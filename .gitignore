@@ -24,6 +24,7 @@ archive/
 
 # Rebuildable outputs at repo root
 /fresh_rewrite.pdf
+/l4dc_poster.pdf
 
 # Editor / OS
 .vscode/
