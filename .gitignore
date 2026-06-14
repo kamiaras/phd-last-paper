@@ -19,6 +19,12 @@
 *.dvi
 *.ps
 
+# Local archive / recycle bin (not part of active repo)
+archive/
+
+# Rebuildable outputs at repo root
+/fresh_rewrite.pdf
+
 # Editor / OS
 .vscode/
 .DS_Store
