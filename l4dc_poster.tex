@@ -1,14 +1,14 @@
-% L4DC 2026 poster — 41.8" x 52.25" (portrait; USC ECE printable width on 42" roll)
+% L4DC 2026 poster — 41.8" x 78" (portrait; extended height for layout; trim before print)
 % Build: pdflatex l4dc_poster.tex  (or latexmk -pdf l4dc_poster.tex)
 % Submit: PDF attachment; request print at document size (no scaling). Subject must include
-%   "poster". Target final trimmed size: 41.8" x 52.5" (height includes ~0.25" printer margin).
+%   "poster". USC ECE default roll target: 41.8" x 52.5"; increase paperheight below for draft layout.
 % Colors: USC cardinal/gold defined in RGB; ECE printer uses CMYK — export CMYK if your tool
 %   allows it, otherwise expect RGB-to-CMYK conversion at print time.
 \documentclass[
   25pt,
   portrait,
   margin=0mm,
-  innermargin=-30mm,
+  innermargin=-90mm,
   blockverticalspace=12mm,
   colspace=22mm,
 ]{tikzposter}
@@ -16,7 +16,7 @@
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
 \usepackage{booktabs}
-\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc}
 
 % +30% font scale relative to tikzposter 25pt defaults
 \renewcommand{\tiny}{\fontsize{15.6}{18.2}\selectfont}
@@ -36,8 +36,8 @@
 \DeclareMathSizes{67.08}{67.08}{46.579}{32.344}
 \DeclareMathSizes{80.496}{80.496}{55.9}{38.818}
 
-% 41.8" printable width on 42" roll; 52.25" height (0.25" short for vertical printer trim)
-\geometry{paperwidth=41.8in,paperheight=52.25in}
+% 41.8" printable width on 42" roll; extended height for draft layout (was 52.25")
+\geometry{paperwidth=41.8in,paperheight=78in}
 
 \tikzposterlatexaffectionproofoff
 
@@ -47,22 +47,78 @@
 \definecolor{USCDark}{RGB}{51,51,51}
 
 \usecolorstyle{Default}
-\colorlet{titlebgcolor}{USCCardinal}
-\colorlet{titlefgcolor}{white}
+\colorlet{titlebgcolor}{white}
+\colorlet{titlefgcolor}{black}
 \colorlet{blocktitlebgcolor}{USCCardinal}
 \colorlet{blocktitlefgcolor}{white}
 \colorlet{blockbodybgcolor}{white}
 \colorlet{blockbodyfgcolor}{USCDark}
-\colorlet{innerblocktitlefgcolor}{USCCardinal}
+\colorlet{innerblocktitlefgcolor}{black}
 \colorlet{notebgcolor}{USCGold!25}
 \colorlet{backgroundcolor}{white}
 
-% Full printable-width title banner (ECE attestation visible in header)
-\usetitlestyle[width=\paperwidth,roundedcorners=0,linewidth=0pt,innersep=1.5cm]{Default}
-\useblockstyle{Default}
+% Full printable-width title: cardinal rules above/below, no filled banner
+\definetitlestyle{LineTitle}{%
+  width=\paperwidth, roundedcorners=0, linewidth=20pt, innersep=1.5cm,
+  titletotopverticalspace=15mm, titletoblockverticalspace=20mm
+}{%
+  \begin{scope}[line width=\titlelinewidth]
+    \draw[USCGold] (\titleposleft,\titlepostop) -- (\titleposright,\titlepostop);
+    \draw[USCGold] (\titleposleft,\titleposbottom) -- (\titleposright,\titleposbottom);
+  \end{scope}
+}
+\usetitlestyle{LineTitle}
+\useblockstyle{Basic}
 
 % Optional logos (drop files into images/ and uncomment)
 % \titlegraphic{\includegraphics[height=5.5cm]{images/usc-logo.pdf}}
+
+\newcommand{\flowword}[1]{{\Large\textsf{#1}}}
+\newcommand{\flowstate}[1]{{\Large\textsf{\textcolor{USCCardinal}{#1}}}}
+\newcommand{\applicationflow}[4]{%
+  \par\vspace{0.38em}%
+  \noindent
+  \begin{minipage}[c]{0.31\linewidth}\raggedright\textbf{#1}\end{minipage}%
+  \begin{minipage}[c]{0.85\linewidth}
+  \begin{tikzpicture}[baseline=-0.55ex, x=\linewidth, y=1pt]
+    \tikzset{
+      appflow/.style={
+        -{Stealth[length=4mm,width=3.2mm]},
+        line width=0.9pt,
+        USCCardinal!80!black,
+        shorten >=3.5mm,
+        shorten <=3.5mm,
+      },
+    }
+    \node[anchor=west, inner sep=0pt] (t1) at (0,0) {\flowword{#2}};
+    \node[anchor=west, inner sep=0pt] (t2) at (0.26,0) {\flowstate{#3}};
+    \node[anchor=west, inner sep=0pt] (t3) at (0.58,0) {\flowword{#4}};
+    \draw[appflow] (t1.east) -- (t2.west);
+    \draw[appflow] (t2.east) -- (t3.west);
+  \end{tikzpicture}
+  \end{minipage}\par
+}
+
+\definecolor{vizgrey}{HTML}{C3C3C3}
+\definecolor{vizgreen}{HTML}{B5E61D}
+\definecolor{vizred}{HTML}{ED1C24}
+\definecolor{feasgreen}{RGB}{34,139,34}
+\newcommand{\vizpanelimg}[2]{%
+  \begin{minipage}[t]{0.275\linewidth}
+    \centering
+    {\normalsize\textbf{#1}}\\[0.3em]
+    \includegraphics[width=\linewidth]{#2}
+  \end{minipage}%
+}
+\newcommand{\vizflowarrow}{%
+  \begin{minipage}[c]{0.08\linewidth}
+    \centering
+    \begin{tikzpicture}
+      \draw[-{Stealth[length=6mm,width=5mm]}, line width=1.8pt, USCCardinal!85!black]
+        (0,0) -- (3.8,0);
+    \end{tikzpicture}
+  \end{minipage}%
+}
 
 \title{Online Dynamic Resource Allocation with State Constraints}
 \author{Kamiar Asgari \quad Michael J. Neely}
@@ -77,43 +133,63 @@
 \begin{columns}
   \column{0.5}
 
-  \block{Motivation}{
-    Many dynamic resource systems are governed by a budget state that constrains allocation at every round. The controller must act before observing inflow and cost, creating an online problem with state coupling.
-
-    \vspace{0.4em}
-    \textbf{Goal:} remain feasible at every round and compete with the best fixed policy in a tractable comparator class.
-
-    \vspace{0.4em}
-    \textbf{Applications:} energy harvesting, queueing, inventory, capital allocation, reservoir control.
-  }
 
   \block{Problem Setup}{
-    State $b_t \geq 0$, action $u_t$ with $0 \leq u_t \leq b_t$. Inflows $a_t$ and convex costs $c_t(b,u)$ may be adversarial; $u_t$ is chosen before they are revealed.
+    Rounds $t=1,\ldots,T$.
+    Choose allocation from budget before inflow or cost.
 
-    \vspace{0.45em}
+    \vspace{0.35em}
+    \textbf{State \& action}
+    \begin{itemize}
+      \item Budget $b_t \geq 0$ at start of round $t$; $b_1=0$.
+      \item Action $u_t \geq 0$ (outflow); feasibility: $0 \leq u_t \leq b_t$.
+    \end{itemize}
+
+    \vspace{0.25em}
+    \textbf{Dynamics} (inflow $a_t \in [0,1]$ after $u_t$)
+    \[
+      b_{t+1} = b_t - u_t + a_t.
+    \]
+
+    \vspace{0.35em}
     \begin{center}
-    \scalebox{1.3}{%
+    \scalebox{1.35}{%
     \begin{tikzpicture}[
       font=\small,
       node/.style={draw=USCCardinal, rounded corners=4pt, line width=0.9pt,
-                   minimum width=2.4cm, minimum height=1.7cm, align=center},
+                   minimum width=2.5cm, minimum height=1.8cm, align=center},
       flow/.style={-{Stealth[length=2.4mm]}, line width=0.9pt, USCDark},
     ]
       \node[node] (inflow) {$a_t$\\[-0.2em]{\scriptsize inflow}};
-      \node[node, fill=USCCardinal!10, right=2.4cm of inflow] (state)
+      \node[node, fill=USCCardinal!10, right=2.5cm of inflow] (state)
         {$b_t$\\[-0.2em]{\scriptsize budget}};
-      \node[node, right=2.4cm of state] (action)
+      \node[node, right=2.5cm of state] (action)
         {$u_t$\\[-0.2em]{\scriptsize action}};
 
       \draw[flow] (inflow) -- (state);
       \draw[flow] (state) -- (action);
 
-      \node[below=0.75cm of state, font=\normalsize] {$b_{t+1} = b_t - u_t + a_t$};
+      \node[below=0.8cm of state, font=\normalsize] {$b_{t+1} = b_t - u_t + a_t$};
     \end{tikzpicture}}
     \end{center}
 
-    \vspace{0.35em}
-    \textbf{Objective:} low cumulative cost vs.\ the best fixed comparator policy in hindsight, with feasibility throughout.
+    \vspace{0.25em}
+    \textbf{Costs \& information}
+    \begin{itemize}
+      \item Cost $c_t(b_t,u_t)$; each $c_t$ convex in $(b,u)$.
+      \item \textbf{Adversarial timing:} $u_t$ chosen \emph{before} $a_t$, $c_t$ observed.
+    \end{itemize}
+
+    \vspace{0.3em}
+    \textbf{Objective:} min cumulative cost; feasible every round; compete with best fixed SDAC policy (below).
+  }
+
+  \block{Motivational Applications}{
+    \applicationflow{Energy harvesting}{harvest}{battery}{discharge}
+    \applicationflow{Queueing}{arrivals}{queue}{service}
+    \applicationflow{Inventory}{supply}{inventory}{sales}
+    \applicationflow{Capital allocation}{cash flow}{balance}{deployment}
+    \applicationflow{Reservoir control}{inflow}{reservoir}{release}
   }
 
   \block{Key Contributions}{
@@ -124,13 +200,60 @@
     \end{itemize}
   }
 
-  \block{Simplex Disturbance-Action Control (SDAC)}{
-    % TODO: add SDAC figure from manuscript
-    \centering
-    \fbox{\parbox[c][7cm][c]{0.92\linewidth}{\centering\Large\textit{[SDAC policy diagram / equations]}}}
-  }
+  
 
   \column{0.5}
+  \block{Simplex Disturbance-Action Control (SDAC)}{
+    \textbf{Idea:} constrain DAC's disturbance filter to the \emph{simplex} --- feasibility for free.
+
+    \vspace{0.55em}
+    \begin{center}
+    \begin{tikzpicture}[
+      font=\small,
+      panel/.style={rounded corners=8pt, align=center, inner sep=14pt,
+                    text width=0.34\linewidth},
+      arr/.style={-{Stealth[length=7mm,width=6mm]}, line width=2.2pt, USCCardinal!85!black},
+    ]
+      \node[panel, draw=USCDark!45, line width=1.4pt, fill=USCDark!4] (dac) {%
+        {\large\textbf{DAC}}\ {\footnotesize(standard)}\\[0.45em]
+        $u_t=\kappa b_t+\sum_{i=1}^{H} (1-\kappa)^i m^{(i)} a_{t-i}$\\[0.3em]
+        {\footnotesize filter $m\in\mathbb{R}^H$ unconstrained}\\[0.65em]
+        \textcolor{vizred}{{\large$\boldsymbol{\times}$} may violate $0\le u_t\le b_t$}%
+      };
+      \node[panel, draw=USCCardinal, line width=2.4pt, fill=USCCardinal!8,
+            right=5.5cm of dac] (sdac) {%
+        {\large\textbf{SDAC}}\ {\footnotesize(this work)}\\[0.45em]
+        $u_t=\kappa b_t+\sum_{i=1}^{H} (1-\kappa)^i w^{(i)} a_{t-i}$\\[0.3em]
+        {\footnotesize weights $w\in\Delta_H$ (simplex)}\\[0.65em]
+        \textcolor{feasgreen}{{\large$\checkmark$} feasible by construction}%
+      };
+      \draw[arr] (dac) -- node[midway, above, font=\footnotesize, text=USCDark!85]
+        {constrain to $\Delta_H$} (sdac);
+    \end{tikzpicture}
+    \end{center}
+
+    \vspace{0.45em}
+    \begin{center}
+    \begin{tikzpicture}[
+      font=\small,
+      callout/.style={rounded corners=8pt, align=left, inner sep=14pt,
+                      text width=0.40\linewidth},
+    ]
+      \node[callout, draw=USCCardinal, line width=1.4pt, fill=USCCardinal!12] (c1) {%
+        {\large\textbf{Feasible by construction}}\\[0.35em]
+        Every fixed $w\in\Delta_H$ keeps $0\le u_t^{\pi(w)}\le b_t^{\pi(w)}$
+        for all $t$.%
+      };
+      \node[callout, draw=USCGold!85!black, line width=1.4pt, fill=USCGold!30,
+            right=2.5cm of c1] (c2) {%
+        {\large\textbf{Convex \& online-learnable}}\\[0.35em]
+        Fixed inflows $\Rightarrow b_t,u_t$ linear in $w \Rightarrow$ costs
+        convex in $w \Rightarrow$ OCO on $\Delta_H$.%
+      };
+    \end{tikzpicture}
+    \end{center}
+  }
+  
 
   \block{Online Algorithm}{
     \textbf{Inputs:} horizon $T$, step size $\eta>0$, gain $\kappa\in(0,1]$, memory $H$, initial weights $w_1\in\Delta_H$, $b_1=0$.
@@ -164,25 +287,62 @@
   }
 
   \block{Regret Guarantee}{
-    % TODO: main theorem statement
-    \fbox{\parbox[c][5.5cm][c]{0.92\linewidth}{\centering\Large\textit{[Main regret bound]}}}
-  }
+    \textbf{Assumption.} Each $c_t$ is convex and Lipschitz.
 
-  \block{Experiments}{
-    % TODO: result plots
-    \fbox{\parbox[c][7cm][c]{0.92\linewidth}{\centering\Large\textit{[Experimental results]}}}
-  }
+    \vspace{0.3em}
+    \textbf{Benchmark.} Compare cumulative cost to the best \emph{fixed} SDAC policy in hindsight:
+    \begin{center}
+    \scalebox{1}{%
+      \mbox{\boldmath$\displaystyle
+        \mathrm{Regret}(T)
+        \triangleq
+        \sum_{t=1}^T c_t(b_t,u_t)
+        -
+        \min_{w\in\Delta_H}\sum_{t=1}^T c_t\bigl(b_t^{\pi(w)},u_t^{\pi(w)}\bigr)
+      $}%
+    }
+    \end{center}
 
-  \block{Takeaways}{
-    SDAC encodes feasibility structurally, enabling clean adversarial regret analysis for state-coupled resource allocation.
-
-    \vspace{0.4em}
-    \textbf{Contact:} \texttt{kamiar@usc.edu}
+    \vspace{0.3em}
+    \textbf{Main bound.} The clipped exponentiated-gradient algorithm satisfies,
+    \begin{center}
+    \scalebox{1.5}{%
+      \mbox{\boldmath$\displaystyle
+        \mathrm{Regret}(T)
+        =
+        O\!\left(\tfrac{\sqrt{T\log H}}{\kappa^2}\right)
+      $}%
+    }
+    \end{center}
   }
 
 \end{columns}
 
-\node[anchor=south,font=\normalsize,text=USCDark!70]
-  at (bottomleft) {Poster size: 41.8\,$''$ $\times$ 52.25\,$''$ document (42\,$''$ roll; $\sim$52.5\,$''$ after vertical trim)};
+\block{Visualization}{
+  \noindent
+  \begin{minipage}[c]{0.85\linewidth}
+    \begin{center}
+    \vizpanelimg{$b_t$}{images/viz/budget-bt.png}%
+    \vizflowarrow
+    \vizpanelimg{Choose $u_t$}{images/viz/choose-ut.png}%
+    \vizflowarrow
+    \vizpanelimg{$b_{t+1}$}{images/viz/budget-bt-plus-1.png}
+    \end{center}
+  \end{minipage}%
+  \hfill\hspace{-1em}
+  \begin{minipage}[c]{0.15\linewidth}
+    \raggedright
+    \textbf{\textcolor{vizgreen}{Green}} $=$ in $b_t$\\[0.55em]
+    \textbf{\textcolor{vizred}{Red}} $=$ allocation $u_t$\\[0.55em]
+    \textbf{\textcolor{vizgrey}{Grey}} $=$ future inflow not yet revealed\\[0.55em]
+    Bar height $= |a_t|$\\[0.55em]
+    $H=3$
+  \end{minipage}
+}
+
+\block{Experiments}{
+  % TODO: result plots
+  \fbox{\parbox[c][7cm][c]{\linewidth}{\centering\Large\textit{[Experimental results]}}}
+}
 
 \end{document}
