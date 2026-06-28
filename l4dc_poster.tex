@@ -1,4 +1,4 @@
-% L4DC 2026 poster — 41.8" x 78" (portrait; extended height for layout; trim before print)
+% L4DC 2026 poster — 41.8" x 52.5" (portrait; USC ECE roll target)
 % Build: pdflatex l4dc_poster.tex  (or latexmk -pdf l4dc_poster.tex)
 % Submit: PDF attachment; request print at document size (no scaling). Subject must include
 %   "poster". USC ECE default roll target: 41.8" x 52.5"; increase paperheight below for draft layout.
@@ -7,10 +7,10 @@
 \documentclass[
   25pt,
   portrait,
-  margin=0mm,
+  margin=10mm,
   innermargin=-90mm,
-  blockverticalspace=12mm,
-  colspace=22mm,
+  blockverticalspace=50mm,
+  colspace=30mm,
 ]{tikzposter}
 
 \usepackage{amsmath,amssymb}
@@ -18,26 +18,26 @@
 \usepackage{booktabs}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc}
 
-% +30% font scale relative to tikzposter 25pt defaults
-\renewcommand{\tiny}{\fontsize{15.6}{18.2}\selectfont}
-\renewcommand{\scriptsize}{\fontsize{18.72}{23.4}\selectfont}
-\renewcommand{\footnotesize}{\fontsize{22.464}{28.6}\selectfont}
-\renewcommand{\small}{\fontsize{26.962}{32.5}\selectfont}
-\renewcommand{\normalsize}{\fontsize{32.344}{39}\selectfont}
-\renewcommand{\large}{\fontsize{38.818}{48.1}\selectfont}
+% Body text +60%; titles/headings +30% (tikzposter 25pt defaults)
+\renewcommand{\tiny}{\fontsize{19.2}{22.4}\selectfont}
+\renewcommand{\scriptsize}{\fontsize{23.04}{28.8}\selectfont}
+\renewcommand{\footnotesize}{\fontsize{27.65}{35.2}\selectfont}
+\renewcommand{\small}{\fontsize{33.11}{40}\selectfont}
+\renewcommand{\normalsize}{\fontsize{39.81}{48}\selectfont}
+\renewcommand{\large}{\fontsize{47.78}{59.2}\selectfont}
 \renewcommand{\Large}{\fontsize{46.579}{58.5}\selectfont}
 \renewcommand{\LARGE}{\fontsize{55.9}{70.2}\selectfont}
 \renewcommand{\huge}{\fontsize{67.08}{83.2}\selectfont}
 \renewcommand{\Huge}{\fontsize{80.496}{100.1}\selectfont}
-\DeclareMathSizes{32.344}{32.344}{26.962}{18.72}
-\DeclareMathSizes{38.818}{38.818}{26.962}{18.72}
+\DeclareMathSizes{39.81}{39.81}{33.11}{23.04}
+\DeclareMathSizes{47.78}{47.78}{33.11}{27.65}
 \DeclareMathSizes{46.579}{46.579}{32.344}{22.464}
 \DeclareMathSizes{55.9}{55.9}{46.579}{32.344}
 \DeclareMathSizes{67.08}{67.08}{46.579}{32.344}
 \DeclareMathSizes{80.496}{80.496}{55.9}{38.818}
 
-% 41.8" printable width on 42" roll; extended height for draft layout (was 52.25")
-\geometry{paperwidth=41.8in,paperheight=78in}
+% 41.8" printable width on 42" roll; 52.5" height (USC ECE default)
+\geometry{paperwidth=41.8in,paperheight=52.5in}
 
 \tikzposterlatexaffectionproofoff
 
@@ -60,7 +60,7 @@
 % Full printable-width title: cardinal rules above/below, no filled banner
 \definetitlestyle{LineTitle}{%
   width=\paperwidth, roundedcorners=0, linewidth=20pt, innersep=1.5cm,
-  titletotopverticalspace=15mm, titletoblockverticalspace=20mm
+  titletotopverticalspace=15mm, titletoblockverticalspace=40mm
 }{%
   \begin{scope}[line width=\titlelinewidth]
     \draw[USCGold] (\titleposleft,\titlepostop) -- (\titleposright,\titlepostop);
@@ -73,12 +73,12 @@
 % Optional logos (drop files into images/ and uncomment)
 % \titlegraphic{\includegraphics[height=5.5cm]{images/usc-logo.pdf}}
 
-\newcommand{\flowword}[1]{{\Large\textsf{#1}}}
-\newcommand{\flowstate}[1]{{\Large\textsf{\textcolor{USCCardinal}{#1}}}}
+\newcommand{\flowword}[1]{{\large\textsf{#1}}}
+\newcommand{\flowstate}[1]{{\large\textsf{\textcolor{USCCardinal}{#1}}}}
 \newcommand{\applicationflow}[4]{%
   \par\vspace{0.38em}%
   \noindent
-  \begin{minipage}[c]{0.31\linewidth}\raggedright\textbf{#1}\end{minipage}%
+  \begin{minipage}[c]{0.31\linewidth}\raggedright{\normalsize\textbf{#1}}\end{minipage}%
   \begin{minipage}[c]{0.85\linewidth}
   \begin{tikzpicture}[baseline=-0.55ex, x=\linewidth, y=1pt]
     \tikzset{
@@ -135,23 +135,7 @@
 
 
   \block{Problem Setup}{
-    Rounds $t=1,\ldots,T$.
-    Choose allocation from budget before inflow or cost.
-
-    \vspace{0.35em}
-    \textbf{State \& action}
-    \begin{itemize}
-      \item Budget $b_t \geq 0$ at start of round $t$; $b_1=0$.
-      \item Action $u_t \geq 0$ (outflow); feasibility: $0 \leq u_t \leq b_t$.
-    \end{itemize}
-
-    \vspace{0.25em}
-    \textbf{Dynamics} (inflow $a_t \in [0,1]$ after $u_t$)
-    \[
-      b_{t+1} = b_t - u_t + a_t.
-    \]
-
-    \vspace{0.35em}
+    \textbf{Dynamics}
     \begin{center}
     \scalebox{1.35}{%
     \begin{tikzpicture}[
@@ -173,96 +157,87 @@
     \end{tikzpicture}}
     \end{center}
 
-    \vspace{0.25em}
-    \textbf{Costs \& information}
+    \vspace{0.35em}
+    \textbf{Constraints}
     \begin{itemize}
-      \item Cost $c_t(b_t,u_t)$; each $c_t$ convex in $(b,u)$.
-      \item \textbf{Adversarial timing:} $u_t$ chosen \emph{before} $a_t$, $c_t$ observed.
+      \item Budget $b_t \geq 0$.
+      \item Feasibility: $0 \leq u_t \leq b_t$.
+      \item Inflow $a_t \in [0,1]$.
     \end{itemize}
-
-    \vspace{0.3em}
-    \textbf{Objective:} min cumulative cost; feasible every round; compete with best fixed SDAC policy (below).
-  }
-
-  \block{Motivational Applications}{
-    \applicationflow{Energy harvesting}{harvest}{battery}{discharge}
-    \applicationflow{Queueing}{arrivals}{queue}{service}
-    \applicationflow{Inventory}{supply}{inventory}{sales}
-    \applicationflow{Capital allocation}{cash flow}{balance}{deployment}
-    \applicationflow{Reservoir control}{inflow}{reservoir}{release}
-  }
-
-  \block{Key Contributions}{
-    \begin{itemize}
-      \item \textbf{SDAC policy class} --- simplex-constrained disturbance-action policies that preserve feasibility by construction.
-      \item \textbf{Online controller} over SDAC weights with sublinear horizon and logarithmic policy-dimension regret.
-      \item \textbf{Adversarial setting} --- general convex state--action costs without distributional assumptions.
-    \end{itemize}
-  }
-
-  
-
-  \column{0.5}
-  \block{Simplex Disturbance-Action Control (SDAC)}{
-    \textbf{Idea:} constrain DAC's disturbance filter to the \emph{simplex} --- feasibility for free.
-
-    \vspace{0.55em}
-    \begin{center}
-    \begin{tikzpicture}[
-      font=\small,
-      panel/.style={rounded corners=8pt, align=center, inner sep=14pt,
-                    text width=0.34\linewidth},
-      arr/.style={-{Stealth[length=7mm,width=6mm]}, line width=2.2pt, USCCardinal!85!black},
-    ]
-      \node[panel, draw=USCDark!45, line width=1.4pt, fill=USCDark!4] (dac) {%
-        {\large\textbf{DAC}}\ {\footnotesize(standard)}\\[0.45em]
-        $u_t=\kappa b_t+\sum_{i=1}^{H} (1-\kappa)^i m^{(i)} a_{t-i}$\\[0.3em]
-        {\footnotesize filter $m\in\mathbb{R}^H$ unconstrained}\\[0.65em]
-        \textcolor{vizred}{{\large$\boldsymbol{\times}$} may violate $0\le u_t\le b_t$}%
-      };
-      \node[panel, draw=USCCardinal, line width=2.4pt, fill=USCCardinal!8,
-            right=5.5cm of dac] (sdac) {%
-        {\large\textbf{SDAC}}\ {\footnotesize(this work)}\\[0.45em]
-        $u_t=\kappa b_t+\sum_{i=1}^{H} (1-\kappa)^i w^{(i)} a_{t-i}$\\[0.3em]
-        {\footnotesize weights $w\in\Delta_H$ (simplex)}\\[0.65em]
-        \textcolor{feasgreen}{{\large$\checkmark$} feasible by construction}%
-      };
-      \draw[arr] (dac) -- node[midway, above, font=\footnotesize, text=USCDark!85]
-        {constrain to $\Delta_H$} (sdac);
-    \end{tikzpicture}
-    \end{center}
-
-    \vspace{0.45em}
-    \begin{center}
-    \begin{tikzpicture}[
-      font=\small,
-      callout/.style={rounded corners=8pt, align=left, inner sep=14pt,
-                      text width=0.40\linewidth},
-    ]
-      \node[callout, draw=USCCardinal, line width=1.4pt, fill=USCCardinal!12] (c1) {%
-        {\large\textbf{Feasible by construction}}\\[0.35em]
-        Every fixed $w\in\Delta_H$ keeps $0\le u_t^{\pi(w)}\le b_t^{\pi(w)}$
-        for all $t$.%
-      };
-      \node[callout, draw=USCGold!85!black, line width=1.4pt, fill=USCGold!30,
-            right=2.5cm of c1] (c2) {%
-        {\large\textbf{Convex \& online-learnable}}\\[0.35em]
-        Fixed inflows $\Rightarrow b_t,u_t$ linear in $w \Rightarrow$ costs
-        convex in $w \Rightarrow$ OCO on $\Delta_H$.%
-      };
-    \end{tikzpicture}
-    \end{center}
-  }
-  
-
-  \block{Online Algorithm}{
-    \textbf{Inputs:} horizon $T$, step size $\eta>0$, gain $\kappa\in(0,1]$, memory $H$, initial weights $w_1\in\Delta_H$, $b_1=0$.
 
     \vspace{0.35em}
-    \textbf{Each round $t=1,\ldots,T$} (choose action \emph{before} seeing $a_t,c_t$):
+    \textbf{Game} (rounds $t=1,\ldots,T$)
+    \begin{enumerate}
+      \item Controller chooses $u_t$.
+      \item Adversary chooses $a_t$ and $c_t$; player suffers cost $c_t(b_t,u_t)$.
+      \item State updates via dynamics; repeat.
+    \end{enumerate}
+  }
+
+  
+
+
+  
+
+  \block{Simplex Disturbance-Action Control (SDAC)}{
+    \begin{center}
+    {\large\textbf{DAC.}} Disturbance-Action Control
+    \[
+      u_t = \kappa b_t + \sum_{i=1}^{H} m^{(i)} a_{t-i},
+      \qquad m \in \mathbb{R}^H.
+    \]
+    \end{center}
+
+    \vspace{0.25em}
+    \begin{center}
+    \begin{tikzpicture}
+      \node[font=\large, text=vizred] (warn) {%
+        Does not guarantee $0 \le u_t \le b_t$%
+      };
+      \draw[-{Stealth[length=5mm,width=4mm]}, line width=2pt, USCCardinal!80!black]
+        (warn.south) -- ++(0,-1.1);
+    \end{tikzpicture}
+    \end{center}
+
+    \vspace{0.15em}
+    \begin{center}
+    \begin{tikzpicture}
+      \node[
+        rounded corners=12pt,
+        draw=USCCardinal,
+        line width=3pt,
+        fill=USCGold!32,
+        inner sep=16pt,
+        text width=0.94\linewidth,
+        align=center,
+      ] {%
+        {\LARGE\textbf{\textcolor{USCCardinal}{SDAC}}}\\[-0.05em]
+        {\large Bound filter on the simplex, \mbox{$w\in\Delta_H$}}\\[0.35em]
+        \scalebox{1.22}{$\displaystyle
+          u_t = \kappa b_t + \sum_{i=1}^{H} (1-\kappa)^i w^{(i)} a_{t-i}.
+        $}%
+      };
+    \end{tikzpicture}
+    \end{center}
+  }
+  
+  \column{0.5}
+  
+  \block{Motivational Applications}{
+    \applicationflow{Energy harvesting}{arrivals}{battery}{discharge}
+    \applicationflow{Queueing}{arrivals}{backlog}{service}
+    \applicationflow{Inventory control}{restock}{stock}{shipments}
+    \applicationflow{Bank accounts}{deposits}{balance}{withdrawals}
+    \applicationflow{Water reservoirs}{inflow}{storage}{release}
+  }
+
+  \block{Online Algorithm}{
+    \textbf{Inputs:} \small{horizon $T$, step size $\eta>0$, gain $\kappa\in(0,1]$, memory $H$, initial weights $w_1\in\Delta_H$, $b_1=0$}.
+    \normalsize
+    \vspace{0.35em}
 
     \begin{enumerate}
-      \item \textbf{Propose} an SDAC action from current weights:
+      \item \textbf{Choose} an SDAC action from current weights:
         \[
           \widehat{u}_t \leftarrow \kappa b_t + \langle w_t,\widetilde{a}_t\rangle,
           \qquad
@@ -280,9 +255,8 @@
         $\ell_t(w)=c_t\bigl(b_t^{\pi(w)},u_t^{\pi(w)}\bigr)$ and take one exponentiated-gradient step on the simplex,
         \[
           w_{t+1}^{(i)} \propto w_t^{(i)}\exp\!\bigl(-\eta\, g_t^{(i)}\bigr),
-          \qquad g_t\in\partial\ell_t(w_t),
+          \qquad g_t\in\partial\ell_t(w_t).
         \]
-        then renormalize so $w_{t+1}\in\Delta_H$.
     \end{enumerate}
   }
 
@@ -290,25 +264,15 @@
     \textbf{Assumption.} Each $c_t$ is convex and Lipschitz.
 
     \vspace{0.3em}
-    \textbf{Benchmark.} Compare cumulative cost to the best \emph{fixed} SDAC policy in hindsight:
+    \textbf{Regret bound.} Against the best \emph{fixed} SDAC policy in hindsight, the clipped exponentiated-gradient algorithm satisfies
     \begin{center}
-    \scalebox{1}{%
+    \scalebox{0.8}{%
       \mbox{\boldmath$\displaystyle
         \mathrm{Regret}(T)
         \triangleq
         \sum_{t=1}^T c_t(b_t,u_t)
         -
         \min_{w\in\Delta_H}\sum_{t=1}^T c_t\bigl(b_t^{\pi(w)},u_t^{\pi(w)}\bigr)
-      $}%
-    }
-    \end{center}
-
-    \vspace{0.3em}
-    \textbf{Main bound.} The clipped exponentiated-gradient algorithm satisfies,
-    \begin{center}
-    \scalebox{1.5}{%
-      \mbox{\boldmath$\displaystyle
-        \mathrm{Regret}(T)
         =
         O\!\left(\tfrac{\sqrt{T\log H}}{\kappa^2}\right)
       $}%
@@ -336,13 +300,7 @@
     \textbf{\textcolor{vizred}{Red}} $=$ allocation $u_t$\\[0.55em]
     \textbf{\textcolor{vizgrey}{Grey}} $=$ future inflow not yet revealed\\[0.55em]
     Bar height $= |a_t|$\\[0.55em]
-    $H=3$
+    $H=3$, $\kappa=0$
   \end{minipage}
 }
-
-\block{Experiments}{
-  % TODO: result plots
-  \fbox{\parbox[c][7cm][c]{\linewidth}{\centering\Large\textit{[Experimental results]}}}
-}
-
 \end{document}
