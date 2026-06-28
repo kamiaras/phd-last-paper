@@ -22,31 +22,31 @@ We study online dynamic resource allocation with resource-in-storage availabilit
 \label{sec:introduction}
 
 \subsection{Motivation and Problem Setting}
-Many dynamic resource systems are governed by a budget state variable that evolves over time and constrains the allocation action at every round. The controller must choose an allocation action from currently available resources before observing the round's inflow and cost.
+Many dynamic resource systems are governed by a budget state variable that evolves over time and constrains the allocation action at every round. The controller must choose an allocation action subject to state-dependent availability limits before observing the round's inflow and cost.
 
 This creates an online optimization problem with state coupling: aggressive early allocation can harm later performance, while overly conservative allocation can increase immediate cost. Our objective is to design a policy that remains feasible at every round and competes with the best fixed policy in a structurally tractable comparator class.
 
 \subsection{Model and Information Structure}
-We study a discrete-time storage-allocation system with state $b_t \geq 0$, where $b_t$ represents the currently available resource. At each time $t$, the controller chooses an allocation action $u_t$ under the \emph{feasibility constraints}:
+We study a discrete-time storage-allocation system with state $b_t \geq 0$, where $b_t$ represents the resource level at the beginning of round $t$. At each time $t$, the controller chooses an allocation action $u_t$ under the \emph{feasibility constraints}
 \[
-0 \leq u_t \leq b_t,
+0 \leq u_t \leq \alpha b_t,
 \]
-which means the controller cannot allocate more than the currently available resource or any negative amount. After the action is chosen, an adversarial inflow $a_t$ arrives, and the state evolves according to
+where $\alpha\in(0,1)$ is a fixed state-decay (retention) factor. The action is therefore nonnegative and capped at a fraction $\alpha$ of the current state. After the action is chosen, an adversarial inflow $a_t$ arrives, and the state evolves according to
 \[
-b_{t+1} = b_t - u_t + a_t,
+b_{t+1} = \alpha b_t - u_t + a_t.
 \]
-with inflow $a_t$.
+The same factor $\alpha$ governs both the allocation cap and the carryover of unallocated state to the next round.
 
 Unlike stochastic application models that rely on distributional assumptions, our formulation is adversarial. Inflows $a_t$ and convex costs $c_t(b, u)$ may vary arbitrarily over time, and the controller chooses $u_t$ before observing either object at round $t$. The goal is low cumulative cost relative to the best fixed policy in a later-defined comparator class, while maintaining feasibility throughout.
 
 \subsection{Application Domains}
 This abstraction captures a broad set of domains:
 \begin{itemize}
-    \item \textbf{Energy Harvesting and Battery Management:} $b_t$ is battery state of charge, $a_t$ is harvested energy, and $u_t$ is discharge or consumption.
-    \item \textbf{Queueing Networks and Buffer Management:} $b_t$ is queue/buffer occupancy, $a_t$ is arrivals, and $u_t$ is service rate constrained by current backlog.
-    \item \textbf{Inventory Control:} $b_t$ is on-hand inventory, $a_t$ is supply or replenishment, and $u_t$ is sales under stock constraints.
-    \item \textbf{Investments and Bank Accounts:} $b_t$ is liquid capital/balance, $a_t$ is incoming cash flow, and $u_t$ is capital deployment or withdrawal under budget limits.
-    \item \textbf{Water Reservoir and Dam Management:} $b_t$ is stored water, $a_t$ is inflow, and $u_t$ is controlled release under storage limits.
+    \item \textbf{Energy Harvesting and Battery Management:} $b_t$ is battery state of charge (with self-discharge factor $\alpha$), $a_t$ is harvested energy, and $u_t$ is discharge or consumption bounded by $\alpha b_t$.
+    \item \textbf{Queueing Networks and Buffer Management:} $b_t$ is queue/buffer occupancy, $a_t$ is arrivals, and $u_t$ is service rate bounded by $\alpha b_t$.
+    \item \textbf{Inventory Control:} $b_t$ is on-hand inventory, $a_t$ is supply or replenishment, and $u_t$ is sales bounded by $\alpha b_t$.
+    \item \textbf{Investments and Bank Accounts:} $b_t$ is liquid capital/balance, $a_t$ is incoming cash flow, and $u_t$ is capital deployment or withdrawal bounded by $\alpha b_t$.
+    \item \textbf{Water Reservoir and Dam Management:} $b_t$ is stored water, $a_t$ is inflow, and $u_t$ is controlled release bounded by $\alpha b_t$.
 \end{itemize}
 
 
@@ -100,7 +100,7 @@ A central idea in this literature is \emph{Disturbance-Action Control} (DAC), a 
 \subsection{Contributions}
 The contributions are organized in two layers:
 \begin{itemize}
-    \item \textbf{Modeling and policy-class contribution.} We formulate adversarial online dynamic resource allocation with state-coupled feasibility and state-dependent costs, where the cost depends on the stored amount in the storage, and we introduce \emph{Simplex Disturbance-Action Control} (SDAC), a DAC-inspired simplex-constrained policy class to compete with. The SDAC \emph{enforces feasibility} by construction while preserving DAC-style expressiveness.
+    \item \textbf{Modeling and policy-class contribution.} We formulate adversarial online dynamic resource allocation with decay-coupled state dynamics, state-dependent feasibility ($0\le u_t\le \alpha b_t$), and state-dependent costs, and we introduce \emph{Simplex Disturbance-Action Control} (SDAC), a DAC-inspired simplex-constrained policy class to compete with. The SDAC \emph{enforces feasibility} by construction while preserving DAC-style expressiveness.
     \item \textbf{Algorithmic and analytical contribution.} We develop an exponentiated-gradient online controller over SDAC weights in which a clipping step \emph{enforces feasibility} of the online action, and we analyze regret against the best fixed SDAC comparator in hindsight, achieving sublinear regret with logarithmic dependence on policy dimension.
 \end{itemize}
 
@@ -111,28 +111,26 @@ Section~\ref{sec:model-setup} formalizes the adversarial allocation model, assum
 \section{Notation}
 \label{sec:notation}
 
-We denote by $t\in\{1,2,\ldots,T\}$ the time index (total horizon $T$). The system state $b_t\in\mathbb{R}_{\ge 0}$ is the available resource, and the action $u_t\in\mathbb{R}_{\ge 0}$ satisfies $0 \le u_t \le b_t$. The exogenous inflow is $a_t\in[0,1]$, and the cost function is $c_t:\mathbb{R}_{\ge 0}^2\to\mathbb{R}$. The online algorithm is $\mathcal{A}$, and $\pi$ (or $\pi(w)$ when parameterized by $w$) denotes a policy from the comparator class $\Pi = \mathrm{SDAC}_H^{\kappa}$. The parameters $\kappa\in(0,1]$ (gain) and $H\in\mathbb{N}$ (memory horizon) are fixed design parameters. The weight vector $w$ lies in the unit simplex $\Delta_H = \{w\in\mathbb{R}_{\ge 0}^H : \sum_i w^{(i)}\le 1\}$. The Lipschitz constants for the cost function are $L_b,L_u>0$. The inner product is denoted $\langle x,y\rangle = x^T y$.
+For any vector $m\in\mathbb{R}^n$, the $i$-th component is denoted by $a^{(i)}$. We denote by $t\in\{1,2,\ldots,T\}$ the time index (total horizon $T$). The system state $b_t\in\mathbb{R}_{\ge 0}$ is the resource level at the beginning of round $t$, and the action $u_t\in\mathbb{R}_{\ge 0}$ satisfies $0 \le u_t \le \alpha b_t$, where $\alpha\in(0,1)$ is a fixed state-decay (retention) factor. The state evolves as $b_{t+1}=\alpha b_t-u_t+a_t$. The exogenous inflow is $a_t\in[0,1]$, and the cost function is $c_t:\mathbb{R}_{\ge 0}^2\to\mathbb{R}$. The online algorithm is $\mathcal{A}$, and $\pi$ (or $\pi(w)$ when parameterized by $w$) denotes a policy from the comparator class $\Pi = \mathrm{SDAC}_H$. The memory horizon $H\in\mathbb{N}$ is a fixed design parameter. The weight vector $w$ lies in the unit simplex $\Delta_H = \{w\in\mathbb{R}_{\ge 0}^H : \sum_i w^{(i)}\le 1\}$. The Lipschitz constants for the cost function are $L_b,L_u>0$. The inner product is denoted $\langle x,y\rangle = x^T y$.
 
-Throughout the paper, several terms are used interchangeably for the same objects. The state variable $b_t$ may also be described as the budget, storage level, battery state, or inventory level,  depending on the application. The action $u_t$ may also be called the allocation, outflow, release, discharge, or consumption decision. Likewise, the inflow $a_t$ may appear as arrival, supply, harvested energy, or replenishment. The constraint $0 \le u_t \le b_t$ is the feasibility, availability, or state-constraint condition, and the cost $c_t(b_t,u_t)$ is referred to as the loss, or stage cost.
+Throughout the paper, several terms are used interchangeably for the same objects. The state variable $b_t$ may also be described as the budget, storage level, battery state, or inventory level,  depending on the application. The action $u_t$ may also be called the allocation, outflow, release, discharge, or consumption decision. Likewise, the inflow $a_t$ may appear as arrival, supply, harvested energy, or replenishment. The constraint $0 \le u_t \le \alpha b_t$ is the feasibility, availability, or state-constraint condition, and the cost $c_t(b_t,u_t)$ is referred to as the loss, or stage cost.
 
 \section{Model and Problem Setup}
 \label{sec:model-setup}
 
-We consider a discrete-time allocation process over rounds $t\in\{1,2,\ldots,T\}$. The system state is denoted by $b_t\in\mathbb{R}_{\ge 0}$, where $b_t$ represents the available budget at the beginning of round $t$. The initial state is given as
+We consider a discrete-time allocation process over rounds $t\in\{1,2,\ldots,T\}$. The system state is denoted by $b_t\in\mathbb{R}_{\ge 0}$, where $b_t$ represents the resource level at the beginning of round $t$. The initial state is given as
 \[
 b_1 = 0.
 \]
-
-At each round, the controller chooses an allocation action $u_t\in\mathbb{R}_{\ge 0}$ subject to state feasibility:
-
+Fix a state-decay (retention) factor $\alpha\in(0,1)$. At each round, the controller chooses an allocation action $u_t\in\mathbb{R}_{\ge 0}$ subject to state feasibility:
 \begin{equation}
 \label{eq:model-feasibility}
-0 \le u_t \le b_t.
+0 \le u_t \le \alpha b_t.
 \end{equation}
 The system then receives an exogenous inflow $a_t\in[0,1]$ and evolves according to
 \begin{equation}
 \label{eq:model-dynamics}
-b_{t+1} = b_t - u_t + a_t.
+b_{t+1} = \alpha b_t - u_t + a_t.
 \end{equation}
 
 After the action is selected, a convex cost function
@@ -150,6 +148,7 @@ The information pattern is adversarial and non-anticipatory. At time $t$, the co
 \paragraph{Assumptions}
 Equations \eqref{eq:model-feasibility}--\eqref{eq:model-lipschitz} define the model. For analysis, we collect the remaining standing assumptions as follows:
 \begin{enumerate}
+    \item \textbf{Decay factor:} $\alpha\in(0,1)$ is fixed and known.
     \item \textbf{Inflow bounds:} $a_t\in[0,1]$ for all $t$.
     \item \textbf{Adversarial timing:} at round $t$, $u_t$ is chosen before observing $a_t$ and $c_t$.
     \item \textbf{Cost regularity:} each $c_t$ is convex in $(b,u)$ and obeys \eqref{eq:model-lipschitz}.
@@ -161,7 +160,7 @@ For an online algorithm $\mathcal{A}$ producing trajectory $\{(b_t^{\mathcal{A}}
 \label{eq:def-cumulative-cost}
 J_T(\mathcal{A}) \triangleq \sum_{t=1}^T c_t\bigl(b_t^{\mathcal{A}},u_t^{\mathcal{A}}\bigr).
 \end{equation}
-For fixed $(\kappa,H)$, let the comparator class be $\Pi\triangleq\mathrm{SDAC}_H^{\kappa}$ (defined in Section~\ref{sec:sdac}). For each $\pi\in\Pi$, let $\{(b_t^{\pi},u_t^{\pi})\}_{t=1}^T$ be the induced feasible trajectory under the same inflow sequence. Regret is defined by
+For fixed $H$, let the comparator class be $\Pi\triangleq\mathrm{SDAC}_H$ (defined in Section~\ref{sec:sdac}). For each $\pi\in\Pi$, let $\{(b_t^{\pi},u_t^{\pi})\}_{t=1}^T$ be the induced feasible trajectory under the same inflow sequence. Regret is defined by
 \begin{equation}
 \label{eq:def-regret}
 \mathrm{Regret}(T)
@@ -178,18 +177,18 @@ The objective is to design an online policy that preserves feasibility in \eqref
 \label{sec:sdac}
 
 \subsection{From Disturbance-Action Control to SDAC}
-Disturbance-Action Control (DAC) parameterizes the action as a linear function of the current state and a finite window of past disturbances. This representation is central in adversarial online control because it accommodates arbitrary disturbance and cost sequences, yields robust regret guarantees, and enables efficient online convex-optimization updates. In our setting, a representative DAC form is
+Disturbance-Action Control (DAC) parameterizes the action as a linear function of a finite window of past disturbances. This representation is central in adversarial online control because it accommodates arbitrary disturbance and cost sequences, yields robust regret guarantees, and enables efficient online convex-optimization updates. In our setting, a representative DAC form is
 \begin{equation}
 \label{eq:dac-param}
-u_t = \kappa b_t + \sum_{i=1}^{H} m^{(i)} a_{t-i},
+u_t = \sum_{i=1}^{H} m^{(i)} a_{t-i},
 \end{equation}
-where $\kappa\in\mathbb{R}$ is a gain, $H\in\mathbb{N}$ is the memory horizon, and $m\in\mathbb{R}^H$ is a disturbance filter.
+where $H\in\mathbb{N}$ is the memory horizon and $m\in\mathbb{R}^H$ is a disturbance filter.
 
-For our constrained allocation model, raw DAC is insufficient: \eqref{eq:dac-param} does not generally enforce \eqref{eq:model-feasibility} at every round. In particular, the action can violate either bound, with $u_t>b_t$ or $u_t<0$. We therefore introduce \emph{Simplex Disturbance-Action Control} (SDAC), which replaces unconstrained DAC filters by a simplex-constrained family tailored to budget dynamics. SDAC is designed to keep the DAC advantages above (adversarial robustness, regret-based comparison, and tractable online updates) while adding feasibility by construction.
+For our constrained allocation model, raw DAC is insufficient: \eqref{eq:dac-param} does not generally enforce \eqref{eq:model-feasibility} at every round. In particular, the action can violate either bound, with $u_t>\alpha b_t$ or $u_t<0$. We therefore introduce \emph{Simplex Disturbance-Action Control} (SDAC), which replaces unconstrained DAC filters by a simplex-constrained family tailored to decay-coupled budget dynamics. SDAC is designed to keep the DAC advantages above (adversarial robustness, regret-based comparison, and tractable online updates) while adding feasibility by construction.
 
 
 \subsection{SDAC Definition}
-Fix $\kappa\in(0,1]$ and memory horizon $H\in\mathbb{N}$. Let
+Fix memory horizon $H\in\mathbb{N}$. Let
 \begin{equation}
 \label{eq:def-simplex}
 \Delta_H \triangleq \left\{w\in\mathbb{R}_{\ge 0}^H:\; \sum_{i=1}^H w^{(i)}\le1\right\}
@@ -197,33 +196,34 @@ Fix $\kappa\in(0,1]$ and memory horizon $H\in\mathbb{N}$. Let
 be the unit simplex. For any $w\in\Delta_H$, define the policy $\pi(w)$ by
 \begin{equation}
 \label{eq:def-sdac-policy}
-u_t^{\pi(w)} \;\triangleq\; \kappa b_t^{\pi(w)} + \sum_{i=1}^{H} w^{(i)}(1-\kappa)^i a_{t-i},
+u_t^{\pi(w)} \;\triangleq\; \sum_{i=1}^{H} w^{(i)}\alpha^i a_{t-i},
 \qquad a_\tau\equiv 0\;\text{for}\;\tau\le 0.
 \end{equation}
 For each round $t$, let
 \[
-\widetilde{a}_t \triangleq \big((1-\kappa)^1 a_{t-1},\ldots,(1-\kappa)^H a_{t-H}\big)^\top \in \mathbb{R}^H,
+\widetilde{a}_t \triangleq \big(\alpha^1 a_{t-1},\ldots,\alpha^H a_{t-H}\big)^\top \in \mathbb{R}^H,
 \]
 so that \eqref{eq:def-sdac-policy} can be written as
 \begin{equation}
 \label{eq:def-sdac-policy-vector}
-u_t^{\pi(w)} = \kappa b_t^{\pi(w)} + \langle w,\widetilde{a}_t\rangle.
+u_t^{\pi(w)} = \langle w,\widetilde{a}_t\rangle.
 \end{equation}
 
 The induced state trajectory satisfies
 \begin{equation}
 \label{eq:sdac-state-update}
-b_{t+1}^{\pi(w)} = b_t^{\pi(w)} - u_t^{\pi(w)} + a_t,
+b_{t+1}^{\pi(w)} = \alpha b_t^{\pi(w)} - u_t^{\pi(w)} + a_t,
 \qquad b_1^{\pi(w)}=0.
 \end{equation}
+The weights $\alpha^i$ align the disturbance filter with the decay factor $\alpha$ in \eqref{eq:model-dynamics}.
 
 The resulting class is
 \[
-\mathrm{SDAC}_H^{\kappa}\triangleq\{\pi(w):w\in\Delta_H\},
+\mathrm{SDAC}_H\triangleq\{\pi(w):w\in\Delta_H\},
 \]
 with $\Delta_H$ defined in \eqref{eq:def-simplex}.
 
-First, feasibility is preserved within the class: for any fixed $w\in\Delta_H$, the induced trajectory under \eqref{eq:def-sdac-policy}--\eqref{eq:sdac-state-update} satisfies $0\le u_t^{\pi(w)}\le b_t^{\pi(w)}$ for all $t$ (see Lemma~\ref{lem:appendix-feasibility} in Appendix~\ref{sec:appendix-proofs}).
+First, feasibility is preserved within the class: for any fixed $w\in\Delta_H$, the induced trajectory under \eqref{eq:def-sdac-policy}--\eqref{eq:sdac-state-update} satisfies $0\le u_t^{\pi(w)}\le \alpha b_t^{\pi(w)}$ for all $t$ (see Lemma~\ref{lem:appendix-feasibility} in Appendix~\ref{sec:appendix-proofs}).
 
 Second, SDAC is compatible with online convex optimization. For fixed inflows, both $b_t^{\pi(w)}$ and $u_t^{\pi(w)}$ are linear in $w$. Therefore, since each $c_t$ is convex in $(b,u)$, the induced cost is convex in $w$ (see Lemma~\ref{lem:appendix-surrogate} in Appendix~\ref{sec:appendix-proofs}). Regret minimization against the best fixed SDAC comparator thus becomes online convex optimization over the simplex.
 
@@ -350,46 +350,46 @@ Recall that we set $a_\tau\equiv 0$ for $\tau\le 0$, which is used in several ba
 % TODO change to <= 1
 \begin{lemma}[State decomposition under SDAC]
 \label{lem:appendix-state-decomp}
-Fix $\kappa\in(0,1]$, $H\in\mathbb{N}$, and $w\in\Delta_H$. Let $\pi(w)$ be defined by \eqref{eq:def-sdac-policy} and \eqref{eq:sdac-state-update}. Then for all $t\ge 2$,
+Fix $H\in\mathbb{N}$ and $w\in\Delta_H$. Let $\pi(w)$ be defined by \eqref{eq:def-sdac-policy} and \eqref{eq:sdac-state-update}. Then for all $t\ge 2$,
 \begin{equation}
 \label{eq:appendix-state-decomp}
 b_t^{\pi(w)}
 =
-\sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i}(1-\kappa)^{j-1}a_{t-j}\right)
+\sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i}\alpha^{j-1}a_{t-j}\right)
 = \langle w,\psi_t\rangle,
 \end{equation}
 where
 \[
-\psi_t^{(i)} \triangleq \sum_{j=1}^{i}(1-\kappa)^{j-1}a_{t-j}, \qquad i=1,\ldots,H.
+\psi_t^{(i)} \triangleq \sum_{j=1}^{i}\alpha^{j-1}a_{t-j}, \qquad i=1,\ldots,H.
 \]
-In particular, $0\le \psi_t^{(i)}\le 1/\kappa$. Consequently, since $w\in\Delta_H$ and
+In particular, $0\le \psi_t^{(i)}\le 1/(1-\alpha)$. Consequently, since $w\in\Delta_H$ and
 $b_t^{\pi(w)}=\langle w,\psi_t\rangle$, we also have $b_t^{\pi(w)}\ge 0$ for all $t\ge 2$.
 \end{lemma}
 
 \begin{proof}
 We use induction on $t$. For $t=2$, $b_1^{\pi(w)}=0$ and $a_{1-i}=0$ for all $i\ge 1$. By the policy definition \eqref{eq:def-sdac-policy},
-\(u_1^{\pi(w)}=\kappa b_1^{\pi(w)}+\sum_{i=1}^H w^{(i)}(1-\kappa)^i a_{1-i}=0\). Then, using the state update \eqref{eq:sdac-state-update},
-\(b_2^{\pi(w)}=b_1^{\pi(w)}-u_1^{\pi(w)}+a_1=a_1\), which is exactly \eqref{eq:appendix-state-decomp} at time $t=2$.
+\(u_1^{\pi(w)}=\sum_{i=1}^H w^{(i)}\alpha^i a_{1-i}=0\). Then, using the state update \eqref{eq:sdac-state-update},
+\(b_2^{\pi(w)}=\alpha b_1^{\pi(w)}-u_1^{\pi(w)}+a_1=a_1\), which is exactly \eqref{eq:appendix-state-decomp} at time $t=2$.
 
 Assume the claim holds at time $t\ge 2$. Using \eqref{eq:def-sdac-policy} and \eqref{eq:sdac-state-update},
 \[
 b_{t+1}^{\pi(w)}
-= (1-\kappa)b_t^{\pi(w)} - \sum_{i=1}^H w^{(i)}(1-\kappa)^i a_{t-i} + a_t.
+= \alpha b_t^{\pi(w)} - \sum_{i=1}^H w^{(i)}\alpha^i a_{t-i} + a_t.
 \]
 Substituting the induction hypothesis gives
 \[
 \begin{aligned}
 b_{t+1}^{\pi(w)}
-&= (1-\kappa)\sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i}(1-\kappa)^{j-1}a_{t-j}\right)
-    - \sum_{i=1}^H w^{(i)}(1-\kappa)^i a_{t-i} + a_t \\
-&= \sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i}(1-\kappa)^j a_{t-j}\right)
-    - \sum_{i=1}^H w^{(i)}(1-\kappa)^i a_{t-i} + a_t \\
-&= \sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i-1}(1-\kappa)^j a_{t-j}\right) + a_t \\
-&= \sum_{i=1}^H w^{(i)}\!\left(a_t + \sum_{j=1}^{i-1}(1-\kappa)^j a_{t-j}\right) \\
-&= \sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i}(1-\kappa)^{j-1}a_{t+1-j}\right),
+&= \alpha\sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i}\alpha^{j-1}a_{t-j}\right)
+    - \sum_{i=1}^H w^{(i)}\alpha^i a_{t-i} + a_t \\
+&= \sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i}\alpha^j a_{t-j}\right)
+    - \sum_{i=1}^H w^{(i)}\alpha^i a_{t-i} + a_t \\
+&= \sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i-1}\alpha^j a_{t-j}\right) + a_t \\
+&= \sum_{i=1}^H w^{(i)}\!\left(a_t + \sum_{j=1}^{i-1}\alpha^j a_{t-j}\right) \\
+&= \sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i}\alpha^{j-1}a_{t+1-j}\right),
 \end{aligned}
 \]
-which is exactly \eqref{eq:appendix-state-decomp} at time $t+1$. In the third displayed line above we reindexed the inner summation (shifted the index $j\mapsto j+1$) to obtain the final form. The bound $\psi_t^{(i)}\le 1/\kappa$ follows from $a_\tau\in[0,1]$ and the geometric series.
+which is exactly \eqref{eq:appendix-state-decomp} at time $t+1$. In the third displayed line above we reindexed the inner summation (shifted the index $j\mapsto j+1$) to obtain the final form. The bound $\psi_t^{(i)}\le 1/(1-\alpha)$ follows from $a_\tau\in[0,1]$ and the geometric series.
 \end{proof}
 
 \begin{lemma}[Linearity of SDAC action in $w$]
@@ -400,33 +400,21 @@ u_t^{\pi(w)} = \langle w,\phi_t\rangle,
 \]
 where
 \[
-\phi_t^{(i)} \triangleq \kappa\psi_t^{(i)} + (1-\kappa)^i a_{t-i}  = \sum_{j=1}^{i}(1-\kappa)^{j-1}a_{t-j}.
+\phi_t^{(i)} \triangleq \alpha^i a_{t-i}.
 \]
-Moreover, $0\le \phi_t^{(i)}\le 1$ for all $i$.
+Moreover, $0\le \phi_t^{(i)}\le \alpha$ for all $i$.
 \end{lemma}
 
 \begin{proof}
 From \eqref{eq:def-sdac-policy},
 \[
-u_t^{\pi(w)} = \kappa b_t^{\pi(w)} + \sum_{i=1}^H w^{(i)}(1-\kappa)^i a_{t-i}.
-\]
-Applying Lemma~\ref{lem:appendix-state-decomp}, we substitute
-\(b_t^{\pi(w)}=\langle w,\psi_t\rangle=\sum_{i=1}^H w^{(i)}\psi_t^{(i)}\), so
-\[
-\begin{aligned}
-u_t^{\pi(w)}
-&= \kappa\sum_{i=1}^H w^{(i)}\psi_t^{(i)} + \sum_{i=1}^H w^{(i)}(1-\kappa)^i a_{t-i} \\
-&= \sum_{i=1}^H w^{(i)}\bigl(\kappa\psi_t^{(i)} + (1-\kappa)^i a_{t-i}\bigr) \\
-&= \sum_{i=1}^H w^{(i)}\phi_t^{(i)}
+u_t^{\pi(w)} = \sum_{i=1}^H w^{(i)}\alpha^i a_{t-i}
+= \sum_{i=1}^H w^{(i)}\phi_t^{(i)}
 = \langle w,\phi_t\rangle.
-\end{aligned}
 \]
-
-The lower bound on $\phi_t^{(i)}$ is immediate from $a_{t-i}\ge 0$ and $\kappa\le 1$. For the upper bound, use $a_\tau\in[0,1]$:
+The lower bound is immediate from $a_{t-i}\ge 0$. For the upper bound, use $a_\tau\in[0,1]$:
 \[
-\phi_t^{(i)}
-\le \kappa\sum_{j=1}^{i}(1-\kappa)^{j-1} + (1-\kappa)^i
-= 1.
+\phi_t^{(i)} = \alpha^i a_{t-i} \le \alpha^i \le \alpha.
 \]
 \end{proof}
 
@@ -434,18 +422,18 @@ The lower bound on $\phi_t^{(i)}$ is immediate from $a_{t-i}\ge 0$ and $\kappa\l
 \label{lem:appendix-feasibility}
 For every fixed $w\in\Delta_H$, the trajectory induced by \eqref{eq:def-sdac-policy}--\eqref{eq:sdac-state-update} satisfies
 \[
-0\le u_t^{\pi(w)}\le b_t^{\pi(w)} \quad \text{for all } t\ge 1.
+0\le u_t^{\pi(w)}\le \alpha b_t^{\pi(w)} \quad \text{for all } t\ge 1.
 \]
 \end{lemma}
 
 \begin{proof}
-Nonnegativity of $u_t^{\pi(w)}$ follows from \eqref{eq:def-sdac-policy}, because each term in the sum is nonnegative: $\kappa b_t^{\pi(w)}\ge 0$ since $\kappa>0$ and $b_t^{\pi(w)}\ge 0$ (by Lemma~\ref{lem:appendix-state-decomp} for $t\ge 2$, and $b_1^{\pi(w)}=0$ by \eqref{eq:sdac-state-update}), while $w^{(i)}\ge 0$, $(1-\kappa)^i\ge 0$, and $a_{t-i}\ge 0$ for every $i$.
+Nonnegativity of $u_t^{\pi(w)}$ follows from \eqref{eq:def-sdac-policy}, because $w^{(i)}\ge 0$, $\alpha^i\ge 0$, and $a_{t-i}\ge 0$ for every $i$.
 
 For the upper bound, Lemma~\ref{lem:appendix-state-decomp} implies
 \begin{align*}
-(1-\kappa)b_t^{\pi(w)}
-&= (1-\kappa)\sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i}(1-\kappa)^{j-1}a_{t-j}\right) \\
-&= \sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i}(1-\kappa)^j a_{t-j}\right).
+\alpha b_t^{\pi(w)}
+&= \alpha\sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i}\alpha^{j-1}a_{t-j}\right) \\
+&= \sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i}\alpha^j a_{t-j}\right).
 \end{align*}
 Now rewrite the inner sum by collecting the coefficient of each $a_{t-i}$. Since all weights are nonnegative, for every $i$ we have
 \[
@@ -453,22 +441,15 @@ Now rewrite the inner sum by collecting the coefficient of each $a_{t-i}$. Since
 \]
 Therefore,
 \[
-(1-\kappa)b_t^{\pi(w)}
+\alpha b_t^{\pi(w)}
 =
-\sum_{i=1}^{H}\left(\sum_{j=i}^{H}w^{(j)}\right)(1-\kappa)^i a_{t-i}
+\sum_{i=1}^{H}\left(\sum_{j=i}^{H}w^{(j)}\right)\alpha^i a_{t-i}
 \ge
-\sum_{i=1}^{H}w^{(i)}(1-\kappa)^i a_{t-i},
-\]
-since $\sum_{j=i}^{H}w^{(j)}\ge w^{(i)}$ and $a_{t-i}\ge 0$. Therefore,
-\[
-u_t^{\pi(w)}
+\sum_{i=1}^{H}w^{(i)}\alpha^i a_{t-i}
 =
-\kappa b_t^{\pi(w)} + \sum_{i=1}^{H}w^{(i)}(1-\kappa)^i a_{t-i}
-\le
-\kappa b_t^{\pi(w)} + (1-\kappa)b_t^{\pi(w)}
-=
-b_t^{\pi(w)}.
+u_t^{\pi(w)},
 \]
+since $\sum_{j=i}^{H}w^{(j)}\ge w^{(i)}$ and $a_{t-i}\ge 0$.
 \end{proof}
 
 \begin{lemma}[Convexity and Lipschitz continuity of surrogate cost]
@@ -481,7 +462,7 @@ Then $\ell_t$ is convex on $\Delta_H$, and for all $w,w'\in\Delta_H$,
 \[
 |\ell_t(w)-\ell_t(w')|
 \le
-\left(\frac{L_b}{\kappa}+L_u\right)\|w-w'\|_1.
+\left(\frac{L_b}{1-\alpha}+\alpha L_u\right)\|w-w'\|_1.
 \]
 \end{lemma}
 
@@ -500,9 +481,9 @@ Using \eqref{eq:model-lipschitz},
 &\le L_b\|w-w'\|_1\|\psi_t\|_\infty + L_u\|w-w'\|_1\|\phi_t\|_\infty \\
 &= \bigl(L_b\|\psi_t\|_\infty + L_u\|\phi_t\|_\infty\bigr)\|w-w'\|_1.
 \end{align*}
-Lemma~\ref{lem:appendix-state-decomp} gives $\|\psi_t\|_\infty\le 1/\kappa$, and Lemma~\ref{lem:appendix-action-linear} gives $\|\phi_t\|_\infty\le 1$, which yields the claim. In particular, one may take the surrogate Lipschitz constant as
+Lemma~\ref{lem:appendix-state-decomp} gives $\|\psi_t\|_\infty\le 1/(1-\alpha)$, and Lemma~\ref{lem:appendix-action-linear} gives $\|\phi_t\|_\infty\le \alpha$, which yields the claim. In particular, one may take the surrogate Lipschitz constant as
 \[
-L := L_u + \frac{L_b}{\kappa},
+L := \alpha L_u + \frac{L_b}{1-\alpha},
 \]
 as used in the main text.
 \end{proof}
