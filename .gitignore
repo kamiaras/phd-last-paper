@@ -18,7 +18,7 @@
 *.xdv
 *.dvi
 *.ps
-
+*.pdf
 # Local archive / recycle bin (not part of active repo)
 archive/
 
