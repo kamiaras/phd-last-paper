@@ -6,6 +6,7 @@
 
 \newtheorem{lemma}{Lemma}
 \newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
 
 \title{Online Dynamic Resource Allocation with State Constraints}
 \author{Kamiar Asgari \and Michael J. Neely}
@@ -64,7 +65,7 @@ This abstraction captures a broad set of domains:
 
 An alternative, though mathematically related, perspective comes from queueing control in computer networks and telecommunications. In that framework, one tracks a queue with stochastic arrivals and makes real-time service decisions (equivalent to allocations in our setup), typically aiming to minimize long-run average service cost while keeping queue lengths stable. This literature is extensive (see, e.g., \cite{tassiulas1990stability,tassiulas1993dynamic,mckeown1999achieving,neely2010stochastic}), but its setting differs from ours in several important respects. Classical queueing work usually assumes stochastic arrivals and focuses on simple, known cost functions that depend only on the service rate, while queue length is kept small. These methods achieve trade-offs between queue size and time-average service cost. By contrast, our model permits fully adversarial sequences of inflows and costs and allows general convex costs that depend on both the queue length (state) and the service rate (action). Thus our approach is more general in cost structure and input model. The queueing literature provides useful motivation and techniques for state-coupled dynamics, but does not directly address the online optimization and regret-minimization objectives we study.
 
-Another related work is \cite{khojastepour2004delay}, which proposes and analyzes a fixed controller that is a linear function of past arrivals. That controller resembles our family of SDAC policies because it uses nonnegative filter weights that sum to one. However, the controller in \cite{khojastepour2004delay} is not updated online and is chosen to achieve bounded service delay; by contrast, our framework focuses on online optimization of a general cost and does not treat delay as a constraint.
+Another related work is \cite{khojastepour2004delay}, which proposes and analyzes a fixed controller that is a linear function of past arrivals. That controller resembles our family of SDAC policies because it uses nonnegative filter weights that sum to one (summing to at most one for SDAC). However, the controller in \cite{khojastepour2004delay} is not updated online and is chosen to achieve bounded service delay; by contrast, our framework focuses on online optimization of a general cost and does not treat delay as a constraint.
 
 \paragraph{Inventory Management}
 
@@ -111,7 +112,7 @@ Section~\ref{sec:model-setup} formalizes the adversarial allocation model, assum
 \section{Notation}
 \label{sec:notation}
 
-For any vector $m\in\mathbb{R}^n$, the $i$-th component is denoted by $a^{(i)}$. We denote by $t\in\{1,2,\ldots,T\}$ the time index (total horizon $T$). The system state $b_t\in\mathbb{R}_{\ge 0}$ is the resource level at the beginning of round $t$, and the action $u_t\in\mathbb{R}_{\ge 0}$ satisfies $0 \le u_t \le \alpha b_t$, where $\alpha\in(0,1)$ is a fixed state-decay (retention) factor. The state evolves as $b_{t+1}=\alpha b_t-u_t+a_t$. The exogenous inflow is $a_t\in[0,1]$, and the cost function is $c_t:\mathbb{R}_{\ge 0}^2\to\mathbb{R}$. The online algorithm is $\mathcal{A}$, and $\pi$ (or $\pi(w)$ when parameterized by $w$) denotes a policy from the comparator class $\Pi = \mathrm{SDAC}_H$. The memory horizon $H\in\mathbb{N}$ is a fixed design parameter. The weight vector $w$ lies in the unit simplex $\Delta_H = \{w\in\mathbb{R}_{\ge 0}^H : \sum_i w^{(i)}\le 1\}$. The Lipschitz constants for the cost function are $L_b,L_u>0$. The inner product is denoted $\langle x,y\rangle = x^T y$.
+For any vector $m\in\mathbb{R}^n$, the $i$-th component is denoted by $m^{(i)}$. We denote by $t\in\{1,2,\ldots,T\}$ the time index (total horizon $T$). The system state $b_t\in\mathbb{R}_{\ge 0}$ is the resource level at the beginning of round $t$, and the action $u_t\in\mathbb{R}_{\ge 0}$ satisfies $0 \le u_t \le \alpha b_t$, where $\alpha\in(0,1)$ is a fixed state-decay (retention) factor. The state evolves as $b_{t+1}=\alpha b_t-u_t+a_t$. The exogenous inflow is $a_t\in[0,1]$ for $t\ge 1$; for nonpositive indices we set $a_\tau\equiv 0$. The cost function is $c_t:\mathbb{R}_{\ge 0}^2\to\mathbb{R}$. The online algorithm is $\mathcal{A}$, and $\pi$ (or $\pi(w)$ when parameterized by $w$) denotes a policy from the comparator class $\Pi = \mathrm{SDAC}_H$. The memory horizon $H\in\mathbb{N}$ is a fixed design parameter. The weight vector $w$ lies in the unit simplex $\Delta_H = \{w\in\mathbb{R}_{\ge 0}^H : \sum_i w^{(i)}\le 1\}$. The Lipschitz constants for the cost function are $L_b,L_u>0$. The inner product is denoted $\langle x,y\rangle = x^T y$.
 
 Throughout the paper, several terms are used interchangeably for the same objects. The state variable $b_t$ may also be described as the budget, storage level, battery state, or inventory level,  depending on the application. The action $u_t$ may also be called the allocation, outflow, release, discharge, or consumption decision. Likewise, the inflow $a_t$ may appear as arrival, supply, harvested energy, or replenishment. The constraint $0 \le u_t \le \alpha b_t$ is the feasibility, availability, or state-constraint condition, and the cost $c_t(b_t,u_t)$ is referred to as the loss, or stage cost.
 
@@ -182,7 +183,7 @@ Disturbance-Action Control (DAC) parameterizes the action as a linear function o
 \label{eq:dac-param}
 u_t = \sum_{i=1}^{H} m^{(i)} a_{t-i},
 \end{equation}
-where $H\in\mathbb{N}$ is the memory horizon and $m\in\mathbb{R}^H$ is a disturbance filter.
+where $H\in\mathbb{N}$ is the memory horizon and $m\in\mathbb{R}^H$ is a disturbance filter. We allow nonpositive indices in such sums, with the convention $a_\tau\equiv 0$ for $\tau\le 0$.
 
 For our constrained allocation model, raw DAC is insufficient: \eqref{eq:dac-param} does not generally enforce \eqref{eq:model-feasibility} at every round. In particular, the action can violate either bound, with $u_t>\alpha b_t$ or $u_t<0$. We therefore introduce \emph{Simplex Disturbance-Action Control} (SDAC), which replaces unconstrained DAC filters by a simplex-constrained family tailored to decay-coupled budget dynamics. SDAC is designed to keep the DAC advantages above (adversarial robustness, regret-based comparison, and tractable online updates) while adding feasibility by construction.
 
@@ -193,7 +194,7 @@ Fix memory horizon $H\in\mathbb{N}$. Let
 \label{eq:def-simplex}
 \Delta_H \triangleq \left\{w\in\mathbb{R}_{\ge 0}^H:\; \sum_{i=1}^H w^{(i)}\le1\right\}
 \end{equation}
-be the unit simplex. For any $w\in\Delta_H$, define the policy $\pi(w)$ by
+be the sub-probability simplex (i.e.\ $\sum_i w^{(i)}\le1$ rather than $=1$). For any $w\in\Delta_H$, define the policy $\pi(w)$ by
 \begin{equation}
 \label{eq:def-sdac-policy}
 u_t^{\pi(w)} \;\triangleq\; \sum_{i=1}^{H} w^{(i)}\alpha^i a_{t-i},
@@ -225,7 +226,46 @@ with $\Delta_H$ defined in \eqref{eq:def-simplex}.
 
 First, feasibility is preserved within the class: for any fixed $w\in\Delta_H$, the induced trajectory under \eqref{eq:def-sdac-policy}--\eqref{eq:sdac-state-update} satisfies $0\le u_t^{\pi(w)}\le \alpha b_t^{\pi(w)}$ for all $t$ (see Lemma~\ref{lem:appendix-feasibility} in Appendix~\ref{sec:appendix-proofs}).
 
-Second, SDAC is compatible with online convex optimization. For fixed inflows, both $b_t^{\pi(w)}$ and $u_t^{\pi(w)}$ are linear in $w$. Therefore, since each $c_t$ is convex in $(b,u)$, the induced cost is convex in $w$ (see Lemma~\ref{lem:appendix-surrogate} in Appendix~\ref{sec:appendix-proofs}). Regret minimization against the best fixed SDAC comparator thus becomes online convex optimization over the simplex.
+Second, SDAC is compatible with online convex optimization. For fixed inflows, $u_t^{\pi(w)}$ is linear in $w$ and $b_t^{\pi(w)}$ is affine in $w$ (the constraint $\sum_i w^{(i)}\le 1$ contributes a state offset; see Lemma~\ref{lem:appendix-state-decomp}). Therefore, since each $c_t$ is convex in $(b,u)$, the induced cost is convex in $w$ (see Lemma~\ref{lem:appendix-surrogate} in Appendix~\ref{sec:appendix-proofs}). Regret minimization against the best fixed SDAC comparator thus becomes online convex optimization over the simplex.
+
+\subsection{Expressiveness: Approximating Linear State-Feedback Policies}
+\label{subsec:sdac-expressiveness}
+
+A standard comparator class in online control is the family of linear state-feedback policies $u_t=-Kx_t$, and a foundational property of Disturbance-Action Control is that the DAC class \emph{approximates} any strongly stable linear policy, with approximation error decaying geometrically in the memory horizon $H$ \cite{agarwal2019online,hazan_introduction_2025}. The underlying mechanism is that, under a stabilizing linear policy, the state is a geometrically decaying function of past disturbances, so a finite disturbance window reproduces the policy up to an exponentially small tail.
+
+We establish the analogue of this guarantee for SDAC. In our scalar, state-constrained model the feasible linear state-feedback policies are exactly the proportional (constant-fraction) allocations $u_t=q\,b_t$ with gain $q\in[0,\alpha]$: since $b_t\ge 0$, the feasibility constraint $0\le u_t\le\alpha b_t$ in \eqref{eq:model-feasibility} holds if and only if $q\in[0,\alpha]$. The next lemma shows that every such policy with $q\in(0,\alpha)$ is approximated, \emph{within the feasible class} $\mathrm{SDAC}_H$, by an explicit weight vector, with action, state, and cost errors that decay geometrically in $H$.
+
+\begin{lemma}[SDAC approximates linear state-feedback policies]
+\label{lem:sdac-linear-approx}
+Fix a gain $q\in(0,\alpha)$ and set $\beta\triangleq\alpha-q\in(0,\alpha)$. Consider the linear (proportional-allocation) policy $\pi_q^{\mathrm{lin}}$ that selects
+\[
+u_t^{\mathrm{lin}}=q\,b_t^{\mathrm{lin}},
+\qquad
+b_{t+1}^{\mathrm{lin}}=\alpha b_t^{\mathrm{lin}}-u_t^{\mathrm{lin}}+a_t,
+\qquad
+b_1^{\mathrm{lin}}=0,
+\]
+which is feasible in the sense of \eqref{eq:model-feasibility}. Define the weight vector $w_q^\star\in\mathbb{R}^H$ by
+\[
+w_q^{\star(i)}\triangleq\frac{q}{\alpha}\Bigl(\frac{\beta}{\alpha}\Bigr)^{i-1},
+\qquad i=1,\ldots,H.
+\]
+Then, for every inflow sequence $\{a_t\}\subset[0,1]$ and all $t\ge 1$:
+\begin{enumerate}
+\item \textup{(Feasible realization.)} $w_q^\star\in\Delta_H$; indeed $\sum_{i=1}^H w_q^{\star(i)}=1-(\beta/\alpha)^H<1$, so $\pi(w_q^\star)\in\mathrm{SDAC}_H$.
+\item \textup{(Action approximation.)} $\displaystyle 0\le u_t^{\mathrm{lin}}-u_t^{\pi(w_q^\star)}\le \frac{q\,\beta^H}{1-\beta}$.
+\item \textup{(State approximation.)} $\displaystyle 0\le b_t^{\pi(w_q^\star)}-b_t^{\mathrm{lin}}\le \frac{q\,\beta^H}{(1-\beta)(1-\alpha)}$.
+\item \textup{(Cost approximation.)} If each $c_t$ satisfies \eqref{eq:model-lipschitz}, then
+\[
+\Bigl|\sum_{t=1}^T c_t\bigl(b_t^{\pi(w_q^\star)},u_t^{\pi(w_q^\star)}\bigr)-\sum_{t=1}^T c_t\bigl(b_t^{\mathrm{lin}},u_t^{\mathrm{lin}}\bigr)\Bigr|
+\le
+\Bigl(L_u+\frac{L_b}{1-\alpha}\Bigr)\frac{q\,\beta^H}{1-\beta}\,T.
+\]
+\end{enumerate}
+In particular, the action, state, and per-horizon cost errors decay geometrically in the memory horizon $H$, so $\mathrm{SDAC}_H$ approximates $\pi_q^{\mathrm{lin}}$ arbitrarily well as $H\to\infty$. The proof is deferred to Appendix~\ref{sec:appendix-proofs}.
+\end{lemma}
+
+This expressiveness property has a direct algorithmic consequence. Because the regret bound of Theorem~\ref{thm:regret-bound} depends on the memory horizon only through $\sqrt{\log H}$, the window $H$ can be enlarged cheaply; combining Lemma~\ref{lem:sdac-linear-approx} with that bound then shows the online controller competes with the best fixed linear policy. We make this precise in Corollary~\ref{cor:regret-vs-linear}, mirroring the role of DAC-to-linear approximation in nonstochastic control \cite{agarwal2019online}.
 
 
 
@@ -242,30 +282,30 @@ For each round $t$, let $w_t\in\Delta_H$ be the online weight vector.
 The controller first forms the unconstrained SDAC-style action
 \begin{equation}
 \label{eq:alg-unconstrained-action}
-\widehat{u}_t \triangleq \kappa b_t^{\mathcal A} + \langle w_t,\widetilde{a}_t\rangle,
+\widehat{u}_t \triangleq \langle w_t,\widetilde{a}_t\rangle,
 \end{equation}
 then enforces feasibility by clipping:
 \begin{equation}
 \label{eq:alg-feasible-action}
-u_t^{\mathcal A} \triangleq \min\{\widehat{u}_t,\,b_t^{\mathcal A}\}.
+u_t^{\mathcal A} \triangleq \min\{\widehat{u}_t,\,\alpha b_t^{\mathcal A}\}.
 \end{equation}
 The state update is
 \begin{equation}
 \label{eq:alg-state-update}
-b_{t+1}^{\mathcal A} = b_t^{\mathcal A} - u_t^{\mathcal A} + a_t,
+b_{t+1}^{\mathcal A} = \alpha b_t^{\mathcal A} - u_t^{\mathcal A} + a_t,
 \qquad b_1^{\mathcal A}=0.
 \end{equation}
 
 \paragraph{Feasibility of the online trajectory}
-We verify that the algorithm satisfies the state-action constraints at every round. The key mechanism is the clipping step in \eqref{eq:alg-feasible-action}, which enforces per-round feasibility by truncating the unconstrained proposal to the currently available state. Since $w_t\in\Delta_H$, $\widetilde{a}_t\ge 0$ componentwise, and $\kappa\in(0,1]$, equation \eqref{eq:alg-unconstrained-action} gives $\widehat u_t\ge 0$. By \eqref{eq:alg-feasible-action},
+We verify that the algorithm satisfies \eqref{eq:model-feasibility} at every round. The key mechanism is the clipping step in \eqref{eq:alg-feasible-action}, which enforces per-round feasibility by truncating the unconstrained proposal to the currently available retained budget $\alpha b_t^{\mathcal A}$. Since $w_t\in\Delta_H$ and $\widetilde{a}_t\ge 0$ componentwise, equation \eqref{eq:alg-unconstrained-action} gives $\widehat u_t\ge 0$. By \eqref{eq:alg-feasible-action},
 \[
-u_t^{\mathcal A}=\min\{\widehat u_t,b_t^{\mathcal A}\}\in[0,b_t^{\mathcal A}],
+u_t^{\mathcal A}=\min\{\widehat u_t,\alpha b_t^{\mathcal A}\}\in[0,\alpha b_t^{\mathcal A}],
 \]
-so the action feasibility constraint holds whenever $b_t^{\mathcal A}\ge 0$. It remains to prove $b_t^{\mathcal A}\ge 0$ for all $t$. The base case is $b_1^{\mathcal A}=0$. If $b_t^{\mathcal A}\ge 0$, then $u_t^{\mathcal A}\le b_t^{\mathcal A}$ and $a_t\in[0,1]$, so from \eqref{eq:alg-state-update},
+so the action feasibility constraint holds whenever $b_t^{\mathcal A}\ge 0$. It remains to prove $b_t^{\mathcal A}\ge 0$ for all $t$. The base case is $b_1^{\mathcal A}=0$. If $b_t^{\mathcal A}\ge 0$, then $u_t^{\mathcal A}\le \alpha b_t^{\mathcal A}$ and $a_t\in[0,1]$, so from \eqref{eq:alg-state-update},
 \[
-b_{t+1}^{\mathcal A}=b_t^{\mathcal A}-u_t^{\mathcal A}+a_t\ge 0.
+b_{t+1}^{\mathcal A}=\alpha b_t^{\mathcal A}-u_t^{\mathcal A}+a_t\ge 0.
 \]
-Thus, by induction, $b_t^{\mathcal A}\ge 0$ and $0\le u_t^{\mathcal A}\le b_t^{\mathcal A}$ for all $t$.
+Thus, by induction, $b_t^{\mathcal A}\ge 0$ and $0\le u_t^{\mathcal A}\le \alpha b_t^{\mathcal A}$ for all $t$.
 
 
 
@@ -282,7 +322,7 @@ The exponentiated-gradient update is
 \label{eq:alg-eg-unnormalized}
 \widetilde{w}_{t+1}^{(i)} \triangleq w_t^{(i)}\exp\!\bigl(-\eta g_t^{(i)}\bigr), \qquad i=1,\ldots,H,
 \end{equation}
-followed by \footnote{This step is a (Bregman) projection onto the unit simplex normalization.}:
+followed by \footnote{This conditional normalization is exactly the Bregman (generalized-KL) projection of $\widetilde w_{t+1}$ onto $\Delta_H=\{w\ge0:\sum_i w^{(i)}\le1\}$; renormalization is triggered only when the unprojected mirror step leaves $\Delta_H$, i.e.\ when $\sum_j\widetilde w_{t+1}^{(j)}>1$. See Lemma~\ref{lem:eg-projection}.}:
 \begin{equation}
 \label{eq:alg-eg-normalized}
 w_{t+1}^{(i)}
@@ -294,7 +334,7 @@ w_{t+1}^{(i)}
 \qquad i=1,\ldots,H.
 \end{equation}
 
-This yields a feasible online trajectory by \eqref{eq:alg-feasible-action} and performs online convex optimization over $\Delta_H$ through \eqref{eq:alg-surrogate-cost}--\eqref{eq:alg-eg-normalized}.
+This yields a feasible online trajectory satisfying \eqref{eq:model-feasibility} by \eqref{eq:alg-feasible-action} and performs online convex optimization over $\Delta_H$ through \eqref{eq:alg-surrogate-cost}--\eqref{eq:alg-eg-normalized}.
 
 
 \section{Regret Analysis}
@@ -310,34 +350,129 @@ Suppose each cost function \(c_t\) is convex and satisfies \eqref{eq:model-lipsc
 \le
 \frac{\log H}{\eta}
 +
-\eta L^2 T\Bigl(\tfrac{1}{2}+\tfrac{1}{\kappa^2}\Bigr),
+\eta L^2 T\Bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\Bigr),
 \qquad
-L := L_u + \tfrac{L_b}{\kappa}.
+L := \alpha L_u + \tfrac{L_b}{1-\alpha}.
 \]
 In particular, the choice
 \[
 \eta^*
 =
-\sqrt{\frac{\log H}{L^2 T\bigl(\tfrac{1}{2}+\tfrac{1}{\kappa^2}\bigr)}}
+\sqrt{\frac{\log H}{L^2 T\bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\bigr)}}
 \]
 gives
 \[
 \mathrm{Regret}(T)
 \le
-2L\sqrt{\Bigl(\tfrac{1}{2}+\tfrac{1}{\kappa^2}\Bigr)T\log H}.
+2L\sqrt{\Bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\Bigr)T\log H}.
 \]
 \end{theorem}
 
 \begin{proof}[Proof sketch]
 By Lemma~\ref{lem:appendix-surrogate}, the surrogate losses are convex and \(L\)-Lipschitz, so standard entropic OMD gives the learning term bound \(\log H/\eta + \eta L^2T/2\).
-The remaining stability term is controlled by Lemmas~\ref{lem:omd-move}--\ref{lem:stab-sum}, which together contribute at most \(\eta L^2T/\kappa^2\). Combining the two bounds yields the claim.
+The remaining stability term is controlled by Lemmas~\ref{lem:omd-move}--\ref{lem:stab-sum}, which together contribute at most \(\tfrac{\alpha}{(1-\alpha)^2}\,\eta L^2T\). Combining the two bounds yields the claim.
+\end{proof}
+
+Combining Theorem~\ref{thm:regret-bound} with the approximation guarantee of Lemma~\ref{lem:sdac-linear-approx} shows that the controller is competitive not only with the best fixed SDAC policy but with the entire family of feasible linear state-feedback policies.
+
+\begin{corollary}[No-regret against linear state-feedback policies]
+\label{cor:regret-vs-linear}
+Run the clipped exponentiated-gradient controller of Section~\ref{sec:online-algorithm} with the step size $\eta^*$ of Theorem~\ref{thm:regret-bound}. Fix any gain $q\in(0,\alpha)$, set $\beta\triangleq\alpha-q$, and let $\bigl(b_t^{\mathrm{lin}},u_t^{\mathrm{lin}}\bigr)$ be the trajectory of the linear policy $\pi_q^{\mathrm{lin}}$ from Lemma~\ref{lem:sdac-linear-approx}. Then
+\[
+\begin{aligned}
+\sum_{t=1}^T c_t\bigl(b_t^{\mathcal A},u_t^{\mathcal A}\bigr)
+-\sum_{t=1}^T c_t\bigl(b_t^{\mathrm{lin}},u_t^{\mathrm{lin}}\bigr)
+&\le
+2L\sqrt{\Bigl(\tfrac12+\tfrac{\alpha}{(1-\alpha)^2}\Bigr)T\log H} \\
+&\quad +\Bigl(L_u+\frac{L_b}{1-\alpha}\Bigr)\frac{q\,\beta^H}{1-\beta}\,T,
+\end{aligned}
+\]
+where $L=\alpha L_u+\tfrac{L_b}{1-\alpha}$. In particular, choosing the memory horizon $H=\bigl\lceil \log T/\log(1/\beta)\bigr\rceil$ forces $\beta^H\le 1/T$, so the second term is $O(1)$ and
+\[
+\sum_{t=1}^T c_t\bigl(b_t^{\mathcal A},u_t^{\mathcal A}\bigr)
+-\sum_{t=1}^T c_t\bigl(b_t^{\mathrm{lin}},u_t^{\mathrm{lin}}\bigr)
+=
+O\!\left(\sqrt{T\log\log T}\,\right).
+\]
+Thus the controller is no-regret against every fixed linear state-feedback policy $u_t=q\,b_t$, $q\in(0,\alpha)$.
+\end{corollary}
+
+\begin{proof}
+By the regret definition \eqref{eq:def-regret} and the optimized bound of Theorem~\ref{thm:regret-bound},
+\[
+\sum_{t=1}^T c_t\bigl(b_t^{\mathcal A},u_t^{\mathcal A}\bigr)
+\le
+\min_{w\in\Delta_H}\sum_{t=1}^T c_t\bigl(b_t^{\pi(w)},u_t^{\pi(w)}\bigr)
++2L\sqrt{\Bigl(\tfrac12+\tfrac{\alpha}{(1-\alpha)^2}\Bigr)T\log H}.
+\]
+Since $w_q^\star\in\Delta_H$ by Lemma~\ref{lem:sdac-linear-approx}(1), the minimum is no larger than the cost of $\pi(w_q^\star)$, which by Lemma~\ref{lem:sdac-linear-approx}(4) obeys
+\[
+\sum_{t=1}^T c_t\bigl(b_t^{\pi(w_q^\star)},u_t^{\pi(w_q^\star)}\bigr)
+\le
+\sum_{t=1}^T c_t\bigl(b_t^{\mathrm{lin}},u_t^{\mathrm{lin}}\bigr)
++\Bigl(L_u+\frac{L_b}{1-\alpha}\Bigr)\frac{q\,\beta^H}{1-\beta}\,T.
+\]
+Chaining the two displays gives the stated bound. For the asymptotic statement, $H=\bigl\lceil \log T/\log(1/\beta)\bigr\rceil$ gives $\beta^H\le 1/T$, so the second term is at most $\bigl(L_u+\tfrac{L_b}{1-\alpha}\bigr)\tfrac{q}{1-\beta}=O(1)$, while $\log H=O(\log\log T)$ in the first term.
 \end{proof}
 
 
 \section{Experiments}
 \label{sec:experiments}
 
-% TODO: EXPERIMENTENT BERTTER BE IN ENERGY HARVESTING FRAMEWORK
+We evaluate the clipped exponentiated-gradient controller of Section~\ref{sec:online-algorithm} in an energy-harvesting battery-management scenario. Harvested-energy arrivals are taken from real solar traces, and the stage cost is a convex state--action function that penalizes both reserve depletion and deviation from proportional discharge. This setup matches the primary application domain in the introduction while exercising the general adversarial model of Section~\ref{sec:model-setup}.
+
+\subsection{Energy-Harvesting Scenario}
+We interpret $b_t$ as battery state of charge at the start of round~$t$, $u_t$ as energy discharged to the load, and $a_t$ as harvested energy arriving after the discharge decision. The retention factor $\alpha$ models self-discharge and the fraction of stored energy that may be allocated in one round. Dynamics, feasibility, and the non-anticipatory information pattern are exactly those of \eqref{eq:model-feasibility}--\eqref{eq:model-dynamics}.
+
+\subsection{Harvested-Energy Arrivals}
+Inflows are derived from the NREL National Solar Radiation Database (NSRDB) \cite{osti_1473618}, using the same trace-based evaluation protocol as the energy-harvesting online optimization experiments in \cite{10.1145/3428337}. We take the first $T$ samples of 5-minute global horizontal irradiance (GHI) from the NSRDB file \texttt{Actual\_32.95\_-115.15\_2006\_UPV\_100MW\_5\_Min} (Imperial Valley, CA, 2006) and convert each raw value $g_t$ to a normalized inflow
+\begin{equation}
+\label{eq:exp-arrival-normalize}
+a_t \;=\; \min\!\left\{1,\;\frac{g_t}{2\,\bar g}\right\},
+\qquad
+\bar g \triangleq \frac{1}{T}\sum_{s=1}^T g_s,
+\end{equation}
+so that $a_t\in[0,1]$ as required by the model. This rescaling preserves the diurnal structure and intermittency of outdoor photovoltaic harvest while mapping arrivals into the bounded domain used in the analysis.
+
+\subsection{State--Action Cost}
+Motivated by quadratic storage penalties in drift-plus-penalty optimization \cite{neely2010stochastic,urgaonkar2011optimal}, base-stock inventory targets \cite{hihat2024online}, and fixed-fraction discharge policies in energy harvesting \cite{tutuncuoglu2012optimum,khojastepour2004delay}, we use the coupled reserve--throughput cost
+\begin{equation}
+\label{eq:exp-cost-family2}
+c_t(b,u)
+\;=\;
+\omega_u\,\bigl(u - q\,b\bigr)^2
+\;+\;
+\omega_b\,\bigl(b_{\mathrm{ref}} - b\bigr)^2,
+\end{equation}
+with fixed weights $\omega_u=\omega_b=1$. The gain $q\in(0,\alpha)$ encodes a target proportional discharge rate $u_t\approx q\,b_t$, consistent with the linear comparator policies analyzed in Lemma~\ref{lem:sdac-linear-approx} and Corollary~\ref{cor:regret-vs-linear}. The reserve level $b_{\mathrm{ref}}$ targets a buffer against harvest intermittency. Writing $B\triangleq 1/(1-\alpha)$ for the worst-case state scale from the appendix bound, we set
+\[
+b_{\mathrm{ref}} = \tfrac{1}{2}\,B.
+\]
+Each $c_t$ in \eqref{eq:exp-cost-family2} is convex in $(b,u)$ and Lipschitz on the admissible region, so the standing assumptions of Section~\ref{sec:model-setup} are satisfied.
+
+\subsection{Parameters and Baselines}
+Unless stated otherwise, we use
+\[
+T = 10{,}000,
+\qquad
+H = 100,
+\qquad
+\alpha = 0.95,
+\qquad
+\omega_u = \omega_b = 1,
+\qquad
+b_{\mathrm{ref}} = \tfrac{1}{2(1-\alpha)}.
+\]
+We report two settings with linear-gain targets $q\in\{0.1,\,0.4\}$ in \eqref{eq:exp-cost-family2}; both satisfy $q<\alpha$.
+
+We compare the following controllers:
+\begin{itemize}
+    \item \textbf{Offline optimal SDAC:} the best fixed weight vector $w^\star\in\Delta_H$ chosen in hindsight for the realized arrival and cost sequence.
+    \item \textbf{Best linear policy:} $u_t = K b_t$ with $K\in[0,\alpha]$ chosen offline to minimize total cost (found by grid search on $K$).
+    \item \textbf{Fixed linear baseline:} $u_t = q\,b_t$ with $q$ matching the target gain in \eqref{eq:exp-cost-family2}.
+    \item \textbf{Online SDAC controller:} the clipped exponentiated-gradient algorithm of Section~\ref{sec:online-algorithm}, with step size $\eta^\star$ from Theorem~\ref{thm:regret-bound} and with a fixed step-size baseline for sensitivity.
+\end{itemize}
+Performance is measured by total cumulative cost \eqref{eq:def-cumulative-cost} and by per-round state, action, and cost trajectories. Simulation code and figure generation are provided in the \texttt{sim/} directory of the accompanying repository.
 
 \appendix
 \section{Appendix: Deferred Proofs}
@@ -347,49 +482,111 @@ This appendix collects the deferred proofs for structural SDAC properties used i
 
 Recall that we set $a_\tau\equiv 0$ for $\tau\le 0$, which is used in several base-case arguments below.
 
-% TODO change to <= 1
+We first prove the linear-policy approximation guarantee stated in Section~\ref{subsec:sdac-expressiveness}.
+
+\begin{proof}[Proof of Lemma~\ref{lem:sdac-linear-approx}]
+Fix $q\in(0,\alpha)$, set $\beta=\alpha-q\in(0,\alpha)$, and recall $a_\tau\equiv 0$ for $\tau\le 0$.
+
+\emph{Feasibility and closed form of the linear policy.} Substituting $u_t^{\mathrm{lin}}=q\,b_t^{\mathrm{lin}}$ into its state update gives the closed loop $b_{t+1}^{\mathrm{lin}}=\alpha b_t^{\mathrm{lin}}-q b_t^{\mathrm{lin}}+a_t=\beta b_t^{\mathrm{lin}}+a_t$ with $b_1^{\mathrm{lin}}=0$. Since $\beta>0$ and $a_t\ge 0$, induction yields $b_t^{\mathrm{lin}}\ge 0$, and then $0\le u_t^{\mathrm{lin}}=q b_t^{\mathrm{lin}}\le\alpha b_t^{\mathrm{lin}}$ because $q\le\alpha$; thus $\pi_q^{\mathrm{lin}}$ satisfies \eqref{eq:model-feasibility}. Unrolling the closed-loop recursion from $b_1^{\mathrm{lin}}=0$,
+\[
+b_t^{\mathrm{lin}}=\sum_{j=1}^{t-1}\beta^{j-1}a_{t-j},
+\qquad
+u_t^{\mathrm{lin}}=q\sum_{j=1}^{t-1}\beta^{j-1}a_{t-j}.
+\]
+
+\emph{Part 1.} Each $w_q^{\star(i)}=\tfrac{q}{\alpha}(\beta/\alpha)^{i-1}\ge 0$. Using $1-\beta/\alpha=(\alpha-\beta)/\alpha=q/\alpha$ and the finite geometric sum,
+\[
+\sum_{i=1}^H w_q^{\star(i)}
+=\frac{q}{\alpha}\cdot\frac{1-(\beta/\alpha)^H}{1-\beta/\alpha}
+=\frac{q}{\alpha}\cdot\frac{\alpha}{q}\bigl(1-(\beta/\alpha)^H\bigr)
+=1-(\beta/\alpha)^H<1,
+\]
+since $0<\beta/\alpha<1$. Hence $w_q^\star\in\Delta_H$ and $\pi(w_q^\star)\in\mathrm{SDAC}_H$.
+
+\emph{Part 2.} By the SDAC definition \eqref{eq:def-sdac-policy} and the identity $w_q^{\star(i)}\alpha^i=q\beta^{i-1}$,
+\[
+u_t^{\pi(w_q^\star)}=\sum_{i=1}^H w_q^{\star(i)}\alpha^i a_{t-i}=q\sum_{i=1}^H\beta^{i-1}a_{t-i}.
+\]
+Because $a_{t-i}=0$ for $i\ge t$, this equals $q\sum_{i=1}^{\min\{H,t-1\}}\beta^{i-1}a_{t-i}$, so subtracting it from $u_t^{\mathrm{lin}}$ cancels the first $\min\{H,t-1\}$ terms:
+\[
+u_t^{\mathrm{lin}}-u_t^{\pi(w_q^\star)}=q\sum_{j=H+1}^{t-1}\beta^{j-1}a_{t-j}\ge 0,
+\]
+which equals $0$ when $t\le H+1$. Using $a_{t-j}\in[0,1]$ and summing the geometric tail,
+\[
+u_t^{\mathrm{lin}}-u_t^{\pi(w_q^\star)}\le q\sum_{j=H+1}^{\infty}\beta^{j-1}=\frac{q\,\beta^H}{1-\beta}.
+\]
+
+\emph{Part 3.} Let $\delta_t\triangleq b_t^{\pi(w_q^\star)}-b_t^{\mathrm{lin}}$ and $e_t\triangleq u_t^{\mathrm{lin}}-u_t^{\pi(w_q^\star)}\in\bigl[0,\,q\beta^H/(1-\beta)\bigr]$ by Part 2. The two trajectories follow the same dynamics \eqref{eq:model-dynamics} driven by the same inflow, so the inflow cancels on subtraction:
+\[
+\delta_{t+1}=\alpha\,\delta_t-\bigl(u_t^{\pi(w_q^\star)}-u_t^{\mathrm{lin}}\bigr)=\alpha\,\delta_t+e_t,
+\qquad \delta_1=0.
+\]
+Unrolling gives $\delta_t=\sum_{s=1}^{t-1}\alpha^{t-1-s}e_s\ge 0$, and since $e_s\le q\beta^H/(1-\beta)$ and $\sum_{s=1}^{t-1}\alpha^{t-1-s}\le 1/(1-\alpha)$,
+\[
+0\le\delta_t\le\frac{q\,\beta^H}{1-\beta}\cdot\frac{1}{1-\alpha}=\frac{q\,\beta^H}{(1-\beta)(1-\alpha)}.
+\]
+
+\emph{Part 4.} By the Lipschitz condition \eqref{eq:model-lipschitz} and Parts 2--3, for each $t$,
+\[
+\bigl|c_t\bigl(b_t^{\pi(w_q^\star)},u_t^{\pi(w_q^\star)}\bigr)-c_t\bigl(b_t^{\mathrm{lin}},u_t^{\mathrm{lin}}\bigr)\bigr|
+\le L_b\,|\delta_t|+L_u\,|e_t|
+\le\Bigl(\frac{L_b}{1-\alpha}+L_u\Bigr)\frac{q\,\beta^H}{1-\beta}.
+\]
+Summing over $t=1,\ldots,T$ and applying the triangle inequality yields Part 4.
+\end{proof}
+
 \begin{lemma}[State decomposition under SDAC]
 \label{lem:appendix-state-decomp}
-Fix $H\in\mathbb{N}$ and $w\in\Delta_H$. Let $\pi(w)$ be defined by \eqref{eq:def-sdac-policy} and \eqref{eq:sdac-state-update}. Then for all $t\ge 2$,
+Fix $H\in\mathbb{N}$ and $w\in\Delta_H$, and write $W\triangleq\sum_{i=1}^H w^{(i)}\le 1$. Let $\pi(w)$ be defined by \eqref{eq:def-sdac-policy} and \eqref{eq:sdac-state-update}. Then for all $t\ge 2$,
 \begin{equation}
 \label{eq:appendix-state-decomp}
 b_t^{\pi(w)}
 =
-\sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i}\alpha^{j-1}a_{t-j}\right)
-= \langle w,\psi_t\rangle,
+\sum_{i=1}^H w^{(i)}\psi_t^{(i)}
++\bigl(1-W\bigr)\rho_t
+=
+\langle w,\psi_t\rangle+(1-W)\rho_t,
 \end{equation}
 where
 \[
-\psi_t^{(i)} \triangleq \sum_{j=1}^{i}\alpha^{j-1}a_{t-j}, \qquad i=1,\ldots,H.
+\psi_t^{(i)} \triangleq \sum_{j=1}^{i}\alpha^{j-1}a_{t-j}\quad(i=1,\ldots,H),
+\qquad
+\rho_t \triangleq \sum_{j=1}^{t-1}\alpha^{j-1}a_{t-j}.
 \]
-In particular, $0\le \psi_t^{(i)}\le 1/(1-\alpha)$. Consequently, since $w\in\Delta_H$ and
-$b_t^{\pi(w)}=\langle w,\psi_t\rangle$, we also have $b_t^{\pi(w)}\ge 0$ for all $t\ge 2$.
+Equivalently, $\rho_t$ is the state $b_t^{\pi(0)}$ produced by the null policy $w=0$ (release nothing, $b_{\tau+1}=\alpha b_\tau+a_\tau$), and the coefficients satisfy $0\le \psi_t^{(i)}\le \rho_t\le 1/(1-\alpha)$. Consequently, setting $w^{(0)}\triangleq 1-W\ge 0$, the identity \eqref{eq:appendix-state-decomp} writes $b_t^{\pi(w)}$ as the convex combination $w^{(0)}\rho_t+\sum_{i=1}^H w^{(i)}\psi_t^{(i)}$ of quantities in $[0,1/(1-\alpha)]$; in particular $w\mapsto b_t^{\pi(w)}$ is affine and
+\[
+0\le b_t^{\pi(w)}\le \frac{1}{1-\alpha}\qquad\text{for all }t\ge 2.
+\]
 \end{lemma}
 
 \begin{proof}
-We use induction on $t$. For $t=2$, $b_1^{\pi(w)}=0$ and $a_{1-i}=0$ for all $i\ge 1$. By the policy definition \eqref{eq:def-sdac-policy},
-\(u_1^{\pi(w)}=\sum_{i=1}^H w^{(i)}\alpha^i a_{1-i}=0\). Then, using the state update \eqref{eq:sdac-state-update},
-\(b_2^{\pi(w)}=\alpha b_1^{\pi(w)}-u_1^{\pi(w)}+a_1=a_1\), which is exactly \eqref{eq:appendix-state-decomp} at time $t=2$.
+Recall $a_\tau\equiv 0$ for $\tau\le 0$. Isolating the $j=1$ term in the definition of $\rho_{t+1}$ and reindexing gives the one-step identity $\rho_{t+1}=\alpha\rho_t+a_t$ (with $\rho_1=0$). We prove \eqref{eq:appendix-state-decomp} by induction on $t$.
 
-Assume the claim holds at time $t\ge 2$. Using \eqref{eq:def-sdac-policy} and \eqref{eq:sdac-state-update},
+\emph{Base case $t=2$.} Since $b_1^{\pi(w)}=0$ and $a_{1-i}=0$ for all $i\ge 1$, the policy \eqref{eq:def-sdac-policy} gives $u_1^{\pi(w)}=\sum_{i=1}^H w^{(i)}\alpha^i a_{1-i}=0$, and the update \eqref{eq:sdac-state-update} gives $b_2^{\pi(w)}=\alpha b_1^{\pi(w)}-u_1^{\pi(w)}+a_1=a_1$. On the other hand $\psi_2^{(i)}=a_1$ for every $i$ and $\rho_2=a_1$, so $\langle w,\psi_2\rangle+(1-W)\rho_2=Wa_1+(1-W)a_1=a_1$, matching \eqref{eq:appendix-state-decomp}.
+
+\emph{Inductive step.} Assume \eqref{eq:appendix-state-decomp} holds at time $t\ge 2$. Using \eqref{eq:def-sdac-policy}, \eqref{eq:sdac-state-update}, and the induction hypothesis,
 \[
 b_{t+1}^{\pi(w)}
-= \alpha b_t^{\pi(w)} - \sum_{i=1}^H w^{(i)}\alpha^i a_{t-i} + a_t.
+= \alpha b_t^{\pi(w)} - \sum_{i=1}^H w^{(i)}\alpha^i a_{t-i} + a_t
+= \Bigl(\alpha\langle w,\psi_t\rangle - \sum_{i=1}^H w^{(i)}\alpha^i a_{t-i}\Bigr) + \alpha(1-W)\rho_t + a_t .
 \]
-Substituting the induction hypothesis gives
+Reindexing the inner summation ($j\mapsto j+1$) yields
 \[
-\begin{aligned}
-b_{t+1}^{\pi(w)}
-&= \alpha\sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i}\alpha^{j-1}a_{t-j}\right)
-    - \sum_{i=1}^H w^{(i)}\alpha^i a_{t-i} + a_t \\
-&= \sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i}\alpha^j a_{t-j}\right)
-    - \sum_{i=1}^H w^{(i)}\alpha^i a_{t-i} + a_t \\
-&= \sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i-1}\alpha^j a_{t-j}\right) + a_t \\
-&= \sum_{i=1}^H w^{(i)}\!\left(a_t + \sum_{j=1}^{i-1}\alpha^j a_{t-j}\right) \\
-&= \sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i}\alpha^{j-1}a_{t+1-j}\right),
-\end{aligned}
+\alpha\langle w,\psi_t\rangle-\sum_{i=1}^H w^{(i)}\alpha^i a_{t-i}
+=\sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i-1}\alpha^j a_{t-j}\right)
+=\sum_{i=1}^H w^{(i)}\bigl(\psi_{t+1}^{(i)}-a_t\bigr)
+=\langle w,\psi_{t+1}\rangle-W a_t ,
 \]
-which is exactly \eqref{eq:appendix-state-decomp} at time $t+1$. In the third displayed line above we reindexed the inner summation (shifted the index $j\mapsto j+1$) to obtain the final form. The bound $\psi_t^{(i)}\le 1/(1-\alpha)$ follows from $a_\tau\in[0,1]$ and the geometric series.
+where the second equality uses $\psi_{t+1}^{(i)}=a_t+\sum_{j=1}^{i-1}\alpha^j a_{t-j}$. Substituting this together with $\rho_{t+1}=\alpha\rho_t+a_t$,
+\[
+b_{t+1}^{\pi(w)}
+=\langle w,\psi_{t+1}\rangle - Wa_t + \alpha(1-W)\rho_t + a_t
+=\langle w,\psi_{t+1}\rangle + (1-W)\bigl(a_t+\alpha\rho_t\bigr)
+=\langle w,\psi_{t+1}\rangle+(1-W)\rho_{t+1},
+\]
+which is \eqref{eq:appendix-state-decomp} at time $t+1$.
+
+\emph{Bounds.} Each $\psi_t^{(i)}$ is the truncation to $j\le i$ of the nonnegative series defining $\rho_t$, so $0\le\psi_t^{(i)}\le\rho_t$; and since $a_\tau\in[0,1]$, the geometric series gives $\rho_t=\sum_{j=1}^{t-1}\alpha^{j-1}a_{t-j}\le\sum_{j=1}^{\infty}\alpha^{j-1}=1/(1-\alpha)$. With $w^{(0)}=1-W\ge 0$, the weights $w^{(0)},w^{(1)},\ldots,w^{(H)}$ are nonnegative and sum to one, so \eqref{eq:appendix-state-decomp} exhibits $b_t^{\pi(w)}$ as a convex combination of $\rho_t,\psi_t^{(1)},\ldots,\psi_t^{(H)}\in[0,1/(1-\alpha)]$, giving $0\le b_t^{\pi(w)}\le 1/(1-\alpha)$. Affineness in $w$ is immediate, as $\psi_t$ and $\rho_t$ do not depend on $w$.
 \end{proof}
 
 \begin{lemma}[Linearity of SDAC action in $w$]
@@ -429,27 +626,24 @@ For every fixed $w\in\Delta_H$, the trajectory induced by \eqref{eq:def-sdac-pol
 \begin{proof}
 Nonnegativity of $u_t^{\pi(w)}$ follows from \eqref{eq:def-sdac-policy}, because $w^{(i)}\ge 0$, $\alpha^i\ge 0$, and $a_{t-i}\ge 0$ for every $i$.
 
-For the upper bound, Lemma~\ref{lem:appendix-state-decomp} implies
-\begin{align*}
-\alpha b_t^{\pi(w)}
-&= \alpha\sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i}\alpha^{j-1}a_{t-j}\right) \\
-&= \sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i}\alpha^j a_{t-j}\right).
-\end{align*}
-Now rewrite the inner sum by collecting the coefficient of each $a_{t-i}$. Since all weights are nonnegative, for every $i$ we have
+For the upper bound, Lemma~\ref{lem:appendix-state-decomp} gives $b_t^{\pi(w)}=\langle w,\psi_t\rangle+(1-W)\rho_t$ with $W=\sum_{i=1}^H w^{(i)}\le 1$. Since $(1-W)\rho_t\ge 0$,
 \[
-\sum_{j=i}^{H} w^{(j)} \ge w^{(i)}.
+\alpha b_t^{\pi(w)}
+\ge \alpha\langle w,\psi_t\rangle
+= \alpha\sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i}\alpha^{j-1}a_{t-j}\right)
+= \sum_{i=1}^H w^{(i)}\!\left(\sum_{j=1}^{i}\alpha^j a_{t-j}\right).
 \]
-Therefore,
+Collecting the coefficient of each $a_{t-i}$ and using that all weights are nonnegative, for every $i$ we have $\sum_{j=i}^{H} w^{(j)} \ge w^{(i)}$, so
 \[
 \alpha b_t^{\pi(w)}
-=
+\ge
 \sum_{i=1}^{H}\left(\sum_{j=i}^{H}w^{(j)}\right)\alpha^i a_{t-i}
 \ge
 \sum_{i=1}^{H}w^{(i)}\alpha^i a_{t-i}
 =
 u_t^{\pi(w)},
 \]
-since $\sum_{j=i}^{H}w^{(j)}\ge w^{(i)}$ and $a_{t-i}\ge 0$.
+since $a_{t-i}\ge 0$.
 \end{proof}
 
 \begin{lemma}[Convexity and Lipschitz continuity of surrogate cost]
@@ -467,25 +661,66 @@ Then $\ell_t$ is convex on $\Delta_H$, and for all $w,w'\in\Delta_H$,
 \end{lemma}
 
 \begin{proof}
-By Lemma~\ref{lem:appendix-state-decomp} and Lemma~\ref{lem:appendix-action-linear},
+By Lemma~\ref{lem:appendix-state-decomp} and Lemma~\ref{lem:appendix-action-linear}, with $W=\sum_{i=1}^H w^{(i)}$,
 \[
-\ell_t(w)=c_t\bigl(\langle w,\psi_t\rangle,\langle w,\phi_t\rangle\bigr).
+\ell_t(w)=c_t\bigl(\langle w,\psi_t\rangle+(1-W)\rho_t,\ \langle w,\phi_t\rangle\bigr).
 \]
-The map $w\mapsto (\langle w,\psi_t\rangle,\langle w,\phi_t\rangle)$ is affine, and $c_t$ is convex, so $\ell_t$ is convex.
+The map $w\mapsto\bigl(b_t^{\pi(w)},u_t^{\pi(w)}\bigr)$ is affine (Lemmas~\ref{lem:appendix-state-decomp}--\ref{lem:appendix-action-linear}) and $c_t$ is convex, so $\ell_t$ is convex.
 
-Using \eqref{eq:model-lipschitz},
+For the Lipschitz estimate, write $\mathbf 1\in\mathbb{R}^H$ for the all-ones vector. The decomposition gives, for all $w,w'\in\Delta_H$,
+\[
+b_t^{\pi(w)}-b_t^{\pi(w')}=\langle w-w',\psi_t\rangle-(W-W')\rho_t=\langle w-w',\,\psi_t-\rho_t\mathbf 1\rangle,
+\]
+using $W-W'=\langle w-w',\mathbf 1\rangle$, while $u_t^{\pi(w)}-u_t^{\pi(w')}=\langle w-w',\phi_t\rangle$. Hence, by \eqref{eq:model-lipschitz} and Hölder's inequality,
 \begin{align*}
 |\ell_t(w)-\ell_t(w')|
-&= \bigl|c_t\bigl(\langle w,\psi_t\rangle,\langle w,\phi_t\rangle\bigr)-c_t\bigl(\langle w',\psi_t\rangle,\langle w',\phi_t\rangle\bigr)\bigr| \\
-&\le L_b\bigl|\langle w-w',\psi_t\rangle\bigr| + L_u\bigl|\langle w-w',\phi_t\rangle\bigr| \\
-&\le L_b\|w-w'\|_1\|\psi_t\|_\infty + L_u\|w-w'\|_1\|\phi_t\|_\infty \\
-&= \bigl(L_b\|\psi_t\|_\infty + L_u\|\phi_t\|_\infty\bigr)\|w-w'\|_1.
+&\le L_b\bigl|\langle w-w',\,\psi_t-\rho_t\mathbf 1\rangle\bigr| + L_u\bigl|\langle w-w',\phi_t\rangle\bigr| \\
+&\le \bigl(L_b\,\|\psi_t-\rho_t\mathbf 1\|_\infty + L_u\,\|\phi_t\|_\infty\bigr)\|w-w'\|_1.
 \end{align*}
-Lemma~\ref{lem:appendix-state-decomp} gives $\|\psi_t\|_\infty\le 1/(1-\alpha)$, and Lemma~\ref{lem:appendix-action-linear} gives $\|\phi_t\|_\infty\le \alpha$, which yields the claim. In particular, one may take the surrogate Lipschitz constant as
+Since $0\le\psi_t^{(i)}\le\rho_t\le 1/(1-\alpha)$ (Lemma~\ref{lem:appendix-state-decomp}), we have $\|\psi_t-\rho_t\mathbf 1\|_\infty=\max_i\bigl(\rho_t-\psi_t^{(i)}\bigr)\le\rho_t\le 1/(1-\alpha)$, and Lemma~\ref{lem:appendix-action-linear} gives $\|\phi_t\|_\infty\le \alpha$. This yields the claim, and one may take the surrogate Lipschitz constant
 \[
 L := \alpha L_u + \frac{L_b}{1-\alpha},
 \]
 as used in the main text.
+\end{proof}
+
+\begin{lemma}[Conditional normalization is the KL projection onto $\Delta_H$]
+\label{lem:eg-projection}
+Let $\Psi(w)=\sum_{i=1}^H w^{(i)}\log w^{(i)}$ denote the negative entropy on $\mathbb{R}_{\ge 0}^H$ (with the convention $0\log 0=0$), and let
+\[
+D_\Psi(w\|v)=\sum_{i=1}^H\Bigl(w^{(i)}\log\tfrac{w^{(i)}}{v^{(i)}}-w^{(i)}+v^{(i)}\Bigr)
+\]
+be its Bregman divergence, the generalized Kullback--Leibler divergence. Fix $\widetilde w\in\mathbb{R}_{>0}^H$ and set $S\triangleq\sum_{i=1}^H \widetilde w^{(i)}$. Then the Bregman projection of $\widetilde w$ onto $\Delta_H=\{w\in\mathbb{R}_{\ge0}^H:\sum_{i} w^{(i)}\le1\}$,
+\[
+P(\widetilde w)\triangleq\operatorname*{arg\,min}_{w\in\Delta_H} D_\Psi(w\|\widetilde w),
+\]
+is given coordinatewise by
+\[
+P(\widetilde w)^{(i)}=
+\begin{cases}
+\widetilde w^{(i)}/S, & S>1,\\[2pt]
+\widetilde w^{(i)}, & S\le1.
+\end{cases}
+\]
+Consequently, taking $\widetilde w=\widetilde w_{t+1}$ from \eqref{eq:alg-eg-unnormalized}, the update \eqref{eq:alg-eg-normalized} is exactly the projection $w_{t+1}=P(\widetilde w_{t+1})$, and hence $w_{t+1}\in\Delta_H$.
+\end{lemma}
+
+\begin{proof}
+Since $\widetilde w$ is fixed, the terms $+\widetilde w^{(i)}$ are constant, so $P(\widetilde w)$ minimizes
+\[
+F(w)\triangleq\sum_{i=1}^H\Bigl(w^{(i)}\log\tfrac{w^{(i)}}{\widetilde w^{(i)}}-w^{(i)}\Bigr)
+\]
+over $\Delta_H$. The function $F$ is strictly convex on $\mathbb{R}_{\ge0}^H$ and $\Delta_H$ is closed and convex, so the minimizer is unique; its partial derivatives are $\partial F/\partial w^{(i)}=\log\bigl(w^{(i)}/\widetilde w^{(i)}\bigr)$.
+
+\emph{Case $S\le 1$.} Here $\widetilde w\in\Delta_H$. Setting $\partial F/\partial w^{(i)}=0$ gives the unconstrained minimizer $w=\widetilde w$ over $\mathbb{R}_{\ge0}^H$, which is feasible; hence $P(\widetilde w)=\widetilde w$.
+
+\emph{Case $S>1$.} Here $\widetilde w\notin\Delta_H$, so the constraint $\sum_i w^{(i)}\le1$ must be active at the optimum. As $\widetilde w^{(i)}>0$, the optimal coordinates are strictly positive and the nonnegativity constraints are inactive; introducing a multiplier $\lambda$ for $\sum_i w^{(i)}=1$, KKT stationarity reads
+\[
+\log\bigl(w^{(i)}/\widetilde w^{(i)}\bigr)+\lambda=0
+\quad\Longrightarrow\quad
+w^{(i)}=\widetilde w^{(i)}e^{-\lambda}.
+\]
+The active constraint $\sum_i w^{(i)}=1$ forces $e^{-\lambda}=1/S$, so $w^{(i)}=\widetilde w^{(i)}/S$; moreover $\lambda=\log S>0$, so dual feasibility holds. This is the claimed normalized form.
 \end{proof}
 
 \begin{lemma}[One-step movement of entropic OMD]
@@ -498,7 +733,7 @@ In particular, if \(\|g_t\|_\infty\le L\), then \(\|w_{t+1}-w_t\|_1\le \eta L\).
 \end{lemma}
 
 \begin{proof}
-Let \(\Psi(w)=\sum_{i=1}^H w^{(i)}\log w^{(i)}\), and write \(\Delta_t\triangleq w_{t+1}-w_t\). The entropic mirror-descent optimality condition gives, for all \(w\in\Delta_H\),
+Let \(\Psi(w)=\sum_{i=1}^H w^{(i)}\log w^{(i)}\), and write \(\Delta_t\triangleq w_{t+1}-w_t\). By Lemma~\ref{lem:eg-projection}, \(w_{t+1}\) is the Bregman projection of the mirror step \(\widetilde w_{t+1}\) onto \(\Delta_H\), so the entropic mirror-descent optimality condition gives, for all \(w\in\Delta_H\),
 \[
 \Bigl\langle g_t + \tfrac{1}{\eta}\bigl(\nabla\Psi(w_{t+1})-\nabla\Psi(w_t)\bigr),\, w-w_{t+1}\Bigr\rangle \ge 0.
 \]
@@ -559,48 +794,46 @@ For all \(t\),
 \begin{align}
 u_t^{\mathcal A}
 &\ge
-\kappa b_t^{\mathcal A}+\langle w_t,\widetilde a_t\rangle
-- (1-\kappa)[b_t^{\pi(w_t)}-b_t^{\mathcal A}]_+,\label{eq:u-lower-bound-eff}\\[4pt]
+\langle w_t,\widetilde a_t\rangle
+- \alpha\,[b_t^{\pi(w_t)}-b_t^{\mathcal A}]_+,\label{eq:u-lower-bound-eff}\\[4pt]
 u_t^{\mathcal A}
 &\le
-\kappa b_t^{\mathcal A}+\langle w_t,\widetilde a_t\rangle.\label{eq:u-upper-bound-eff}
+\langle w_t,\widetilde a_t\rangle.\label{eq:u-upper-bound-eff}
 \end{align}
 \end{lemma}
 
 \begin{proof}
-Recall that
+Recall from \eqref{eq:alg-unconstrained-action}--\eqref{eq:alg-feasible-action} that
 \[
-\widehat u_t = \kappa b_t^{\mathcal A}+\langle w_t,\widetilde a_t\rangle,
+\widehat u_t = \langle w_t,\widetilde a_t\rangle,
 \qquad
-u_t^{\mathcal A}=\min\{\widehat u_t,b_t^{\mathcal A}\}.
+u_t^{\mathcal A}=\min\{\widehat u_t,\alpha b_t^{\mathcal A}\}.
 \]
 Therefore,
 \[
 u_t^{\mathcal A}
 =
-\widehat u_t-\bigl[\widehat u_t-b_t^{\mathcal A}\bigr]_+
+\widehat u_t-\bigl[\widehat u_t-\alpha b_t^{\mathcal A}\bigr]_+
 =
-\kappa b_t^{\mathcal A}+\langle w_t,\widetilde a_t\rangle
--\bigl[\langle w_t,\widetilde a_t\rangle-(1-\kappa)b_t^{\mathcal A}\bigr]_+.
+\langle w_t,\widetilde a_t\rangle
+-\bigl[\langle w_t,\widetilde a_t\rangle-\alpha b_t^{\mathcal A}\bigr]_+.
 \]
 This identity gives the upper bound immediately, since the subtracted term is nonnegative.
 
-For the lower bound, Lemma~\ref{lem:appendix-feasibility} applied to the comparator policy \(\pi(w_t)\) yields
+For the lower bound, Lemma~\ref{lem:appendix-feasibility} applied to the comparator policy \(\pi(w_t)\) yields, using \eqref{eq:def-sdac-policy-vector},
 \[
 u_t^{\pi(w_t)}
 =
-\kappa b_t^{\pi(w_t)}+\langle w_t,\widetilde a_t\rangle
-\le b_t^{\pi(w_t)}.
+\langle w_t,\widetilde a_t\rangle
+\le \alpha b_t^{\pi(w_t)}.
 \]
-Hence
+Subtracting \(\alpha b_t^{\mathcal A}\) from both sides and applying monotonicity of \([\cdot]_+\) gives
 \[
-\langle w_t,\widetilde a_t\rangle \le (1-\kappa)b_t^{\pi(w_t)}.
-\]
-Subtracting \((1-\kappa)b_t^{\mathcal A}\) from both sides and applying monotonicity of \([\cdot]_+\) gives
-\[
-\bigl[\langle w_t,\widetilde a_t\rangle-(1-\kappa)b_t^{\mathcal A}\bigr]_+
+\bigl[\langle w_t,\widetilde a_t\rangle-\alpha b_t^{\mathcal A}\bigr]_+
 \le
-(1-\kappa)\bigl[b_t^{\pi(w_t)}-b_t^{\mathcal A}\bigr]_+.
+\bigl[\alpha b_t^{\pi(w_t)}-\alpha b_t^{\mathcal A}\bigr]_+
+=
+\alpha\bigl[b_t^{\pi(w_t)}-b_t^{\mathcal A}\bigr]_+.
 \]
 Substituting this bound into the expression above for \(u_t^{\mathcal A}\) yields the stated lower bound.
 \end{proof}
@@ -615,54 +848,51 @@ Define the state gap
 For any fixed $w\in\Delta_H$ and every $t\ge 1$ the following two-sided recursion holds:
 \begin{align}
 \Gamma_{t+1}^w
-&= \Gamma_t^w - \bigl(u_t^{\pi(w)}-u_t^{\mathcal A}\bigr) \nonumber\\
-&\ge (1-\kappa)\Gamma_t^w + \langle w_t-w,\widetilde a_t\rangle - (1-\kappa)[\Gamma_t^{w_t}]_+ ,\label{eq:GAMMA-Lower}\\[4pt]
+&= \alpha\Gamma_t^w - \bigl(u_t^{\pi(w)}-u_t^{\mathcal A}\bigr) \nonumber\\
+&\ge \alpha\Gamma_t^w + \langle w_t-w,\widetilde a_t\rangle - \alpha[\Gamma_t^{w_t}]_+ ,\label{eq:GAMMA-Lower}\\[4pt]
 \Gamma_{t+1}^w
-&\le (1-\kappa)\Gamma_t^w + \langle w_t-w,\widetilde a_t\rangle.\label{eq:GAMMA-Upper}
+&\le \alpha\Gamma_t^w + \langle w_t-w,\widetilde a_t\rangle.\label{eq:GAMMA-Upper}
 \end{align}
 where $[x]_+ := \max\{x,0\}$.
 \end{lemma}
 
 \begin{proof}
-From the state updates \eqref{eq:sdac-state-update} (for $\pi(w)$) and \eqref{eq:alg-state-update} (for the algorithm) we have the exact identity
+From the state updates \eqref{eq:sdac-state-update} (for $\pi(w)$) and \eqref{eq:alg-state-update} (for the algorithm), the inflow $a_t$ cancels and we obtain the exact identity
 \begin{equation}
     \label{eq:state-gap-identity}
-    \Gamma_{t+1}^w = b_{t+1}^{\pi(w)}-b_{t+1}^{\mathcal A} = \Gamma_t^w - \bigl(u_t^{\pi(w)}-u_t^{\mathcal A}\bigr).
+    \Gamma_{t+1}^w = b_{t+1}^{\pi(w)}-b_{t+1}^{\mathcal A} = \alpha\Gamma_t^w - \bigl(u_t^{\pi(w)}-u_t^{\mathcal A}\bigr).
 \end{equation}
 Consequently, bounding $\Gamma_{t+1}^w$ reduces to bounding the action difference $u_t^{\pi(w)}-u_t^{\mathcal A}$.
 
-Using the SDAC representation for the comparator action and the bounds of Lemma~\ref{lem:bounding-u-eff} for the algorithm action, we have
+Using the SDAC representation \eqref{eq:def-sdac-policy-vector} for the comparator action and the bounds of Lemma~\ref{lem:bounding-u-eff} for the algorithm action, we have
 \[
-u_t^{\pi(w)} = \kappa b_t^{\pi(w)} + \langle w,\widetilde a_t\rangle,
+u_t^{\pi(w)} = \langle w,\widetilde a_t\rangle,
 \]
 and
 \[
-\kappa b_t^{\mathcal A}+\langle w_t,\widetilde a_t\rangle-(1-\kappa)[\Gamma_t^{w_t}]_+ \le u_t^{\mathcal A} \le \kappa b_t^{\mathcal A}+\langle w_t,\widetilde a_t\rangle.
+\langle w_t,\widetilde a_t\rangle-\alpha[\Gamma_t^{w_t}]_+ \le u_t^{\mathcal A} \le \langle w_t,\widetilde a_t\rangle.
 \]
 Subtracting the upper bound on $u_t^{\mathcal A}$ from $u_t^{\pi(w)}$ yields the lower bound on $u_t^{\pi(w)}-u_t^{\mathcal A}$:
-\begin{align*}
+\[
 u_t^{\pi(w)}-u_t^{\mathcal A}
-&\ge \kappa b_t^{\pi(w)}+\langle w,\widetilde a_t\rangle \\
-&\quad - \bigl(\kappa b_t^{\mathcal A}+\langle w_t,\widetilde a_t\rangle\bigr) \\
-&= \kappa\Gamma_t^w - \langle w_t-w,\widetilde a_t\rangle.
-\end{align*}
+\ge \langle w,\widetilde a_t\rangle - \langle w_t,\widetilde a_t\rangle
+= - \langle w_t-w,\widetilde a_t\rangle.
+\]
 Inserting this into the identity \eqref{eq:state-gap-identity} gives
 \[
-\Gamma_{t+1}^w \le \Gamma_t^w - \bigl(\kappa\Gamma_t^w - \langle w_t-w,\widetilde a_t\rangle\bigr) = (1-\kappa)\Gamma_t^w + \langle w_t-w,\widetilde a_t\rangle,
+\Gamma_{t+1}^w \le \alpha\Gamma_t^w + \langle w_t-w,\widetilde a_t\rangle,
 \]
 which is \eqref{eq:GAMMA-Upper}.
 
 Similarly, using the lower bound on $u_t^{\mathcal A}$ produces an upper bound on $u_t^{\pi(w)}-u_t^{\mathcal A}$:
-\begin{align*}
+\[
 u_t^{\pi(w)}-u_t^{\mathcal A}
-&\le \kappa b_t^{\pi(w)}+\langle w,\widetilde a_t\rangle \\
-&\quad - \Bigl(\kappa b_t^{\mathcal A}+\langle w_t,\widetilde a_t\rangle-(1-\kappa)[\Gamma_t^{w_t}]_+\Bigr) \\
-&= \kappa\Gamma_t^w - \langle w_t-w,\widetilde a_t\rangle + (1-\kappa)[\Gamma_t^{w_t}]_+.
-\end{align*}
+\le \langle w,\widetilde a_t\rangle - \Bigl(\langle w_t,\widetilde a_t\rangle-\alpha[\Gamma_t^{w_t}]_+\Bigr)
+= - \langle w_t-w,\widetilde a_t\rangle + \alpha[\Gamma_t^{w_t}]_+.
+\]
 Substituting this bound into the identity \eqref{eq:state-gap-identity} yields
 \[
-\Gamma_{t+1}^w \ge \Gamma_t^w - \bigl(\kappa\Gamma_t^w - \langle w_t-w,\widetilde a_t\rangle + (1-\kappa)[\Gamma_t^{w_t}]_+\bigr)
-= (1-\kappa)\Gamma_t^w + \langle w_t-w,\widetilde a_t\rangle - (1-\kappa)[\Gamma_t^{w_t}]_+,
+\Gamma_{t+1}^w \ge \alpha\Gamma_t^w + \langle w_t-w,\widetilde a_t\rangle - \alpha[\Gamma_t^{w_t}]_+,
 \]
 which is \eqref{eq:GAMMA-Lower} and completes the proof.
 \end{proof}
@@ -671,13 +901,13 @@ which is \eqref{eq:GAMMA-Lower} and completes the proof.
 \label{lem:state-gap-bound}
 For every $t\ge 1$, let the state gap be defined by \eqref{eq:def-state-gap}. Then
 \[
--\frac{\eta L}{\kappa^3}
+-\frac{\alpha\,\eta L}{(1-\alpha)^3}
 \le
 \Gamma_t^{w_t}
 =
 b_t^{\pi(w_t)}-b_t^{\mathcal A}
 \le
-\frac{\eta L}{\kappa^2}.
+\frac{\alpha\,\eta L}{(1-\alpha)^2}.
 \]
 \end{lemma}
 
@@ -686,16 +916,16 @@ From \eqref{eq:GAMMA-Upper}, for any fixed comparator $w\in\Delta_H$ and every $
 \[
 \Gamma_{s+1}^{w}
 \le
-(1-\kappa)\Gamma_s^{w} + \langle w_s-w,\widetilde a_s\rangle.
+\alpha\Gamma_s^{w} + \langle w_s-w,\widetilde a_s\rangle.
 \]
 Applying the recursion repeatedly up to time $t$ yields
 \[
 \begin{aligned}
 \Gamma_t^{w}
-&\le (1-\kappa)\Gamma_{t-1}^{w} + \langle w_{t-1}-w,\widetilde a_{t-1}\rangle \\
-&\le (1-\kappa)^2\Gamma_{t-2}^{w} + (1-\kappa)\langle w_{t-2}-w,\widetilde a_{t-2}\rangle + \langle w_{t-1}-w,\widetilde a_{t-1}\rangle \\
+&\le \alpha\Gamma_{t-1}^{w} + \langle w_{t-1}-w,\widetilde a_{t-1}\rangle \\
+&\le \alpha^2\Gamma_{t-2}^{w} + \alpha\langle w_{t-2}-w,\widetilde a_{t-2}\rangle + \langle w_{t-1}-w,\widetilde a_{t-1}\rangle \\
 &\ \vdots \\
-&\le (1-\kappa)^{t-1}\Gamma_1^{w} + \sum_{s=1}^{t-1}(1-\kappa)^{t-1-s}\langle w_s-w,\widetilde a_s\rangle.
+&\le \alpha^{t-1}\Gamma_1^{w} + \sum_{s=1}^{t-1}\alpha^{t-1-s}\langle w_s-w,\widetilde a_s\rangle.
 \end{aligned}
 \]
 Now fix $w=w_t$. 
@@ -703,63 +933,63 @@ Since $b_1^{\pi(w_t)}=b_1^{\mathcal A}=0$, we have $\Gamma_1^{w_t}=0$, and there
 \[
 \Gamma_t^{w_t}
 \le
-\sum_{s=1}^{t-1}(1-\kappa)^{t-1-s}\langle w_s-w_t,\widetilde a_s\rangle.
+\sum_{s=1}^{t-1}\alpha^{t-1-s}\langle w_s-w_t,\widetilde a_s\rangle.
 \]
-Note that $\|\widetilde a_s\|_\infty = \max_{i\le H}(1-\kappa)^i a_{s-i} \le 1-\kappa$ since $a_\tau\in[0,1]$ and $i\ge1$. Hence,
+Note that $\|\widetilde a_s\|_\infty = \max_{i\le H}\alpha^i a_{s-i} \le \alpha$ since $a_\tau\in[0,1]$ and $i\ge1$. Hence,
 \[
 \begin{aligned}
 \Gamma_t^{w_t}
-&\le \sum_{s=1}^{t-1}(1-\kappa)^{t-1-s}\bigl|\langle w_s-w_t,\widetilde a_s\rangle\bigr| \\
-&\le \sum_{s=1}^{t-1}(1-\kappa)^{t-1-s}\|w_s-w_t\|_1\|\widetilde a_s\|_\infty \\
-&\le (1-\kappa)\eta L\sum_{s=1}^{t-1}(1-\kappa)^{t-1-s}(t-s) \\
-&= (1-\kappa)\eta L\sum_{j=1}^{t-1} j(1-\kappa)^{j-1}
-\le \eta L\sum_{j=1}^{\infty} j(1-\kappa)^{j-1}
-= \frac{\eta L}{\kappa^2}.
+&\le \sum_{s=1}^{t-1}\alpha^{t-1-s}\bigl|\langle w_s-w_t,\widetilde a_s\rangle\bigr| \\
+&\le \sum_{s=1}^{t-1}\alpha^{t-1-s}\|w_s-w_t\|_1\|\widetilde a_s\|_\infty \\
+&\le \alpha\,\eta L\sum_{s=1}^{t-1}\alpha^{t-1-s}(t-s) \\
+&= \alpha\,\eta L\sum_{j=1}^{t-1} j\,\alpha^{j-1}
+\le \alpha\,\eta L\sum_{j=1}^{\infty} j\,\alpha^{j-1}
+= \frac{\alpha\,\eta L}{(1-\alpha)^2}.
 \end{aligned}
 \]
 Where we used the geometric-series identity
 \[
-\sum_{j=1}^{\infty} j(1-\kappa)^{j-1} = \frac{1}{\kappa^2}.
+\sum_{j=1}^{\infty} j\,\alpha^{j-1} = \frac{1}{(1-\alpha)^2}.
 \]
 
 Similarly, for the lower bound, unrolling \eqref{eq:GAMMA-Lower} with the same fixed comparator $w=w_t$ yields
 \[
 \Gamma_t^{w_t}
 \ge
-\sum_{s=1}^{t-1}(1-\kappa)^{t-1-s}\langle w_s-w_t,\widetilde a_s\rangle
+\sum_{s=1}^{t-1}\alpha^{t-1-s}\langle w_s-w_t,\widetilde a_s\rangle
 -
-\sum_{s=1}^{t-1}(1-\kappa)^{t-s}[\Gamma_s^{w_s}]_+.
+\sum_{s=1}^{t-1}\alpha^{t-s}[\Gamma_s^{w_s}]_+.
 \]
-The upper bound just proved applies to every earlier time $s$, so $[\Gamma_s^{w_s}]_+\le \eta L/\kappa^2$. Also, by Hölder's inequality and Lemma~\ref{cor:cum-move},
+The upper bound just proved applies to every earlier time $s$, so $[\Gamma_s^{w_s}]_+\le \alpha\eta L/(1-\alpha)^2$. Also, by Hölder's inequality and Lemma~\ref{cor:cum-move},
 \begin{align*}
 \Gamma_t^{w_t}
 &\ge
--\eta L\sum_{s=1}^{t-1}(1-\kappa)^{t-1-s}(t-s) \\
-&\quad -\frac{\eta L}{\kappa^2}\sum_{s=1}^{t-1}(1-\kappa)^{t-s} \\
-&= -\eta L\sum_{j=1}^{t-1} j(1-\kappa)^{j-1}
- -\frac{\eta L}{\kappa^2}\sum_{j=1}^{t-1}(1-\kappa)^j.
+-\alpha\,\eta L\sum_{s=1}^{t-1}\alpha^{t-1-s}(t-s) \\
+&\quad -\frac{\alpha\,\eta L}{(1-\alpha)^2}\sum_{s=1}^{t-1}\alpha^{t-s} \\
+&= -\alpha\,\eta L\sum_{j=1}^{t-1} j\,\alpha^{j-1}
+ -\frac{\alpha\,\eta L}{(1-\alpha)^2}\sum_{j=1}^{t-1}\alpha^j.
 \end{align*}
 Extending both sums to infinity gives
 \[
 \Gamma_t^{w_t}
 \ge
--\eta L\sum_{j=1}^{\infty} j(1-\kappa)^{j-1}
--\frac{\eta L}{\kappa^2}\sum_{j=1}^{\infty}(1-\kappa)^j.
+-\alpha\,\eta L\sum_{j=1}^{\infty} j\,\alpha^{j-1}
+-\frac{\alpha\,\eta L}{(1-\alpha)^2}\sum_{j=1}^{\infty}\alpha^j.
 \]
 Using the geometric-series identities
 \[
-\sum_{j=1}^{\infty} j(1-\kappa)^{j-1} = \frac{1}{\kappa^2},
+\sum_{j=1}^{\infty} j\,\alpha^{j-1} = \frac{1}{(1-\alpha)^2},
 \qquad
-\sum_{j=1}^{\infty}(1-\kappa)^j = \frac{1-\kappa}{\kappa},
+\sum_{j=1}^{\infty}\alpha^j = \frac{\alpha}{1-\alpha},
 \]
 we obtain
 \[
 \Gamma_t^{w_t}
 \ge
--\frac{\eta L}{\kappa^2}
--\frac{\eta L(1-\kappa)}{\kappa^3}
-\ge
--\frac{\eta L}{\kappa^3}.
+-\frac{\alpha\,\eta L}{(1-\alpha)^2}
+-\frac{\alpha^2\,\eta L}{(1-\alpha)^3}
+=
+-\frac{\alpha\,\eta L}{(1-\alpha)^3}.
 \]
 Hence, the claim.
 \end{proof}
@@ -768,74 +998,36 @@ Hence, the claim.
 \label{lem:u-gap-by-b-gap-eff}
 Let the state gap be defined by \eqref{eq:def-state-gap}. Then for all \(t\),
 \[
--\frac{\eta L}{\kappa^2}
-\le
-\kappa\Gamma_t^{w_t}
+0
 \le
 u_t^{\pi(w_t)}-u_t^{\mathcal A}
 \le
-\kappa\Gamma_t^{w_t}+(1-\kappa)[\Gamma_t^{w_t}]_+
+\alpha\,[\Gamma_t^{w_t}]_+
 \le
-\frac{\eta L}{\kappa^2}.
+\frac{\alpha^2\,\eta L}{(1-\alpha)^2}.
 \]
 \end{lemma}
 
 \begin{proof}
-\textbf{Upper bound.}
-From Lemma~\ref{lem:bounding-u-eff} (lower bound \eqref{eq:u-lower-bound-eff}),
-\[
-u_t^{\mathcal A}
-\ge
-\kappa b_t^{\mathcal A} + \langle w_t,\widetilde a_t\rangle
--(1-\kappa)\,[\Gamma_t^{w_t}]_+ .
-\]
-Subtracting from \(u_t^{\pi(w_t)} = \kappa b_t^{\pi(w_t)} + \langle w_t,\widetilde a_t\rangle\) (by \eqref{eq:def-sdac-policy-vector}),
+By \eqref{eq:def-sdac-policy-vector} and \eqref{eq:alg-unconstrained-action}, the comparator action equals the unconstrained proposal, \(u_t^{\pi(w_t)} = \langle w_t,\widetilde a_t\rangle = \widehat u_t\), while \(u_t^{\mathcal A}=\min\{\widehat u_t,\alpha b_t^{\mathcal A}\}\le \widehat u_t\) by \eqref{eq:alg-feasible-action}. Hence the gap is nonnegative and
 \[
 u_t^{\pi(w_t)} - u_t^{\mathcal A}
+=
+\widehat u_t - \min\{\widehat u_t,\alpha b_t^{\mathcal A}\}
+=
+\bigl[\langle w_t,\widetilde a_t\rangle - \alpha b_t^{\mathcal A}\bigr]_+ .
+\]
+As established in the proof of Lemma~\ref{lem:bounding-u-eff} (using feasibility of \(\pi(w_t)\)),
+\[
+\bigl[\langle w_t,\widetilde a_t\rangle - \alpha b_t^{\mathcal A}\bigr]_+
 \le
-\kappa (b_t^{\pi(w_t)}-b_t^{\mathcal A})
-+(1-\kappa)\,[\Gamma_t^{w_t}]_+
-= \kappa \Gamma_t^{w_t} + (1-\kappa)\,[\Gamma_t^{w_t}]_+ .
+\alpha\,[b_t^{\pi(w_t)}-b_t^{\mathcal A}]_+
+=
+\alpha\,[\Gamma_t^{w_t}]_+ ,
 \]
-Here we used \eqref{eq:def-state-gap}.
-
-\textbf{Lower bound.}
-From Lemma~\ref{lem:bounding-u-eff} (upper bound \eqref{eq:u-upper-bound-eff}),
+which is the middle inequality. Finally, by Lemma~\ref{lem:state-gap-bound}, \([\Gamma_t^{w_t}]_+ \le \dfrac{\alpha\,\eta L}{(1-\alpha)^2}\), so
 \[
-u_t^{\mathcal A}
-\le
-\kappa b_t^{\mathcal A} + \langle w_t,\widetilde a_t\rangle ,
-\]
-so
-\[
-u_t^{\mathcal A} - u_t^{\pi(w_t)}
-\le
-\kappa b_t^{\mathcal A} + \langle w_t,\widetilde a_t\rangle
-- (\kappa b_t^{\pi(w_t)} + \langle w_t,\widetilde a_t\rangle)
-= \kappa(b_t^{\mathcal A}-b_t^{\pi(w_t)})
-= -\kappa\Gamma_t^{w_t}.
-\]
-Equivalently,
-\[
-u_t^{\pi(w_t)} - u_t^{\mathcal A}
-\ge \kappa \Gamma_t^{w_t}.
-\]
-
-Finally, by Lemma~\ref{lem:state-gap-bound},
-\[
-\Gamma_t^{w_t} \ge -\frac{\eta L}{\kappa^3}
-\quad\Longrightarrow\quad
-\kappa\Gamma_t^{w_t} \ge -\frac{\eta L}{\kappa^2},
-\]
-and also
-\[
-[\Gamma_t^{w_t}]_+ \le \frac{\eta L}{\kappa^2}.
-\]
-Hence
-\[
-\kappa\Gamma_t^{w_t} + (1-\kappa)[\Gamma_t^{w_t}]_+
-\le
-\frac{\eta L}{\kappa^2},
+\alpha\,[\Gamma_t^{w_t}]_+ \le \frac{\alpha^2\,\eta L}{(1-\alpha)^2},
 \]
 which gives the rightmost inequality and completes the proof.
 \end{proof}
@@ -846,9 +1038,9 @@ For all horizons \(T\),
 \[
 \sum_{t=1}^T \left(c_t(b_t^{\mathcal A},u_t^{\mathcal A})-c_t\left(b_t^{\pi(w_t)},u_t^{\pi(w_t)}\right)\right)
 \le
-\frac{T\eta L^2}{\kappa^2},
+\frac{\alpha\,T\eta L^2}{(1-\alpha)^2},
 \]
-where \(L=L_u+\tfrac{L_b}{\kappa}\).
+where \(L=\alpha L_u+\tfrac{L_b}{1-\alpha}\).
 \end{lemma}
 
 \begin{proof}
@@ -864,13 +1056,13 @@ L_u \big|u_t^{\mathcal A} - u_t^{\pi(w_t)}\big|
 From Lemma~\ref{lem:u-gap-by-b-gap-eff},
 \[
 |u_t^{\mathcal A} - u_t^{\pi(w_t)}|
-\le \frac{\eta L}{\kappa^2},
+\le \frac{\alpha^2\,\eta L}{(1-\alpha)^2},
 \]
 Also, by Lemma~\ref{lem:state-gap-bound} and \eqref{eq:def-state-gap},
 \[
 |b_t^{\mathcal A} - b_t^{\pi(w_t)}|
 = |\Gamma_t^{w_t}|
-\le \frac{\eta L}{\kappa^3}.
+\le \frac{\alpha\,\eta L}{(1-\alpha)^3}.
 \]
 Therefore, for each \(t \ge 1\),
 \[
@@ -878,8 +1070,8 @@ c_t\bigl(b_t^{\mathcal A},u_t^{\mathcal A}\bigr)
 -
 c_t\bigl(b_t^{\pi(w_t)},u_t^{\pi(w_t)}\bigr)
 \le
-L_u \frac{\eta L}{\kappa^2}
-+ L_b \frac{\eta L}{\kappa^3}.
+L_u \frac{\alpha^2\,\eta L}{(1-\alpha)^2}
++ L_b \frac{\alpha\,\eta L}{(1-\alpha)^3}.
 \]
 Summing over \(t=1,2,\dots,T\) gives
 \[
@@ -890,14 +1082,14 @@ c_t(b_t^{\mathcal A},u_t^{\mathcal A})
 c_t(b_t^{\pi(w_t)},u_t^{\pi(w_t)})
 \Bigr)
 \le
-T\frac{\eta L}{\kappa^2}\left(
-L_u 
-+  \frac{L_b}{\kappa}
+\frac{\alpha\,T\eta L}{(1-\alpha)^2}\left(
+\alpha L_u 
++  \frac{L_b}{1-\alpha}
 \right)
 =
-\frac{T\eta L^2}{\kappa^2},
+\frac{\alpha\,T\eta L^2}{(1-\alpha)^2},
 \]
-where we used \(L = L_u + \tfrac{L_b}{\kappa}\) in the final step.
+where we used \(L = \alpha L_u + \tfrac{L_b}{1-\alpha}\) in the final step.
 \end{proof}
 
 
@@ -941,7 +1133,7 @@ From Lemma~\ref{lem:stab-sum}, the stability term satisfies
 \[
 \sum_{t=1}^T c_t(b_t^{\mathcal A},u_t^{\mathcal A})- \sum_{t=1}^T c_t(b_t^{\pi(w_t)},u_t^{\pi(w_t)}) 
 \le 
-\frac{\eta L^2 T}{\kappa^2}.
+\frac{\alpha\,\eta L^2 T}{(1-\alpha)^2}.
 \]
 Adding the OMD term and the stability term yields the combined bound
 \[
@@ -951,7 +1143,7 @@ Adding the OMD term and the stability term yields the combined bound
 \;+\;
 \frac{\eta L^2 T}{2}
 \;+\;
-\frac{\eta L^2 T}{\kappa^2}.
+\frac{\alpha\,\eta L^2 T}{(1-\alpha)^2}.
 \]
 Rearranging by factoring out the \(\eta\) term gives
 \[
@@ -959,15 +1151,15 @@ Rearranging by factoring out the \(\eta\) term gives
 \;\le\;
 \frac{\log H}{\eta}
 \;+\;
-\eta L^2 T\Bigl(\tfrac{1}{2}+\tfrac{1}{\kappa^2}\Bigr).
+\eta L^2 T\Bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\Bigr).
 \]
-To optimize over \(\eta > 0\), we apply the inequality \(A/\eta + B\eta \le 2\sqrt{AB}\) with \(A=\log H\) and \(B= L^2 T(\tfrac{1}{2}+\tfrac{1}{\kappa^2})\). This yields the optimal step size
+To optimize over \(\eta > 0\), we apply the inequality \(A/\eta + B\eta \le 2\sqrt{AB}\) with \(A=\log H\) and \(B= L^2 T(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2})\). This yields the optimal step size
 \[
-\eta^* = \sqrt{\frac{\log H}{L^2 T\bigl(\tfrac{1}{2}+\tfrac{1}{\kappa^2}\bigr)}}
+\eta^* = \sqrt{\frac{\log H}{L^2 T\bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\bigr)}}
 \]
 and the resulting regret bound
 \[
-\mathrm{Regret}(T) \;\le\; 2L\sqrt{\Bigl(\tfrac{1}{2}+\tfrac{1}{\kappa^2}\Bigr)T\log H}.
+\mathrm{Regret}(T) \;\le\; 2L\sqrt{\Bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\Bigr)T\log H}.
 \]
 \end{proof}
 
