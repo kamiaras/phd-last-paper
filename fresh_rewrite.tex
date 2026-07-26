@@ -279,33 +279,33 @@ We now define an online controller over SDAC weights using exponentiated-gradien
 For each round $t$, let $w_t\in\Delta_H$ be the online weight vector.
 
 \paragraph{Action selection}
-The controller first forms the unconstrained SDAC-style action
+The controller first forms the pre-clipping SDAC proposal
 \begin{equation}
-\label{eq:alg-unconstrained-action}
+\label{eq:alg-preclip-action}
 \widehat{u}_t \triangleq \langle w_t,\widetilde{a}_t\rangle,
 \end{equation}
 then enforces feasibility by clipping:
 \begin{equation}
 \label{eq:alg-feasible-action}
-u_t^{\mathcal A} \triangleq \min\{\widehat{u}_t,\,\alpha b_t^{\mathcal A}\}.
+u_t^{\mathcal{A}} \triangleq \min\{\widehat{u}_t,\,\alpha b_t^{\mathcal{A}}\}.
 \end{equation}
 The state update is
 \begin{equation}
 \label{eq:alg-state-update}
-b_{t+1}^{\mathcal A} = \alpha b_t^{\mathcal A} - u_t^{\mathcal A} + a_t,
-\qquad b_1^{\mathcal A}=0.
+b_{t+1}^{\mathcal{A}} = \alpha b_t^{\mathcal{A}} - u_t^{\mathcal{A}} + a_t,
+\qquad b_1^{\mathcal{A}}=0.
 \end{equation}
 
 \paragraph{Feasibility of the online trajectory}
-We verify that the algorithm satisfies \eqref{eq:model-feasibility} at every round. The key mechanism is the clipping step in \eqref{eq:alg-feasible-action}, which enforces per-round feasibility by truncating the unconstrained proposal to the currently available retained budget $\alpha b_t^{\mathcal A}$. Since $w_t\in\Delta_H$ and $\widetilde{a}_t\ge 0$ componentwise, equation \eqref{eq:alg-unconstrained-action} gives $\widehat u_t\ge 0$. By \eqref{eq:alg-feasible-action},
+We verify that the algorithm satisfies \eqref{eq:model-feasibility} at every round. The key mechanism is the clipping step in \eqref{eq:alg-feasible-action}, which enforces per-round feasibility by truncating the pre-clipping proposal to the currently available retained budget $\alpha b_t^{\mathcal{A}}$. Since $w_t\in\Delta_H$ and $\widetilde{a}_t\ge 0$ componentwise, equation \eqref{eq:alg-preclip-action} gives $\widehat u_t\ge 0$. By \eqref{eq:alg-feasible-action},
 \[
-u_t^{\mathcal A}=\min\{\widehat u_t,\alpha b_t^{\mathcal A}\}\in[0,\alpha b_t^{\mathcal A}],
+u_t^{\mathcal{A}}=\min\{\widehat u_t,\alpha b_t^{\mathcal{A}}\}\in[0,\alpha b_t^{\mathcal{A}}],
 \]
-so the action feasibility constraint holds whenever $b_t^{\mathcal A}\ge 0$. It remains to prove $b_t^{\mathcal A}\ge 0$ for all $t$. The base case is $b_1^{\mathcal A}=0$. If $b_t^{\mathcal A}\ge 0$, then $u_t^{\mathcal A}\le \alpha b_t^{\mathcal A}$ and $a_t\in[0,1]$, so from \eqref{eq:alg-state-update},
+so the action feasibility constraint holds whenever $b_t^{\mathcal{A}}\ge 0$. It remains to prove $b_t^{\mathcal{A}}\ge 0$ for all $t$. The base case is $b_1^{\mathcal{A}}=0$. If $b_t^{\mathcal{A}}\ge 0$, then $u_t^{\mathcal{A}}\le \alpha b_t^{\mathcal{A}}$ and $a_t\in[0,1]$, so from \eqref{eq:alg-state-update},
 \[
-b_{t+1}^{\mathcal A}=\alpha b_t^{\mathcal A}-u_t^{\mathcal A}+a_t\ge 0.
+b_{t+1}^{\mathcal{A}}=\alpha b_t^{\mathcal{A}}-u_t^{\mathcal{A}}+a_t\ge 0.
 \]
-Thus, by induction, $b_t^{\mathcal A}\ge 0$ and $0\le u_t^{\mathcal A}\le \alpha b_t^{\mathcal A}$ for all $t$.
+Thus, by induction, $b_t^{\mathcal{A}}\ge 0$ and $0\le u_t^{\mathcal{A}}\le \alpha b_t^{\mathcal{A}}$ for all $t$.
 
 
 
@@ -416,65 +416,6 @@ Chaining the two displays gives the stated bound. For the asymptotic statement, 
 \end{proof}
 
 
-\section{Experiments}
-\label{sec:experiments}
-
-We evaluate the clipped exponentiated-gradient controller of Section~\ref{sec:online-algorithm} in an energy-harvesting battery-management scenario. Harvested-energy arrivals are taken from real solar traces, and the stage cost is a convex state--action function that penalizes both reserve depletion and deviation from proportional discharge. This setup matches the primary application domain in the introduction while exercising the general adversarial model of Section~\ref{sec:model-setup}.
-
-\subsection{Energy-Harvesting Scenario}
-We interpret $b_t$ as battery state of charge at the start of round~$t$, $u_t$ as energy discharged to the load, and $a_t$ as harvested energy arriving after the discharge decision. The retention factor $\alpha$ models self-discharge and the fraction of stored energy that may be allocated in one round. Dynamics, feasibility, and the non-anticipatory information pattern are exactly those of \eqref{eq:model-feasibility}--\eqref{eq:model-dynamics}.
-
-\subsection{Harvested-Energy Arrivals}
-Inflows are derived from the NREL National Solar Radiation Database (NSRDB) \cite{osti_1473618}, using the same trace-based evaluation protocol as the energy-harvesting online optimization experiments in \cite{10.1145/3428337}. We take the first $T$ samples of 5-minute global horizontal irradiance (GHI) from the NSRDB file \texttt{Actual\_32.95\_-115.15\_2006\_UPV\_100MW\_5\_Min} (Imperial Valley, CA, 2006) and convert each raw value $g_t$ to a normalized inflow
-\begin{equation}
-\label{eq:exp-arrival-normalize}
-a_t \;=\; \min\!\left\{1,\;\frac{g_t}{2\,\bar g}\right\},
-\qquad
-\bar g \triangleq \frac{1}{T}\sum_{s=1}^T g_s,
-\end{equation}
-so that $a_t\in[0,1]$ as required by the model. This rescaling preserves the diurnal structure and intermittency of outdoor photovoltaic harvest while mapping arrivals into the bounded domain used in the analysis.
-
-\subsection{State--Action Cost}
-Motivated by quadratic storage penalties in drift-plus-penalty optimization \cite{neely2010stochastic,urgaonkar2011optimal}, base-stock inventory targets \cite{hihat2024online}, and fixed-fraction discharge policies in energy harvesting \cite{tutuncuoglu2012optimum,khojastepour2004delay}, we use the coupled reserve--throughput cost
-\begin{equation}
-\label{eq:exp-cost-family2}
-c_t(b,u)
-\;=\;
-\omega_u\,\bigl(u - q\,b\bigr)^2
-\;+\;
-\omega_b\,\bigl(b_{\mathrm{ref}} - b\bigr)^2,
-\end{equation}
-with fixed weights $\omega_u=\omega_b=1$. The gain $q\in(0,\alpha)$ encodes a target proportional discharge rate $u_t\approx q\,b_t$, consistent with the linear comparator policies analyzed in Lemma~\ref{lem:sdac-linear-approx} and Corollary~\ref{cor:regret-vs-linear}. The reserve level $b_{\mathrm{ref}}$ targets a buffer against harvest intermittency. Writing $B\triangleq 1/(1-\alpha)$ for the worst-case state scale from the appendix bound, we set
-\[
-b_{\mathrm{ref}} = \tfrac{1}{2}\,B.
-\]
-Each $c_t$ in \eqref{eq:exp-cost-family2} is convex in $(b,u)$ and Lipschitz on the admissible region, so the standing assumptions of Section~\ref{sec:model-setup} are satisfied.
-
-\subsection{Parameters and Baselines}
-Unless stated otherwise, we use
-\[
-T = 10{,}000,
-\qquad
-H = 100,
-\qquad
-\alpha = 0.95,
-\qquad
-\omega_u = \omega_b = 1,
-\qquad
-b_{\mathrm{ref}} = \tfrac{1}{2(1-\alpha)}.
-\]
-We report two settings with linear-gain targets $q\in\{0.1,\,0.4\}$ in \eqref{eq:exp-cost-family2}; both satisfy $q<\alpha$.
-
-We compare the following controllers:
-\begin{itemize}
-    \item \textbf{Offline optimal SDAC:} the best fixed weight vector $w^\star\in\Delta_H$ chosen in hindsight for the realized arrival and cost sequence.
-    \item \textbf{Best linear policy:} $u_t = K b_t$ with $K\in[0,\alpha]$ chosen offline to minimize total cost (found by grid search on $K$).
-    \item \textbf{Fixed linear baseline:} $u_t = q\,b_t$ with $q$ matching the target gain in \eqref{eq:exp-cost-family2}.
-    \item \textbf{Online SDAC controller:} the clipped exponentiated-gradient algorithm of Section~\ref{sec:online-algorithm}, with step size $\eta^\star$ from Theorem~\ref{thm:regret-bound} and with a fixed step-size baseline for sensitivity.
-\end{itemize}
-Performance is measured by total cumulative cost \eqref{eq:def-cumulative-cost} and by per-round state, action, and cost trajectories. Simulation code and figure generation are provided in the \texttt{sim/} directory of the accompanying repository.
-
-\appendix
 \section{Appendix: Deferred Proofs}
 \label{sec:appendix-proofs}
 
