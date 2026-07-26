@@ -1,4 +1,9 @@
-\documentclass[journal]{IEEEtran}
+\documentclass[letterpaper,10pt,conference]{ieeeconf}
+\IEEEoverridecommandlockouts
+\overrideIEEEmargins
+% ieeeconf predefines \proof; clear it so amsthm can load cleanly.
+\let\proof\relax
+\let\endproof\relax
 \usepackage{amsmath,amssymb,amsthm,mathtools}
 \usepackage{cite}
 \usepackage{graphicx}
@@ -19,7 +24,7 @@ Computer Engineering, University of Southern California, Los Angeles, CA 90089 U
 \thanks{Corresponding author: K.~Asgari.}%
 }
 
-\markboth{IEEE Transactions on Control Systems Technology}%
+\markboth{IEEE Control Systems Letters}%
 {Asgari and Neely: Online Dynamic Resource Allocation with State Constraints}
 
 \begin{document}
@@ -45,16 +50,16 @@ related storage systems in which real-time allocations must respect availability
 limits induced by the stored resource.
 \end{abstract}
 
-\begin{IEEEkeywords}
+\begin{keywords}
 Online control, resource allocation, disturbance-action policies, energy harvesting,
 regret minimization, state constraints.
-\end{IEEEkeywords}
+\end{keywords}
 
 \section{Introduction}
 \label{sec:introduction}
 
 \subsection{Motivation and Problem Setting}
-\IEEEPARstart{M}{any} dynamic resource systems are governed by a budget state variable that evolves over time and constrains the allocation action at every round. The controller must choose an allocation action subject to state-dependent availability limits before observing the round's inflow and cost.
+\PARstart{M}{any} dynamic resource systems are governed by a budget state variable that evolves over time and constrains the allocation action at every round. The controller must choose an allocation action subject to state-dependent availability limits before observing the round's inflow and cost.
 
 This creates an online optimization problem with state coupling: aggressive early allocation can harm later performance, while overly conservative allocation can increase immediate cost. Our objective is to design a policy that remains feasible at every round and competes with the best fixed policy in a structurally tractable comparator class.
 
