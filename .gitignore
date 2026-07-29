@@ -18,12 +18,8 @@
 *.xdv
 *.dvi
 *.ps
-*.pdf
 # Local archive / recycle bin (not part of active repo)
 archive/
-
-# Rebuildable outputs at repo root
-/fresh_rewrite.pdf
 
 # Python (sim/)
 sim/.venv/

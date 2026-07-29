@@ -39,4 +39,4 @@ Fresh rewrite of the thesis chapter for publication.
 ## LaTeX
 
 - Build artifacts are gitignored (`.aux`, `.log`, `.bbl`, etc.).
-- Do not commit rebuildable PDF outputs from local builds (e.g. `fresh_rewrite.pdf`).
+- PDF outputs (e.g. `fresh_rewrite.pdf`) are tracked.
