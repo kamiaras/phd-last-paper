@@ -1,9 +1,4 @@
-\documentclass[letterpaper,10pt,conference]{ieeeconf}
-\IEEEoverridecommandlockouts
-\overrideIEEEmargins
-% ieeeconf predefines \proof; clear it so amsthm can load cleanly.
-\let\proof\relax
-\let\endproof\relax
+\documentclass[journal]{IEEEtran}
 \usepackage{amsmath,amssymb,amsthm,mathtools}
 \usepackage{cite}
 \usepackage{graphicx}
@@ -24,7 +19,7 @@ Computer Engineering, University of Southern California, Los Angeles, CA 90089 U
 \thanks{Corresponding author: K.~Asgari.}%
 }
 
-\markboth{IEEE Control Systems Letters}%
+\markboth{IEEE Transactions on Automatic Control}%
 {Asgari and Neely: Online Constrained Control of Storage Systems via SDAC}
 
 \begin{document}
@@ -34,15 +29,15 @@ Computer Engineering, University of Southern California, Los Angeles, CA 90089 U
 We study online control of a scalar system under adversarial disturbances, convex stage costs, and state-dependent constraints. At each time, the controller must choose a feasible action before observing that time's disturbance and cost. We introduce \emph{Simplex Disturbance-Action Control} (SDAC), a simplex-constrained disturbance-action policy class that preserves per-step feasibility by construction. An online controller updates SDAC parameters via exponentiated gradient on the sub-probability simplex, with a truncation step that enforces control feasibility. We prove regret that is sublinear in the horizon and logarithmic in the policy dimension against the best fixed SDAC policy in hindsight, implying no-regret relative to feasible linear state-feedback policies. The setting is motivated by energy-harvesting battery management and similar storage systems.
 \end{abstract}
 
-\begin{keywords}
+\begin{IEEEkeywords}
 Online control, disturbance-action policies, storage systems, energy harvesting, regret minimization, state constraints.
-\end{keywords}
+\end{IEEEkeywords}
 
 \section{Introduction}
 \label{sec:introduction}
 
 \subsection{Motivation and Problem Setting}
-\PARstart{M}{any} dynamic resource systems can be modeled by a storage state that evolves over time and constrains the control action at every time. The controller must choose a action subject to state-dependent constraints before observing that time's disturbance and cost.
+\IEEEPARstart{M}{any} dynamic resource systems can be modeled by a storage state that evolves over time and constrains the control action at every time. The controller must choose a action subject to state-dependent constraints before observing that time's disturbance and cost.
 
 This creates a constrained discrete-time control problem with state--control coupling: aggressive early control actions can harm later performance, while overly conservative actions can increase immediate cost. Our objective is to design a policy that remains feasible at every time and competes with the best fixed policy in a structurally tractable policy class.
 
