@@ -309,9 +309,10 @@ algorithm and $\pi$ (or $\pi(M)$) for a fixed policy.
 We consider a discrete-time process over times $t\in\{1,2,\ldots,T\}$. The system
 state is denoted by $x_t\in\mathbb{R}_{\ge 0}$, where $x_t$ represents the resource
 level at the beginning of time $t$. The initial state is given as
-\[
+\begin{equation}
+\label{eq:model-init}
 x_1 = 0.
-\]
+\end{equation}
 Fix a state-retention factor $\alpha\in(0,1)$. At each time, the controller chooses a
 control action $u_t\in\mathbb{R}_{\ge 0}$ subject to the state constraint:
 \begin{equation}
@@ -745,7 +746,7 @@ x_{t+1}^{\mathcal{A}} = \alpha x_t^{\mathcal{A}} - u_t^{\mathcal{A}} + w_t,
 \qquad x_1^{\mathcal{A}}=0.
 \end{equation}
 
-\paragraph{Feasibility of the online trajectory}
+\paragraph{Feasibility of the online trajectory}    
 We verify that the algorithm satisfies \eqref{eq:model-feasibility} at every time.
 The key mechanism is the feasibility projection in \eqref{eq:alg-feasible-action},
 which maps the unconstrained control action onto the currently available feasible
@@ -836,7 +837,7 @@ Appendix~\ref{sec:appendix-proofs}.
 Suppose each cost function \(c_t\) is convex and satisfies
 \eqref{eq:model-lipschitz}. Then the OMD controller with
 feasibility projection from Section~\ref{sec:online-algorithm}, initialized as in
-\eqref{eq:alg-init}, satisfies
+\eqref{eq:alg-init} and using parameter step size $\eta>0$, satisfies
 \[
 \begin{aligned}
 \RegSDAC{T}
@@ -973,7 +974,8 @@ x_t^{\mathrm{lin}}+w_t$ with $x_1^{\mathrm{lin}}=0$. Since $\beta>0$ and $w_t\ge
 induction yields $x_t^{\mathrm{lin}}\ge 0$, and then $0\le u_t^{\mathrm{lin}}=q
 x_t^{\mathrm{lin}}\le\alpha x_t^{\mathrm{lin}}$ because $q\le\alpha$; thus
 $\pi_q^{\mathrm{lin}}$ satisfies \eqref{eq:model-feasibility}. Unrolling the
-closed-loop recursion from $x_1^{\mathrm{lin}}=0$,
+closed-loop recursion from the initialization
+$x_1^{\mathrm{lin}}=0$ \eqref{eq:model-init},
 \[
 x_t^{\mathrm{lin}}=\sum_{j=1}^{t-1}\beta^{j-1}w_{t-j},
 \qquad
