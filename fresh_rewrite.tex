@@ -103,7 +103,7 @@ This abstraction captures a broad set of domains:
         harvested energy, and $u_t$ is discharge or consumption bounded by available
         energy $\alpha x_t$.
     \item \textbf{Queueing Networks and Buffer Management:} $x_t$ is queue/buffer
-        occupancy (retention factor $\alpha$ after abandonment/leakage), $w_t$ is
+        occupancy, $w_t$ is
         packet arrivals, and $u_t$ is service bounded by $\alpha x_t$.
     \item \textbf{Inventory Control:} $x_t$ is on-hand inventory (retention factor
         $\alpha$ after spoilage/deterioration), $w_t$ is supply or replenishment, and
@@ -115,46 +115,39 @@ This abstraction captures a broad set of domains:
         (retention factor $\alpha$ after evaporation/seepage), $w_t$ is inflow, and
         $u_t$ is controlled release bounded by $\alpha x_t$.
 \end{itemize}
+We take energy harvesting as the running interpretation; the other domains share the
+same retention-coupled state dynamics and state-dependent action constraints.
 
+\subsection{Related Work}
 
-%\subsection{Related Work}
-%\paragraph{Queueing and Network Optimization}
-%The queueing-network literature has extensively studied systems with arrivals,
-%storage (queues), and controlled service/allocations. A classical line of work
-%focuses on \emph{adversarial queueing theory} (AQT), where arrivals and routing
-%decisions may be chosen adversarially and the primary objective is to establish
-%stability (i.e., bounded queue lengths) under appropriate load conditions
-%\cite{borodin2001adversarial, gamarnik1998stability, kiwi2005survey}. While this
-%model shares structural similarities with our setting in allowing worst-case inputs,
-%its scope is fundamentally different: the goal is stability rather than optimization
-%of a cost function, and no notion of regret or comparison to an optimal dynamic
-%policy is considered. Moreover, in many classical adversarial queueing formulations,
-%actions are \emph{discrete} (e.g., routing or scheduling decisions), whereas our
-%setting considers \emph{continuous allocation decisions}.
+\paragraph{Online control}
+A recent line of work in online learning studies online control, where a linear
+dynamical system is operated under adversarial arrivals and costs. The objective
+is low time-average cost relative to the best policy in hindsight, rather than
+classical stabilization or worst-case guarantees. Foundational results for linear
+systems and adversarial settings include \cite{agarwal2019online,
+agarwal2019logarithmic, hazan2020nonstochasticBandit, simchowitz2020improper}; see
+\cite{hazan_introduction_2025} for a modern overview.
 
-%A second major line is \emph{stochastic network optimization} based on
-%Lyapunov-drift arguments \cite{neely2010stochastic, georgiadis2006resource}. These
-%works assume stochastic arrivals and network conditions and design policies (e.g.,
-%max-weight or drift-plus-penalty) that achieve near-optimal time-average utility 
-%while ensuring queue stability. In these formulations, the stage utility
-%(equivalently, negative cost) is modeled primarily as a function of the current
-%control action, with queue states entering through stability constraints and drift
-%terms rather than through a joint state-action adversarial loss. In addition, many
-%formulations use discrete or finitely parameterized action sets (e.g., selecting
-%from a finite set of rates or schedules), in contrast to our continuous decision
-%space.
+A central idea in this literature is \emph{Disturbance-Action Control}
+(DAC),\footnote{``Disturbance-Action Control'' is the standard name in the
+online-control literature. In this paper the underlying signal is the nonnegative
+arrival $w_t$; we retain the DAC/SDAC names for continuity with that literature.}
+a policy parameterization in which control actions are expressed as affine or linear
+functions of the current state and a finite history of past arrivals. This
+representation yields tractable surrogates for policy optimization and enables
+efficient no-regret updates in adversarial environments. Extensions include partial
+observability \cite{lale2020logarithmic} and bandit feedback
+\cite{hazan2020nonstochasticBandit}. SDAC adapts this template to state-constrained
+resource systems, where feasibility is coupled over time through the dynamics.
 
-%A related direction is online convex optimization with long-term constraints using
-%virtual queues to handle long-term constraints \cite{mahdavi2012trading,
-%jenatton2016adaptive, yu2017online, JMLR:v21:16-494}. These works allow adversarial
-%convex costs and provide regret and long-term constraint violation guarantees.
-%However, the queueing structure is typically auxiliary, serving to enforce
-%constraints rather than modeling a system's dynamic, and the objective does not
-%explicitly depend on the evolving queue state. Furthermore, the benchmarks are
-%standard regret notions relative to fixed comparators, rather than policies that
-%account for state evolution.
-
-
+Online control provides a strong foundation for our problem class: it accommodates
+arbitrary time-varying arrivals and unknown general convex cost functions, and the
+resulting algorithms come with robust guarantees and tractability. However, for
+state-coupled storage dynamics, unconstrained DAC does not enforce per-step
+feasibility by construction. Our framework fills this gap by replacing DAC with SDAC,
+a simplex-constrained DAC-style family that preserves the feasibility defined by
+\eqref{eq:model-feasibility} while retaining the desirable characteristics.
 
 \paragraph{Energy Harvesting}
 A closely related work is \cite{lin2025optimal}, which studies an online
@@ -176,9 +169,7 @@ than fixed policies. In contrast, our framework jointly optimizes over state-act
 costs, adversarial arrivals, and stronger benchmarks, requiring new
 algorithmic techniques.
 
-
 \paragraph{Queueing and Network Optimization}
-
 An alternative, though mathematically related, perspective comes from queueing
 control in computer networks and telecommunications. In that framework, one tracks a
 queue with stochastic arrivals and makes real-time service decisions, typically
@@ -196,6 +187,13 @@ exogenous-arrival model. The queueing literature provides useful motivation and
 techniques for state-coupled dynamics, but does not directly address the online
 optimization and regret-minimization objectives we study.
 
+Moreover, in most practical queueing applications the natural retention factor is
+$\alpha=1$ (no abandonment/leakage), so those settings are related dynamics but not
+a direct instance of the $\alpha\in(0,1)$ model studied in this paper. The case
+$\alpha\ge 1$ can be handled by a straightforward extension (Section~\ref{sec:extensions});
+we do not develop it in here, as it adds technical overhead without
+introducing new ideas.
+
 Another related work is \cite{khojastepour2004delay}, which proposes and analyzes a
 fixed controller that is a linear function of past arrivals. That controller
 resembles our family of SDAC policies because it uses nonnegative filter weights that
@@ -205,7 +203,6 @@ service delay; by contrast, our framework focuses on online optimization of a ge
 cost and does not treat delay as a constraint.
 
 \paragraph{Inventory Management}
-
 A related work is \cite{yang2020online}, which studies a distinct model in which
 demand (equivalent to allocation in our setup) is chosen adversarially, while the
 controller chooses the supply (equivalent to arrivals in our model). The
@@ -216,7 +213,6 @@ control action from the feasible state bound, whereas \cite{yang2020online} choo
 how much to procure. Another key difference is the cost model: our framework allows
 general convex state-action costs, while \cite{yang2020online} uses a linear
 cost depending only on the control action.
-
 
 More closely related to ours is \cite{hihat2024online}, which considers an
 inventory-control formulation with potentially nonlinear and nondifferentiable
@@ -232,9 +228,6 @@ approaches operating through nonlinear nondifferentiable dynamics such as
 \cite{hihat2024online}. The two frameworks are structurally related but target
 different problem structures, control variables, and policy classes.
 
-
-
-
 \paragraph{Water Reservoir and Dam Management}
 Classical dam theory studies storage dynamics with random inflows and controlled
 releases (see, for example, \cite{moran1954dams,prabhu1998stochastic}). Relative to
@@ -242,42 +235,6 @@ our adversarial online-control setting, this literature typically assumes stocha
 inputs and emphasizes stationary performance criteria under simple, known cost
 structures. Here, it serves mainly as historical context for state-coupled control
 under state constraints.
-
-
-\paragraph{Online control}
-
-A recent line of work in online learning studies online control, where a linear
-dynamical system is operated under adversarial arrivals and costs. The objective
-is low time-average cost relative to the best policy in hindsight, rather than
-classical stabilization or worst-case guarantees. Foundational results for linear
-systems and adversarial settings include \cite{agarwal2019online,
-agarwal2019logarithmic, hazan2020nonstochasticBandit, simchowitz2020improper}; see
-\cite{hazan_introduction_2025} for a modern overview.
-
-A central idea in this literature is \emph{Disturbance-Action Control}
-(DAC),\footnote{``Disturbance-Action Control'' is the standard name in the
-online-control literature. In this paper the underlying signal is the nonnegative
-arrival $w_t$; we retain the DAC/SDAC names for continuity with that literature.}
-a policy parameterization in which control actions are expressed as affine or linear
-functions of the current state and a finite history of past arrivals. This
-representation yields tractable surrogates for policy optimization and enables
-efficient no-regret updates in adversarial environments. Extensions include partial
-observability \cite{lale2020logarithmic} and bandit feedback
-\cite{hazan2020nonstochasticBandit}. SDAC adapts this template to state-constrained
-resource systems, where feasibility is coupled over time through the dynamics.
-
-
-
-Online control provides a strong foundation for our problem class: it accommodates
-arbitrary time-varying arrivals and unknown general convex cost functions, and the
-resulting algorithms come with robust guarantees and tractability. However, for
-state-coupled storage dynamics, unconstrained DAC does not enforce per-step
-feasibility by construction. Our framework fills this gap by replacing DAC with SDAC,
-a simplex-constrained DAC-style family that preserves the feasibility defined by
-\eqref{eq:model-feasibility} while retaining the desirable characteristics.
-
-
-
 
 \subsection{Contributions}
 The contributions are organized in two layers:
@@ -302,7 +259,8 @@ Section~\ref{sec:model-setup} formalizes the adversarial storage-control model,
 assumptions, and regret benchmark. Section~\ref{sec:sdac} introduces the SDAC policy
 class and summarizes its structural properties. Section~\ref{sec:online-algorithm}
 presents the online controller, Section~\ref{sec:regret-analysis} develops regret
-guarantees, and Section~\ref{sec:conclusion} concludes. Deferred proofs appear in the
+guarantees, Section~\ref{sec:extensions} sketches immediate extensions, and
+Section~\ref{sec:conclusion} concludes. Deferred proofs appear in the
 Appendix.
 
 
@@ -372,6 +330,8 @@ arbitrary.
      policies described below are required to satisfy \eqref{eq:model-feasibility} under dynamics
         \eqref{eq:model-dynamics}.
 \end{enumerate}
+We focus on $\alpha\in(0,1)$; the case $\alpha\ge 1$ is discussed in
+Section~\ref{sec:extensions}.
 
 Let $\{(x_t^{\mathcal{A}},u_t^{\mathcal{A}})\}_{t=1}^T$ denote the trajectory of an
 online algorithm $\mathcal{A}$. Define its cumulative cost by
@@ -931,6 +891,46 @@ $\log(H+1)=O(\log\log T)$ in the first term.
 \end{proof}
 
 
+\section{Extensions}
+\label{sec:extensions}
+
+We briefly sketch three directions in which the present framework extends with only
+minor changes to the policy class and algorithm. A full analysis is left for future
+work.
+
+\paragraph{Retention $\alpha\ge 1$.}
+Extending SDAC and our algorithm and analysis to handle $\alpha\ge 1$ is
+straightforward: one can augment the SDAC action by a fixed proportional drain,
+replacing $u_t^{\pi(M)}=\langle M,\widetilde{w}_t\rangle$ with
+$u_t^{\pi(M)}=Kx_t+\langle M,\widetilde{w}_t\rangle$ for a fixed $K$ satisfying
+$0<\alpha-K<1$, which reduces the dynamics to an equivalent system with retention
+in $(0,1)$. We deliberately restricted attention to the simpler $\alpha\in(0,1)$
+environment for elegance and to avoid extra lines of derivation.
+
+\paragraph{Vector action / multi-task allocation.}
+Consider a single storage state $x_t$ with a vector action
+$u_t\in\mathbb{R}_{\ge 0}^n$ that allocates resource across $n$ tasks, subject to
+$\mathbf{1}^\top u_t\le\alpha x_t$, so that the total drain from storage is the sum of
+the task allocations. The dynamics remain
+$x_{t+1}=\alpha x_t-\mathbf{1}^\top u_t+w_t$, and the cost $c_t(x_t,u_t)$ is convex in
+$(x,u)$. SDAC lifts by replacing the filter vector $M\in\Delta_H$ with a matrix
+$M\in\mathbb{R}_{\ge 0}^{n\times H}$ whose entries sum to at most one (a matrix
+simplex), with each row corresponding to a task and each column to a memory lag.
+OMD then runs over this matrix simplex with the same feasibility-projection idea as
+in the scalar case.
+
+\paragraph{Multiple storages with diagonal dynamics.}
+Suppose the state is $x_t\in\mathbb{R}_{\ge 0}^d$ and evolves as
+$x_{t+1}=A x_t-u_t+w_t$ with $A=\mathrm{diag}(\alpha_1,\ldots,\alpha_d)$,
+$\alpha_i\in(0,1)$, arrivals $w_t\in[0,1]^d$, and per-coordinate constraints
+$0\le u_t^{(i)}\le\alpha_i x_t^{(i)}$. Because $A$ is diagonal, the coordinates
+decouple into $d$ independent scalar storage problems. The natural SDAC class is a
+product of simplices, and OMD may be run independently on each coordinate. Cross-coupled
+storages (non-diagonal $A$) fall outside this easy reduction.
+
+These directions preserve feasibility by construction and the OMD structure developed
+above; fleshing out the corresponding regret bounds is left for future work.
+
 \section{Conclusion}
 \label{sec:conclusion}
 
@@ -943,7 +943,10 @@ policy, with only logarithmic dependence on the memory horizon. The same guarant
 extend to competition with feasible linear state-feedback policies, i.e. sublinear
 $\RegLin{T}$, via the SDAC approximation result. The framework is directly applicable to energy-harvesting battery management
 and related storage settings in which decisions must respect
-state constraints in real time.
+state constraints in real time. Immediate lifts---retention $\alpha\ge 1$,
+multi-task vector allocation, and diagonal multi-storage---are outlined in
+Section~\ref{sec:extensions}.
+
 
 
 \appendices
