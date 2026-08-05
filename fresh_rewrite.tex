@@ -36,7 +36,7 @@ must choose a feasible action before observing the corresponding disturbance and
 cost. We introduce \emph{Simplex Disturbance-Action Control} (SDAC), a
 simplex-constrained disturbance-action policy class that preserves per-step
 feasibility by construction. An online controller updates SDAC parameters via
-exponentiated gradient on the sub-probability simplex, with a feasibility projection
+online mirror descent (OMD) on the sub-probability simplex, with a feasibility projection
 that enforces the state-dependent action constraint. We prove that regret against the best fixed SDAC policy in hindsight is sublinear in
 the horizon and logarithmic in the policy dimension, implying no-regret relative to
 feasible linear state-feedback policies. The setting is motivated by energy-harvesting battery
@@ -276,8 +276,8 @@ The contributions are organized in two layers:
         SDAC \emph{enforces feasibility} by construction while preserving DAC-style
         expressiveness.
     \item \textbf{Algorithmic and analytical contribution.} We develop an
-        exponentiated-gradient online controller over SDAC parameters in which a
-        feasibility projection \emph{enforces} the state-dependent constraint on the
+        OMD controller with feasibility projection over SDAC parameters that
+        \emph{enforces} the state-dependent constraint on the
         online control action, and we analyze regret against the best fixed SDAC
         policy in hindsight, proving a bound that is sublinear in the horizon and
         logarithmic in the policy dimension.
@@ -449,7 +449,8 @@ satisfies $0\le u_t^{\pi(M)}\le \alpha x_t^{\pi(M)}$ for all $t$ (see
 Lemma~\ref{lem:appendix-feasibility}).
 
 Second, SDAC is compatible with online convex optimization. For fixed disturbance
-sequences, $u_t^{\pi(M)}$ is linear in $M$ and $x_t^{\pi(M)}$ is affine in $M$ (see
+sequences, $u_t^{\pi(M)}$ is linear in $M$ by
+\eqref{eq:def-sdac-policy-vector}, and $x_t^{\pi(M)}$ is affine in $M$ (see
 Lemma~\ref{lem:appendix-state-decomp}). Therefore, since each $c_t$ is convex in
 $(x,u)$, the induced cost is convex in $M$ (see Lemma~\ref{lem:appendix-surrogate}).
 Regret minimization against the best fixed SDAC policy thus becomes online convex
@@ -471,7 +472,7 @@ $q\in[0,\alpha]$: since $x_t\ge 0$, the feasibility constraint $0\le u_t\le\alph
 x_t$ in \eqref{eq:model-feasibility} holds if and only if $q\in[0,\alpha]$. The next
 lemma shows that every such policy with $q\in(0,\alpha)$ is approximated,
 \emph{within the feasible class} $\mathrm{SDAC}_H$, by explicit parameters, with
-control-action, state, and cost errors that decay geometrically in $H$.
+cost approximation error that decays geometrically in $H$.
 
 \begin{lemma}[SDAC approximates linear state-feedback policies]
 \label{lem:sdac-linear-approx}
@@ -491,18 +492,8 @@ Define $M_q^\star\in\mathbb{R}^H$ by
 M_q^{\star(i)}\triangleq\frac{q}{\alpha}\Bigl(\frac{\beta}{\alpha}\Bigr)^{i-1},
 \qquad i=1,\ldots,H.
 \]
-Then $M_q^\star\in\Delta_H$ with $\sum_{i=1}^H M_q^{\star(i)}=1-(\beta/\alpha)^H$,
-and for every $\{w_t\}\subset[0,1]$ and all $t\ge 1$,
-\begin{equation}
-\label{eq:sdac-lin-approx-bounds}
-\begin{aligned}
-0 &\le u_t^{\mathrm{lin}}-u_t^{\pi(M_q^\star)}
-\le \frac{q\,\beta^H}{1-\beta}, \\[0.25em]
-0 &\le x_t^{\pi(M_q^\star)}-x_t^{\mathrm{lin}}
-\le \frac{q\,\beta^H}{(1-\beta)(1-\alpha)}.
-\end{aligned}
-\end{equation}
-Moreover, if each $c_t$ satisfies \eqref{eq:model-lipschitz}, then
+Then $M_q^\star\in\Delta_H$, and if each $c_t$ satisfies
+\eqref{eq:model-lipschitz}, then for every $\{w_t\}\subset[0,1]$,
 \begin{equation}
 \label{eq:sdac-lin-approx-cost}
 \begin{aligned}
@@ -512,7 +503,7 @@ Moreover, if each $c_t$ satisfies \eqref{eq:model-lipschitz}, then
 \Bigl(L_u+\frac{L_x}{1-\alpha}\Bigr)\frac{q\,\beta^H}{1-\beta}\,T.
 \end{aligned}
 \end{equation}
-In particular, the errors decay geometrically in $H$, so $\mathrm{SDAC}_H$
+In particular, the cost error decays geometrically in $H$, so $\mathrm{SDAC}_H$
 approximates $\pi_q^{\mathrm{lin}}$ arbitrarily well as $H\to\infty$. The proof is
 deferred to Appendix~\ref{sec:appendix-proofs}.
 \end{lemma}
@@ -533,18 +524,18 @@ approximation in online control \cite{agarwal2019online}.
 \label{sec:online-algorithm}
 
 We now present our online algorithm, which updates SDAC parameters by
-unnormalized-negentropy online mirror descent (equivalently, exponentiated gradient)
+online mirror descent (OMD) with unnormalized negentropy (equivalently, exponentiated gradient)
 over the sub-probability simplex $\Delta_H\subset\mathbb{R}^H$ with a fixed step size
 $\eta>0$.
 
-For each time $t$, let $M_t\in\Delta_H$ be the online parameter vector. We initialize
+For each time $t$, let $M_t\in\Delta_H$ be the online parameter. We initialize
 at
 \begin{equation}
 \label{eq:alg-init}
 M_1^{(i)}\triangleq\frac{1}{H+1},\qquad i=1,\ldots,H
 \end{equation}
-so that the unnormalized-negentropy Bregman diameter of $\Delta_H$ relative to $M_1$
-is at most $\log(H+1)$ (see the proof of Theorem~\ref{thm:regret-bound}).
+so that the Bregman diameter of $\Delta_H$ relative to $M_1$ under unnormalized
+negentropy is at most $\log(H+1)$ (see the proof of Theorem~\ref{thm:regret-bound}).
 
 \paragraph{Control-action selection}
 The controller first forms the unconstrained SDAC control action
@@ -587,7 +578,7 @@ x_t^{\mathcal{A}}$ for all $t$.
 
 
 
-\paragraph{Surrogate cost and mirror-descent step}
+\paragraph{Surrogate cost and OMD update}
 Define the surrogate cost at time $t$ by
 \begin{equation}
 \label{eq:alg-surrogate-cost}
@@ -606,7 +597,7 @@ D_\Psi(M\|V)\triangleq\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{V^{(i)}}-M^{(
 \]
 be its Bregman divergence, the generalized Kullback--Leibler divergence.
 
-We define the online-mirror-descent update in the compact, one-line form
+We define the OMD update
 \begin{equation}
 \label{eq:alg-omd-argmin}
 M_{t+1} \triangleq \operatorname*{arg\,min}_{M\in\Delta_H}
@@ -619,15 +610,16 @@ this optimization-based definition.
 Although \eqref{eq:alg-omd-argmin} is a constrained optimization problem, it is easy
 to solve analytically because $\Psi$ is separable and the objective is linear in
 $g_t$. As shown in Lemma~\ref{lem:omd-closed-form}, the minimizer in
-\eqref{eq:alg-omd-argmin} is exactly the result of two elementary steps: an
-unconstrained exponentiated-gradient step,
+\eqref{eq:alg-omd-argmin} is exactly the result of two elementary steps: a
+multiplicative step,
 \begin{equation}
-\label{eq:alg-eg-unnormalized}
+\label{eq:alg-omd-mult}
 \widetilde{M}_{t+1}^{(i)} \triangleq M_t^{(i)}\exp\!\bigl(-\eta g_t^{(i)}\bigr), \qquad i=1,\ldots,H,
 \end{equation}
-followed by renormalization, triggered only when the resulting mass exceeds one:
+followed by the Bregman projection onto $\Delta_H$, triggered only when the resulting
+mass exceeds one:
 \begin{equation}
-\label{eq:alg-eg-normalized}
+\label{eq:alg-omd-proj}
 M_{t+1}^{(i)}
 \triangleq
 \frac{\widetilde{M}_{t+1}^{(i)}}{\max\!\bigl(1,S_{t+1}\bigr)},
@@ -637,7 +629,7 @@ S_{t+1}\triangleq\sum_{j=1}^H \widetilde{M}_{t+1}^{(j)},
 for $i=1,\ldots,H$. This is the form we implement in practice.
 
 This yields a feasible online trajectory satisfying \eqref{eq:model-feasibility} by
-\eqref{eq:alg-feasible-action} and performs online mirror descent over $\Delta_H$
+\eqref{eq:alg-feasible-action} and performs OMD over $\Delta_H$
 through \eqref{eq:alg-surrogate-cost} and \eqref{eq:alg-omd-argmin}.
 
 
@@ -653,7 +645,7 @@ Appendix~\ref{sec:appendix-proofs}.
 \begin{theorem}[Regret bound]
 \label{thm:regret-bound}
 Suppose each cost function \(c_t\) is convex and satisfies
-\eqref{eq:model-lipschitz}. Then the exponentiated-gradient controller with
+\eqref{eq:model-lipschitz}. Then the OMD controller with
 feasibility projection from Section~\ref{sec:online-algorithm}, initialized as in
 \eqref{eq:alg-init}, satisfies
 \[
@@ -682,7 +674,7 @@ gives
 
 \begin{proof}[Proof sketch]
 By Lemma~\ref{lem:appendix-surrogate}, the surrogate costs are convex and
-\(L\)-Lipschitz. Unnormalized-negentropy OMD on $\Delta_H$, initialized as in
+\(L\)-Lipschitz. OMD on $\Delta_H$, initialized as in
 \eqref{eq:alg-init}, yields Bregman diameter at most $\log(H+1)$, so the OMD term is
 bounded by \(\log(H+1)/\eta + \eta L^2T/2\).
 The remaining stability term is controlled by
@@ -698,7 +690,7 @@ state-feedback policies.
 
 \begin{corollary}[No-regret against linear state-feedback policies]
 \label{cor:regret-vs-linear}
-Run the exponentiated-gradient controller with feasibility projection of
+Run the OMD controller with feasibility projection of
 Section~\ref{sec:online-algorithm} with the step size $\eta^*$ of
 Theorem~\ref{thm:regret-bound}. Fix any gain $q\in(0,\alpha)$, set
 $\beta\triangleq\alpha-q$, and let
@@ -766,7 +758,7 @@ $\log(H+1)=O(\log\log T)$ in the first term.
 
 We studied adversarial online control of a storage system under  state-dependent
 action  constraints. The SDAC policy class enforces
-feasibility by construction, and the exponentiated-gradient controller with
+feasibility by construction, and the OMD controller with
 feasibility projection over
 SDAC parameters achieves sublinear regret $\RegSDAC{T}$ against the best fixed SDAC
 policy, with only logarithmic dependence on the memory horizon. The same guarantees
@@ -891,14 +883,8 @@ and
 \]
 Equivalently, $\rho_t$ is the state $x_t^{\pi(0)}$ produced by the null policy $M=0$
 (release nothing, $x_{\tau+1}=\alpha x_\tau+w_\tau$), and the coefficients satisfy
-$0\le \psi_t^{(i)}\le \rho_t\le 1/(1-\alpha)$. Consequently, setting
-$M^{(0)}\triangleq 1-W\ge 0$, the identity \eqref{eq:appendix-state-decomp} writes
-$x_t^{\pi(M)}$ as the convex combination $M^{(0)}\rho_t+\sum_{i=1}^H
-M^{(i)}\psi_t^{(i)}$ of quantities in $[0,1/(1-\alpha)]$; in particular $M\mapsto
-x_t^{\pi(M)}$ is affine and
-\[
-0\le x_t^{\pi(M)}\le \frac{1}{1-\alpha}\qquad\text{for all }t\ge 2.
-\]
+$0\le \psi_t^{(i)}\le \rho_t\le 1/(1-\alpha)$. In particular, $M\mapsto
+x_t^{\pi(M)}$ is affine.
 \end{lemma}
 
 \begin{proof}
@@ -950,40 +936,7 @@ which is \eqref{eq:appendix-state-decomp} at time $t+1$.
 series defining $\rho_t$, so $0\le\psi_t^{(i)}\le\rho_t$; and since $w_\tau\in[0,1]$,
 the geometric series gives
 $\rho_t=\sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j}\le\sum_{j=1}^{\infty}\alpha^{j-1}=1/(1-\alpha)$.
-With $M^{(0)}=1-W\ge 0$, the parameters $M^{(0)},M^{(1)},\ldots,M^{(H)}$ are
-nonnegative and sum to one, so \eqref{eq:appendix-state-decomp} exhibits
-$x_t^{\pi(M)}$ as a convex combination of
-$\rho_t,\psi_t^{(1)},\ldots,\psi_t^{(H)}\in[0,1/(1-\alpha)]$, giving $0\le
-x_t^{\pi(M)}\le 1/(1-\alpha)$. Affineness in $M$ is immediate, as $\psi_t$ and
-$\rho_t$ do not depend on $M$.
-\end{proof}
-
-\begin{lemma}[Linearity of SDAC action in $M$]
-\label{lem:appendix-action-linear}
-Under the setup of Lemma~\ref{lem:appendix-state-decomp}, for each $t$,
-\[
-u_t^{\pi(M)} = \langle M,\widetilde{w}_t\rangle,
-\]
-where $\widetilde{w}_t$ is the retention-weighted past-disturbance vector from
-\eqref{eq:def-sdac-policy-vector}, with components
-\[
-\widetilde{w}_t^{(i)} \triangleq \alpha^i w_{t-i}.
-\]
-Moreover, $0\le \widetilde{w}_t^{(i)}\le \alpha$ for all $i$.
-\end{lemma}
-
-\begin{proof}
-From \eqref{eq:def-sdac-policy},
-\[
-u_t^{\pi(M)} = \sum_{i=1}^H M^{(i)}\alpha^i w_{t-i}
-= \sum_{i=1}^H M^{(i)}\widetilde{w}_t^{(i)}
-= \langle M,\widetilde{w}_t\rangle.
-\]
-The lower bound is immediate from $w_{t-i}\ge 0$. For the upper bound, use
-$w_\tau\in[0,1]$:
-\[
-\widetilde{w}_t^{(i)} = \alpha^i w_{t-i} \le \alpha^i \le \alpha.
-\]
+Affineness in $M$ is immediate, as $\psi_t$ and $\rho_t$ do not depend on $M$.
 \end{proof}
 
 \begin{lemma}[Feasibility of SDAC policies]
@@ -1044,15 +997,15 @@ Then $\ell_t$ is convex on $\Delta_H$, and for all $M,M'\in\Delta_H$,
 \end{lemma}
 
 \begin{proof}
-By Lemma~\ref{lem:appendix-state-decomp} and Lemma~\ref{lem:appendix-action-linear},
-with $W=\sum_{i=1}^H M^{(i)}$,
+By Lemma~\ref{lem:appendix-state-decomp} and
+\eqref{eq:def-sdac-policy-vector}, with $W=\sum_{i=1}^H M^{(i)}$,
 \[
 \ell_t(M)=c_t\bigl(\langle M,\psi_t\rangle+(1-W)\rho_t,\ \langle
 M,\widetilde{w}_t\rangle\bigr).
 \]
 The map $M\mapsto\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr)$ is affine
-(Lemmas~\ref{lem:appendix-state-decomp}--\ref{lem:appendix-action-linear}) and $c_t$
-is convex, so $\ell_t$ is convex.
+(Lemma~\ref{lem:appendix-state-decomp} and
+\eqref{eq:def-sdac-policy-vector}) and $c_t$ is convex, so $\ell_t$ is convex.
 
 For the Lipschitz estimate, the decomposition gives, for all $M,M'\in\Delta_H$,
 \[
@@ -1075,8 +1028,8 @@ $u_t^{\pi(M)}-u_t^{\pi(M')}=\langle M-M',\widetilde{w}_t\rangle$. Hence, by
 Since $0\le\psi_t^{(i)}\le\rho_t\le 1/(1-\alpha)$
 (Lemma~\ref{lem:appendix-state-decomp}), we have
 $\|\psi_t-\rho_t\mathbf{1}\|_\infty=\max_i\bigl(\rho_t-\psi_t^{(i)}\bigr)\le\rho_t\le
-1/(1-\alpha)$, and Lemma~\ref{lem:appendix-action-linear} gives
-$\|\widetilde{w}_t\|_\infty\le \alpha$. This yields the claim, and one may take the
+1/(1-\alpha)$, and $\|\widetilde{w}_t\|_\infty=\max_i\alpha^i w_{t-i}\le\alpha$
+because $w_\tau\in[0,1]$ and $i\ge 1$. This yields the claim, and one may take the
 surrogate Lipschitz constant
 \[
 L := \alpha L_u + \frac{L_x}{1-\alpha},
@@ -1084,8 +1037,8 @@ L := \alpha L_u + \frac{L_x}{1-\alpha},
 as used in the main text.
 \end{proof}
 
-\begin{lemma}[Conditional normalization is the KL projection onto $\Delta_H$]
-\label{lem:eg-projection}
+\begin{lemma}[Bregman projection onto $\Delta_H$]
+\label{lem:bregman-projection}
 Let $\Psi$ and $D_\Psi$ be the unnormalized negentropy and its Bregman divergence
 from \eqref{eq:def-negentropy}. Fix $\widetilde{M}\in\mathbb{R}_{>0}^H$ and set
 $S\triangleq\sum_{i=1}^H \widetilde{M}^{(i)}$. Then the Bregman projection of
@@ -1129,10 +1082,10 @@ holds. Equivalently, $P(\widetilde{M})^{(i)}=\widetilde{M}^{(i)}/\max(1,S)$ in b
 cases.
 \end{proof}
 
-\begin{lemma}[Closed-form solution of the one-line OMD update]
+\begin{lemma}[Closed-form solution of the OMD update]
 \label{lem:omd-closed-form}
 Fix $M_t\in\Delta_H$, $\eta>0$, and $g_t\in\mathbb{R}^H$, and let
-$\widetilde{M}_{t+1}$ be defined coordinatewise by \eqref{eq:alg-eg-unnormalized},
+$\widetilde{M}_{t+1}$ be defined coordinatewise by \eqref{eq:alg-omd-mult},
 i.e.\ $\widetilde{M}_{t+1}^{(i)}=M_t^{(i)}e^{-\eta g_t^{(i)}}$. Then
 \[
 \begin{aligned}
@@ -1143,9 +1096,9 @@ i.e.\ $\widetilde{M}_{t+1}^{(i)}=M_t^{(i)}e^{-\eta g_t^{(i)}}$. Then
 P(\widetilde{M}_{t+1}),
 \end{aligned}
 \]
-where $P(\cdot)$ is the Bregman projection of Lemma~\ref{lem:eg-projection}.
-Consequently, the one-line update \eqref{eq:alg-omd-argmin} coincides exactly with
-the two-step procedure \eqref{eq:alg-eg-unnormalized}--\eqref{eq:alg-eg-normalized},
+where $P(\cdot)$ is the Bregman projection of Lemma~\ref{lem:bregman-projection}.
+Consequently, the OMD update \eqref{eq:alg-omd-argmin} coincides exactly with
+the closed-form OMD update \eqref{eq:alg-omd-mult}--\eqref{eq:alg-omd-proj},
 and in particular $M_{t+1}\in\Delta_H$.
 \end{lemma}
 
@@ -1169,16 +1122,16 @@ $D_\Psi$ from \eqref{eq:def-negentropy} and of $\widetilde{M}_{t+1}$:
 The second sum does not depend on $M$, so minimizing the left-hand side over
 $M\in\Delta_H$ is equivalent to minimizing $D_\Psi(M\|\widetilde{M}_{t+1})$ over
 $M\in\Delta_H$, which by definition is the Bregman projection
-$P(\widetilde{M}_{t+1})$. Lemma~\ref{lem:eg-projection} identifies
+$P(\widetilde{M}_{t+1})$. Lemma~\ref{lem:bregman-projection} identifies
 $P(\widetilde{M}_{t+1})$ coordinatewise as
 $\widetilde{M}_{t+1}^{(i)}/\max(1,S_{t+1})$ with
 $S_{t+1}=\sum_j\widetilde{M}_{t+1}^{(j)}$, which is exactly
-\eqref{eq:alg-eg-normalized}.
+\eqref{eq:alg-omd-proj}.
 \end{proof}
 
-\begin{lemma}[One-step movement of unnormalized-negentropy OMD]
+\begin{lemma}[One-step movement of OMD]
 \label{lem:omd-move}
-For the unnormalized-negentropy OMD update with step size \(\eta>0\) and subgradient
+For the OMD update with step size \(\eta>0\) and subgradient
 \(g_t\in\partial \ell_t(M_t)\),
 \[
 \|M_{t+1}-M_t\|_1 \le \eta\,\|g_t\|_\infty.
@@ -1228,7 +1181,7 @@ Since both iterates lie in \(\Delta_H\), the unnormalized negentropy is
 \(\nabla^2\Psi(M)=\mathrm{diag}(1/M^{(i)})\) satisfies
 \(v^\top\nabla^2\Psi(M)\,v=\sum_i (v^{(i)})^2/M^{(i)}\ge\|v\|_1^2/(\sum_i
 M^{(i)})\ge\|v\|_1^2\) whenever \(\sum_i M^{(i)}\le1\) (Cauchy--Schwarz), so the
-usual Pinsker-type bound for the generalized KL extends to the sub-probability
+usual Pinsker-type bound for the Bregman divergence extends to the sub-probability
 simplex \(\Delta_H\),
 \begin{align*}
 D_\Psi(M_{t+1}\|M_t)&\ge \tfrac12\|M_{t+1}-M_t\|_1^2, \\
@@ -1267,15 +1220,15 @@ satisfies \(t-j\ge 1\). By the triangle inequality and Lemma~\ref{lem:omd-move},
 \begin{lemma}[Control-action bounds relative to the benchmark trajectory]
 \label{lem:bounding-u-eff}
 For all \(t\),
-\begin{align}
+\begin{align*}
 u_t^{\mathcal{A}}
 &\ge
 \langle M_t,\widetilde{w}_t\rangle
-- \alpha\,[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}]_+,\label{eq:u-lower-bound-eff}\\[4pt]
+- \alpha\,[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}]_+ ,\\[4pt]
 u_t^{\mathcal{A}}
 &\le
-\langle M_t,\widetilde{w}_t\rangle.\label{eq:u-upper-bound-eff}
-\end{align}
+\langle M_t,\widetilde{w}_t\rangle.
+\end{align*}
 \end{lemma}
 
 \begin{proof}
@@ -1331,7 +1284,6 @@ For any fixed $M\in\Delta_H$ and every $t\ge 1$ the following two-sided recursio
 holds:
 \begin{align}
 \Gamma_{t+1}^M
-&= \alpha\Gamma_t^M - \bigl(u_t^{\pi(M)}-u_t^{\mathcal{A}}\bigr) \nonumber\\
 &\ge \alpha\Gamma_t^M + \langle M_t-M,\widetilde{w}_t\rangle - \alpha[\Gamma_t^{M_t}]_+ ,\label{eq:GAMMA-Lower}\\[4pt]
 \Gamma_{t+1}^M
 &\le \alpha\Gamma_t^M + \langle M_t-M,\widetilde{w}_t\rangle.\label{eq:GAMMA-Upper}
@@ -1501,8 +1453,6 @@ Let the state gap be defined by \eqref{eq:def-state-gap}. Then for all \(t\),
 \le
 u_t^{\pi(M_t)}-u_t^{\mathcal{A}}
 \le
-\alpha\,[\Gamma_t^{M_t}]_+
-\le
 \frac{\alpha^2\,\eta L}{(1-\alpha)^2}.
 \]
 \end{lemma}
@@ -1527,14 +1477,18 @@ As established in the proof of Lemma~\ref{lem:bounding-u-eff} (using feasibility
 \le
 \alpha\,[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}]_+
 =
-\alpha\,[\Gamma_t^{M_t}]_+ ,
+\alpha\,[\Gamma_t^{M_t}]_+ .
 \]
-which is the middle inequality. Finally, by Lemma~\ref{lem:state-gap-bound},
+By Lemma~\ref{lem:state-gap-bound},
 \([\Gamma_t^{M_t}]_+ \le \dfrac{\alpha\,\eta L}{(1-\alpha)^2}\), so
 \[
-\alpha\,[\Gamma_t^{M_t}]_+ \le \frac{\alpha^2\,\eta L}{(1-\alpha)^2},
+u_t^{\pi(M_t)}-u_t^{\mathcal{A}}
+\le
+\alpha\,[\Gamma_t^{M_t}]_+
+\le
+\frac{\alpha^2\,\eta L}{(1-\alpha)^2},
 \]
-which gives the rightmost inequality and completes the proof.
+which completes the proof.
 \end{proof}
 
 \begin{lemma}[Stability term]
@@ -1624,7 +1578,7 @@ regret:
 We call the first sum the stability term, and the second sum the OMD term. We will
 bound each term separately.
 
-We bound the OMD term using the mirror-descent update \eqref{eq:alg-omd-argmin} with
+We bound the OMD term using the OMD update \eqref{eq:alg-omd-argmin} with
 the unnormalized negentropy $\Psi$ and Bregman divergence $D_\Psi$ from
 \eqref{eq:def-negentropy}. Under the initialization \eqref{eq:alg-init}, for any
 benchmark $M^\star\in\Delta_H$ with $W^\star\triangleq\sum_{i=1}^H M^{\star(i)}\le
