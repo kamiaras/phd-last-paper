@@ -10,8 +10,8 @@
 \newtheorem{theorem}{Theorem}
 \newtheorem{corollary}{Corollary}
 
-\newcommand{\RegSDAC}[1]{\mathrm{Regret}_{\mathrm{SDAC}}(#1)}
-\newcommand{\RegLin}[1]{\mathrm{Regret}_{\mathrm{lin}}(#1)}
+\newcommand{\RegSDAC}[1]{\mathrm{Reg}_{\scriptscriptstyle\mathrm{SDAC}}(#1)}
+\newcommand{\RegLin}[1]{\mathrm{Reg}_{\mathrm{lin}}(#1)}
 
 \title{Online Constrained Control of Storage Systems via Simplex Disturbance-Action
 Policies}
@@ -443,16 +443,205 @@ The weights $\alpha^i$ align the disturbance filter with the retention factor
 $\alpha$ in \eqref{eq:model-dynamics}.
 
 
-First, feasibility is preserved within the class: for any fixed $M\in\Delta_H$, the
-induced trajectory under \eqref{eq:def-sdac-policy}--\eqref{eq:sdac-state-update}
-satisfies $0\le u_t^{\pi(M)}\le \alpha x_t^{\pi(M)}$ for all $t$ (see
-Lemma~\ref{lem:appendix-feasibility}).
+We now establish the two structural properties that make SDAC useful: the induced
+control action always satisfies the feasibility constraint
+\eqref{eq:model-feasibility}, and the induced cost is convex and Lipschitz in $M$, so
+that regret minimization against the best fixed SDAC policy is an instance of online
+convex optimization over the simplex. Both properties follow from an explicit
+decomposition of the state trajectory that isolates its dependence on $M$.
 
-Second, SDAC is compatible with online convex optimization. For fixed disturbance
-sequences, $u_t^{\pi(M)}$ is linear in $M$ by
-\eqref{eq:def-sdac-policy-vector}, and $x_t^{\pi(M)}$ is affine in $M$ (see
-Lemma~\ref{lem:appendix-state-decomp}). Therefore, since each $c_t$ is convex in
-$(x,u)$, the induced cost is convex in $M$ (see Lemma~\ref{lem:appendix-surrogate}).
+Recall that we set $w_\tau\equiv 0$ for $\tau\le 0$, which is used in the base-case
+arguments below.
+
+\begin{lemma}[State decomposition under SDAC]
+\label{lem:appendix-state-decomp}
+Fix $H\in\mathbb{N}$ and $M\in\Delta_H$, and write $W\triangleq\sum_{i=1}^H
+M^{(i)}\le 1$. Let $\pi(M)$ be defined by \eqref{eq:def-sdac-policy} and
+\eqref{eq:sdac-state-update}. Then for all $t\ge 2$,
+\begin{equation}
+\label{eq:appendix-state-decomp}
+x_t^{\pi(M)}
+=
+\sum_{i=1}^H M^{(i)}\psi_t^{(i)}
++\bigl(1-W\bigr)\rho_t
+=
+\langle M,\psi_t\rangle+(1-W)\rho_t,
+\end{equation}
+where
+\[
+\psi_t^{(i)} \triangleq \sum_{j=1}^{i}\alpha^{j-1}w_{t-j}
+\quad(i=1,\ldots,H),
+\]
+and
+\[
+\rho_t \triangleq \sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j}.
+\]
+Equivalently, $\rho_t$ is the state $x_t^{\pi(0)}$ produced by the null policy $M=0$
+(release nothing, $x_{\tau+1}=\alpha x_\tau+w_\tau$), and the coefficients satisfy
+$0\le \psi_t^{(i)}\le \rho_t\le 1/(1-\alpha)$. In particular, $M\mapsto
+x_t^{\pi(M)}$ is affine.
+\end{lemma}
+
+\begin{proof}
+Isolating the $j=1$ term in the definition
+of $\rho_{t+1}$ and reindexing gives the one-step identity
+$\rho_{t+1}=\alpha\rho_t+w_t$ (with $\rho_1=0$). We prove
+\eqref{eq:appendix-state-decomp} by induction on $t$.
+
+\emph{Base case $t=2$.} Since $x_1^{\pi(M)}=0$ and $w_{1-i}=0$ for all $i\ge 1$, the
+policy \eqref{eq:def-sdac-policy} gives $u_1^{\pi(M)}=\sum_{i=1}^H M^{(i)}\alpha^i
+w_{1-i}=0$, and the update \eqref{eq:sdac-state-update} gives $x_2^{\pi(M)}=\alpha
+x_1^{\pi(M)}-u_1^{\pi(M)}+w_1=w_1$. On the other hand $\psi_2^{(i)}=w_1$ for every
+$i$ and $\rho_2=w_1$, so $\langle M,\psi_2\rangle+(1-W)\rho_2=Ww_1+(1-W)w_1=w_1$,
+matching \eqref{eq:appendix-state-decomp}.
+
+\emph{Inductive step.} Assume \eqref{eq:appendix-state-decomp} holds at time $t\ge
+2$. Using \eqref{eq:def-sdac-policy}, \eqref{eq:sdac-state-update}, and the induction
+hypothesis,
+\[
+\begin{aligned}
+x_{t+1}^{\pi(M)}
+&= \alpha x_t^{\pi(M)} - \sum_{i=1}^H M^{(i)}\alpha^i w_{t-i} + w_t \\
+&= \Bigl(\alpha\langle M,\psi_t\rangle - \sum_{i=1}^H M^{(i)}\alpha^i w_{t-i}\Bigr) \\
+&\qquad + \alpha(1-W)\rho_t + w_t .
+\end{aligned}
+\]
+Reindexing the inner summation ($j\mapsto j+1$) yields
+\[
+\begin{aligned}
+&\alpha\langle M,\psi_t\rangle-\sum_{i=1}^H M^{(i)}\alpha^i w_{t-i} \\
+&\qquad=\sum_{i=1}^H M^{(i)}\!\left(\sum_{j=1}^{i-1}\alpha^j w_{t-j}\right) \\
+&\qquad=\sum_{i=1}^H M^{(i)}\bigl(\psi_{t+1}^{(i)}-w_t\bigr)
+=\langle M,\psi_{t+1}\rangle-W w_t ,
+\end{aligned}
+\]
+where the second equality uses $\psi_{t+1}^{(i)}=w_t+\sum_{j=1}^{i-1}\alpha^j
+w_{t-j}$. Substituting this together with $\rho_{t+1}=\alpha\rho_t+w_t$,
+\[
+\begin{aligned}
+x_{t+1}^{\pi(M)}
+&=\langle M,\psi_{t+1}\rangle - W w_t + \alpha(1-W)\rho_t + w_t \\
+&=\langle M,\psi_{t+1}\rangle + (1-W)\bigl(w_t+\alpha\rho_t\bigr) \\
+&=\langle M,\psi_{t+1}\rangle+(1-W)\rho_{t+1},
+\end{aligned}
+\]
+which is \eqref{eq:appendix-state-decomp} at time $t+1$.
+
+\emph{Bounds.} Each $\psi_t^{(i)}$ is the truncation to $j\le i$ of the nonnegative
+series defining $\rho_t$, so $0\le\psi_t^{(i)}\le\rho_t$; and since $w_\tau\in[0,1]$,
+the geometric series gives
+$\rho_t=\sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j}\le\sum_{j=1}^{\infty}\alpha^{j-1}=1/(1-\alpha)$.
+Affineness in $M$ is immediate, as $\psi_t$ and $\rho_t$ do not depend on $M$.
+\end{proof}
+
+The first consequence of this decomposition is that feasibility is preserved within
+the class.
+
+\begin{lemma}[Feasibility of SDAC policies]
+\label{lem:appendix-feasibility}
+For every fixed $M\in\Delta_H$, the trajectory induced by
+\eqref{eq:def-sdac-policy}--\eqref{eq:sdac-state-update} satisfies
+\[
+0\le u_t^{\pi(M)}\le \alpha x_t^{\pi(M)} \quad \text{for all } t\ge 1.
+\]
+\end{lemma}
+
+\begin{proof}
+Nonnegativity of $u_t^{\pi(M)}$ follows from \eqref{eq:def-sdac-policy}, because
+$M^{(i)}\ge 0$, $\alpha^i\ge 0$, and $w_{t-i}\ge 0$ for every $i$.
+
+For the upper bound at $t=1$, we have $x_1^{\pi(M)}=0$ and $w_{1-i}=0$ for all $i\ge
+1$, so $u_1^{\pi(M)}=0=\alpha x_1^{\pi(M)}$.
+
+Now fix $t\ge 2$. Lemma~\ref{lem:appendix-state-decomp} gives $x_t^{\pi(M)}=\langle
+M,\psi_t\rangle+(1-W)\rho_t$ with $W=\sum_{i=1}^H M^{(i)}\le 1$. Since
+$(1-W)\rho_t\ge 0$,
+\[
+\begin{aligned}
+\alpha x_t^{\pi(M)}
+&\ge \alpha\langle M,\psi_t\rangle
+= \alpha\sum_{i=1}^H M^{(i)}\!\left(\sum_{j=1}^{i}\alpha^{j-1}w_{t-j}\right) \\
+&= \sum_{i=1}^H M^{(i)}\!\left(\sum_{j=1}^{i}\alpha^j w_{t-j}\right).
+\end{aligned}
+\]
+Collecting the coefficient of each $w_{t-i}$ and using that all parameters are
+nonnegative, for every $i$ we have $\sum_{j=i}^{H} M^{(j)} \ge M^{(i)}$, so
+\[
+\begin{aligned}
+\alpha x_t^{\pi(M)}
+&\ge
+\sum_{i=1}^{H}\left(\sum_{j=i}^{H}M^{(j)}\right)\alpha^i w_{t-i} \\
+&\ge
+\sum_{i=1}^{H}M^{(i)}\alpha^i w_{t-i}
+=
+u_t^{\pi(M)},
+\end{aligned}
+\]
+since $w_{t-i}\ge 0$.
+\end{proof}
+
+The second consequence is that SDAC is compatible with online convex optimization:
+for fixed disturbance sequences, $u_t^{\pi(M)}$ is linear in $M$ by
+\eqref{eq:def-sdac-policy-vector}, and $x_t^{\pi(M)}$ is affine in $M$ by
+Lemma~\ref{lem:appendix-state-decomp}. Since each $c_t$ is convex in $(x,u)$, this
+already shows the induced cost is convex in $M$; the next lemma also quantifies its
+Lipschitz constant, which we use later to tune the online algorithm's step size.
+
+\begin{lemma}[Convexity and Lipschitz continuity of surrogate cost]
+\label{lem:appendix-surrogate}
+Define
+\[
+\ell_t(M) \triangleq c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr), \qquad M\in\Delta_H.
+\]
+Then $\ell_t$ is convex on $\Delta_H$, and for all $M,M'\in\Delta_H$,
+\[
+|\ell_t(M)-\ell_t(M')|
+\le
+\left(\frac{L_x}{1-\alpha}+\alpha L_u\right)\|M-M'\|_1.
+\]
+\end{lemma}
+
+\begin{proof}
+By Lemma~\ref{lem:appendix-state-decomp} and
+\eqref{eq:def-sdac-policy-vector}, with $W=\sum_{i=1}^H M^{(i)}$,
+\[
+\ell_t(M)=c_t\bigl(\langle M,\psi_t\rangle+(1-W)\rho_t,\ \langle
+M,\widetilde{w}_t\rangle\bigr).
+\]
+The map $M\mapsto\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr)$ is affine
+(Lemma~\ref{lem:appendix-state-decomp} and
+\eqref{eq:def-sdac-policy-vector}) and $c_t$ is convex, so $\ell_t$ is convex.
+
+For the Lipschitz estimate, the decomposition gives, for all $M,M'\in\Delta_H$,
+\[
+\begin{aligned}
+x_t^{\pi(M)}-x_t^{\pi(M')}
+&=\langle M-M',\psi_t\rangle-(W-W')\rho_t \\
+&=\langle M-M',\,\psi_t-\rho_t\mathbf{1}\rangle,
+\end{aligned}
+\]
+using $W-W'=\langle M-M',\mathbf{1}\rangle$, while
+$u_t^{\pi(M)}-u_t^{\pi(M')}=\langle M-M',\widetilde{w}_t\rangle$. Hence, by
+\eqref{eq:model-lipschitz} and Hölder's inequality,
+\begin{align*}
+|\ell_t(M)-\ell_t(M')|
+&\le L_x\bigl|\langle M-M',\,\psi_t-\rho_t\mathbf{1}\rangle\bigr| \\
+&\quad + L_u\bigl|\langle M-M',\widetilde{w}_t\rangle\bigr| \\
+&\le \bigl(L_x\,\|\psi_t-\rho_t\mathbf{1}\|_\infty + L_u\,\|\widetilde{w}_t\|_\infty\bigr) \\
+&\qquad\cdot\|M-M'\|_1.
+\end{align*}
+Since $0\le\psi_t^{(i)}\le\rho_t\le 1/(1-\alpha)$
+(Lemma~\ref{lem:appendix-state-decomp}), we have
+$\|\psi_t-\rho_t\mathbf{1}\|_\infty=\max_i\bigl(\rho_t-\psi_t^{(i)}\bigr)\le\rho_t\le
+1/(1-\alpha)$, and $\|\widetilde{w}_t\|_\infty=\max_i\alpha^i w_{t-i}\le\alpha$
+because $w_\tau\in[0,1]$ and $i\ge 1$. This yields the claim, and one may take the
+surrogate Lipschitz constant
+\[
+L := \alpha L_u + \frac{L_x}{1-\alpha},
+\]
+as used in the main text.
+\end{proof}
+
 Regret minimization against the best fixed SDAC policy thus becomes online convex
 optimization over the simplex.
 
@@ -672,16 +861,6 @@ gives
 \]
 \end{theorem}
 
-\begin{proof}[Proof sketch]
-By Lemma~\ref{lem:appendix-surrogate}, the surrogate costs are convex and
-\(L\)-Lipschitz. OMD on $\Delta_H$, initialized as in
-\eqref{eq:alg-init}, yields Bregman diameter at most $\log(H+1)$, so the OMD term is
-bounded by \(\log(H+1)/\eta + \eta L^2T/2\).
-The remaining stability term is controlled by
-Lemmas~\ref{lem:omd-move}--\ref{lem:stab-sum}, which together contribute at most
-\(\tfrac{\alpha}{(1-\alpha)^2}\,\eta L^2T\). Combining the two bounds yields the
-claim.
-\end{proof}
 
 Combining Theorem~\ref{thm:regret-bound} with the approximation guarantee of
 Lemma~\ref{lem:sdac-linear-approx} shows that the controller is competitive not only
@@ -772,8 +951,9 @@ state constraints in real time.
 \section{Deferred Proofs}
 \label{sec:appendix-proofs}
 
-This appendix collects the deferred proofs for structural SDAC properties used in
-Section~\ref{sec:sdac} and the regret bound stated in
+This appendix collects the deferred proof of the linear-state-feedback
+approximation guarantee from Section~\ref{sec:sdac}, together with the OMD and
+stability lemmas leading up to the regret bound stated in
 Section~\ref{sec:regret-analysis}.
 
 Recall that we set $w_\tau\equiv 0$ for $\tau\le 0$, which is used in several
@@ -858,184 +1038,11 @@ for each $t$,
 Summing over $t=1,\ldots,T$ and applying the triangle inequality yields Part 4.
 \end{proof}
 
-\begin{lemma}[State decomposition under SDAC]
-\label{lem:appendix-state-decomp}
-Fix $H\in\mathbb{N}$ and $M\in\Delta_H$, and write $W\triangleq\sum_{i=1}^H
-M^{(i)}\le 1$. Let $\pi(M)$ be defined by \eqref{eq:def-sdac-policy} and
-\eqref{eq:sdac-state-update}. Then for all $t\ge 2$,
-\begin{equation}
-\label{eq:appendix-state-decomp}
-x_t^{\pi(M)}
-=
-\sum_{i=1}^H M^{(i)}\psi_t^{(i)}
-+\bigl(1-W\bigr)\rho_t
-=
-\langle M,\psi_t\rangle+(1-W)\rho_t,
-\end{equation}
-where
-\[
-\psi_t^{(i)} \triangleq \sum_{j=1}^{i}\alpha^{j-1}w_{t-j}
-\quad(i=1,\ldots,H),
-\]
-and
-\[
-\rho_t \triangleq \sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j}.
-\]
-Equivalently, $\rho_t$ is the state $x_t^{\pi(0)}$ produced by the null policy $M=0$
-(release nothing, $x_{\tau+1}=\alpha x_\tau+w_\tau$), and the coefficients satisfy
-$0\le \psi_t^{(i)}\le \rho_t\le 1/(1-\alpha)$. In particular, $M\mapsto
-x_t^{\pi(M)}$ is affine.
-\end{lemma}
-
-\begin{proof}
-Recall $w_\tau\equiv 0$ for $\tau\le 0$. Isolating the $j=1$ term in the definition
-of $\rho_{t+1}$ and reindexing gives the one-step identity
-$\rho_{t+1}=\alpha\rho_t+w_t$ (with $\rho_1=0$). We prove
-\eqref{eq:appendix-state-decomp} by induction on $t$.
-
-\emph{Base case $t=2$.} Since $x_1^{\pi(M)}=0$ and $w_{1-i}=0$ for all $i\ge 1$, the
-policy \eqref{eq:def-sdac-policy} gives $u_1^{\pi(M)}=\sum_{i=1}^H M^{(i)}\alpha^i
-w_{1-i}=0$, and the update \eqref{eq:sdac-state-update} gives $x_2^{\pi(M)}=\alpha
-x_1^{\pi(M)}-u_1^{\pi(M)}+w_1=w_1$. On the other hand $\psi_2^{(i)}=w_1$ for every
-$i$ and $\rho_2=w_1$, so $\langle M,\psi_2\rangle+(1-W)\rho_2=Ww_1+(1-W)w_1=w_1$,
-matching \eqref{eq:appendix-state-decomp}.
-
-\emph{Inductive step.} Assume \eqref{eq:appendix-state-decomp} holds at time $t\ge
-2$. Using \eqref{eq:def-sdac-policy}, \eqref{eq:sdac-state-update}, and the induction
-hypothesis,
-\[
-\begin{aligned}
-x_{t+1}^{\pi(M)}
-&= \alpha x_t^{\pi(M)} - \sum_{i=1}^H M^{(i)}\alpha^i w_{t-i} + w_t \\
-&= \Bigl(\alpha\langle M,\psi_t\rangle - \sum_{i=1}^H M^{(i)}\alpha^i w_{t-i}\Bigr) \\
-&\qquad + \alpha(1-W)\rho_t + w_t .
-\end{aligned}
-\]
-Reindexing the inner summation ($j\mapsto j+1$) yields
-\[
-\begin{aligned}
-&\alpha\langle M,\psi_t\rangle-\sum_{i=1}^H M^{(i)}\alpha^i w_{t-i} \\
-&\qquad=\sum_{i=1}^H M^{(i)}\!\left(\sum_{j=1}^{i-1}\alpha^j w_{t-j}\right) \\
-&\qquad=\sum_{i=1}^H M^{(i)}\bigl(\psi_{t+1}^{(i)}-w_t\bigr)
-=\langle M,\psi_{t+1}\rangle-W w_t ,
-\end{aligned}
-\]
-where the second equality uses $\psi_{t+1}^{(i)}=w_t+\sum_{j=1}^{i-1}\alpha^j
-w_{t-j}$. Substituting this together with $\rho_{t+1}=\alpha\rho_t+w_t$,
-\[
-\begin{aligned}
-x_{t+1}^{\pi(M)}
-&=\langle M,\psi_{t+1}\rangle - W w_t + \alpha(1-W)\rho_t + w_t \\
-&=\langle M,\psi_{t+1}\rangle + (1-W)\bigl(w_t+\alpha\rho_t\bigr) \\
-&=\langle M,\psi_{t+1}\rangle+(1-W)\rho_{t+1},
-\end{aligned}
-\]
-which is \eqref{eq:appendix-state-decomp} at time $t+1$.
-
-\emph{Bounds.} Each $\psi_t^{(i)}$ is the truncation to $j\le i$ of the nonnegative
-series defining $\rho_t$, so $0\le\psi_t^{(i)}\le\rho_t$; and since $w_\tau\in[0,1]$,
-the geometric series gives
-$\rho_t=\sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j}\le\sum_{j=1}^{\infty}\alpha^{j-1}=1/(1-\alpha)$.
-Affineness in $M$ is immediate, as $\psi_t$ and $\rho_t$ do not depend on $M$.
-\end{proof}
-
-\begin{lemma}[Feasibility of SDAC policies]
-\label{lem:appendix-feasibility}
-For every fixed $M\in\Delta_H$, the trajectory induced by
-\eqref{eq:def-sdac-policy}--\eqref{eq:sdac-state-update} satisfies
-\[
-0\le u_t^{\pi(M)}\le \alpha x_t^{\pi(M)} \quad \text{for all } t\ge 1.
-\]
-\end{lemma}
-
-\begin{proof}
-Nonnegativity of $u_t^{\pi(M)}$ follows from \eqref{eq:def-sdac-policy}, because
-$M^{(i)}\ge 0$, $\alpha^i\ge 0$, and $w_{t-i}\ge 0$ for every $i$.
-
-For the upper bound at $t=1$, we have $x_1^{\pi(M)}=0$ and $w_{1-i}=0$ for all $i\ge
-1$, so $u_1^{\pi(M)}=0=\alpha x_1^{\pi(M)}$.
-
-Now fix $t\ge 2$. Lemma~\ref{lem:appendix-state-decomp} gives $x_t^{\pi(M)}=\langle
-M,\psi_t\rangle+(1-W)\rho_t$ with $W=\sum_{i=1}^H M^{(i)}\le 1$. Since
-$(1-W)\rho_t\ge 0$,
-\[
-\begin{aligned}
-\alpha x_t^{\pi(M)}
-&\ge \alpha\langle M,\psi_t\rangle
-= \alpha\sum_{i=1}^H M^{(i)}\!\left(\sum_{j=1}^{i}\alpha^{j-1}w_{t-j}\right) \\
-&= \sum_{i=1}^H M^{(i)}\!\left(\sum_{j=1}^{i}\alpha^j w_{t-j}\right).
-\end{aligned}
-\]
-Collecting the coefficient of each $w_{t-i}$ and using that all parameters are
-nonnegative, for every $i$ we have $\sum_{j=i}^{H} M^{(j)} \ge M^{(i)}$, so
-\[
-\begin{aligned}
-\alpha x_t^{\pi(M)}
-&\ge
-\sum_{i=1}^{H}\left(\sum_{j=i}^{H}M^{(j)}\right)\alpha^i w_{t-i} \\
-&\ge
-\sum_{i=1}^{H}M^{(i)}\alpha^i w_{t-i}
-=
-u_t^{\pi(M)},
-\end{aligned}
-\]
-since $w_{t-i}\ge 0$.
-\end{proof}
-
-\begin{lemma}[Convexity and Lipschitz continuity of surrogate cost]
-\label{lem:appendix-surrogate}
-Define
-\[
-\ell_t(M) \triangleq c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr), \qquad M\in\Delta_H.
-\]
-Then $\ell_t$ is convex on $\Delta_H$, and for all $M,M'\in\Delta_H$,
-\[
-|\ell_t(M)-\ell_t(M')|
-\le
-\left(\frac{L_x}{1-\alpha}+\alpha L_u\right)\|M-M'\|_1.
-\]
-\end{lemma}
-
-\begin{proof}
-By Lemma~\ref{lem:appendix-state-decomp} and
-\eqref{eq:def-sdac-policy-vector}, with $W=\sum_{i=1}^H M^{(i)}$,
-\[
-\ell_t(M)=c_t\bigl(\langle M,\psi_t\rangle+(1-W)\rho_t,\ \langle
-M,\widetilde{w}_t\rangle\bigr).
-\]
-The map $M\mapsto\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr)$ is affine
-(Lemma~\ref{lem:appendix-state-decomp} and
-\eqref{eq:def-sdac-policy-vector}) and $c_t$ is convex, so $\ell_t$ is convex.
-
-For the Lipschitz estimate, the decomposition gives, for all $M,M'\in\Delta_H$,
-\[
-\begin{aligned}
-x_t^{\pi(M)}-x_t^{\pi(M')}
-&=\langle M-M',\psi_t\rangle-(W-W')\rho_t \\
-&=\langle M-M',\,\psi_t-\rho_t\mathbf{1}\rangle,
-\end{aligned}
-\]
-using $W-W'=\langle M-M',\mathbf{1}\rangle$, while
-$u_t^{\pi(M)}-u_t^{\pi(M')}=\langle M-M',\widetilde{w}_t\rangle$. Hence, by
-\eqref{eq:model-lipschitz} and Hölder's inequality,
-\begin{align*}
-|\ell_t(M)-\ell_t(M')|
-&\le L_x\bigl|\langle M-M',\,\psi_t-\rho_t\mathbf{1}\rangle\bigr| \\
-&\quad + L_u\bigl|\langle M-M',\widetilde{w}_t\rangle\bigr| \\
-&\le \bigl(L_x\,\|\psi_t-\rho_t\mathbf{1}\|_\infty + L_u\,\|\widetilde{w}_t\|_\infty\bigr) \\
-&\qquad\cdot\|M-M'\|_1.
-\end{align*}
-Since $0\le\psi_t^{(i)}\le\rho_t\le 1/(1-\alpha)$
-(Lemma~\ref{lem:appendix-state-decomp}), we have
-$\|\psi_t-\rho_t\mathbf{1}\|_\infty=\max_i\bigl(\rho_t-\psi_t^{(i)}\bigr)\le\rho_t\le
-1/(1-\alpha)$, and $\|\widetilde{w}_t\|_\infty=\max_i\alpha^i w_{t-i}\le\alpha$
-because $w_\tau\in[0,1]$ and $i\ge 1$. This yields the claim, and one may take the
-surrogate Lipschitz constant
-\[
-L := \alpha L_u + \frac{L_x}{1-\alpha},
-\]
-as used in the main text.
-\end{proof}
+The remaining lemmas establish the OMD and stability estimates used in the proof of
+Theorem~\ref{thm:regret-bound}; they rely on the state-decomposition, feasibility,
+and surrogate-cost lemmas already established in Section~\ref{sec:sdac}
+(Lemmas~\ref{lem:appendix-state-decomp}, \ref{lem:appendix-feasibility}, and
+\ref{lem:appendix-surrogate}).
 
 \begin{lemma}[Bregman projection onto $\Delta_H$]
 \label{lem:bregman-projection}
