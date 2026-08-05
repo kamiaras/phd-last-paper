@@ -10,7 +10,8 @@
 \newtheorem{theorem}{Theorem}
 \newtheorem{corollary}{Corollary}
 
-\title{Online Constrained Control of Storage Systems via Simplex Disturbance-Action Policies}
+\title{Online Constrained Control of Storage Systems via Simplex Disturbance-Action
+Policies}
 
 \author{Kamiar~Asgari and Michael~J.~Neely%
 \thanks{K.~Asgari and M.~J.~Neely are with the Department of Electrical and
@@ -26,89 +27,238 @@ Computer Engineering, University of Southern California, Los Angeles, CA 90089 U
 \maketitle
 
 \begin{abstract}
-We study online control of a scalar system under adversarial disturbances, convex stage costs, and state-dependent action constraints. At each time, the controller must choose a feasible action before observing that time's disturbance and cost. We introduce \emph{Simplex Disturbance-Action Control} (SDAC), a simplex-constrained disturbance-action policy class that preserves per-step feasibility by construction. An online controller updates SDAC parameters via exponentiated gradient on the sub-probability simplex, with a feasibility projection that enforces the state-dependent action constraint. We prove regret that is sublinear in the horizon and logarithmic in the policy dimension against the best fixed SDAC policy in hindsight, implying no-regret relative to feasible linear state-feedback policies. The setting is motivated by energy-harvesting battery management and similar storage systems.
+We study online control of a scalar system under adversarial disturbances, convex
+cost functions, and state-dependent action constraints. At each time, the controller
+must choose a feasible action before observing the corresponding disturbance and
+cost. We introduce \emph{Simplex Disturbance-Action Control} (SDAC), a
+simplex-constrained disturbance-action policy class that preserves per-step
+feasibility by construction. An online controller updates SDAC parameters via
+exponentiated gradient on the sub-probability simplex, with a feasibility projection
+that enforces the state-dependent action constraint. We prove regret that is
+sublinear in the horizon and logarithmic in the policy dimension against the best
+fixed SDAC policy in hindsight, implying no-regret relative to feasible linear
+state-feedback policies. The setting is motivated by energy-harvesting battery
+management and similar storage systems.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Online control, disturbance-action policies, storage systems, energy harvesting, regret minimization, state constraints.
+Online control, disturbance-action policies, storage systems, energy harvesting,
+regret minimization, state constraints.
 \end{IEEEkeywords}
 
 \section{Introduction}
 \label{sec:introduction}
 
 \subsection{Motivation and Problem Setting}
-\IEEEPARstart{M}{any} dynamic resource systems can be modeled by a storage state that evolves over time and constrains the control action at every time. The controller must choose a action subject to state-dependent constraints before observing that time's disturbance and cost.
+\IEEEPARstart{M}{any} dynamic resource systems can be modeled by a storage state that
+evolves over time and constrains the control action at every time. The controller
+must choose an action subject to state-dependent constraints before observing the
+corresponding disturbance and cost.
 
-This creates a constrained discrete-time control problem with state--control coupling: aggressive early control actions can harm later performance, while overly conservative actions can increase immediate cost. Our objective is to design a policy that remains feasible at every time and competes with the best fixed policy in a rich policy class—one expressive enough to capture many strong policies.
+This creates a constrained discrete-time control problem with state--control
+coupling: aggressive early control actions can harm later performance, while overly
+conservative actions can increase per-step cost. Our objective is to design a policy
+that remains feasible at every time and competes with the best fixed policy in a rich
+policy class—one expressive enough to capture many strong policies.
 
 \subsection{Model and Information Structure}
-We study a discrete-time storage system with state $x_t \geq 0$, where $x_t$ models the storage level at the beginning of time $t$. At each time $t$, the controller chooses a control action $u_t$ under the \emph{state constraints}
+We study a discrete-time storage system with state $x_t \geq 0$, where $x_t$ models
+the storage level at the beginning of time $t$. At each time $t$, the controller
+chooses a control action $u_t$ under the \emph{state constraints}
 \[
 0 \leq u_t \leq \alpha x_t,
 \]
-where $\alpha\in(0,1)$ is a fixed known state-retention factor (so a fraction $1-\alpha$ of the state is lost each period). After the action is chosen, an adversarial disturbance $w_t$ arrives, and the state evolves according to
+where $\alpha\in(0,1)$ is a fixed known state-retention factor (so a fraction
+$1-\alpha$ of the state is lost each period). After the action is chosen, an
+adversarial disturbance $w_t$ arrives, and the state evolves according to
 \[
 x_{t+1} = \alpha x_t - u_t + w_t.
 \]
 
-Unlike stochastic application models that rely on distributional assumptions, our formulation is adversarial. Disturbances $w_t$ and costs $c_t(x, u)$ may vary arbitrarily over time, and the controller chooses $u_t$ before observing either at time $t$. The goal is low cumulative cost relative to the best fixed policy in a later-defined policy class, while both our algorithm and the benchmark policy maintain feasibility throughout.
+Unlike stochastic application models that rely on distributional assumptions, our
+formulation is adversarial. Disturbances $w_t$ and costs $c_t(x, u)$ may vary
+arbitrarily over time, and the controller chooses $u_t$ before observing either at
+time $t$. The goal is low cumulative cost relative to the best fixed policy in a
+later-defined policy class, while both our algorithm and the benchmark policy
+maintain feasibility throughout.
  
 \subsection{Application Domains}
 This abstraction captures a broad set of domains:
 \begin{itemize}
-    \item \textbf{Energy Harvesting and Battery Management:} $x_t$ is battery state of charge (retention factor $\alpha$ after self-discharge), $w_t$ is harvested energy, and $u_t$ is discharge or consumption bounded by available energy $\alpha x_t$.
-    \item \textbf{Queueing Networks and Buffer Management:} $x_t$ is queue/buffer occupancy (retention factor $\alpha$ after abandonment/leakage), $w_t$ is packet arrivals, and $u_t$ is service bounded by $\alpha x_t$.
-    \item \textbf{Inventory Control:} $x_t$ is on-hand inventory (retention factor $\alpha$ after spoilage/deterioration), $w_t$ is supply or replenishment, and $u_t$ is sales bounded by $\alpha x_t$.
-    \item \textbf{Investments and Bank Accounts:} $x_t$ is liquid capital/balance (retention factor $\alpha$ after fees), $w_t$ is incoming cash flow, and $u_t$ is capital deployment or withdrawal bounded by $\alpha x_t$.
-    \item \textbf{Water Reservoir and Dam Management:} $x_t$ is stored water (retention factor $\alpha$ after evaporation/seepage), $w_t$ is inflow, and $u_t$ is controlled release bounded by $\alpha x_t$.
+    \item \textbf{Energy Harvesting and Battery Management:} $x_t$ is battery state
+        of charge (retention factor $\alpha$ after self-discharge), $w_t$ is
+        harvested energy, and $u_t$ is discharge or consumption bounded by available
+        energy $\alpha x_t$.
+    \item \textbf{Queueing Networks and Buffer Management:} $x_t$ is queue/buffer
+        occupancy (retention factor $\alpha$ after abandonment/leakage), $w_t$ is
+        packet arrivals, and $u_t$ is service bounded by $\alpha x_t$.
+    \item \textbf{Inventory Control:} $x_t$ is on-hand inventory (retention factor
+        $\alpha$ after spoilage/deterioration), $w_t$ is supply or replenishment, and
+        $u_t$ is sales bounded by $\alpha x_t$.
+    \item \textbf{Investments and Bank Accounts:} $x_t$ is liquid capital/balance
+        (retention factor $\alpha$ after fees), $w_t$ is incoming cash flow, and
+        $u_t$ is capital deployment or withdrawal bounded by $\alpha x_t$.
+    \item \textbf{Water Reservoir and Dam Management:} $x_t$ is stored water
+        (retention factor $\alpha$ after evaporation/seepage), $w_t$ is inflow, and
+        $u_t$ is controlled release bounded by $\alpha x_t$.
 \end{itemize}
 
 
 %\subsection{Related Work}
 %\paragraph{Queueing and Network Optimization}
-%The queueing-network literature has extensively studied systems with arrivals, storage (queues), and controlled service/allocations. A classical line of work focuses on \emph{adversarial queueing theory} (AQT), where arrivals and routing decisions may be chosen adversarially and the primary objective is to establish stability (i.e., bounded queue lengths) under appropriate load conditions \cite{borodin2001adversarial, gamarnik1998stability, kiwi2005survey}. While this model shares structural similarities with our setting in allowing worst-case inputs, its scope is fundamentally different: the goal is stability rather than optimization of a cost function, and no notion of regret or comparison to an optimal dynamic policy is considered. Moreover, in many classical adversarial queueing formulations, actions are \emph{discrete} (e.g., routing or scheduling decisions), whereas our setting considers \emph{continuous allocation decisions}.
+%The queueing-network literature has extensively studied systems with arrivals,
+%storage (queues), and controlled service/allocations. A classical line of work
+%focuses on \emph{adversarial queueing theory} (AQT), where arrivals and routing
+%decisions may be chosen adversarially and the primary objective is to establish
+%stability (i.e., bounded queue lengths) under appropriate load conditions
+%\cite{borodin2001adversarial, gamarnik1998stability, kiwi2005survey}. While this
+%model shares structural similarities with our setting in allowing worst-case inputs,
+%its scope is fundamentally different: the goal is stability rather than optimization
+%of a cost function, and no notion of regret or comparison to an optimal dynamic
+%policy is considered. Moreover, in many classical adversarial queueing formulations,
+%actions are \emph{discrete} (e.g., routing or scheduling decisions), whereas our
+%setting considers \emph{continuous allocation decisions}.
 
-%A second major line is \emph{stochastic network optimization} based on Lyapunov-drift arguments \cite{neely2010stochastic, georgiadis2006resource}. These works assume stochastic arrivals and network conditions and design policies (e.g., max-weight or drift-plus-penalty) that achieve near-optimal time-average utility while ensuring queue stability. In these formulations, the stage utility (equivalently, negative cost) is modeled primarily as a function of the current control action, with queue states entering through stability constraints and drift terms rather than through a joint state-action adversarial loss. In addition, many formulations use discrete or finitely parameterized action sets (e.g., selecting from a finite set of rates or schedules), in contrast to our continuous decision space.
+%A second major line is \emph{stochastic network optimization} based on
+%Lyapunov-drift arguments \cite{neely2010stochastic, georgiadis2006resource}. These
+%works assume stochastic arrivals and network conditions and design policies (e.g.,
+%max-weight or drift-plus-penalty) that achieve near-optimal time-average utility
+%while ensuring queue stability. In these formulations, the stage utility
+%(equivalently, negative cost) is modeled primarily as a function of the current
+%control action, with queue states entering through stability constraints and drift
+%terms rather than through a joint state-action adversarial loss. In addition, many
+%formulations use discrete or finitely parameterized action sets (e.g., selecting
+%from a finite set of rates or schedules), in contrast to our continuous decision
+%space.
 
-%A related direction is online convex optimization with long-term constraints using virtual queues to handle long-term constraints \cite{mahdavi2012trading, jenatton2016adaptive, yu2017online, JMLR:v21:16-494}. These works allow adversarial convex costs and provide regret and long-term constraint violation guarantees. However, the queueing structure is typically auxiliary, serving to enforce constraints rather than modeling a system's dynamic, and the objective does not explicitly depend on the evolving queue state. Furthermore, the benchmarks are standard regret notions relative to fixed comparators, rather than policies that account for state evolution.
+%A related direction is online convex optimization with long-term constraints using
+%virtual queues to handle long-term constraints \cite{mahdavi2012trading,
+%jenatton2016adaptive, yu2017online, JMLR:v21:16-494}. These works allow adversarial
+%convex costs and provide regret and long-term constraint violation guarantees.
+%However, the queueing structure is typically auxiliary, serving to enforce
+%constraints rather than modeling a system's dynamic, and the objective does not
+%explicitly depend on the evolving queue state. Furthermore, the benchmarks are
+%standard regret notions relative to fixed comparators, rather than policies that
+%account for state evolution.
 
 
 
 \paragraph{Energy Harvesting and Battery Management}
-A closely related work is \cite{lin2025optimal}, which studies an online energy-harvesting allocation problem with dynamics similar to ours. That work benchmarks against the best sequence of decisions in hindsight, but it differs in several important ways: \cite{lin2025optimal} uses competitive ratio rather than regret, adopts an action-only cost model rather than general convex state-action costs, which means in particular that it cannot optimize a function of the battery size, and it has a less adversarial information pattern because the algorithm observes the current cost before selecting the action, whereas in our model the control action is chosen before the cost is revealed.
+A closely related work is \cite{lin2025optimal}, which studies an online
+energy-harvesting allocation problem with dynamics similar to ours. That work
+benchmarks against the best sequence of decisions in hindsight, but it differs in
+several important ways: \cite{lin2025optimal} uses competitive ratio rather than
+regret, adopts an action-only cost model rather than general convex state-action
+costs, which means in particular that it cannot optimize a function of the battery
+size, and it has a less adversarial information pattern because the algorithm
+observes the current cost before selecting the action, whereas in our model the
+control action is chosen before the cost is revealed.
 
-Prior work on energy harvesting includes \cite{10.1145/3428337}, which improves over \cite{Yu2019} by achieving $O(\sqrt{T})$ regret with finite battery and adversarial costs (versus the stochastic costs in \cite{Yu2019}). Both works consider action-only costs (not state-dependent), i.i.d. disturbances (not adversarial), and benchmark against fixed allocation amounts rather than fixed policies. In contrast, our framework jointly optimizes over state-action stage costs, adversarial disturbances, and stronger benchmarks, requiring new algorithmic techniques.
+Prior work on energy harvesting includes \cite{Yu2019}, which studies online
+allocation with stochastic costs, and \cite{10.1145/3428337}, which improves over
+\cite{Yu2019} by achieving $O(\sqrt{T})$ regret with finite battery and adversarial
+costs. Both works consider action-only costs (not state-dependent), i.i.d.
+disturbances (not adversarial), and benchmark against fixed allocation amounts rather
+than fixed policies. In contrast, our framework jointly optimizes over state-action
+costs, adversarial disturbances, and stronger benchmarks, requiring new
+algorithmic techniques.
 
 
 \paragraph{Queueing and Network Optimization}
 
-An alternative, though mathematically related, perspective comes from queueing control in computer networks and telecommunications. In that framework, one tracks a queue with stochastic arrivals and makes real-time service decisions, typically aiming to minimize long-run average service cost while keeping queue lengths stable. This literature is extensive (see, e.g., \cite{tassiulas1990stability,tassiulas1993dynamic,mckeown1999achieving,neely2010stochastic}), but its setting differs from ours in several important respects. Classical queueing work usually assumes stochastic arrivals and focuses on simple, known cost functions that depend only on the service rate, while queue length is kept small. These methods achieve trade-offs between queue size and time-average service cost. By contrast, our model permits fully adversarial sequences of  disturbances and stage costs and allows general convex costs that depend on both the queue length (state) and the service rate (control action). Thus our approach is more general in cost structure and exogenous-disturbance model. The queueing literature provides useful motivation and techniques for state-coupled dynamics, but does not directly address the online optimization and regret-minimization objectives we study.
+An alternative, though mathematically related, perspective comes from queueing
+control in computer networks and telecommunications. In that framework, one tracks a
+queue with stochastic arrivals and makes real-time service decisions, typically
+aiming to minimize long-run average service cost while keeping queue lengths stable.
+This literature is extensive (see, e.g.,
+\cite{tassiulas1990stability,tassiulas1993dynamic,mckeown1999achieving,neely2010stochastic}),
+but its setting differs from ours in several important respects. Classical queueing
+work usually assumes stochastic arrivals and focuses on simple, known cost functions
+that depend only on the service rate, while queue length is kept small. These methods
+achieve trade-offs between queue size and time-average service cost. By contrast, our
+model permits fully adversarial sequences of disturbances and cost functions and allows
+general convex costs that depend on both the queue length (state) and the service
+rate (control action). Thus our approach is more general in cost structure and
+exogenous-disturbance model. The queueing literature provides useful motivation and
+techniques for state-coupled dynamics, but does not directly address the online
+optimization and regret-minimization objectives we study.
 
-Another related work is \cite{khojastepour2004delay}, which proposes and analyzes a fixed controller that is a linear function of past arrivals. That controller resembles our family of SDAC policies because it uses nonnegative filter weights that sum to one (summing to at most one for SDAC). However, the controller in \cite{khojastepour2004delay} is not updated online and is chosen to achieve bounded service delay; by contrast, our framework focuses on online optimization of a general cost and does not treat delay as a constraint.
+Another related work is \cite{khojastepour2004delay}, which proposes and analyzes a
+fixed controller that is a linear function of past arrivals. That controller
+resembles our family of SDAC policies because it uses nonnegative filter weights that
+sum to one (summing to at most one for SDAC). However, the controller in
+\cite{khojastepour2004delay} is not updated online and is chosen to achieve bounded
+service delay; by contrast, our framework focuses on online optimization of a general
+cost and does not treat delay as a constraint.
 
 \paragraph{Inventory Management}
 
-A related work is \cite{yang2020online}, which studies a distinct model in which demand (equivalent to allocation in our setup) is chosen adversarially, while the controller chooses the supply (equivalent to disturbances in our model). The objective is to minimize time-average purchasing cost while always meeting demand, and the performance metric is competitive ratio rather than regret. Although structurally similar to our setting, the control variable differs: we choose the control action from the feasible state bound, whereas \cite{yang2020online} chooses how much to procure. Another key difference is the cost model: our framework allows general convex state-action stage costs, while \cite{yang2020online} uses a linear cost depending only on the control action.
+A related work is \cite{yang2020online}, which studies a distinct model in which
+demand (equivalent to allocation in our setup) is chosen adversarially, while the
+controller chooses the supply (equivalent to disturbances in our model). The
+objective is to minimize time-average purchasing cost while always meeting demand,
+and the performance metric is competitive ratio rather than regret. Although
+structurally similar to our setting, the control variable differs: we choose the
+control action from the feasible state bound, whereas \cite{yang2020online} chooses
+how much to procure. Another key difference is the cost model: our framework allows
+general convex state-action costs, while \cite{yang2020online} uses a linear
+cost depending only on the control action.
 
 
-More closely related to ours is \cite{hihat2024online}, which considers an inventory-control formulation with potentially nonlinear and nondifferentiable state-transition functions, and studies base-stock policies. While that model is more general in scope, its decision structure differs from ours: as in \cite{yang2020online}, the controller chooses supply (inflow) and then observes demand (allocation) through the transition, whereas our controller chooses the control action and observes incoming supply (disturbances). Methodologically, our setup is intentionally narrower and tailored to SDAC-based adversarial regret analysis: feasibility constraints are enforced by policy design, yielding a simpler linear state recursion, lower computational overhead, and cleaner analysis than approaches operating through nonlinear nondifferentiable dynamics such as \cite{hihat2024online}. The two frameworks are structurally related but target different problem structures, control variables, and policy classes.
+More closely related to ours is \cite{hihat2024online}, which considers an
+inventory-control formulation with potentially nonlinear and nondifferentiable
+state-transition functions, and studies base-stock policies. While that model is more
+general in scope, its decision structure differs from ours: as in
+\cite{yang2020online}, the controller chooses supply (inflow) and then observes
+demand (allocation) through the transition, whereas our controller chooses the
+control action and observes incoming supply (disturbances). Methodologically, our
+setup is intentionally narrower and tailored to SDAC-based adversarial regret
+analysis: feasibility constraints are enforced by policy design, yielding a simpler
+linear state recursion, lower computational overhead, and cleaner analysis than
+approaches operating through nonlinear nondifferentiable dynamics such as
+\cite{hihat2024online}. The two frameworks are structurally related but target
+different problem structures, control variables, and policy classes.
 
 
 
 
 \paragraph{Water Reservoir and Dam Management}
-Classical dam theory studies storage dynamics with random inflows and controlled releases (see, for example, \cite{moran1954dams,prabhu1998stochastic}). Relative to our adversarial online-control setting, this literature typically assumes stochastic inputs and emphasizes stationary performance criteria under simple, known cost structures. Here, it serves mainly as historical context for state-coupled control under state constraints.
+Classical dam theory studies storage dynamics with random inflows and controlled
+releases (see, for example, \cite{moran1954dams,prabhu1998stochastic}). Relative to
+our adversarial online-control setting, this literature typically assumes stochastic
+inputs and emphasizes stationary performance criteria under simple, known cost
+structures. Here, it serves mainly as historical context for state-coupled control
+under state constraints.
 
 
 \paragraph{Online control}
 
-A recent line of work in online learning studies online control, where a linear dynamical system is operated under adversarial disturbances and costs. The objective is low time-average cost relative to the best policy in hindsight, rather than classical stabilization or worst-case guarantees. Foundational results for linear systems and adversarial settings include \cite{agarwal2019online, agarwal2019logarithmic, hazan2020nonstochasticBandit, simchowitz2020improper}; see \cite{hazan_introduction_2025} for a modern overview.
+A recent line of work in online learning studies online control, where a linear
+dynamical system is operated under adversarial disturbances and costs. The objective
+is low time-average cost relative to the best policy in hindsight, rather than
+classical stabilization or worst-case guarantees. Foundational results for linear
+systems and adversarial settings include \cite{agarwal2019online,
+agarwal2019logarithmic, hazan2020nonstochasticBandit, simchowitz2020improper}; see
+\cite{hazan_introduction_2025} for a modern overview.
 
-A central idea in this literature is \emph{Disturbance-Action Control} (DAC), a policy parameterization in which control actions are expressed as affine or linear functions of the current state and a finite history of past disturbances. This representation yields tractable surrogates for policy optimization and enables efficient no-regret updates in adversarial environments. Extensions include partial observability \cite{lale2020logarithmic} and bandit feedback \cite{hazan2020nonstochasticBandit}. SDAC adapts this template to state-constrained resource systems, where feasibility is coupled over time through the dynamics.
+A central idea in this literature is \emph{Disturbance-Action Control} (DAC), a
+policy parameterization in which control actions are expressed as affine or linear
+functions of the current state and a finite history of past disturbances. This
+representation yields tractable surrogates for policy optimization and enables
+efficient no-regret updates in adversarial environments. Extensions include partial
+observability \cite{lale2020logarithmic} and bandit feedback
+\cite{hazan2020nonstochasticBandit}. SDAC adapts this template to state-constrained
+resource systems, where feasibility is coupled over time through the dynamics.
 
 
 
-Online control provides a strong foundation for our problem class: it accommodates arbitrary time-varying disturbances and unknown general convex stage costs, and the resulting algorithms come with robust guarantees and tractability. However, for state-coupled storage dynamics, unconstrained DAC does not enforce per-step feasibility by construction. Our framework fills this gap by replacing DAC with SDAC, a simplex-constrained DAC-style family that preserves the feasibility defined by \eqref{eq:model-feasibility} while retaining the desirable characteristics.
+Online control provides a strong foundation for our problem class: it accommodates
+arbitrary time-varying disturbances and unknown general convex cost functions, and the
+resulting algorithms come with robust guarantees and tractability. However, for
+state-coupled storage dynamics, unconstrained DAC does not enforce per-step
+feasibility by construction. Our framework fills this gap by replacing DAC with SDAC,
+a simplex-constrained DAC-style family that preserves the feasibility defined by
+\eqref{eq:model-feasibility} while retaining the desirable characteristics.
 
 
 
@@ -116,66 +266,104 @@ Online control provides a strong foundation for our problem class: it accommodat
 \subsection{Contributions}
 The contributions are organized in two layers:
 \begin{itemize}
-    \item \textbf{Modeling and policy-class contribution.} We formulate adversarial online control of a storage system with retention-coupled state dynamics, state-dependent feasibility ($0\le u_t\le \alpha x_t$), and state-dependent stage costs, and we introduce \emph{Simplex Disturbance-Action Control} (SDAC), a DAC-inspired simplex-constrained policy class to compete with. The SDAC \emph{enforces feasibility} by construction while preserving DAC-style expressiveness.
-    \item \textbf{Algorithmic and analytical contribution.} We develop an exponentiated-gradient online controller over SDAC parameters in which a feasibility projection \emph{enforces} the state-dependent constraint on the online control action, and we analyze regret against the best fixed SDAC policy in hindsight, achieving sublinear regret with logarithmic dependence on policy dimension.
+    \item \textbf{Modeling and policy-class contribution.} We formulate adversarial
+        online control of a storage system with retention-coupled state dynamics,
+        state-dependent feasibility ($0\le u_t\le \alpha x_t$), and state-dependent
+        cost functions, and we introduce \emph{Simplex Disturbance-Action Control}
+        (SDAC), a DAC-inspired simplex-constrained policy class to compete with. The
+        SDAC \emph{enforces feasibility} by construction while preserving DAC-style
+        expressiveness.
+    \item \textbf{Algorithmic and analytical contribution.} We develop an
+        exponentiated-gradient online controller over SDAC parameters in which a
+        feasibility projection \emph{enforces} the state-dependent constraint on the
+        online control action, and we analyze regret against the best fixed SDAC
+        policy in hindsight, achieving sublinear regret with logarithmic dependence
+        on policy dimension.
 \end{itemize}
 
 \subsection{Paper Organization}
-Section~\ref{sec:model-setup} formalizes the adversarial storage-control model, assumptions, and regret benchmark. Section~\ref{sec:sdac} introduces the SDAC policy class and summarizes its structural properties. Section~\ref{sec:online-algorithm} presents the online controller, Section~\ref{sec:regret-analysis} develops regret guarantees, and Section~\ref{sec:conclusion} concludes. Deferred proofs appear in the Appendix.
+Section~\ref{sec:model-setup} formalizes the adversarial storage-control model,
+assumptions, and regret benchmark. Section~\ref{sec:sdac} introduces the SDAC policy
+class and summarizes its structural properties. Section~\ref{sec:online-algorithm}
+presents the online controller, Section~\ref{sec:regret-analysis} develops regret
+guarantees, and Section~\ref{sec:conclusion} concludes. Deferred proofs appear in the
+Appendix.
 
 
 \section{Notation}
 \label{sec:notation}
 
-We write $[z]_+ \triangleq \max\{z,0\}$. For a vector $v\in\mathbb{R}^n$, the $i$-th coordinate is $v^{(i)}$, and $\mathbf{1}$ denotes the all-ones vector (dimension clear from context). The Euclidean inner product is $\langle\cdot,\cdot\rangle$. Time indices may be nonpositive, with the convention that the corresponding quantities are zero (in particular $w_\tau\equiv 0$ for $\tau\le 0$). The online algorithm is denoted $\mathcal{A}$; a fixed policy is denoted $\pi$, or $\pi(M)$ when parameterized by parameters $M$.
+We write $[z]_+ \triangleq \max\{z,0\}$. For $v\in\mathbb{R}^n$, the $i$-th
+coordinate is $v^{(i)}$, and $\mathbf{1}$ denotes the all-ones vector (dimension
+clear from context). The Euclidean inner product is $\langle\cdot,\cdot\rangle$. Time
+indices may be nonpositive, with corresponding quantities taken to be zero
+(e.g.\ $w_\tau\equiv 0$ for $\tau\le 0$). We write $\mathcal{A}$ for the online
+algorithm and $\pi$ (or $\pi(M)$) for a fixed policy.
 
 
 \section{Model and Problem Setup}
 \label{sec:model-setup}
 
-We consider a discrete-time process over times $t\in\{1,2,\ldots,T\}$. The system state is denoted by $x_t\in\mathbb{R}_{\ge 0}$, where $x_t$ represents the resource level at the beginning of time $t$. The initial state is given as
+We consider a discrete-time process over times $t\in\{1,2,\ldots,T\}$. The system
+state is denoted by $x_t\in\mathbb{R}_{\ge 0}$, where $x_t$ represents the resource
+level at the beginning of time $t$. The initial state is given as
 \[
 x_1 = 0.
 \]
-Fix a state-retention factor $\alpha\in(0,1)$. At each time, the controller chooses a control action $u_t\in\mathbb{R}_{\ge 0}$ subject to the state constraint:
+Fix a state-retention factor $\alpha\in(0,1)$. At each time, the controller chooses a
+control action $u_t\in\mathbb{R}_{\ge 0}$ subject to the state constraint:
 \begin{equation}
 \label{eq:model-feasibility}
 0 \le u_t \le \alpha x_t.
 \end{equation}
-The system then receives an disturbance $w_t\in[0,1]$ and evolves according to
+The system then receives a disturbance $w_t\in[0,1]$ and evolves according to
 \begin{equation}
 \label{eq:model-dynamics}
 x_{t+1} = \alpha x_t - u_t + w_t.
 \end{equation}
 
-After the control action is selected, a convex stage cost
+After the control action is selected, a convex cost function
 \[
 c_t: \mathbb{R}_{\ge 0}^2 \to \mathbb{R}
 \]
-is revealed, and the incurred cost is $c_t(x_t,u_t)$. We assume each $c_t$ is convex in $(x,u)$ and satisfies a Lipschitz condition on the relevant domain. There exist constants $L_x,L_u>0$ such that for all admissible $(x,u)$ and $(x',u')$,
+is revealed, and the incurred cost is $c_t(x_t,u_t)$. We assume each $c_t$ is convex
+in $(x,u)$ and satisfies a Lipschitz condition on the relevant domain. There exist
+constants $L_x,L_u>0$ such that for all admissible $(x,u)$ and $(x',u')$,
 \begin{equation}
 \label{eq:model-lipschitz}
 |c_t(x,u)-c_t(x',u')| \le L_x|x-x'| + L_u|u-u'|.
 \end{equation}
 
-The information pattern is adversarial and non-anticipatory. At time $t$, the controller chooses $u_t$ before observing $w_t$ and $c_t$. Hence both the disturbance sequence $\{w_t\}_{t=1}^T$ and the stage-cost sequence $\{c_t\}_{t=1}^T$ may be arbitrary.
+The information pattern is adversarial and non-anticipatory. At time $t$, the
+controller chooses $u_t$ before observing $w_t$ and $c_t$. Hence both the disturbance
+sequence $\{w_t\}_{t=1}^T$ and the sequence of cost functions $\{c_t\}_{t=1}^T$ may be
+arbitrary.
 
 \paragraph{Assumptions}
-Equations \eqref{eq:model-feasibility}--\eqref{eq:model-lipschitz} define the model. For analysis, we collect the remaining standing assumptions as follows:
+
 \begin{enumerate}
-    \item \textbf{Retention factor:} $\alpha\in(0,1)$ is fixed and known (a fraction $1-\alpha$ of the state is lost each period).
+    \item \textbf{Retention factor:} $\alpha\in(0,1)$ is fixed and known (a fraction
+        $1-\alpha$ of the state is lost each period).
     \item \textbf{Disturbance bounds:} $w_t\in[0,1]$ for all $t$.
-    \item \textbf{Adversarial timing:} at time $t$, $u_t$ is chosen before observing $w_t$ and $c_t$.
-    \item \textbf{Cost regularity:} each $c_t$ is convex in $(x,u)$ and obeys \eqref{eq:model-lipschitz}.
-    \item \textbf{Feasible policy class:} both the online policy and benchmark policies are required to satisfy \eqref{eq:model-feasibility} under dynamics \eqref{eq:model-dynamics}.
+    \item \textbf{Adversarial timing:} at time $t$, $u_t$ is chosen before observing
+        $w_t$ and $c_t$.
+    \item \textbf{Cost regularity:} each $c_t$ is convex in $(x,u)$ and obeys
+        \eqref{eq:model-lipschitz}.
+    \item \textbf{Feasible policy class:} both the online policy to be developed and the benchmark
+     described below are required to satisfy \eqref{eq:model-feasibility} under dynamics
+        \eqref{eq:model-dynamics}.
 \end{enumerate}
 
-For an online algorithm $\mathcal{A}$ producing trajectory $\{(x_t^{\mathcal{A}},u_t^{\mathcal{A}})\}_{t=1}^T$, define cumulative cost
+For an online algorithm $\mathcal{A}$ producing trajectory
+$\{(x_t^{\mathcal{A}},u_t^{\mathcal{A}})\}_{t=1}^T$, define cumulative cost
 \begin{equation}
 \label{eq:def-cumulative-cost}
 J_T(\mathcal{A}) \triangleq \sum_{t=1}^T c_t\bigl(x_t^{\mathcal{A}},u_t^{\mathcal{A}}\bigr).
 \end{equation}
-For fixed $H$, let the policy class be $\Pi\triangleq\mathrm{SDAC}_H$ (defined in Section~\ref{sec:sdac}). For each $\pi\in\Pi$, let $\{(x_t^{\pi},u_t^{\pi})\}_{t=1}^T$ be the induced feasible trajectory under the same disturbance sequence. Regret is defined by
+For a fixed positive integer $H$, let the policy class be $\Pi\triangleq\mathrm{SDAC}_H$ (defined in
+Section~\ref{sec:sdac}). For each $\pi\in\Pi$, let
+$\{(x_t^{\pi},u_t^{\pi})\}_{t=1}^T$ be the induced feasible trajectory under the same
+disturbance sequence. Regret is defined by
 \begin{equation}
 \label{eq:def-regret}
 \mathrm{Regret}(T)
@@ -185,28 +373,44 @@ For fixed $H$, let the policy class be $\Pi\triangleq\mathrm{SDAC}_H$ (defined i
 \min_{\pi\in\Pi}
 \sum_{t=1}^T c_t\bigl(x_t^{\pi},u_t^{\pi}\bigr).
 \end{equation}
-While the online controller may update its SDAC parameters over time, the benchmark in \eqref{eq:def-regret} is the best single fixed SDAC policy chosen in hindsight.
-The objective is to design an online policy that preserves feasibility in \eqref{eq:model-feasibility} for all $t$ and achieves sublinear regret as defined in \eqref{eq:def-regret}.
+While the online controller may update its SDAC parameters over time, the benchmark
+in \eqref{eq:def-regret} is the best single fixed SDAC policy chosen in hindsight.
+The objective is to design an online policy that preserves feasibility in
+\eqref{eq:model-feasibility} for all $t$ and achieves sublinear regret as defined in
+\eqref{eq:def-regret}.
 
 \section{Simplex Disturbance-Action Control (SDAC)}
 \label{sec:sdac}
 
 \subsection{From Disturbance-Action Control to SDAC}
-Disturbance-Action Control (DAC) parameterizes the control action as a linear function of a finite window of past disturbances. This representation is central in adversarial online control because the cost is convex in term of the parameters, yields robust regret guarantees, and enables efficient online convex-optimization updates. In our setting, a representative DAC form is
+Disturbance-Action Control (DAC) parameterizes the control action as a linear
+function of a finite window of past disturbances. This representation is central in
+adversarial online control because the cost is convex in term of the parameters,
+yields robust regret guarantees, and enables efficient online convex-optimization
+updates. In our setting, a representative DAC form is
 \begin{equation}
 \label{eq:dac-param}
 u_t = \sum_{i=1}^{H} M^{(i)} w_{t-i},
 \end{equation}
-where $H\in\mathbb{N}$ is the memory horizon and $M\in\mathbb{R}^H$ is a linear filter. We allow nonpositive indices in such sums, with the convention $w_\tau\equiv 0$ for $\tau\le 0$.
+where $H\in\mathbb{N}$ is the memory horizon and $M\in\mathbb{R}^H$ is a linear
+filter. We allow nonpositive indices in such sums, with the convention $w_\tau\equiv
+0$ for $\tau\le 0$.
 
-For our constrained model, unconstrained DAC is insufficient. In particular, the control action can violate either bound, with $u_t>\alpha x_t$ or $u_t<0$. We therefore introduce \emph{Simplex Disturbance-Action Control} (SDAC), which replaces unconstrained DAC filters by a simplex-constrained family tailored to this dynamics. SDAC is designed to keep the DAC advantages above (adversarial robustness, regret-based comparison, and tractable online updates) while adding feasibility by construction.
+For our constrained model, unconstrained DAC is insufficient. In particular, the
+control action can violate \eqref{eq:model-feasibility}, either by having $u_t>\alpha x_t$ or $u_t<0$. We
+therefore introduce \emph{Simplex Disturbance-Action Control} (SDAC), which replaces
+unconstrained DAC filters by a simplex-constrained family tailored to this dynamics.
+SDAC is designed to keep the DAC advantages above (adversarial robustness,
+regret-based comparison, and tractable online updates) while adding feasibility by
+construction.
 
 
 \subsection{SDAC Definition}
 Fix memory horizon $H\in\mathbb{N}$. Let
 \begin{equation}
 \label{eq:def-simplex}
-\Delta_H \triangleq \left\{M\in\mathbb{R}_{\ge 0}^H:\; \sum_{i=1}^H M^{(i)}\le1\right\}
+\Delta_H \triangleq \left\{M\in\mathbb{R}_{\ge 0}^H:\; \sum_{i=1}^H
+M^{(i)}\le1\right\}
 \end{equation}
 be the sub-probability simplex. For any $M\in\Delta_H$, define the policy $\pi(M)$ by
 \begin{equation}
@@ -214,11 +418,13 @@ be the sub-probability simplex. For any $M\in\Delta_H$, define the policy $\pi(M
 u_t^{\pi(M)} \;\triangleq\; \sum_{i=1}^{H} M^{(i)}\alpha^i w_{t-i},
 \qquad w_\tau\equiv 0\;\text{for}\;\tau\le 0.
 \end{equation}
-For each time $t$, let
-\[
-\widetilde{w}_t \triangleq \big(\alpha w_{t-1},\ldots,\alpha^H w_{t-H}\big)^\top \in \mathbb{R}^H,
-\]
-so that \eqref{eq:def-sdac-policy} can be written as
+For each time $t\in\{1,2,\ldots,T\}$, let
+\begin{equation}
+\label{eq:def-w-tilde}
+\widetilde{w}_t \triangleq \big(\alpha w_{t-1},\alpha^2 w_{t-2},\ldots,\alpha^H w_{t-H}\big)^\top \in \mathbb{R}^H,
+\end{equation}
+with the same convention $w_\tau\equiv 0$ for $\tau\le 0$, so that
+\eqref{eq:def-sdac-policy} can be written as
 \begin{equation}
 \label{eq:def-sdac-policy-vector}
 u_t^{\pi(M)} = \langle M,\widetilde{w}_t\rangle.
@@ -230,36 +436,60 @@ The induced state trajectory satisfies
 x_{t+1}^{\pi(M)} = \alpha x_t^{\pi(M)} - u_t^{\pi(M)} + w_t,
 \qquad x_1^{\pi(M)}=0.
 \end{equation}
-The weights $\alpha^i$ align the disturbance filter with the retention factor $\alpha$ in \eqref{eq:model-dynamics}.
+The weights $\alpha^i$ align the disturbance filter with the retention factor
+$\alpha$ in \eqref{eq:model-dynamics}.
 
 
-First, feasibility is preserved within the class: for any fixed $M\in\Delta_H$, the induced trajectory under \eqref{eq:def-sdac-policy}--\eqref{eq:sdac-state-update} satisfies $0\le u_t^{\pi(M)}\le \alpha x_t^{\pi(M)}$ for all $t$ (see Lemma~\ref{lem:appendix-feasibility}).
+First, feasibility is preserved within the class: for any fixed $M\in\Delta_H$, the
+induced trajectory under \eqref{eq:def-sdac-policy}--\eqref{eq:sdac-state-update}
+satisfies $0\le u_t^{\pi(M)}\le \alpha x_t^{\pi(M)}$ for all $t$ (see
+Lemma~\ref{lem:appendix-feasibility}).
 
-Second, SDAC is compatible with online convex optimization. For fixed disturbance sequences, $u_t^{\pi(M)}$ is linear in $M$ and $x_t^{\pi(M)}$ is affine in $M$ (see Lemma~\ref{lem:appendix-state-decomp}). Therefore, since each $c_t$ is convex in $(x,u)$, the induced cost is convex in $M$ (see Lemma~\ref{lem:appendix-surrogate}). Regret minimization against the best fixed SDAC policy thus becomes online convex optimization over the simplex.
+Second, SDAC is compatible with online convex optimization. For fixed disturbance
+sequences, $u_t^{\pi(M)}$ is linear in $M$ and $x_t^{\pi(M)}$ is affine in $M$ (see
+Lemma~\ref{lem:appendix-state-decomp}). Therefore, since each $c_t$ is convex in
+$(x,u)$, the induced cost is convex in $M$ (see Lemma~\ref{lem:appendix-surrogate}).
+Regret minimization against the best fixed SDAC policy thus becomes online convex
+optimization over the simplex.
 
 \subsection{Expressiveness: Approximating Linear State-Feedback Policies}
 \label{subsec:sdac-expressiveness}
 
-A standard policy class in online control is the family of linear state-feedback policies $u_t=-Kx_t$, and a foundational property of Disturbance-Action Control is that the DAC class \emph{approximates} any strongly stable linear policy, with approximation error decaying geometrically in the memory horizon $H$ \cite{agarwal2019online,hazan_introduction_2025}. 
+A standard policy class in online control is the family of linear state-feedback
+policies $u_t=-Kx_t$, and a foundational property of Disturbance-Action Control is
+that the DAC class \emph{approximates} any strongly stable linear policy, with
+approximation error decaying geometrically in the memory horizon $H$
+\cite{agarwal2019online,hazan_introduction_2025}.
 
-We establish the analogue of this guarantee for SDAC. In our scalar, state-constrained model the feasible linear state-feedback policies are exactly the proportional (constant-fraction) control actions $u_t=q\,x_t$ with gain $q\in[0,\alpha]$: since $x_t\ge 0$, the feasibility constraint $0\le u_t\le\alpha x_t$ in \eqref{eq:model-feasibility} holds if and only if $q\in[0,\alpha]$. The next lemma shows that every such policy with $q\in(0,\alpha)$ is approximated, \emph{within the feasible class} $\mathrm{SDAC}_H$, by explicit parameters, with control-action, state, and cost errors that decay geometrically in $H$.
+We establish the analogue of this guarantee for SDAC. In our scalar,
+state-constrained model the feasible linear state-feedback policies are exactly the
+proportional (constant-fraction) control actions $u_t=q\,x_t$ with gain
+$q\in[0,\alpha]$: since $x_t\ge 0$, the feasibility constraint $0\le u_t\le\alpha
+x_t$ in \eqref{eq:model-feasibility} holds if and only if $q\in[0,\alpha]$. The next
+lemma shows that every such policy with $q\in(0,\alpha)$ is approximated,
+\emph{within the feasible class} $\mathrm{SDAC}_H$, by explicit parameters, with
+control-action, state, and cost errors that decay geometrically in $H$.
 
 \begin{lemma}[SDAC approximates linear state-feedback policies]
 \label{lem:sdac-linear-approx}
-Fix $q\in(0,\alpha)$, set $\beta\triangleq\alpha-q$, and let $\pi_q^{\mathrm{lin}}$ denote the feasible linear policy
+Fix $q\in(0,\alpha)$, set $\beta\triangleq\alpha-q$, and let $\pi_q^{\mathrm{lin}}$
+denote the feasible linear policy
 \[
 u_t^{\mathrm{lin}}=q\,x_t^{\mathrm{lin}},
 \qquad
 x_{t+1}^{\mathrm{lin}}=\beta\,x_t^{\mathrm{lin}}+w_t,
 \qquad
-x_1^{\mathrm{lin}}=0.  
+t\ge 1,
+\qquad
+x_1^{\mathrm{lin}}=0.
 \]
 Define $M_q^\star\in\mathbb{R}^H$ by
 \[
 M_q^{\star(i)}\triangleq\frac{q}{\alpha}\Bigl(\frac{\beta}{\alpha}\Bigr)^{i-1},
 \qquad i=1,\ldots,H.
 \]
-Then $M_q^\star\in\Delta_H$ with $\sum_{i=1}^H M_q^{\star(i)}=1-(\beta/\alpha)^H$, and for every $\{w_t\}\subset[0,1]$ and all $t\ge 1$,
+Then $M_q^\star\in\Delta_H$ with $\sum_{i=1}^H M_q^{\star(i)}=1-(\beta/\alpha)^H$,
+and for every $\{w_t\}\subset[0,1]$ and all $t\ge 1$,
 \begin{equation}
 \label{eq:sdac-lin-approx-bounds}
 \begin{aligned}
@@ -279,10 +509,18 @@ Moreover, if each $c_t$ satisfies \eqref{eq:model-lipschitz}, then
 \Bigl(L_u+\frac{L_x}{1-\alpha}\Bigr)\frac{q\,\beta^H}{1-\beta}\,T.
 \end{aligned}
 \end{equation}
-In particular, the errors decay geometrically in $H$, so $\mathrm{SDAC}_H$ approximates $\pi_q^{\mathrm{lin}}$ arbitrarily well as $H\to\infty$. The proof is deferred to Appendix~\ref{sec:appendix-proofs}.
+In particular, the errors decay geometrically in $H$, so $\mathrm{SDAC}_H$
+approximates $\pi_q^{\mathrm{lin}}$ arbitrarily well as $H\to\infty$. The proof is
+deferred to Appendix~\ref{sec:appendix-proofs}.
 \end{lemma}
 
-This expressiveness property has a direct algorithmic consequence. Because the regret bound of Theorem~\ref{thm:regret-bound} depends on the memory horizon only through $\sqrt{\log(H+1)}$, the window $H$ can be enlarged cheaply; combining Lemma~\ref{lem:sdac-linear-approx} with that bound then shows the online controller competes with the best fixed linear policy. We make this precise in Corollary~\ref{cor:regret-vs-linear}, mirroring the role of DAC-to-linear approximation in online control \cite{agarwal2019online}.
+This expressiveness property has a direct algorithmic consequence. Because the regret
+bound of Theorem~\ref{thm:regret-bound} depends on the memory horizon only through
+$\sqrt{\log(H+1)}$, the window $H$ can be enlarged cheaply; combining
+Lemma~\ref{lem:sdac-linear-approx} with that bound then shows the online controller
+competes with the best fixed linear policy. We make this precise in
+Corollary~\ref{cor:regret-vs-linear}, mirroring the role of DAC-to-linear
+approximation in online control \cite{agarwal2019online}.
 
 
 
@@ -291,14 +529,19 @@ This expressiveness property has a direct algorithmic consequence. Because the r
 \section{Online Algorithm}
 \label{sec:online-algorithm}
 
-We now present our online algorithm, which updates SDAC parameters by unnormalized-negentropy online mirror descent (equivalently, exponentiated gradient) over the sub-probability simplex $\Delta_H\subset\mathbb{R}^H$.
+We now present our online algorithm, which updates SDAC parameters by
+unnormalized-negentropy online mirror descent (equivalently, exponentiated gradient)
+over the sub-probability simplex $\Delta_H\subset\mathbb{R}^H$ with a fixed step size
+$\eta>0$.
 
-For each time $t$, let $M_t\in\Delta_H$ be the online parameter vector. We initialize at
+For each time $t$, let $M_t\in\Delta_H$ be the online parameter vector. We initialize
+at
 \begin{equation}
 \label{eq:alg-init}
 M_1^{(i)}\triangleq\frac{1}{H+1},\qquad i=1,\ldots,H
 \end{equation}
-so that the unnormalized-negentropy Bregman diameter of $\Delta_H$ relative to $M_1$ is at most $\log(H+1)$ (see the proof of Theorem~\ref{thm:regret-bound}).
+so that the unnormalized-negentropy Bregman diameter of $\Delta_H$ relative to $M_1$
+is at most $\log(H+1)$ (see the proof of Theorem~\ref{thm:regret-bound}).
 
 \paragraph{Control-action selection}
 The controller first forms the unconstrained SDAC control action
@@ -306,7 +549,8 @@ The controller first forms the unconstrained SDAC control action
 \label{eq:alg-unconstrained-action}
 \widehat{u}_t \triangleq \langle M_t,\widetilde{w}_t\rangle,
 \end{equation}
-then applies a feasibility projection onto the admissible action interval $[0,\alpha x_t^{\mathcal{A}}]$:
+then applies a feasibility projection onto the admissible action interval $[0,\alpha
+x_t^{\mathcal{A}}]$:
 \begin{equation}
 \label{eq:alg-feasible-action}
 u_t^{\mathcal{A}} \triangleq \min\{\widehat{u}_t,\,\alpha x_t^{\mathcal{A}}\}.
@@ -319,15 +563,24 @@ x_{t+1}^{\mathcal{A}} = \alpha x_t^{\mathcal{A}} - u_t^{\mathcal{A}} + w_t,
 \end{equation}
 
 \paragraph{Feasibility of the online trajectory}
-We verify that the algorithm satisfies \eqref{eq:model-feasibility} at every time. The key mechanism is the feasibility projection in \eqref{eq:alg-feasible-action}, which maps the unconstrained control action onto the currently available feasible interval $[0,\alpha x_t^{\mathcal{A}}]$. Since $M_t\in\Delta_H$ and $\widetilde{w}_t\ge 0$ componentwise, equation \eqref{eq:alg-unconstrained-action} gives $\widehat{u}_t\ge 0$. By \eqref{eq:alg-feasible-action},
+We verify that the algorithm satisfies \eqref{eq:model-feasibility} at every time.
+The key mechanism is the feasibility projection in \eqref{eq:alg-feasible-action},
+which maps the unconstrained control action onto the currently available feasible
+interval $[0,\alpha x_t^{\mathcal{A}}]$. Since $M_t\in\Delta_H$ and
+$\widetilde{w}_t\ge 0$ componentwise, equation \eqref{eq:alg-unconstrained-action}
+gives $\widehat{u}_t\ge 0$. By \eqref{eq:alg-feasible-action},
 \[
 u_t^{\mathcal{A}}=\min\{\widehat{u}_t,\alpha x_t^{\mathcal{A}}\}\in[0,\alpha x_t^{\mathcal{A}}],
 \]
-so the control-action feasibility constraint holds whenever $x_t^{\mathcal{A}}\ge 0$. It remains to prove $x_t^{\mathcal{A}}\ge 0$ for all $t$. The base case is $x_1^{\mathcal{A}}=0$. If $x_t^{\mathcal{A}}\ge 0$, then $u_t^{\mathcal{A}}\le \alpha x_t^{\mathcal{A}}$ and $w_t\in[0,1]$, so from \eqref{eq:alg-state-update},
+so the control-action feasibility constraint holds whenever $x_t^{\mathcal{A}}\ge 0$.
+It remains to prove $x_t^{\mathcal{A}}\ge 0$ for all $t$. The base case is
+$x_1^{\mathcal{A}}=0$. If $x_t^{\mathcal{A}}\ge 0$, then $u_t^{\mathcal{A}}\le \alpha
+x_t^{\mathcal{A}}$ and $w_t\in[0,1]$, so from \eqref{eq:alg-state-update},
 \[
 x_{t+1}^{\mathcal{A}}=\alpha x_t^{\mathcal{A}}-u_t^{\mathcal{A}}+w_t\ge 0.
 \]
-Thus, by induction, $x_t^{\mathcal{A}}\ge 0$ and $0\le u_t^{\mathcal{A}}\le \alpha x_t^{\mathcal{A}}$ for all $t$.
+Thus, by induction, $x_t^{\mathcal{A}}\ge 0$ and $0\le u_t^{\mathcal{A}}\le \alpha
+x_t^{\mathcal{A}}$ for all $t$.
 
 
 
@@ -337,14 +590,19 @@ Define the surrogate cost at time $t$ by
 \label{eq:alg-surrogate-cost}
 \ell_t(M) \triangleq c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr), \qquad M\in\Delta_H,
 \end{equation}
-which is convex and Lipschitz by Lemma~\ref{lem:appendix-surrogate}. Let $g_t\in\partial \ell_t(M_t)$ be a subgradient.
+which is convex and Lipschitz by Lemma~\ref{lem:appendix-surrogate}. Let
+$g_t\in\partial \ell_t(M_t)$ be a subgradient.
 
 The exponentiated-gradient update is
 \begin{equation}
 \label{eq:alg-eg-unnormalized}
 \widetilde{M}_{t+1}^{(i)} \triangleq M_t^{(i)}\exp\!\bigl(-\eta g_t^{(i)}\bigr), \qquad i=1,\ldots,H,
 \end{equation}
-followed by the closed-form Bregman projection onto $\Delta_H$\footnote{This step is exactly the Bregman (generalized-KL) projection of $\widetilde{M}_{t+1}$ onto $\Delta_H=\{M\ge0:\sum_i M^{(i)}\le1\}$ induced by the unnormalized negentropy; renormalization is triggered only when the unprojected mirror step leaves $\Delta_H$, i.e.\ when $\sum_j\widetilde{M}_{t+1}^{(j)}>1$. See Lemma~\ref{lem:eg-projection}.}:
+followed by the closed-form Bregman projection onto $\Delta_H$\footnote{This step is
+exactly the Bregman (generalized-KL) projection of $\widetilde{M}_{t+1}$ onto
+$\Delta_H=\{M\ge0:\sum_i M^{(i)}\le1\}$ induced by the unnormalized negentropy;
+renormalization is triggered only when the unprojected mirror step leaves $\Delta_H$,
+i.e.\ when $\sum_j\widetilde{M}_{t+1}^{(j)}>1$. See Lemma~\ref{lem:eg-projection}.}:
 \begin{equation}
 \label{eq:alg-eg-normalized}
 M_{t+1}^{(i)}
@@ -355,17 +613,26 @@ S_{t+1}\triangleq\sum_{j=1}^H \widetilde{M}_{t+1}^{(j)},
 \end{equation}
 for $i=1,\ldots,H$.
 
-This yields a feasible online trajectory satisfying \eqref{eq:model-feasibility} by \eqref{eq:alg-feasible-action} and performs online convex optimization over $\Delta_H$ through \eqref{eq:alg-surrogate-cost}--\eqref{eq:alg-eg-normalized}.
+This yields a feasible online trajectory satisfying \eqref{eq:model-feasibility} by
+\eqref{eq:alg-feasible-action} and performs online convex optimization over
+$\Delta_H$ through \eqref{eq:alg-surrogate-cost}--\eqref{eq:alg-eg-normalized}.
 
 
 \section{Regret Analysis}
 \label{sec:regret-analysis}
 
-The regret proof has two parts: a standard online convex optimization bound for the surrogate costs \(\ell_t\), and a stability bound showing that the feasibility-projected online control action stays close to the SDAC policy trajectory driven by the same parameters. The technical lemmas are deferred to Appendix~\ref{sec:appendix-proofs}.
+The regret proof has two parts: a standard online convex optimization bound for the
+surrogate costs \(\ell_t\), and a stability bound showing that the
+feasibility-projected online control action stays close to the SDAC policy trajectory
+driven by the same parameters. The technical lemmas are deferred to
+Appendix~\ref{sec:appendix-proofs}.
 
 \begin{theorem}[Regret bound]
 \label{thm:regret-bound}
-Suppose each cost function \(c_t\) is convex and satisfies \eqref{eq:model-lipschitz}. Then the exponentiated-gradient controller with feasibility projection from Section~\ref{sec:online-algorithm}, initialized as in \eqref{eq:alg-init}, satisfies
+Suppose each cost function \(c_t\) is convex and satisfies
+\eqref{eq:model-lipschitz}. Then the exponentiated-gradient controller with
+feasibility projection from Section~\ref{sec:online-algorithm}, initialized as in
+\eqref{eq:alg-init}, satisfies
 \[
 \begin{aligned}
 \mathrm{Regret}(T)
@@ -391,15 +658,29 @@ gives
 \end{theorem}
 
 \begin{proof}[Proof sketch]
-By Lemma~\ref{lem:appendix-surrogate}, the surrogate costs are convex and \(L\)-Lipschitz. Unnormalized-negentropy OMD on $\Delta_H$, initialized as in \eqref{eq:alg-init}, yields Bregman diameter at most $\log(H+1)$, so the OMD term is bounded by \(\log(H+1)/\eta + \eta L^2T/2\).
-The remaining stability term is controlled by Lemmas~\ref{lem:omd-move}--\ref{lem:stab-sum}, which together contribute at most \(\tfrac{\alpha}{(1-\alpha)^2}\,\eta L^2T\). Combining the two bounds yields the claim.
+By Lemma~\ref{lem:appendix-surrogate}, the surrogate costs are convex and
+\(L\)-Lipschitz. Unnormalized-negentropy OMD on $\Delta_H$, initialized as in
+\eqref{eq:alg-init}, yields Bregman diameter at most $\log(H+1)$, so the OMD term is
+bounded by \(\log(H+1)/\eta + \eta L^2T/2\).
+The remaining stability term is controlled by
+Lemmas~\ref{lem:omd-move}--\ref{lem:stab-sum}, which together contribute at most
+\(\tfrac{\alpha}{(1-\alpha)^2}\,\eta L^2T\). Combining the two bounds yields the
+claim.
 \end{proof}
 
-Combining Theorem~\ref{thm:regret-bound} with the approximation guarantee of Lemma~\ref{lem:sdac-linear-approx} shows that the controller is competitive not only with the best fixed SDAC policy but with the entire family of feasible linear state-feedback policies.
+Combining Theorem~\ref{thm:regret-bound} with the approximation guarantee of
+Lemma~\ref{lem:sdac-linear-approx} shows that the controller is competitive not only
+with the best fixed SDAC policy but with the entire family of feasible linear
+state-feedback policies.
 
 \begin{corollary}[No-regret against linear state-feedback policies]
 \label{cor:regret-vs-linear}
-Run the exponentiated-gradient controller with feasibility projection of Section~\ref{sec:online-algorithm} with the step size $\eta^*$ of Theorem~\ref{thm:regret-bound}. Fix any gain $q\in(0,\alpha)$, set $\beta\triangleq\alpha-q$, and let $\bigl(x_t^{\mathrm{lin}},u_t^{\mathrm{lin}}\bigr)$ be the trajectory of the linear policy $\pi_q^{\mathrm{lin}}$ from Lemma~\ref{lem:sdac-linear-approx}. Then
+Run the exponentiated-gradient controller with feasibility projection of
+Section~\ref{sec:online-algorithm} with the step size $\eta^*$ of
+Theorem~\ref{thm:regret-bound}. Fix any gain $q\in(0,\alpha)$, set
+$\beta\triangleq\alpha-q$, and let
+$\bigl(x_t^{\mathrm{lin}},u_t^{\mathrm{lin}}\bigr)$ be the trajectory of the linear
+policy $\pi_q^{\mathrm{lin}}$ from Lemma~\ref{lem:sdac-linear-approx}. Then
 \[
 \begin{aligned}
 &\sum_{t=1}^T c_t\bigl(x_t^{\mathcal{A}},u_t^{\mathcal{A}}\bigr)
@@ -409,7 +690,9 @@ Run the exponentiated-gradient controller with feasibility projection of Section
 &\qquad\quad +\Bigl(L_u+\frac{L_x}{1-\alpha}\Bigr)\frac{q\,\beta^H}{1-\beta}\,T,
 \end{aligned}
 \]
-where $L=\alpha L_u+\tfrac{L_x}{1-\alpha}$. In particular, choosing the memory horizon $H=\bigl\lceil \log T/\log(1/\beta)\bigr\rceil$ forces $\beta^H\le 1/T$, so the second term is $O(1)$ and
+where $L=\alpha L_u+\tfrac{L_x}{1-\alpha}$. In particular, choosing the memory
+horizon $H=\bigl\lceil \log T/\log(1/\beta)\bigr\rceil$ forces $\beta^H\le 1/T$, so
+the second term is $O(1)$ and
 \[
 \begin{aligned}
 &\sum_{t=1}^T c_t\bigl(x_t^{\mathcal{A}},u_t^{\mathcal{A}}\bigr)
@@ -418,11 +701,13 @@ where $L=\alpha L_u+\tfrac{L_x}{1-\alpha}$. In particular, choosing the memory h
 O\!\left(\sqrt{T\log\log T}\,\right).
 \end{aligned}
 \]
-Thus the controller is no-regret against every fixed linear state-feedback policy $u_t=q\,x_t$, $q\in(0,\alpha)$.
+Thus the controller is no-regret against every fixed linear state-feedback policy
+$u_t=q\,x_t$, $q\in(0,\alpha)$.
 \end{corollary}
 
 \begin{proof}
-By the regret definition \eqref{eq:def-regret} and the optimized bound of Theorem~\ref{thm:regret-bound},
+By the regret definition \eqref{eq:def-regret} and the optimized bound of
+Theorem~\ref{thm:regret-bound},
 \[
 \begin{aligned}
 \sum_{t=1}^T c_t\bigl(x_t^{\mathcal{A}},u_t^{\mathcal{A}}\bigr)
@@ -431,7 +716,9 @@ By the regret definition \eqref{eq:def-regret} and the optimized bound of Theore
 &\quad +2L\sqrt{\Bigl(\tfrac12+\tfrac{\alpha}{(1-\alpha)^2}\Bigr)T\log(H+1)}.
 \end{aligned}
 \]
-Since $M_q^\star\in\Delta_H$ by Lemma~\ref{lem:sdac-linear-approx}, the minimum is no larger than the cost of $\pi(M_q^\star)$, which by \eqref{eq:sdac-lin-approx-cost} obeys
+Since $M_q^\star\in\Delta_H$ by Lemma~\ref{lem:sdac-linear-approx}, the minimum is no
+larger than the cost of $\pi(M_q^\star)$, which by \eqref{eq:sdac-lin-approx-cost}
+obeys
 \[
 \begin{aligned}
 &\sum_{t=1}^T c_t\bigl(x_t^{\pi(M_q^\star)},u_t^{\pi(M_q^\star)}\bigr) \\
@@ -440,15 +727,20 @@ Since $M_q^\star\in\Delta_H$ by Lemma~\ref{lem:sdac-linear-approx}, the minimum 
 +\Bigl(L_u+\frac{L_x}{1-\alpha}\Bigr)\frac{q\,\beta^H}{1-\beta}\,T.
 \end{aligned}
 \]
-Chaining the two displays gives the stated bound. For the asymptotic statement, $H=\bigl\lceil \log T/\log(1/\beta)\bigr\rceil$ gives $\beta^H\le 1/T$, so the second term is at most $\bigl(L_u+\tfrac{L_x}{1-\alpha}\bigr)\tfrac{q}{1-\beta}=O(1)$, while $\log(H+1)=O(\log\log T)$ in the first term.
+Chaining the two displays gives the stated bound. For the asymptotic statement,
+$H=\bigl\lceil \log T/\log(1/\beta)\bigr\rceil$ gives $\beta^H\le 1/T$, so the second
+term is at most $\bigl(L_u+\tfrac{L_x}{1-\alpha}\bigr)\tfrac{q}{1-\beta}=O(1)$, while
+$\log(H+1)=O(\log\log T)$ in the first term.
 \end{proof}
 
 
 \section{Conclusion}
 \label{sec:conclusion}
 
-We studied adversarial online control of a storage system under  state-dependent action  constraints. The SDAC policy class enforces
-feasibility by construction, and the exponentiated-gradient controller with feasibility projection over
+We studied adversarial online control of a storage system under  state-dependent
+action  constraints. The SDAC policy class enforces
+feasibility by construction, and the exponentiated-gradient controller with
+feasibility projection over
 SDAC parameters achieves sublinear regret against the best fixed SDAC policy, with
 only logarithmic dependence on the memory horizon. The same guarantees extend to
 competition with feasible linear state-feedback policies via the SDAC approximation
@@ -461,23 +753,36 @@ state constraints in real time.
 \section{Deferred Proofs}
 \label{sec:appendix-proofs}
 
-This appendix collects the deferred proofs for structural SDAC properties used in Section~\ref{sec:sdac} and the regret bound stated in Section~\ref{sec:regret-analysis}.
+This appendix collects the deferred proofs for structural SDAC properties used in
+Section~\ref{sec:sdac} and the regret bound stated in
+Section~\ref{sec:regret-analysis}.
 
-Recall that we set $w_\tau\equiv 0$ for $\tau\le 0$, which is used in several base-case arguments below.
+Recall that we set $w_\tau\equiv 0$ for $\tau\le 0$, which is used in several
+base-case arguments below.
 
-We first prove the linear-policy approximation guarantee stated in Section~\ref{subsec:sdac-expressiveness}.
+We first prove the linear-policy approximation guarantee stated in
+Section~\ref{subsec:sdac-expressiveness}.
 
 \begin{proof}[Proof of Lemma~\ref{lem:sdac-linear-approx}]
-Fix $q\in(0,\alpha)$, set $\beta=\alpha-q\in(0,\alpha)$, and recall $w_\tau\equiv 0$ for $\tau\le 0$.
+Fix $q\in(0,\alpha)$, set $\beta=\alpha-q\in(0,\alpha)$, and recall $w_\tau\equiv 0$
+for $\tau\le 0$.
 
-\emph{Feasibility and closed form of the linear policy.} Substituting $u_t^{\mathrm{lin}}=q\,x_t^{\mathrm{lin}}$ into its state update gives the closed loop $x_{t+1}^{\mathrm{lin}}=\alpha x_t^{\mathrm{lin}}-q x_t^{\mathrm{lin}}+w_t=\beta x_t^{\mathrm{lin}}+w_t$ with $x_1^{\mathrm{lin}}=0$. Since $\beta>0$ and $w_t\ge 0$, induction yields $x_t^{\mathrm{lin}}\ge 0$, and then $0\le u_t^{\mathrm{lin}}=q x_t^{\mathrm{lin}}\le\alpha x_t^{\mathrm{lin}}$ because $q\le\alpha$; thus $\pi_q^{\mathrm{lin}}$ satisfies \eqref{eq:model-feasibility}. Unrolling the closed-loop recursion from $x_1^{\mathrm{lin}}=0$,
+\emph{Feasibility and closed form of the linear policy.} Substituting
+$u_t^{\mathrm{lin}}=q\,x_t^{\mathrm{lin}}$ into its state update gives the closed
+loop $x_{t+1}^{\mathrm{lin}}=\alpha x_t^{\mathrm{lin}}-q x_t^{\mathrm{lin}}+w_t=\beta
+x_t^{\mathrm{lin}}+w_t$ with $x_1^{\mathrm{lin}}=0$. Since $\beta>0$ and $w_t\ge 0$,
+induction yields $x_t^{\mathrm{lin}}\ge 0$, and then $0\le u_t^{\mathrm{lin}}=q
+x_t^{\mathrm{lin}}\le\alpha x_t^{\mathrm{lin}}$ because $q\le\alpha$; thus
+$\pi_q^{\mathrm{lin}}$ satisfies \eqref{eq:model-feasibility}. Unrolling the
+closed-loop recursion from $x_1^{\mathrm{lin}}=0$,
 \[
 x_t^{\mathrm{lin}}=\sum_{j=1}^{t-1}\beta^{j-1}w_{t-j},
 \qquad
 u_t^{\mathrm{lin}}=q\sum_{j=1}^{t-1}\beta^{j-1}w_{t-j}.
 \]
 
-\emph{Part 1.} Each $M_q^{\star(i)}=\tfrac{q}{\alpha}(\beta/\alpha)^{i-1}\ge 0$. Using $1-\beta/\alpha=(\alpha-\beta)/\alpha=q/\alpha$ and the finite geometric sum,
+\emph{Part 1.} Each $M_q^{\star(i)}=\tfrac{q}{\alpha}(\beta/\alpha)^{i-1}\ge 0$.
+Using $1-\beta/\alpha=(\alpha-\beta)/\alpha=q/\alpha$ and the finite geometric sum,
 \[
 \begin{aligned}
 \sum_{i=1}^H M_q^{\star(i)}
@@ -486,32 +791,43 @@ u_t^{\mathrm{lin}}=q\sum_{j=1}^{t-1}\beta^{j-1}w_{t-j}.
 =1-(\beta/\alpha)^H<1,
 \end{aligned}
 \]
-since $0<\beta/\alpha<1$. Hence $M_q^\star\in\Delta_H$ and $\pi(M_q^\star)\in\mathrm{SDAC}_H$.
+since $0<\beta/\alpha<1$. Hence $M_q^\star\in\Delta_H$ and
+$\pi(M_q^\star)\in\mathrm{SDAC}_H$.
 
-\emph{Part 2.} By the SDAC definition \eqref{eq:def-sdac-policy} and the identity $M_q^{\star(i)}\alpha^i=q\beta^{i-1}$,
+\emph{Part 2.} By the SDAC definition \eqref{eq:def-sdac-policy} and the identity
+$M_q^{\star(i)}\alpha^i=q\beta^{i-1}$,
 \[
 u_t^{\pi(M_q^\star)}=\sum_{i=1}^H M_q^{\star(i)}\alpha^i w_{t-i}=q\sum_{i=1}^H\beta^{i-1}w_{t-i}.
 \]
-Because $w_{t-i}=0$ for $i\ge t$, this equals $q\sum_{i=1}^{\min\{H,t-1\}}\beta^{i-1}w_{t-i}$, so subtracting it from $u_t^{\mathrm{lin}}$ cancels the first $\min\{H,t-1\}$ terms:
+Because $w_{t-i}=0$ for $i\ge t$, this equals
+$q\sum_{i=1}^{\min\{H,t-1\}}\beta^{i-1}w_{t-i}$, so subtracting it from
+$u_t^{\mathrm{lin}}$ cancels the first $\min\{H,t-1\}$ terms:
 \[
 u_t^{\mathrm{lin}}-u_t^{\pi(M_q^\star)}=q\sum_{j=H+1}^{t-1}\beta^{j-1}w_{t-j}\ge 0,
 \]
-which equals $0$ when $t\le H+1$. Using $w_{t-j}\in[0,1]$ and summing the geometric tail,
+which equals $0$ when $t\le H+1$. Using $w_{t-j}\in[0,1]$ and summing the geometric
+tail,
 \[
 u_t^{\mathrm{lin}}-u_t^{\pi(M_q^\star)}\le q\sum_{j=H+1}^{\infty}\beta^{j-1}=\frac{q\,\beta^H}{1-\beta}.
 \]
 
-\emph{Part 3.} Let $\delta_t\triangleq x_t^{\pi(M_q^\star)}-x_t^{\mathrm{lin}}$ and $e_t\triangleq u_t^{\mathrm{lin}}-u_t^{\pi(M_q^\star)}\in\bigl[0,\,q\beta^H/(1-\beta)\bigr]$ by Part 2. The two trajectories follow the same dynamics \eqref{eq:model-dynamics} driven by the same disturbance, so the disturbance cancels on subtraction:
+\emph{Part 3.} Let $\delta_t\triangleq x_t^{\pi(M_q^\star)}-x_t^{\mathrm{lin}}$ and
+$e_t\triangleq
+u_t^{\mathrm{lin}}-u_t^{\pi(M_q^\star)}\in\bigl[0,\,q\beta^H/(1-\beta)\bigr]$ by Part
+2. The two trajectories follow the same dynamics \eqref{eq:model-dynamics} driven by
+the same disturbance, so the disturbance cancels on subtraction:
 \[
 \delta_{t+1}=\alpha\,\delta_t-\bigl(u_t^{\pi(M_q^\star)}-u_t^{\mathrm{lin}}\bigr)=\alpha\,\delta_t+e_t,
 \qquad \delta_1=0.
 \]
-Unrolling gives $\delta_t=\sum_{s=1}^{t-1}\alpha^{t-1-s}e_s\ge 0$, and since $e_s\le q\beta^H/(1-\beta)$ and $\sum_{s=1}^{t-1}\alpha^{t-1-s}\le 1/(1-\alpha)$,
+Unrolling gives $\delta_t=\sum_{s=1}^{t-1}\alpha^{t-1-s}e_s\ge 0$, and since $e_s\le
+q\beta^H/(1-\beta)$ and $\sum_{s=1}^{t-1}\alpha^{t-1-s}\le 1/(1-\alpha)$,
 \[
 0\le\delta_t\le\frac{q\,\beta^H}{1-\beta}\cdot\frac{1}{1-\alpha}=\frac{q\,\beta^H}{(1-\beta)(1-\alpha)}.
 \]
 
-\emph{Part 4.} By the Lipschitz condition \eqref{eq:model-lipschitz} and Parts 2--3, for each $t$,
+\emph{Part 4.} By the Lipschitz condition \eqref{eq:model-lipschitz} and Parts 2--3,
+for each $t$,
 \[
 \begin{aligned}
 &\bigl|c_t\bigl(x_t^{\pi(M_q^\star)},u_t^{\pi(M_q^\star)}\bigr)
@@ -525,7 +841,9 @@ Summing over $t=1,\ldots,T$ and applying the triangle inequality yields Part 4.
 
 \begin{lemma}[State decomposition under SDAC]
 \label{lem:appendix-state-decomp}
-Fix $H\in\mathbb{N}$ and $M\in\Delta_H$, and write $W\triangleq\sum_{i=1}^H M^{(i)}\le 1$. Let $\pi(M)$ be defined by \eqref{eq:def-sdac-policy} and \eqref{eq:sdac-state-update}. Then for all $t\ge 2$,
+Fix $H\in\mathbb{N}$ and $M\in\Delta_H$, and write $W\triangleq\sum_{i=1}^H
+M^{(i)}\le 1$. Let $\pi(M)$ be defined by \eqref{eq:def-sdac-policy} and
+\eqref{eq:sdac-state-update}. Then for all $t\ge 2$,
 \begin{equation}
 \label{eq:appendix-state-decomp}
 x_t^{\pi(M)}
@@ -544,18 +862,34 @@ and
 \[
 \rho_t \triangleq \sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j}.
 \]
-Equivalently, $\rho_t$ is the state $x_t^{\pi(0)}$ produced by the null policy $M=0$ (release nothing, $x_{\tau+1}=\alpha x_\tau+w_\tau$), and the coefficients satisfy $0\le \psi_t^{(i)}\le \rho_t\le 1/(1-\alpha)$. Consequently, setting $M^{(0)}\triangleq 1-W\ge 0$, the identity \eqref{eq:appendix-state-decomp} writes $x_t^{\pi(M)}$ as the convex combination $M^{(0)}\rho_t+\sum_{i=1}^H M^{(i)}\psi_t^{(i)}$ of quantities in $[0,1/(1-\alpha)]$; in particular $M\mapsto x_t^{\pi(M)}$ is affine and
+Equivalently, $\rho_t$ is the state $x_t^{\pi(0)}$ produced by the null policy $M=0$
+(release nothing, $x_{\tau+1}=\alpha x_\tau+w_\tau$), and the coefficients satisfy
+$0\le \psi_t^{(i)}\le \rho_t\le 1/(1-\alpha)$. Consequently, setting
+$M^{(0)}\triangleq 1-W\ge 0$, the identity \eqref{eq:appendix-state-decomp} writes
+$x_t^{\pi(M)}$ as the convex combination $M^{(0)}\rho_t+\sum_{i=1}^H
+M^{(i)}\psi_t^{(i)}$ of quantities in $[0,1/(1-\alpha)]$; in particular $M\mapsto
+x_t^{\pi(M)}$ is affine and
 \[
 0\le x_t^{\pi(M)}\le \frac{1}{1-\alpha}\qquad\text{for all }t\ge 2.
 \]
 \end{lemma}
 
 \begin{proof}
-Recall $w_\tau\equiv 0$ for $\tau\le 0$. Isolating the $j=1$ term in the definition of $\rho_{t+1}$ and reindexing gives the one-step identity $\rho_{t+1}=\alpha\rho_t+w_t$ (with $\rho_1=0$). We prove \eqref{eq:appendix-state-decomp} by induction on $t$.
+Recall $w_\tau\equiv 0$ for $\tau\le 0$. Isolating the $j=1$ term in the definition
+of $\rho_{t+1}$ and reindexing gives the one-step identity
+$\rho_{t+1}=\alpha\rho_t+w_t$ (with $\rho_1=0$). We prove
+\eqref{eq:appendix-state-decomp} by induction on $t$.
 
-\emph{Base case $t=2$.} Since $x_1^{\pi(M)}=0$ and $w_{1-i}=0$ for all $i\ge 1$, the policy \eqref{eq:def-sdac-policy} gives $u_1^{\pi(M)}=\sum_{i=1}^H M^{(i)}\alpha^i w_{1-i}=0$, and the update \eqref{eq:sdac-state-update} gives $x_2^{\pi(M)}=\alpha x_1^{\pi(M)}-u_1^{\pi(M)}+w_1=w_1$. On the other hand $\psi_2^{(i)}=w_1$ for every $i$ and $\rho_2=w_1$, so $\langle M,\psi_2\rangle+(1-W)\rho_2=Ww_1+(1-W)w_1=w_1$, matching \eqref{eq:appendix-state-decomp}.
+\emph{Base case $t=2$.} Since $x_1^{\pi(M)}=0$ and $w_{1-i}=0$ for all $i\ge 1$, the
+policy \eqref{eq:def-sdac-policy} gives $u_1^{\pi(M)}=\sum_{i=1}^H M^{(i)}\alpha^i
+w_{1-i}=0$, and the update \eqref{eq:sdac-state-update} gives $x_2^{\pi(M)}=\alpha
+x_1^{\pi(M)}-u_1^{\pi(M)}+w_1=w_1$. On the other hand $\psi_2^{(i)}=w_1$ for every
+$i$ and $\rho_2=w_1$, so $\langle M,\psi_2\rangle+(1-W)\rho_2=Ww_1+(1-W)w_1=w_1$,
+matching \eqref{eq:appendix-state-decomp}.
 
-\emph{Inductive step.} Assume \eqref{eq:appendix-state-decomp} holds at time $t\ge 2$. Using \eqref{eq:def-sdac-policy}, \eqref{eq:sdac-state-update}, and the induction hypothesis,
+\emph{Inductive step.} Assume \eqref{eq:appendix-state-decomp} holds at time $t\ge
+2$. Using \eqref{eq:def-sdac-policy}, \eqref{eq:sdac-state-update}, and the induction
+hypothesis,
 \[
 \begin{aligned}
 x_{t+1}^{\pi(M)}
@@ -573,7 +907,8 @@ Reindexing the inner summation ($j\mapsto j+1$) yields
 =\langle M,\psi_{t+1}\rangle-W w_t ,
 \end{aligned}
 \]
-where the second equality uses $\psi_{t+1}^{(i)}=w_t+\sum_{j=1}^{i-1}\alpha^j w_{t-j}$. Substituting this together with $\rho_{t+1}=\alpha\rho_t+w_t$,
+where the second equality uses $\psi_{t+1}^{(i)}=w_t+\sum_{j=1}^{i-1}\alpha^j
+w_{t-j}$. Substituting this together with $\rho_{t+1}=\alpha\rho_t+w_t$,
 \[
 \begin{aligned}
 x_{t+1}^{\pi(M)}
@@ -584,7 +919,16 @@ x_{t+1}^{\pi(M)}
 \]
 which is \eqref{eq:appendix-state-decomp} at time $t+1$.
 
-\emph{Bounds.} Each $\psi_t^{(i)}$ is the truncation to $j\le i$ of the nonnegative series defining $\rho_t$, so $0\le\psi_t^{(i)}\le\rho_t$; and since $w_\tau\in[0,1]$, the geometric series gives $\rho_t=\sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j}\le\sum_{j=1}^{\infty}\alpha^{j-1}=1/(1-\alpha)$. With $M^{(0)}=1-W\ge 0$, the parameters $M^{(0)},M^{(1)},\ldots,M^{(H)}$ are nonnegative and sum to one, so \eqref{eq:appendix-state-decomp} exhibits $x_t^{\pi(M)}$ as a convex combination of $\rho_t,\psi_t^{(1)},\ldots,\psi_t^{(H)}\in[0,1/(1-\alpha)]$, giving $0\le x_t^{\pi(M)}\le 1/(1-\alpha)$. Affineness in $M$ is immediate, as $\psi_t$ and $\rho_t$ do not depend on $M$.
+\emph{Bounds.} Each $\psi_t^{(i)}$ is the truncation to $j\le i$ of the nonnegative
+series defining $\rho_t$, so $0\le\psi_t^{(i)}\le\rho_t$; and since $w_\tau\in[0,1]$,
+the geometric series gives
+$\rho_t=\sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j}\le\sum_{j=1}^{\infty}\alpha^{j-1}=1/(1-\alpha)$.
+With $M^{(0)}=1-W\ge 0$, the parameters $M^{(0)},M^{(1)},\ldots,M^{(H)}$ are
+nonnegative and sum to one, so \eqref{eq:appendix-state-decomp} exhibits
+$x_t^{\pi(M)}$ as a convex combination of
+$\rho_t,\psi_t^{(1)},\ldots,\psi_t^{(H)}\in[0,1/(1-\alpha)]$, giving $0\le
+x_t^{\pi(M)}\le 1/(1-\alpha)$. Affineness in $M$ is immediate, as $\psi_t$ and
+$\rho_t$ do not depend on $M$.
 \end{proof}
 
 \begin{lemma}[Linearity of SDAC action in $M$]
@@ -593,7 +937,8 @@ Under the setup of Lemma~\ref{lem:appendix-state-decomp}, for each $t$,
 \[
 u_t^{\pi(M)} = \langle M,\widetilde{w}_t\rangle,
 \]
-where $\widetilde{w}_t$ is the retention-weighted past-disturbance vector from \eqref{eq:def-sdac-policy-vector}, with components
+where $\widetilde{w}_t$ is the retention-weighted past-disturbance vector from
+\eqref{eq:def-sdac-policy-vector}, with components
 \[
 \widetilde{w}_t^{(i)} \triangleq \alpha^i w_{t-i}.
 \]
@@ -607,7 +952,8 @@ u_t^{\pi(M)} = \sum_{i=1}^H M^{(i)}\alpha^i w_{t-i}
 = \sum_{i=1}^H M^{(i)}\widetilde{w}_t^{(i)}
 = \langle M,\widetilde{w}_t\rangle.
 \]
-The lower bound is immediate from $w_{t-i}\ge 0$. For the upper bound, use $w_\tau\in[0,1]$:
+The lower bound is immediate from $w_{t-i}\ge 0$. For the upper bound, use
+$w_\tau\in[0,1]$:
 \[
 \widetilde{w}_t^{(i)} = \alpha^i w_{t-i} \le \alpha^i \le \alpha.
 \]
@@ -615,18 +961,23 @@ The lower bound is immediate from $w_{t-i}\ge 0$. For the upper bound, use $w_\t
 
 \begin{lemma}[Feasibility of SDAC policies]
 \label{lem:appendix-feasibility}
-For every fixed $M\in\Delta_H$, the trajectory induced by \eqref{eq:def-sdac-policy}--\eqref{eq:sdac-state-update} satisfies
+For every fixed $M\in\Delta_H$, the trajectory induced by
+\eqref{eq:def-sdac-policy}--\eqref{eq:sdac-state-update} satisfies
 \[
 0\le u_t^{\pi(M)}\le \alpha x_t^{\pi(M)} \quad \text{for all } t\ge 1.
 \]
 \end{lemma}
 
 \begin{proof}
-Nonnegativity of $u_t^{\pi(M)}$ follows from \eqref{eq:def-sdac-policy}, because $M^{(i)}\ge 0$, $\alpha^i\ge 0$, and $w_{t-i}\ge 0$ for every $i$.
+Nonnegativity of $u_t^{\pi(M)}$ follows from \eqref{eq:def-sdac-policy}, because
+$M^{(i)}\ge 0$, $\alpha^i\ge 0$, and $w_{t-i}\ge 0$ for every $i$.
 
-For the upper bound at $t=1$, we have $x_1^{\pi(M)}=0$ and $w_{1-i}=0$ for all $i\ge 1$, so $u_1^{\pi(M)}=0=\alpha x_1^{\pi(M)}$.
+For the upper bound at $t=1$, we have $x_1^{\pi(M)}=0$ and $w_{1-i}=0$ for all $i\ge
+1$, so $u_1^{\pi(M)}=0=\alpha x_1^{\pi(M)}$.
 
-Now fix $t\ge 2$. Lemma~\ref{lem:appendix-state-decomp} gives $x_t^{\pi(M)}=\langle M,\psi_t\rangle+(1-W)\rho_t$ with $W=\sum_{i=1}^H M^{(i)}\le 1$. Since $(1-W)\rho_t\ge 0$,
+Now fix $t\ge 2$. Lemma~\ref{lem:appendix-state-decomp} gives $x_t^{\pi(M)}=\langle
+M,\psi_t\rangle+(1-W)\rho_t$ with $W=\sum_{i=1}^H M^{(i)}\le 1$. Since
+$(1-W)\rho_t\ge 0$,
 \[
 \begin{aligned}
 \alpha x_t^{\pi(M)}
@@ -635,7 +986,8 @@ Now fix $t\ge 2$. Lemma~\ref{lem:appendix-state-decomp} gives $x_t^{\pi(M)}=\lan
 &= \sum_{i=1}^H M^{(i)}\!\left(\sum_{j=1}^{i}\alpha^j w_{t-j}\right).
 \end{aligned}
 \]
-Collecting the coefficient of each $w_{t-i}$ and using that all parameters are nonnegative, for every $i$ we have $\sum_{j=i}^{H} M^{(j)} \ge M^{(i)}$, so
+Collecting the coefficient of each $w_{t-i}$ and using that all parameters are
+nonnegative, for every $i$ we have $\sum_{j=i}^{H} M^{(j)} \ge M^{(i)}$, so
 \[
 \begin{aligned}
 \alpha x_t^{\pi(M)}
@@ -665,11 +1017,15 @@ Then $\ell_t$ is convex on $\Delta_H$, and for all $M,M'\in\Delta_H$,
 \end{lemma}
 
 \begin{proof}
-By Lemma~\ref{lem:appendix-state-decomp} and Lemma~\ref{lem:appendix-action-linear}, with $W=\sum_{i=1}^H M^{(i)}$,
+By Lemma~\ref{lem:appendix-state-decomp} and Lemma~\ref{lem:appendix-action-linear},
+with $W=\sum_{i=1}^H M^{(i)}$,
 \[
-\ell_t(M)=c_t\bigl(\langle M,\psi_t\rangle+(1-W)\rho_t,\ \langle M,\widetilde{w}_t\rangle\bigr).
+\ell_t(M)=c_t\bigl(\langle M,\psi_t\rangle+(1-W)\rho_t,\ \langle
+M,\widetilde{w}_t\rangle\bigr).
 \]
-The map $M\mapsto\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr)$ is affine (Lemmas~\ref{lem:appendix-state-decomp}--\ref{lem:appendix-action-linear}) and $c_t$ is convex, so $\ell_t$ is convex.
+The map $M\mapsto\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr)$ is affine
+(Lemmas~\ref{lem:appendix-state-decomp}--\ref{lem:appendix-action-linear}) and $c_t$
+is convex, so $\ell_t$ is convex.
 
 For the Lipschitz estimate, the decomposition gives, for all $M,M'\in\Delta_H$,
 \[
@@ -679,7 +1035,9 @@ x_t^{\pi(M)}-x_t^{\pi(M')}
 &=\langle M-M',\,\psi_t-\rho_t\mathbf{1}\rangle,
 \end{aligned}
 \]
-using $W-W'=\langle M-M',\mathbf{1}\rangle$, while $u_t^{\pi(M)}-u_t^{\pi(M')}=\langle M-M',\widetilde{w}_t\rangle$. Hence, by \eqref{eq:model-lipschitz} and Hölder's inequality,
+using $W-W'=\langle M-M',\mathbf{1}\rangle$, while
+$u_t^{\pi(M)}-u_t^{\pi(M')}=\langle M-M',\widetilde{w}_t\rangle$. Hence, by
+\eqref{eq:model-lipschitz} and Hölder's inequality,
 \begin{align*}
 |\ell_t(M)-\ell_t(M')|
 &\le L_x\bigl|\langle M-M',\,\psi_t-\rho_t\mathbf{1}\rangle\bigr| \\
@@ -687,7 +1045,12 @@ using $W-W'=\langle M-M',\mathbf{1}\rangle$, while $u_t^{\pi(M)}-u_t^{\pi(M')}=\
 &\le \bigl(L_x\,\|\psi_t-\rho_t\mathbf{1}\|_\infty + L_u\,\|\widetilde{w}_t\|_\infty\bigr) \\
 &\qquad\cdot\|M-M'\|_1.
 \end{align*}
-Since $0\le\psi_t^{(i)}\le\rho_t\le 1/(1-\alpha)$ (Lemma~\ref{lem:appendix-state-decomp}), we have $\|\psi_t-\rho_t\mathbf{1}\|_\infty=\max_i\bigl(\rho_t-\psi_t^{(i)}\bigr)\le\rho_t\le 1/(1-\alpha)$, and Lemma~\ref{lem:appendix-action-linear} gives $\|\widetilde{w}_t\|_\infty\le \alpha$. This yields the claim, and one may take the surrogate Lipschitz constant
+Since $0\le\psi_t^{(i)}\le\rho_t\le 1/(1-\alpha)$
+(Lemma~\ref{lem:appendix-state-decomp}), we have
+$\|\psi_t-\rho_t\mathbf{1}\|_\infty=\max_i\bigl(\rho_t-\psi_t^{(i)}\bigr)\le\rho_t\le
+1/(1-\alpha)$, and Lemma~\ref{lem:appendix-action-linear} gives
+$\|\widetilde{w}_t\|_\infty\le \alpha$. This yields the claim, and one may take the
+surrogate Lipschitz constant
 \[
 L := \alpha L_u + \frac{L_x}{1-\alpha},
 \]
@@ -696,11 +1059,16 @@ as used in the main text.
 
 \begin{lemma}[Conditional normalization is the KL projection onto $\Delta_H$]
 \label{lem:eg-projection}
-Let $\Psi(M)=\sum_{i=1}^H\bigl(M^{(i)}\log M^{(i)}-M^{(i)}\bigr)$ denote the unnormalized negentropy on $\mathbb{R}_{\ge 0}^H$ (with the convention $0\log 0=0$), and let
+Let $\Psi(M)=\sum_{i=1}^H\bigl(M^{(i)}\log M^{(i)}-M^{(i)}\bigr)$ denote the
+unnormalized negentropy on $\mathbb{R}_{\ge 0}^H$ (with the convention $0\log 0=0$),
+and let
 \[
 D_\Psi(M\|V)=\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{V^{(i)}}-M^{(i)}+V^{(i)}\Bigr)
 \]
-be its Bregman divergence, the generalized Kullback--Leibler divergence. Fix $\widetilde{M}\in\mathbb{R}_{>0}^H$ and set $S\triangleq\sum_{i=1}^H \widetilde{M}^{(i)}$. Then the Bregman projection of $\widetilde{M}$ onto $\Delta_H=\{M\in\mathbb{R}_{\ge0}^H:\sum_{i} M^{(i)}\le1\}$,
+be its Bregman divergence, the generalized Kullback--Leibler divergence. Fix
+$\widetilde{M}\in\mathbb{R}_{>0}^H$ and set $S\triangleq\sum_{i=1}^H
+\widetilde{M}^{(i)}$. Then the Bregman projection of $\widetilde{M}$ onto
+$\Delta_H=\{M\in\mathbb{R}_{\ge0}^H:\sum_{i} M^{(i)}\le1\}$,
 \[
 P(\widetilde{M})\triangleq\operatorname*{arg\,min}_{M\in\Delta_H} D_\Psi(M\|\widetilde{M}),
 \]
@@ -709,30 +1077,44 @@ is given coordinatewise by
 P(\widetilde{M})^{(i)}=
 \frac{\widetilde{M}^{(i)}}{\max(1,S)}.
 \]
-Consequently, taking $\widetilde{M}=\widetilde{M}_{t+1}$ from \eqref{eq:alg-eg-unnormalized}, the update \eqref{eq:alg-eg-normalized} is exactly the projection $M_{t+1}=P(\widetilde{M}_{t+1})$, and hence $M_{t+1}\in\Delta_H$.
+Consequently, taking $\widetilde{M}=\widetilde{M}_{t+1}$ from
+\eqref{eq:alg-eg-unnormalized}, the update \eqref{eq:alg-eg-normalized} is exactly
+the projection $M_{t+1}=P(\widetilde{M}_{t+1})$, and hence $M_{t+1}\in\Delta_H$.
 \end{lemma}
 
 \begin{proof}
-Since $\widetilde{M}$ is fixed, the terms $+\widetilde{M}^{(i)}$ are constant, so $P(\widetilde{M})$ minimizes
+Since $\widetilde{M}$ is fixed, the terms $+\widetilde{M}^{(i)}$ are constant, so
+$P(\widetilde{M})$ minimizes
 \[
 F(M)\triangleq\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{\widetilde{M}^{(i)}}-M^{(i)}\Bigr)
 \]
-over $\Delta_H$. The function $F$ is strictly convex on $\mathbb{R}_{\ge0}^H$ and $\Delta_H$ is closed and convex, so the minimizer is unique; its partial derivatives are $\partial F/\partial M^{(i)}=\log\bigl(M^{(i)}/\widetilde{M}^{(i)}\bigr)$.
+over $\Delta_H$. The function $F$ is strictly convex on $\mathbb{R}_{\ge0}^H$ and
+$\Delta_H$ is closed and convex, so the minimizer is unique; its partial derivatives
+are $\partial F/\partial M^{(i)}=\log\bigl(M^{(i)}/\widetilde{M}^{(i)}\bigr)$.
 
-\emph{Case $S\le 1$.} Here $\widetilde{M}\in\Delta_H$. Setting $\partial F/\partial M^{(i)}=0$ gives the unconstrained minimizer $M=\widetilde{M}$ over $\mathbb{R}_{\ge0}^H$, which is feasible; hence $P(\widetilde{M})=\widetilde{M}$.
+\emph{Case $S\le 1$.} Here $\widetilde{M}\in\Delta_H$. Setting $\partial F/\partial
+M^{(i)}=0$ gives the unconstrained minimizer $M=\widetilde{M}$ over
+$\mathbb{R}_{\ge0}^H$, which is feasible; hence $P(\widetilde{M})=\widetilde{M}$.
 
-\emph{Case $S>1$.} Here $\widetilde{M}\notin\Delta_H$, so the constraint $\sum_i M^{(i)}\le1$ must be active at the optimum. As $\widetilde{M}^{(i)}>0$, the optimal coordinates are strictly positive and the nonnegativity constraints are inactive; introducing a multiplier $\lambda$ for $\sum_i M^{(i)}=1$, KKT stationarity reads
+\emph{Case $S>1$.} Here $\widetilde{M}\notin\Delta_H$, so the constraint $\sum_i
+M^{(i)}\le1$ must be active at the optimum. As $\widetilde{M}^{(i)}>0$, the optimal
+coordinates are strictly positive and the nonnegativity constraints are inactive;
+introducing a multiplier $\lambda$ for $\sum_i M^{(i)}=1$, KKT stationarity reads
 \[
 \log\bigl(M^{(i)}/\widetilde{M}^{(i)}\bigr)+\lambda=0
 \quad\Longrightarrow\quad
 M^{(i)}=\widetilde{M}^{(i)}e^{-\lambda}.
 \]
-The active constraint $\sum_i M^{(i)}=1$ forces $e^{-\lambda}=1/S$, so $M^{(i)}=\widetilde{M}^{(i)}/S$; moreover $\lambda=\log S>0$, so dual feasibility holds. Equivalently, $P(\widetilde{M})^{(i)}=\widetilde{M}^{(i)}/\max(1,S)$ in both cases.
+The active constraint $\sum_i M^{(i)}=1$ forces $e^{-\lambda}=1/S$, so
+$M^{(i)}=\widetilde{M}^{(i)}/S$; moreover $\lambda=\log S>0$, so dual feasibility
+holds. Equivalently, $P(\widetilde{M})^{(i)}=\widetilde{M}^{(i)}/\max(1,S)$ in both
+cases.
 \end{proof}
 
 \begin{lemma}[One-step movement of unnormalized-negentropy OMD]
 \label{lem:omd-move}
-For the unnormalized-negentropy OMD update with step size \(\eta>0\) and subgradient \(g_t\in\partial \ell_t(M_t)\),
+For the unnormalized-negentropy OMD update with step size \(\eta>0\) and subgradient
+\(g_t\in\partial \ell_t(M_t)\),
 \[
 \|M_{t+1}-M_t\|_1 \le \eta\,\|g_t\|_\infty.
 \]
@@ -740,7 +1122,10 @@ In particular, if \(\|g_t\|_\infty\le L\), then \(\|M_{t+1}-M_t\|_1\le \eta L\).
 \end{lemma}
 
 \begin{proof}
-Let \(\Psi(M)=\sum_{i=1}^H\bigl(M^{(i)}\log M^{(i)}-M^{(i)}\bigr)\). By Lemma~\ref{lem:eg-projection}, \(M_{t+1}\) is the Bregman projection of the mirror step \(\widetilde{M}_{t+1}\) onto \(\Delta_H\), so the first order optimality condition gives, for all \(M\in\Delta_H\),
+Let \(\Psi(M)=\sum_{i=1}^H\bigl(M^{(i)}\log M^{(i)}-M^{(i)}\bigr)\). By
+Lemma~\ref{lem:eg-projection}, \(M_{t+1}\) is the Bregman projection of the mirror
+step \(\widetilde{M}_{t+1}\) onto \(\Delta_H\), so the first order optimality
+condition gives, for all \(M\in\Delta_H\),
 \[ 
 \begin{aligned}
 \Bigl\langle g_t + \tfrac{1}{\eta}\bigl(\nabla\Psi(M_{t+1})-\nabla\Psi(M_t)\bigr), 
@@ -751,7 +1136,8 @@ Taking \(M=M_t\) and rearranging yields
 \[
 \langle g_t,M_t-M_{t+1}\rangle
 \ge
-\tfrac{1}{\eta}\Bigl\langle \nabla\Psi(M_{t+1})-\nabla\Psi(M_t),\,M_{t+1}-M_t\Bigr\rangle.
+\tfrac{1}{\eta}\Bigl\langle
+\nabla\Psi(M_{t+1})-\nabla\Psi(M_t),\,M_{t+1}-M_t\Bigr\rangle.
 \]
 By the Bregman identity,
 \[
@@ -769,7 +1155,13 @@ Hence, using Hölder's inequality,
 \eta\,\|g_t\|_\infty\,\|M_{t+1}-M_t\|_1.
 \end{aligned}
 \]
-Since both iterates lie in \(\Delta_H\), the unnormalized negentropy is \(1\)-strongly convex with respect to \(\|\cdot\|_1\) on this set: the Hessian \(\nabla^2\Psi(M)=\mathrm{diag}(1/M^{(i)})\) satisfies \(v^\top\nabla^2\Psi(M)\,v=\sum_i (v^{(i)})^2/M^{(i)}\ge\|v\|_1^2/(\sum_i M^{(i)})\ge\|v\|_1^2\) whenever \(\sum_i M^{(i)}\le1\) (Cauchy--Schwarz), so the usual Pinsker-type bound for the generalized KL extends to the sub-probability simplex \(\Delta_H\),
+Since both iterates lie in \(\Delta_H\), the unnormalized negentropy is
+\(1\)-strongly convex with respect to \(\|\cdot\|_1\) on this set: the Hessian
+\(\nabla^2\Psi(M)=\mathrm{diag}(1/M^{(i)})\) satisfies
+\(v^\top\nabla^2\Psi(M)\,v=\sum_i (v^{(i)})^2/M^{(i)}\ge\|v\|_1^2/(\sum_i
+M^{(i)})\ge\|v\|_1^2\) whenever \(\sum_i M^{(i)}\le1\) (Cauchy--Schwarz), so the
+usual Pinsker-type bound for the generalized KL extends to the sub-probability
+simplex \(\Delta_H\),
 \begin{align*}
 D_\Psi(M_{t+1}\|M_t)&\ge \tfrac12\|M_{t+1}-M_t\|_1^2, \\
 D_\Psi(M_t\|M_{t+1})&\ge \tfrac12\|M_{t+1}-M_t\|_1^2,
@@ -794,7 +1186,8 @@ For every \(t\ge 2\) and every integer \(i\) with \(1\le i\le t-1\),
 \end{lemma}
 
 \begin{proof}
-The range \(1\le i\le t-1\) ensures that every index \(t-j\) for \(j=1,\ldots,i\) satisfies \(t-j\ge 1\). By the triangle inequality and Lemma~\ref{lem:omd-move},
+The range \(1\le i\le t-1\) ensures that every index \(t-j\) for \(j=1,\ldots,i\)
+satisfies \(t-j\ge 1\). By the triangle inequality and Lemma~\ref{lem:omd-move},
 \[
 \|M_{t-i}-M_t\|_1
 \le
@@ -833,16 +1226,19 @@ u_t^{\mathcal{A}}
 \langle M_t,\widetilde{w}_t\rangle
 -\bigl[\langle M_t,\widetilde{w}_t\rangle-\alpha x_t^{\mathcal{A}}\bigr]_+.
 \]
-This identity gives the upper bound immediately, since the subtracted term is nonnegative.
+This identity gives the upper bound immediately, since the subtracted term is
+nonnegative.
 
-For the lower bound, Lemma~\ref{lem:appendix-feasibility} applied to the benchmark policy \(\pi(M_t)\) yields, using \eqref{eq:def-sdac-policy-vector},
+For the lower bound, Lemma~\ref{lem:appendix-feasibility} applied to the benchmark
+policy \(\pi(M_t)\) yields, using \eqref{eq:def-sdac-policy-vector},
 \[
 u_t^{\pi(M_t)}
 =
 \langle M_t,\widetilde{w}_t\rangle
 \le \alpha x_t^{\pi(M_t)}.
 \]
-Subtracting \(\alpha x_t^{\mathcal{A}}\) from both sides and applying monotonicity of \([\cdot]_+\) gives
+Subtracting \(\alpha x_t^{\mathcal{A}}\) from both sides and applying monotonicity of
+\([\cdot]_+\) gives
 \[
 \begin{aligned}
 &\bigl[\langle M_t,\widetilde{w}_t\rangle-\alpha x_t^{\mathcal{A}}\bigr]_+ \\
@@ -852,7 +1248,8 @@ Subtracting \(\alpha x_t^{\mathcal{A}}\) from both sides and applying monotonici
 \alpha\bigl[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}\bigr]_+.
 \end{aligned}
 \]
-Substituting this bound into the expression above for \(u_t^{\mathcal{A}}\) yields the stated lower bound.
+Substituting this bound into the expression above for \(u_t^{\mathcal{A}}\) yields
+the stated lower bound.
 \end{proof}
 
 \begin{lemma}[State-gap recursion]
@@ -862,7 +1259,8 @@ Define the state gap
 \label{eq:def-state-gap}
 \Gamma_t^M \triangleq x_t^{\pi(M)} - x_t^{\mathcal{A}}.
 \end{equation}
-For any fixed $M\in\Delta_H$ and every $t\ge 1$ the following two-sided recursion holds:
+For any fixed $M\in\Delta_H$ and every $t\ge 1$ the following two-sided recursion
+holds:
 \begin{align}
 \Gamma_{t+1}^M
 &= \alpha\Gamma_t^M - \bigl(u_t^{\pi(M)}-u_t^{\mathcal{A}}\bigr) \nonumber\\
@@ -873,22 +1271,29 @@ For any fixed $M\in\Delta_H$ and every $t\ge 1$ the following two-sided recursio
 \end{lemma}
 
 \begin{proof}
-From the state updates \eqref{eq:sdac-state-update} (for $\pi(M)$) and \eqref{eq:alg-state-update} (for the algorithm), the  disturbance $w_t$ cancels and we obtain the exact identity
+From the state updates \eqref{eq:sdac-state-update} (for $\pi(M)$) and
+\eqref{eq:alg-state-update} (for the algorithm), the  disturbance $w_t$ cancels and
+we obtain the exact identity
 \begin{equation}
     \label{eq:state-gap-identity}
     \Gamma_{t+1}^M = x_{t+1}^{\pi(M)}-x_{t+1}^{\mathcal{A}} = \alpha\Gamma_t^M - \bigl(u_t^{\pi(M)}-u_t^{\mathcal{A}}\bigr).
 \end{equation}
-Consequently, bounding $\Gamma_{t+1}^M$ reduces to bounding the control-action difference $u_t^{\pi(M)}-u_t^{\mathcal{A}}$.
+Consequently, bounding $\Gamma_{t+1}^M$ reduces to bounding the control-action
+difference $u_t^{\pi(M)}-u_t^{\mathcal{A}}$.
 
-Using the SDAC representation \eqref{eq:def-sdac-policy-vector} for the benchmark control action and the bounds of Lemma~\ref{lem:bounding-u-eff} for the algorithm control action, we have
+Using the SDAC representation \eqref{eq:def-sdac-policy-vector} for the benchmark
+control action and the bounds of Lemma~\ref{lem:bounding-u-eff} for the algorithm
+control action, we have
 \[
 u_t^{\pi(M)} = \langle M,\widetilde{w}_t\rangle,
 \]
 and
 \[
-\langle M_t,\widetilde{w}_t\rangle-\alpha[\Gamma_t^{M_t}]_+ \le u_t^{\mathcal{A}} \le \langle M_t,\widetilde{w}_t\rangle.
+\langle M_t,\widetilde{w}_t\rangle-\alpha[\Gamma_t^{M_t}]_+ \le u_t^{\mathcal{A}} \le
+\langle M_t,\widetilde{w}_t\rangle.
 \]
-Subtracting the upper bound on $u_t^{\mathcal{A}}$ from $u_t^{\pi(M)}$ yields the lower bound on $u_t^{\pi(M)}-u_t^{\mathcal{A}}$:
+Subtracting the upper bound on $u_t^{\mathcal{A}}$ from $u_t^{\pi(M)}$ yields the
+lower bound on $u_t^{\pi(M)}-u_t^{\mathcal{A}}$:
 \[
 u_t^{\pi(M)}-u_t^{\mathcal{A}}
 \ge \langle M,\widetilde{w}_t\rangle - \langle M_t,\widetilde{w}_t\rangle
@@ -900,7 +1305,8 @@ Inserting this into the identity \eqref{eq:state-gap-identity} gives
 \]
 which is \eqref{eq:GAMMA-Upper}.
 
-Similarly, using the lower bound on $u_t^{\mathcal{A}}$ produces an upper bound on $u_t^{\pi(M)}-u_t^{\mathcal{A}}$:
+Similarly, using the lower bound on $u_t^{\mathcal{A}}$ produces an upper bound on
+$u_t^{\pi(M)}-u_t^{\mathcal{A}}$:
 \[
 \begin{aligned}
 u_t^{\pi(M)}-u_t^{\mathcal{A}}
@@ -930,7 +1336,8 @@ x_t^{\pi(M_t)}-x_t^{\mathcal{A}}
 \end{lemma}
 
 \begin{proof}
-From \eqref{eq:GAMMA-Upper}, for any fixed benchmark $M\in\Delta_H$ and every $s\ge 1$,
+From \eqref{eq:GAMMA-Upper}, for any fixed benchmark $M\in\Delta_H$ and every $s\ge
+1$,
 \[
 \Gamma_{s+1}^{M}
 \le
@@ -955,7 +1362,8 @@ Since $x_1^{\pi(M_t)}=x_1^{\mathcal{A}}=0$, we have $\Gamma_1^{M_t}=0$, and ther
 \le
 \sum_{s=1}^{t-1}\alpha^{t-1-s}\langle M_s-M_t,\widetilde{w}_s\rangle.
 \]
-Note that $\|\widetilde{w}_s\|_\infty = \max_{i\le H}\alpha^i w_{s-i} \le \alpha$ since $w_\tau\in[0,1]$ and $i\ge1$. Hence,
+Note that $\|\widetilde{w}_s\|_\infty = \max_{i\le H}\alpha^i w_{s-i} \le \alpha$
+since $w_\tau\in[0,1]$ and $i\ge1$. Hence,
 \[
 \begin{aligned}
 \Gamma_t^{M_t}
@@ -972,7 +1380,8 @@ Where we used the geometric-series identity
 \sum_{j=1}^{\infty} j\,\alpha^{j-1} = \frac{1}{(1-\alpha)^2}.
 \]
 
-Similarly, for the lower bound, unrolling \eqref{eq:GAMMA-Lower} with the same fixed benchmark $M=M_t$ yields
+Similarly, for the lower bound, unrolling \eqref{eq:GAMMA-Lower} with the same fixed
+benchmark $M=M_t$ yields
 \[
 \Gamma_t^{M_t}
 \ge
@@ -980,7 +1389,9 @@ Similarly, for the lower bound, unrolling \eqref{eq:GAMMA-Lower} with the same f
 -
 \sum_{s=1}^{t-1}\alpha^{t-s}[\Gamma_s^{M_s}]_+.
 \]
-The upper bound just proved applies to every earlier time $s$, so $[\Gamma_s^{M_s}]_+\le \alpha\eta L/(1-\alpha)^2$. Also, by Hölder's inequality and Lemma~\ref{lem:cum-move},
+The upper bound just proved applies to every earlier time $s$, so
+$[\Gamma_s^{M_s}]_+\le \alpha\eta L/(1-\alpha)^2$. Also, by Hölder's inequality and
+Lemma~\ref{lem:cum-move},
 \begin{align*}
 \Gamma_t^{M_t}
 &\ge
@@ -1029,7 +1440,11 @@ u_t^{\pi(M_t)}-u_t^{\mathcal{A}}
 \end{lemma}
 
 \begin{proof}
-By \eqref{eq:def-sdac-policy-vector} and \eqref{eq:alg-unconstrained-action}, the benchmark control action equals the unconstrained control action, \(u_t^{\pi(M_t)} = \langle M_t,\widetilde{w}_t\rangle = \widehat{u}_t\), while \(u_t^{\mathcal{A}}=\min\{\widehat{u}_t,\alpha x_t^{\mathcal{A}}\}\le \widehat{u}_t\) by \eqref{eq:alg-feasible-action}. Hence the gap is nonnegative and
+By \eqref{eq:def-sdac-policy-vector} and \eqref{eq:alg-unconstrained-action}, the
+benchmark control action equals the unconstrained control action, \(u_t^{\pi(M_t)} =
+\langle M_t,\widetilde{w}_t\rangle = \widehat{u}_t\), while
+\(u_t^{\mathcal{A}}=\min\{\widehat{u}_t,\alpha x_t^{\mathcal{A}}\}\le \widehat{u}_t\)
+by \eqref{eq:alg-feasible-action}. Hence the gap is nonnegative and
 \[
 u_t^{\pi(M_t)} - u_t^{\mathcal{A}}
 =
@@ -1037,7 +1452,8 @@ u_t^{\pi(M_t)} - u_t^{\mathcal{A}}
 =
 \bigl[\langle M_t,\widetilde{w}_t\rangle - \alpha x_t^{\mathcal{A}}\bigr]_+ .
 \]
-As established in the proof of Lemma~\ref{lem:bounding-u-eff} (using feasibility of \(\pi(M_t)\)),
+As established in the proof of Lemma~\ref{lem:bounding-u-eff} (using feasibility of
+\(\pi(M_t)\)),
 \[
 \bigl[\langle M_t,\widetilde{w}_t\rangle - \alpha x_t^{\mathcal{A}}\bigr]_+
 \le
@@ -1045,7 +1461,8 @@ As established in the proof of Lemma~\ref{lem:bounding-u-eff} (using feasibility
 =
 \alpha\,[\Gamma_t^{M_t}]_+ ,
 \]
-which is the middle inequality. Finally, by Lemma~\ref{lem:state-gap-bound}, \([\Gamma_t^{M_t}]_+ \le \dfrac{\alpha\,\eta L}{(1-\alpha)^2}\), so
+which is the middle inequality. Finally, by Lemma~\ref{lem:state-gap-bound},
+\([\Gamma_t^{M_t}]_+ \le \dfrac{\alpha\,\eta L}{(1-\alpha)^2}\), so
 \[
 \alpha\,[\Gamma_t^{M_t}]_+ \le \frac{\alpha^2\,\eta L}{(1-\alpha)^2},
 \]
@@ -1125,7 +1542,8 @@ where we used \(L = \alpha L_u + \tfrac{L_x}{1-\alpha}\) in the final step.
 
 \begin{proof}[Proof of Theorem~\ref{thm:regret-bound}]
 
-Starting from \eqref{eq:def-regret} we have the following decomposition of the regret:
+Starting from \eqref{eq:def-regret} we have the following decomposition of the
+regret:
 \begin{align*}
 \mathrm{Regret}(T)
 &= \sum_{t=1}^T c_t(x_t^{\mathcal{A}},u_t^{\mathcal{A}}) \\
@@ -1135,9 +1553,15 @@ Starting from \eqref{eq:def-regret} we have the following decomposition of the r
 &\quad + \sum_{t=1}^T c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr) \\
 &\quad - \min_{M\in\Delta_H}\sum_{t=1}^T c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr).
 \end{align*} 
-We call the first sum the stability term, and the second sum the OMD term. We will bound each term separately.
+We call the first sum the stability term, and the second sum the OMD term. We will
+bound each term separately.
 
-We bound the OMD term by unnormalized-negentropy OMD on $\Delta_H\subset\mathbb{R}^H$. Let $\Psi(M)=\sum_{i=1}^H\bigl(M^{(i)}\log M^{(i)}-M^{(i)}\bigr)$ and let $D_\Psi$ be its Bregman divergence as in Lemma~\ref{lem:eg-projection}. Under the initialization \eqref{eq:alg-init}, for any benchmark $M^\star\in\Delta_H$ with $W^\star\triangleq\sum_{i=1}^H M^{\star(i)}\le 1$,
+We bound the OMD term by unnormalized-negentropy OMD on
+$\Delta_H\subset\mathbb{R}^H$. Let $\Psi(M)=\sum_{i=1}^H\bigl(M^{(i)}\log
+M^{(i)}-M^{(i)}\bigr)$ and let $D_\Psi$ be its Bregman divergence as in
+Lemma~\ref{lem:eg-projection}. Under the initialization \eqref{eq:alg-init}, for any
+benchmark $M^\star\in\Delta_H$ with $W^\star\triangleq\sum_{i=1}^H M^{\star(i)}\le
+1$,
 \[
 \begin{aligned}
 &D_\Psi(M^\star\|M_1) \\
@@ -1154,7 +1578,8 @@ W^\star
 \tfrac{H}{H+1}.
 \end{aligned}
 \]
-Since each $M^{\star(i)}\in[0,1]$, one has $M^{\star(i)}\log M^{\star(i)}\le 0$, and therefore
+Since each $M^{\star(i)}\in[0,1]$, one has $M^{\star(i)}\log M^{\star(i)}\le 0$, and
+therefore
 \[
 D_\Psi(M^\star\|M_1)
 \le
@@ -1164,13 +1589,18 @@ The right-hand side is at most $\log(H+1)$ for every $W^\star\in[0,1]$: equivale
 \[
 (1-W^\star)\log(H+1)+W^\star-\tfrac{H}{H+1}\ge 0,
 \]
-which holds because the left-hand side is affine in $W^\star$ and nonnegative at the endpoints $W^\star=0$ and $W^\star=1$. Hence $D_\Psi(M^\star\|M_1)\le\log(H+1)$. The surrogate costs $\ell_t$ from \eqref{eq:alg-surrogate-cost} are convex and $L$-Lipschitz by Lemma~\ref{lem:appendix-surrogate}, so the standard OMD regret bound with Bregman divergence $D_\Psi$ on $\Delta_H$ \cite{hazan2016introduction} yields
+which holds because the left-hand side is affine in $W^\star$ and nonnegative at the
+endpoints $W^\star=0$ and $W^\star=1$. Hence $D_\Psi(M^\star\|M_1)\le\log(H+1)$. The
+surrogate costs $\ell_t$ from \eqref{eq:alg-surrogate-cost} are convex and
+$L$-Lipschitz by Lemma~\ref{lem:appendix-surrogate}, so the standard OMD regret bound
+with Bregman divergence $D_\Psi$ on $\Delta_H$ \cite{hazan2016introduction} yields
 \begin{align*}
 \sum_{t=1}^T \ell_t(M_t) - \min_{M\in\Delta_H}\sum_{t=1}^T \ell_t(M)
 &\le
 \frac{\log(H+1)}{\eta} + \frac{\eta L^2 T}{2}.
 \end{align*}
-Using \eqref{eq:alg-surrogate-cost}, we substitute \(\ell_t(M)=c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr)\), so that
+Using \eqref{eq:alg-surrogate-cost}, we substitute
+\(\ell_t(M)=c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr)\), so that
 \begin{align*}
 \sum_{t=1}^T \ell_t(M_t)
 &=
@@ -1218,13 +1648,17 @@ Rearranging by factoring out the \(\eta\) term gives
 \;+\;
 \eta L^2 T\Bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\Bigr).
 \]
-To optimize over \(\eta > 0\), we apply the inequality \(A/\eta + B\eta \le 2\sqrt{AB}\) with \(A=\log(H+1)\) and \(B= L^2 T(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2})\). This yields the optimal step size
+To optimize over \(\eta > 0\), we apply the inequality \(A/\eta + B\eta \le
+2\sqrt{AB}\) with \(A=\log(H+1)\) and \(B= L^2
+T(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2})\). This yields the optimal step size
 \[
-\eta^* = \sqrt{\frac{\log(H+1)}{L^2 T\bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\bigr)}}
+\eta^* = \sqrt{\frac{\log(H+1)}{L^2
+T\bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\bigr)}}
 \] 
 and the resulting regret bound
 \[
-\mathrm{Regret}(T) \;\le\; 2L\sqrt{\Bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\Bigr)T\log(H+1)}.
+\mathrm{Regret}(T) \;\le\;
+2L\sqrt{\Bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\Bigr)T\log(H+1)}.
 \]
 \end{proof}
 
