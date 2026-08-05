@@ -10,6 +10,9 @@
 \newtheorem{theorem}{Theorem}
 \newtheorem{corollary}{Corollary}
 
+\newcommand{\RegSDAC}[1]{\mathrm{Regret}_{\mathrm{SDAC}}(#1)}
+\newcommand{\RegLin}[1]{\mathrm{Regret}_{\mathrm{lin}}(#1)}
+
 \title{Online Constrained Control of Storage Systems via Simplex Disturbance-Action
 Policies}
 
@@ -34,10 +37,9 @@ cost. We introduce \emph{Simplex Disturbance-Action Control} (SDAC), a
 simplex-constrained disturbance-action policy class that preserves per-step
 feasibility by construction. An online controller updates SDAC parameters via
 exponentiated gradient on the sub-probability simplex, with a feasibility projection
-that enforces the state-dependent action constraint. We prove regret that is
-sublinear in the horizon and logarithmic in the policy dimension against the best
-fixed SDAC policy in hindsight, implying no-regret relative to feasible linear
-state-feedback policies. The setting is motivated by energy-harvesting battery
+that enforces the state-dependent action constraint. We prove that regret against the best fixed SDAC policy in hindsight is sublinear in
+the horizon and logarithmic in the policy dimension, implying no-regret relative to
+feasible linear state-feedback policies. The setting is motivated by energy-harvesting battery
 management and similar storage systems.
 \end{abstract}
 
@@ -277,8 +279,8 @@ The contributions are organized in two layers:
         exponentiated-gradient online controller over SDAC parameters in which a
         feasibility projection \emph{enforces} the state-dependent constraint on the
         online control action, and we analyze regret against the best fixed SDAC
-        policy in hindsight, achieving sublinear regret with logarithmic dependence
-        on policy dimension.
+        policy in hindsight, proving a bound that is sublinear in the horizon and
+        logarithmic in the policy dimension.
 \end{itemize}
 
 \subsection{Paper Organization}
@@ -360,17 +362,18 @@ $\{(x_t^{\mathcal{A}},u_t^{\mathcal{A}})\}_{t=1}^T$, define cumulative cost
 \label{eq:def-cumulative-cost}
 J_T(\mathcal{A}) \triangleq \sum_{t=1}^T c_t\bigl(x_t^{\mathcal{A}},u_t^{\mathcal{A}}\bigr).
 \end{equation}
-For a fixed positive integer $H$, let the policy class be $\Pi\triangleq\mathrm{SDAC}_H$ (defined in
-Section~\ref{sec:sdac}). For each $\pi\in\Pi$, let
-$\{(x_t^{\pi},u_t^{\pi})\}_{t=1}^T$ be the induced feasible trajectory under the same
-disturbance sequence. Regret is defined by
+For a fixed positive integer $H$, let $\pi$ range over the policy class
+$\mathrm{SDAC}_H$ (defined in Section~\ref{sec:sdac}). For each
+$\pi\in\mathrm{SDAC}_H$, let $\{(x_t^{\pi},u_t^{\pi})\}_{t=1}^T$ be the induced
+feasible trajectory under the same disturbance sequence. Regret against the best
+fixed SDAC policy is defined by
 \begin{equation}
 \label{eq:def-regret}
-\mathrm{Regret}(T)
+\RegSDAC{T}
 \triangleq
 \sum_{t=1}^T c_t\bigl(x_t^{\mathcal{A}},u_t^{\mathcal{A}}\bigr)
 -
-\min_{\pi\in\Pi}
+\min_{\pi\in\mathrm{SDAC}_H}
 \sum_{t=1}^T c_t\bigl(x_t^{\pi},u_t^{\pi}\bigr).
 \end{equation}
 While the online controller may update its SDAC parameters over time, the benchmark
@@ -584,25 +587,45 @@ x_t^{\mathcal{A}}$ for all $t$.
 
 
 
-\paragraph{Surrogate cost and gradient step}
+\paragraph{Surrogate cost and mirror-descent step}
 Define the surrogate cost at time $t$ by
 \begin{equation}
 \label{eq:alg-surrogate-cost}
 \ell_t(M) \triangleq c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr), \qquad M\in\Delta_H,
 \end{equation}
 which is convex and Lipschitz by Lemma~\ref{lem:appendix-surrogate}. Let
-$g_t\in\partial \ell_t(M_t)$ be a subgradient.
+$g_t\in\partial \ell_t(M_t)$ be a subgradient. Let
+\begin{equation}
+\label{eq:def-negentropy}
+\Psi(M) \triangleq \sum_{i=1}^H\bigl(M^{(i)}\log M^{(i)}-M^{(i)}\bigr), \qquad
+M\in\mathbb{R}_{\ge0}^H,
+\end{equation}
+denote the unnormalized negentropy (with the convention $0\log0\triangleq0$), and let
+\[
+D_\Psi(M\|V)\triangleq\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{V^{(i)}}-M^{(i)}+V^{(i)}\Bigr)
+\]
+be its Bregman divergence, the generalized Kullback--Leibler divergence.
 
-The exponentiated-gradient update is
+We define the online-mirror-descent update in the compact, one-line form
+\begin{equation}
+\label{eq:alg-omd-argmin}
+M_{t+1} \triangleq \operatorname*{arg\,min}_{M\in\Delta_H}
+\Bigl\{\eta\langle g_t,M\rangle + D_\Psi(M\|M_t)\Bigr\}.
+\end{equation}
+All of the regret analysis in Section~\ref{sec:regret-analysis} works directly with
+this optimization-based definition.
+
+\paragraph{Closed-form solution}
+Although \eqref{eq:alg-omd-argmin} is a constrained optimization problem, it is easy
+to solve analytically because $\Psi$ is separable and the objective is linear in
+$g_t$. As shown in Lemma~\ref{lem:omd-closed-form}, the minimizer in
+\eqref{eq:alg-omd-argmin} is exactly the result of two elementary steps: an
+unconstrained exponentiated-gradient step,
 \begin{equation}
 \label{eq:alg-eg-unnormalized}
 \widetilde{M}_{t+1}^{(i)} \triangleq M_t^{(i)}\exp\!\bigl(-\eta g_t^{(i)}\bigr), \qquad i=1,\ldots,H,
 \end{equation}
-followed by the closed-form Bregman projection onto $\Delta_H$\footnote{This step is
-exactly the Bregman (generalized-KL) projection of $\widetilde{M}_{t+1}$ onto
-$\Delta_H=\{M\ge0:\sum_i M^{(i)}\le1\}$ induced by the unnormalized negentropy;
-renormalization is triggered only when the unprojected mirror step leaves $\Delta_H$,
-i.e.\ when $\sum_j\widetilde{M}_{t+1}^{(j)}>1$. See Lemma~\ref{lem:eg-projection}.}:
+followed by renormalization, triggered only when the resulting mass exceeds one:
 \begin{equation}
 \label{eq:alg-eg-normalized}
 M_{t+1}^{(i)}
@@ -611,11 +634,11 @@ M_{t+1}^{(i)}
 \quad
 S_{t+1}\triangleq\sum_{j=1}^H \widetilde{M}_{t+1}^{(j)},
 \end{equation}
-for $i=1,\ldots,H$.
+for $i=1,\ldots,H$. This is the form we implement in practice.
 
 This yields a feasible online trajectory satisfying \eqref{eq:model-feasibility} by
-\eqref{eq:alg-feasible-action} and performs online convex optimization over
-$\Delta_H$ through \eqref{eq:alg-surrogate-cost}--\eqref{eq:alg-eg-normalized}.
+\eqref{eq:alg-feasible-action} and performs online mirror descent over $\Delta_H$
+through \eqref{eq:alg-surrogate-cost} and \eqref{eq:alg-omd-argmin}.
 
 
 \section{Regret Analysis}
@@ -635,7 +658,7 @@ feasibility projection from Section~\ref{sec:online-algorithm}, initialized as i
 \eqref{eq:alg-init}, satisfies
 \[
 \begin{aligned}
-\mathrm{Regret}(T)
+\RegSDAC{T}
 &\le
 \frac{\log(H+1)}{\eta}
 +
@@ -651,7 +674,7 @@ In particular, the choice
 \]
 gives
 \[
-\mathrm{Regret}(T)
+\RegSDAC{T}
 \le
 2L\sqrt{\Bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\Bigr)T\log(H+1)}.
 \]
@@ -680,29 +703,32 @@ Section~\ref{sec:online-algorithm} with the step size $\eta^*$ of
 Theorem~\ref{thm:regret-bound}. Fix any gain $q\in(0,\alpha)$, set
 $\beta\triangleq\alpha-q$, and let
 $\bigl(x_t^{\mathrm{lin}},u_t^{\mathrm{lin}}\bigr)$ be the trajectory of the linear
-policy $\pi_q^{\mathrm{lin}}$ from Lemma~\ref{lem:sdac-linear-approx}. Then
+policy $\pi_q^{\mathrm{lin}}$ from Lemma~\ref{lem:sdac-linear-approx}. Define
+\[
+\RegLin{T}
+\triangleq
+\sum_{t=1}^T c_t\bigl(x_t^{\mathcal{A}},u_t^{\mathcal{A}}\bigr)
+-\sum_{t=1}^T c_t\bigl(x_t^{\mathrm{lin}},u_t^{\mathrm{lin}}\bigr).
+\]
+Then
 \[
 \begin{aligned}
-&\sum_{t=1}^T c_t\bigl(x_t^{\mathcal{A}},u_t^{\mathcal{A}}\bigr)
--\sum_{t=1}^T c_t\bigl(x_t^{\mathrm{lin}},u_t^{\mathrm{lin}}\bigr) \\
-&\qquad\le
+\RegLin{T}
+&\le
 2L\sqrt{\Bigl(\tfrac12+\tfrac{\alpha}{(1-\alpha)^2}\Bigr)T\log(H+1)} \\
-&\qquad\quad +\Bigl(L_u+\frac{L_x}{1-\alpha}\Bigr)\frac{q\,\beta^H}{1-\beta}\,T,
+&\quad +\Bigl(L_u+\frac{L_x}{1-\alpha}\Bigr)\frac{q\,\beta^H}{1-\beta}\,T,
 \end{aligned}
 \]
 where $L=\alpha L_u+\tfrac{L_x}{1-\alpha}$. In particular, choosing the memory
 horizon $H=\bigl\lceil \log T/\log(1/\beta)\bigr\rceil$ forces $\beta^H\le 1/T$, so
 the second term is $O(1)$ and
 \[
-\begin{aligned}
-&\sum_{t=1}^T c_t\bigl(x_t^{\mathcal{A}},u_t^{\mathcal{A}}\bigr)
--\sum_{t=1}^T c_t\bigl(x_t^{\mathrm{lin}},u_t^{\mathrm{lin}}\bigr) \\
-&\qquad=
+\RegLin{T}
+=
 O\!\left(\sqrt{T\log\log T}\,\right).
-\end{aligned}
 \]
-Thus the controller is no-regret against every fixed linear state-feedback policy
-$u_t=q\,x_t$, $q\in(0,\alpha)$.
+Thus $\RegLin{T}=o(T)$ against every fixed linear state-feedback policy
+$u_t=q\,x_t$, $q\in(0,\alpha)$: the controller is no-regret relative to this class.
 \end{corollary}
 
 \begin{proof}
@@ -727,7 +753,8 @@ obeys
 +\Bigl(L_u+\frac{L_x}{1-\alpha}\Bigr)\frac{q\,\beta^H}{1-\beta}\,T.
 \end{aligned}
 \]
-Chaining the two displays gives the stated bound. For the asymptotic statement,
+Chaining the two displays gives, by the definition of $\RegLin{T}$ above, the stated
+bound. For the asymptotic statement,
 $H=\bigl\lceil \log T/\log(1/\beta)\bigr\rceil$ gives $\beta^H\le 1/T$, so the second
 term is at most $\bigl(L_u+\tfrac{L_x}{1-\alpha}\bigr)\tfrac{q}{1-\beta}=O(1)$, while
 $\log(H+1)=O(\log\log T)$ in the first term.
@@ -741,10 +768,10 @@ We studied adversarial online control of a storage system under  state-dependent
 action  constraints. The SDAC policy class enforces
 feasibility by construction, and the exponentiated-gradient controller with
 feasibility projection over
-SDAC parameters achieves sublinear regret against the best fixed SDAC policy, with
-only logarithmic dependence on the memory horizon. The same guarantees extend to
-competition with feasible linear state-feedback policies via the SDAC approximation
-result. The framework is directly applicable to energy-harvesting battery management
+SDAC parameters achieves sublinear regret $\RegSDAC{T}$ against the best fixed SDAC
+policy, with only logarithmic dependence on the memory horizon. The same guarantees
+extend to competition with feasible linear state-feedback policies, i.e. sublinear
+$\RegLin{T}$, via the SDAC approximation result. The framework is directly applicable to energy-harvesting battery management
 and related storage settings in which decisions must respect
 state constraints in real time.
 
@@ -1059,16 +1086,10 @@ as used in the main text.
 
 \begin{lemma}[Conditional normalization is the KL projection onto $\Delta_H$]
 \label{lem:eg-projection}
-Let $\Psi(M)=\sum_{i=1}^H\bigl(M^{(i)}\log M^{(i)}-M^{(i)}\bigr)$ denote the
-unnormalized negentropy on $\mathbb{R}_{\ge 0}^H$ (with the convention $0\log 0=0$),
-and let
-\[
-D_\Psi(M\|V)=\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{V^{(i)}}-M^{(i)}+V^{(i)}\Bigr)
-\]
-be its Bregman divergence, the generalized Kullback--Leibler divergence. Fix
-$\widetilde{M}\in\mathbb{R}_{>0}^H$ and set $S\triangleq\sum_{i=1}^H
-\widetilde{M}^{(i)}$. Then the Bregman projection of $\widetilde{M}$ onto
-$\Delta_H=\{M\in\mathbb{R}_{\ge0}^H:\sum_{i} M^{(i)}\le1\}$,
+Let $\Psi$ and $D_\Psi$ be the unnormalized negentropy and its Bregman divergence
+from \eqref{eq:def-negentropy}. Fix $\widetilde{M}\in\mathbb{R}_{>0}^H$ and set
+$S\triangleq\sum_{i=1}^H \widetilde{M}^{(i)}$. Then the Bregman projection of
+$\widetilde{M}$ onto $\Delta_H=\{M\in\mathbb{R}_{\ge0}^H:\sum_{i} M^{(i)}\le1\}$,
 \[
 P(\widetilde{M})\triangleq\operatorname*{arg\,min}_{M\in\Delta_H} D_\Psi(M\|\widetilde{M}),
 \]
@@ -1077,9 +1098,6 @@ is given coordinatewise by
 P(\widetilde{M})^{(i)}=
 \frac{\widetilde{M}^{(i)}}{\max(1,S)}.
 \]
-Consequently, taking $\widetilde{M}=\widetilde{M}_{t+1}$ from
-\eqref{eq:alg-eg-unnormalized}, the update \eqref{eq:alg-eg-normalized} is exactly
-the projection $M_{t+1}=P(\widetilde{M}_{t+1})$, and hence $M_{t+1}\in\Delta_H$.
 \end{lemma}
 
 \begin{proof}
@@ -1111,6 +1129,53 @@ holds. Equivalently, $P(\widetilde{M})^{(i)}=\widetilde{M}^{(i)}/\max(1,S)$ in b
 cases.
 \end{proof}
 
+\begin{lemma}[Closed-form solution of the one-line OMD update]
+\label{lem:omd-closed-form}
+Fix $M_t\in\Delta_H$, $\eta>0$, and $g_t\in\mathbb{R}^H$, and let
+$\widetilde{M}_{t+1}$ be defined coordinatewise by \eqref{eq:alg-eg-unnormalized},
+i.e.\ $\widetilde{M}_{t+1}^{(i)}=M_t^{(i)}e^{-\eta g_t^{(i)}}$. Then
+\[
+\begin{aligned}
+&\operatorname*{arg\,min}_{M\in\Delta_H}\Bigl\{\eta\langle g_t,M\rangle+D_\Psi(M\|M_t)\Bigr\} \\
+&\quad=
+\operatorname*{arg\,min}_{M\in\Delta_H} D_\Psi(M\|\widetilde{M}_{t+1})
+=
+P(\widetilde{M}_{t+1}),
+\end{aligned}
+\]
+where $P(\cdot)$ is the Bregman projection of Lemma~\ref{lem:eg-projection}.
+Consequently, the one-line update \eqref{eq:alg-omd-argmin} coincides exactly with
+the two-step procedure \eqref{eq:alg-eg-unnormalized}--\eqref{eq:alg-eg-normalized},
+and in particular $M_{t+1}\in\Delta_H$.
+\end{lemma}
+
+\begin{proof}
+For any $M\in\mathbb{R}_{\ge0}^H$, expand the objective using the definitions of
+$D_\Psi$ from \eqref{eq:def-negentropy} and of $\widetilde{M}_{t+1}$:
+\[
+\begin{aligned}
+&\eta\langle g_t,M\rangle + D_\Psi(M\|M_t) \\
+&=\sum_{i=1}^H\Bigl(\eta g_t^{(i)}M^{(i)}
++M^{(i)}\log\tfrac{M^{(i)}}{M_t^{(i)}}-M^{(i)}+M_t^{(i)}\Bigr) \\
+&=\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{M_t^{(i)}e^{-\eta g_t^{(i)}}}
+-M^{(i)}+M_t^{(i)}\Bigr) \\
+&=\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{\widetilde{M}_{t+1}^{(i)}}
+-M^{(i)}+\widetilde{M}_{t+1}^{(i)}\Bigr) \\
+&\quad+\sum_{i=1}^H\bigl(M_t^{(i)}-\widetilde{M}_{t+1}^{(i)}\bigr) \\
+&=D_\Psi(M\|\widetilde{M}_{t+1})
++\sum_{i=1}^H\bigl(M_t^{(i)}-\widetilde{M}_{t+1}^{(i)}\bigr).
+\end{aligned}
+\]
+The second sum does not depend on $M$, so minimizing the left-hand side over
+$M\in\Delta_H$ is equivalent to minimizing $D_\Psi(M\|\widetilde{M}_{t+1})$ over
+$M\in\Delta_H$, which by definition is the Bregman projection
+$P(\widetilde{M}_{t+1})$. Lemma~\ref{lem:eg-projection} identifies
+$P(\widetilde{M}_{t+1})$ coordinatewise as
+$\widetilde{M}_{t+1}^{(i)}/\max(1,S_{t+1})$ with
+$S_{t+1}=\sum_j\widetilde{M}_{t+1}^{(j)}$, which is exactly
+\eqref{eq:alg-eg-normalized}.
+\end{proof}
+
 \begin{lemma}[One-step movement of unnormalized-negentropy OMD]
 \label{lem:omd-move}
 For the unnormalized-negentropy OMD update with step size \(\eta>0\) and subgradient
@@ -1122,10 +1187,13 @@ In particular, if \(\|g_t\|_\infty\le L\), then \(\|M_{t+1}-M_t\|_1\le \eta L\).
 \end{lemma}
 
 \begin{proof}
-Let \(\Psi(M)=\sum_{i=1}^H\bigl(M^{(i)}\log M^{(i)}-M^{(i)}\bigr)\). By
-Lemma~\ref{lem:eg-projection}, \(M_{t+1}\) is the Bregman projection of the mirror
-step \(\widetilde{M}_{t+1}\) onto \(\Delta_H\), so the first order optimality
-condition gives, for all \(M\in\Delta_H\),
+Let \(\Psi\) and \(D_\Psi\) be as in \eqref{eq:def-negentropy}. By definition
+\eqref{eq:alg-omd-argmin}, \(M_{t+1}\) minimizes the convex function
+\(F(M)\triangleq\eta\langle g_t,M\rangle+D_\Psi(M\|M_t)\) over the convex set
+\(\Delta_H\), and \(F\) is differentiable on \(\mathbb{R}_{>0}^H\) with
+\(\nabla F(M)=\eta g_t+\nabla\Psi(M)-\nabla\Psi(M_t)\). The first-order optimality
+condition for constrained convex minimization therefore gives, for all
+\(M\in\Delta_H\),
 \[ 
 \begin{aligned}
 \Bigl\langle g_t + \tfrac{1}{\eta}\bigl(\nabla\Psi(M_{t+1})-\nabla\Psi(M_t)\bigr), 
@@ -1545,7 +1613,7 @@ where we used \(L = \alpha L_u + \tfrac{L_x}{1-\alpha}\) in the final step.
 Starting from \eqref{eq:def-regret} we have the following decomposition of the
 regret:
 \begin{align*}
-\mathrm{Regret}(T)
+\RegSDAC{T}
 &= \sum_{t=1}^T c_t(x_t^{\mathcal{A}},u_t^{\mathcal{A}}) \\
 &\quad - \min_{M\in\Delta_H}\sum_{t=1}^T c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr) \\
 &= \sum_{t=1}^T c_t(x_t^{\mathcal{A}},u_t^{\mathcal{A}})
@@ -1556,10 +1624,9 @@ regret:
 We call the first sum the stability term, and the second sum the OMD term. We will
 bound each term separately.
 
-We bound the OMD term by unnormalized-negentropy OMD on
-$\Delta_H\subset\mathbb{R}^H$. Let $\Psi(M)=\sum_{i=1}^H\bigl(M^{(i)}\log
-M^{(i)}-M^{(i)}\bigr)$ and let $D_\Psi$ be its Bregman divergence as in
-Lemma~\ref{lem:eg-projection}. Under the initialization \eqref{eq:alg-init}, for any
+We bound the OMD term using the mirror-descent update \eqref{eq:alg-omd-argmin} with
+the unnormalized negentropy $\Psi$ and Bregman divergence $D_\Psi$ from
+\eqref{eq:def-negentropy}. Under the initialization \eqref{eq:alg-init}, for any
 benchmark $M^\star\in\Delta_H$ with $W^\star\triangleq\sum_{i=1}^H M^{\star(i)}\le
 1$,
 \[
@@ -1631,7 +1698,7 @@ From Lemma~\ref{lem:stab-sum}, the stability term satisfies
 Adding the OMD term and the stability term yields the combined bound
 \[
 \begin{aligned}
-\mathrm{Regret}(T)
+\RegSDAC{T}
 \;\le\;
 \frac{\log(H+1)}{\eta}
 \;+\;
@@ -1642,7 +1709,7 @@ Adding the OMD term and the stability term yields the combined bound
 \]
 Rearranging by factoring out the \(\eta\) term gives
 \[
-\mathrm{Regret}(T)
+\RegSDAC{T}
 \;\le\;
 \frac{\log(H+1)}{\eta}
 \;+\;
@@ -1657,7 +1724,7 @@ T\bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\bigr)}}
 \] 
 and the resulting regret bound
 \[
-\mathrm{Regret}(T) \;\le\;
+\RegSDAC{T} \;\le\;
 2L\sqrt{\Bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\Bigr)T\log(H+1)}.
 \]
 \end{proof}
