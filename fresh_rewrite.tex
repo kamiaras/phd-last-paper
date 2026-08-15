@@ -1488,71 +1488,129 @@ Lemma~\ref{lem:bregman-projection} then yields \eqref{eq:alg-omd-proj}.
 
 \begin{lemma}[One-step movement of OMD]
 \label{lem:omd-move}
-For the OMD update with step size \(\eta>0\) and subgradient
-\(g_t\in\partial \ell_t(M_t)\),
+For the OMD update with step size $\eta>0$ and subgradient
+$g_t\in\partial \ell_t(M_t)$,
 \[
 \|M_{t+1}-M_t\|_1 \le \eta\,\|g_t\|_\infty.
 \]
-In particular, if \(\|g_t\|_\infty\le L\), then \(\|M_{t+1}-M_t\|_1\le \eta L\).
+In particular, if $\|g_t\|_\infty\le L$, then $\|M_{t+1}-M_t\|_1\le \eta L$.
 \end{lemma}
 
 \begin{proof}
-Let \(\Psi\) and \(D_\Psi\) be as in \eqref{eq:def-negentropy}. By definition
-\eqref{eq:alg-omd-argmin}, \(M_{t+1}\) minimizes the convex function
-\(F(M)\triangleq\eta\langle g_t,M\rangle+D_\Psi(M\|M_t)\) over the convex set
-\(\Delta_H\), and \(F\) is differentiable on \(\mathbb{R}_{>0}^H\) with
-\(\nabla F(M)=\eta g_t+\nabla\Psi(M)-\nabla\Psi(M_t)\). The first-order optimality
-condition for constrained convex minimization therefore gives, for all
-\(M\in\Delta_H\),
-\[
+By \eqref{eq:alg-omd-argmin}, $M_{t+1}$ minimizes
+\begin{equation}
+\label{eq:omd-F}
+F(M)\triangleq\eta\sum_{i=1}^H g_t^{(i)}M^{(i)}+D_\Psi(M\|M_t)
+\end{equation}
+over $\Delta_H$. Differentiating \eqref{eq:omd-F} on $\mathbb{R}_{>0}^H$,
+\begin{equation}
+\label{eq:omd-F-grad}
+\frac{\partial F}{\partial M^{(i)}}
+=
+\eta g_t^{(i)}+\nabla\Psi(M)^{(i)}-\nabla\Psi(M_t)^{(i)}.
+\end{equation}
+First-order optimality and \eqref{eq:omd-F-grad} give, for all $M\in\Delta_H$,
+\begin{equation}
+\label{eq:omd-foc}
 \begin{aligned}
-\Bigl\langle g_t + \tfrac{1}{\eta}\bigl(\nabla\Psi(M_{t+1})-\nabla\Psi(M_t)\bigr),
- M-M_{t+1}\Bigr\rangle \ge 0.
+&\sum_{i=1}^H
+\bigl(\eta g_t^{(i)}+\nabla\Psi(M_{t+1})^{(i)}-\nabla\Psi(M_t)^{(i)}\bigr) \\
+&\qquad\times
+\bigl(M^{(i)}-M_{t+1}^{(i)}\bigr)
+\ge 0.
 \end{aligned}
-\]
-Taking \(M=M_t\) and rearranging yields
-\[
-\langle g_t,M_t-M_{t+1}\rangle
-\ge
-\tfrac{1}{\eta}\Bigl\langle
-\nabla\Psi(M_{t+1})-\nabla\Psi(M_t),\,M_{t+1}-M_t\Bigr\rangle.
-\]
-By the Bregman identity,
-\[
+\end{equation}
+Taking $M=M_t$ in \eqref{eq:omd-foc}, and then rearranging,
+\begin{equation}
+\label{eq:omd-foc-Mt}
 \begin{aligned}
-&\Bigl\langle \nabla\Psi(M_{t+1})-\nabla\Psi(M_t),\,M_{t+1}-M_t\Bigr\rangle \\
+&\sum_{i=1}^H
+\bigl(\eta g_t^{(i)}+\nabla\Psi(M_{t+1})^{(i)}-\nabla\Psi(M_t)^{(i)}\bigr) \\
+&\qquad\times
+\bigl(M_t^{(i)}-M_{t+1}^{(i)}\bigr)
+\ge 0 \\
+&\sum_{i=1}^H g_t^{(i)}\bigl(M_t^{(i)}-M_{t+1}^{(i)}\bigr) \\
+&\qquad\ge
+\tfrac{1}{\eta}\sum_{i=1}^H
+\bigl(\nabla\Psi(M_{t+1})^{(i)}-\nabla\Psi(M_t)^{(i)}\bigr) \\
+&\qquad\qquad\times
+\bigl(M_{t+1}^{(i)}-M_t^{(i)}\bigr).
+\end{aligned}
+\end{equation}
+By the Bregman identity,
+\begin{equation}
+\label{eq:omd-breg-id}
+\begin{aligned}
+&\sum_{i=1}^H
+\bigl(\nabla\Psi(M_{t+1})^{(i)}-\nabla\Psi(M_t)^{(i)}\bigr)
+\bigl(M_{t+1}^{(i)}-M_t^{(i)}\bigr) \\
 &\qquad=
 D_\Psi(M_{t+1}\|M_t)+D_\Psi(M_t\|M_{t+1}).
 \end{aligned}
-\]
-Hence, using H\"older's inequality,
-\[
+\end{equation}
+Substituting \eqref{eq:omd-breg-id} into \eqref{eq:omd-foc-Mt}, and then applying
+H\"older's inequality,
+\begin{equation}
+\label{eq:omd-breg-holder}
 \begin{aligned}
 &D_\Psi(M_{t+1}\|M_t)+D_\Psi(M_t\|M_{t+1}) \\
 &\qquad\le
+\eta\sum_{i=1}^H g_t^{(i)}\bigl(M_t^{(i)}-M_{t+1}^{(i)}\bigr) \\
+&\qquad\le
 \eta\,\|g_t\|_\infty\,\|M_{t+1}-M_t\|_1.
 \end{aligned}
-\]
-Since both iterates lie in \(\Delta_H\), the unnormalized negentropy is
-\(1\)-strongly convex with respect to \(\|\cdot\|_1\) on this set: the Hessian
-\(\nabla^2\Psi(M)=\mathrm{diag}(1/M^{(i)})\) satisfies
-\(v^\top\nabla^2\Psi(M)\,v=\sum_i (v^{(i)})^2/M^{(i)}\ge\|v\|_1^2/(\sum_i
-M^{(i)})\ge\|v\|_1^2\) whenever \(\sum_i M^{(i)}\le1\) (Cauchy--Schwarz), so the
-usual Pinsker-type bound for the Bregman divergence extends to the subprobability
-simplex \(\Delta_H\),
-\begin{align*}
-D_\Psi(M_{t+1}\|M_t)&\ge \tfrac12\|M_{t+1}-M_t\|_1^2, \\
-D_\Psi(M_t\|M_{t+1})&\ge \tfrac12\|M_{t+1}-M_t\|_1^2,
-\end{align*}
-and the left-hand side is at least \(\|M_{t+1}-M_t\|_1^2\). Therefore
-\[
+\end{equation}
+From \eqref{eq:def-negentropy},
+\begin{equation}
+\label{eq:omd-hess}
 \begin{aligned}
-&\|M_{t+1}-M_t\|_1^2
+\nabla^2\Psi(M)
+&=
+\mathrm{diag}\bigl(1/M^{(i)}\bigr) \\
+v^\top\nabla^2\Psi(M)\,v
+&=
+\sum_{i=1}^H \frac{(v^{(i)})^2}{M^{(i)}}.
+\end{aligned}
+\end{equation}
+Applying Cauchy--Schwarz to \eqref{eq:omd-hess}, and then
+$\sum_{i=1}^H M^{(i)}\le 1$,
+\begin{equation}
+\label{eq:omd-cs}
+\begin{aligned}
+\sum_{i=1}^H \frac{(v^{(i)})^2}{M^{(i)}}
+&\ge
+\frac{\|v\|_1^2}{\sum_{i=1}^H M^{(i)}} \\
+&\ge
+\|v\|_1^2.
+\end{aligned}
+\end{equation}
+Hence, by \eqref{eq:omd-cs}, $\Psi$ is $1$-strongly convex w.r.t.\
+$\|\cdot\|_1$ on $\Delta_H$, so
+\begin{equation}
+\label{eq:omd-pinsker}
+\begin{aligned}
+D_\Psi(M_{t+1}\|M_t)
+&\ge
+\tfrac12\|M_{t+1}-M_t\|_1^2, \\
+D_\Psi(M_t\|M_{t+1})
+&\ge
+\tfrac12\|M_{t+1}-M_t\|_1^2.
+\end{aligned}
+\end{equation}
+Adding the two lines of \eqref{eq:omd-pinsker},
+\begin{equation}
+\label{eq:omd-pinsker-sum}
+D_\Psi(M_{t+1}\|M_t)+D_\Psi(M_t\|M_{t+1})
+\ge
+\|M_{t+1}-M_t\|_1^2.
+\end{equation}
+Substituting \eqref{eq:omd-pinsker-sum} into \eqref{eq:omd-breg-holder},
+\[
+\|M_{t+1}-M_t\|_1^2
 \le
 \eta\,\|g_t\|_\infty\,\|M_{t+1}-M_t\|_1,
-\end{aligned}
 \]
-which implies \(\|M_{t+1}-M_t\|_1\le \eta\|g_t\|_\infty\).
+so $\|M_{t+1}-M_t\|_1\le\eta\|g_t\|_\infty$.
 \end{proof}
 
 \begin{lemma}[Cumulative movement]
