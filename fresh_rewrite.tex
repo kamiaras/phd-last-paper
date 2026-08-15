@@ -1402,7 +1402,7 @@ $\widetilde{M}_{t+1}$ be defined coordinatewise by \eqref{eq:alg-omd-mult},
 i.e.\ $\widetilde{M}_{t+1}^{(i)}=M_t^{(i)}e^{-\eta g_t^{(i)}}$. Then
 \[
 \begin{aligned}
-&\operatorname*{arg\,min}_{M\in\Delta_H}\Bigl\{\eta\langle g_t,M\rangle+D_\Psi(M\|M_t)\Bigr\} \\
+&\operatorname*{arg\,min}_{M\in\Delta_H}\Bigl\{\eta\sum_{i=1}^H g_t^{(i)}M^{(i)}+D_\Psi(M\|M_t)\Bigr\} \\
 &\quad=
 \operatorname*{arg\,min}_{M\in\Delta_H} D_\Psi(M\|\widetilde{M}_{t+1})
 =
@@ -1417,30 +1417,73 @@ initialization \eqref{eq:alg-init} keeps every algorithm iterate strictly positi
 \end{lemma}
 
 \begin{proof}
-For any $M\in\mathbb{R}_{\ge0}^H$, expand the objective using the definitions of
-$D_\Psi$ from \eqref{eq:def-negentropy} and of $\widetilde{M}_{t+1}$:
-\[
+For any $M\in\mathbb{R}_{\ge0}^H$, by definition of $D_\Psi$,
+\begin{equation}
+\label{eq:omd-cf-expand}
 \begin{aligned}
-&\eta\langle g_t,M\rangle + D_\Psi(M\|M_t) \\
-&=\sum_{i=1}^H\Bigl(\eta g_t^{(i)}M^{(i)}
-+M^{(i)}\log\tfrac{M^{(i)}}{M_t^{(i)}}-M^{(i)}+M_t^{(i)}\Bigr) \\
-&=\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{M_t^{(i)}e^{-\eta g_t^{(i)}}}
--M^{(i)}+M_t^{(i)}\Bigr) \\
-&=\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{\widetilde{M}_{t+1}^{(i)}}
+&\eta\sum_{i=1}^H g_t^{(i)}M^{(i)}+D_\Psi(M\|M_t) \\
+&=
+\sum_{i=1}^H\Bigl(\eta g_t^{(i)}M^{(i)}
++M^{(i)}\log\tfrac{M^{(i)}}{M_t^{(i)}}-M^{(i)}+M_t^{(i)}\Bigr).
+\end{aligned}
+\end{equation}
+Completing the logarithm,
+\begin{equation}
+\label{eq:omd-cf-log}
+\begin{aligned}
+\eta g_t^{(i)}M^{(i)}+M^{(i)}\log\tfrac{M^{(i)}}{M_t^{(i)}}
+&=
+M^{(i)}\Bigl(\log\tfrac{M^{(i)}}{M_t^{(i)}}+\eta g_t^{(i)}\Bigr) \\
+&=
+M^{(i)}\log\tfrac{M^{(i)}}{M_t^{(i)}e^{-\eta g_t^{(i)}}}.
+\end{aligned}
+\end{equation}
+Substituting \eqref{eq:omd-cf-log} into \eqref{eq:omd-cf-expand},
+\begin{equation}
+\label{eq:omd-cf-absorb}
+\begin{aligned}
+&\eta\sum_{i=1}^H g_t^{(i)}M^{(i)}+D_\Psi(M\|M_t) \\
+&=
+\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{M_t^{(i)}e^{-\eta g_t^{(i)}}}
+-M^{(i)}+M_t^{(i)}\Bigr).
+\end{aligned}
+\end{equation}
+Substituting \eqref{eq:alg-omd-mult} into \eqref{eq:omd-cf-absorb},
+\begin{equation}
+\label{eq:omd-cf-tilde}
+\begin{aligned}
+&\eta\sum_{i=1}^H g_t^{(i)}M^{(i)}+D_\Psi(M\|M_t) \\
+&=
+\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{\widetilde{M}_{t+1}^{(i)}}
+-M^{(i)}+M_t^{(i)}\Bigr).
+\end{aligned}
+\end{equation}
+Adding and subtracting $\sum_{i=1}^H\widetilde{M}_{t+1}^{(i)}$ in
+\eqref{eq:omd-cf-tilde},
+\begin{equation}
+\label{eq:omd-cf-breg}
+\begin{aligned}
+&\eta\sum_{i=1}^H g_t^{(i)}M^{(i)}+D_\Psi(M\|M_t) \\
+&=
+\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{\widetilde{M}_{t+1}^{(i)}}
 -M^{(i)}+\widetilde{M}_{t+1}^{(i)}\Bigr) \\
 &\quad+\sum_{i=1}^H\bigl(M_t^{(i)}-\widetilde{M}_{t+1}^{(i)}\bigr) \\
-&=D_\Psi(M\|\widetilde{M}_{t+1})
+&=
+D_\Psi(M\|\widetilde{M}_{t+1})
 +\sum_{i=1}^H\bigl(M_t^{(i)}-\widetilde{M}_{t+1}^{(i)}\bigr).
 \end{aligned}
+\end{equation}
+The second sum in \eqref{eq:omd-cf-breg} does not depend on $M$, so
+\[
+\begin{aligned}
+&\operatorname*{arg\,min}_{M\in\Delta_H}\Bigl\{\eta\sum_{i=1}^H g_t^{(i)}M^{(i)}+D_\Psi(M\|M_t)\Bigr\} \\
+&=
+\operatorname*{arg\,min}_{M\in\Delta_H} D_\Psi(M\|\widetilde{M}_{t+1})
+=
+P(\widetilde{M}_{t+1}).
+\end{aligned}
 \]
-The second sum does not depend on $M$, so minimizing the left-hand side over
-$M\in\Delta_H$ is equivalent to minimizing $D_\Psi(M\|\widetilde{M}_{t+1})$ over
-$M\in\Delta_H$, which by definition is the Bregman projection
-$P(\widetilde{M}_{t+1})$. Lemma~\ref{lem:bregman-projection} identifies
-$P(\widetilde{M}_{t+1})$ coordinatewise as
-$\widetilde{M}_{t+1}^{(i)}/\max\{1,S_{t+1}\}$ with
-$S_{t+1}=\sum_j\widetilde{M}_{t+1}^{(j)}$, which is exactly
-\eqref{eq:alg-omd-proj}.
+Lemma~\ref{lem:bregman-projection} then yields \eqref{eq:alg-omd-proj}.
 \end{proof}
 
 \begin{lemma}[One-step movement of OMD]
