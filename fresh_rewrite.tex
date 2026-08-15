@@ -425,80 +425,103 @@ arguments below.
 \label{lem:sdac-state-decomp}
 Fix $H\in\mathbb{N}$ and $M\in\Delta_H$, and write $W\triangleq\sum_{i=1}^H
 M^{(i)}\le 1$. Let $\pi(M)$ be defined by \eqref{eq:def-sdac-policy} and
-\eqref{eq:sdac-state-update}. Then for all $t\in\{2,\ldots,T\}$,
+\eqref{eq:sdac-state-update}. Define
+\[
+\psi_t^{(i)} \triangleq \sum_{j=1}^{i}\alpha^{j-1}w_{t-j}
+\quad(i=1,\ldots,H),
+\]
+\[
+\rho_t \triangleq \sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j}.
+\]
+Then for all $t\in\{2,\ldots,T\}$,
 \begin{equation}
 \label{eq:sdac-state-decomp}
 x_t^{\pi(M)}
 =
 \sum_{i=1}^H M^{(i)}\psi_t^{(i)}
-+\bigl(1-W\bigr)\rho_t
-=
-\langle M,\psi_t\rangle+(1-W)\rho_t,
++\bigl(1-W\bigr)\rho_t,
 \end{equation}
-where
-\[
-\psi_t^{(i)} \triangleq \sum_{j=1}^{i}\alpha^{j-1}w_{t-j}
-\quad(i=1,\ldots,H),
-\]
-and
-\[
-\rho_t \triangleq \sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j}.
-\]
-Equivalently, $\rho_t$ is the state $x_t^{\pi(0)}$ produced by the null policy $M=0$
-(release nothing, $x_{\tau+1}=\alpha x_\tau+w_\tau$), and the coefficients $\psi_t^{(i)}$ and $\rho_t$ satisfy
-$0\le \psi_t^{(i)}\le \rho_t\le 1/(1-\alpha)$. In particular, the map $M\mapsto x_t^{\pi(M)}$ is affine.
+and the coefficients satisfy $0\le \psi_t^{(i)}\le \rho_t\le 1/(1-\alpha)$. In
+particular, the map $M\mapsto x_t^{\pi(M)}$ is affine.
 \end{lemma}
 
 \begin{proof}
-Isolating the $j=1$ term in the definition
-of $\rho_{t+1}$ and reindexing gives the one-step identity
-$\rho_{t+1}=\alpha\rho_t+w_t$ (with $\rho_1=0$). We prove
-\eqref{eq:sdac-state-decomp} by induction on $t$.
+We first record a one-step recursion for $\rho_t$: isolating the $j=1$ term in its
+definition and reindexing gives
+\begin{equation}
+\label{eq:rho-recursion}
+\rho_{t+1}=\alpha\rho_t+w_t, \qquad \rho_1=0.
+\end{equation}
+We prove \eqref{eq:sdac-state-decomp} by induction on $t$.
 
-\emph{Base case $t=2$.} Since $x_1^{\pi(M)}=0$ and $w_{1-i}=0$ for all $i\ge 1$, the
-policy \eqref{eq:def-sdac-policy} gives $u_1^{\pi(M)}=\sum_{i=1}^H M^{(i)}\alpha^i
-w_{1-i}=0$, and the update \eqref{eq:sdac-state-update} gives $x_2^{\pi(M)}=\alpha
-x_1^{\pi(M)}-u_1^{\pi(M)}+w_1=w_1$. On the other hand $\psi_2^{(i)}=w_1$ for every
-$i$ and $\rho_2=w_1$, so $\langle M,\psi_2\rangle+(1-W)\rho_2=Ww_1+(1-W)w_1=w_1$,
-matching \eqref{eq:sdac-state-decomp}.
+\emph{Base case $t=2$.} Since $x_1^{\pi(M)}=0$ and $w_{1-i}=0$ for $i\ge 1$,
+\eqref{eq:def-sdac-policy} and \eqref{eq:sdac-state-update} give
+\[
+x_2^{\pi(M)} = \alpha\cdot 0 - 0 + w_1 = w_1.
+\]
+Also $\psi_2^{(i)}=\rho_2=w_1$ for every $i$, so the right side of
+\eqref{eq:sdac-state-decomp} at $t=2$ is
+\[
+\sum_{i=1}^H M^{(i)}w_1+(1-W)w_1 = Ww_1+(1-W)w_1 = w_1 = x_2^{\pi(M)}.
+\]
 
 \emph{Inductive step.} Assume \eqref{eq:sdac-state-decomp} holds at time
-$t\in\{2,\ldots,T-1\}$. Using \eqref{eq:def-sdac-policy}, \eqref{eq:sdac-state-update}, and the induction
-hypothesis,
+$t\in\{2,\ldots,T-1\}$. By \eqref{eq:sdac-state-update} and
+\eqref{eq:def-sdac-policy},
+\begin{equation}
+\label{eq:decomp-step1}
+x_{t+1}^{\pi(M)} = \alpha x_t^{\pi(M)} - \sum_{i=1}^H M^{(i)}\alpha^i w_{t-i} + w_t.
+\end{equation}
+Substituting \eqref{eq:sdac-state-decomp} for $x_t^{\pi(M)}$ in
+\eqref{eq:decomp-step1}, and then distributing $\alpha$,
+\begin{equation}
+\label{eq:decomp-step2}
+\begin{aligned}
+x_{t+1}^{\pi(M)}
+&= \alpha\Bigl(\sum_{i=1}^H M^{(i)}\psi_t^{(i)}+(1-W)\rho_t\Bigr) \\
+&\qquad -\sum_{i=1}^H M^{(i)}\alpha^i w_{t-i}+w_t \\
+&= \sum_{i=1}^H M^{(i)}\Bigl(\alpha\psi_t^{(i)}-\alpha^i w_{t-i}\Bigr)
++\alpha(1-W)\rho_t+w_t.
+\end{aligned}
+\end{equation}
+By definition of $\psi_{t+1}^{(i)}$, for each $i$
+\begin{equation}
+\label{eq:decomp-cancel}
+\begin{aligned}
+\alpha\psi_t^{(i)}-\alpha^i w_{t-i}
+&= \sum_{j=1}^{i}\alpha^j w_{t-j} - \alpha^i w_{t-i} \\
+&= \sum_{j=1}^{i-1}\alpha^j w_{t-j} \\
+&= \psi_{t+1}^{(i)} - w_t.
+\end{aligned}
+\end{equation}
+Substituting \eqref{eq:decomp-cancel} into \eqref{eq:decomp-step2}, and then summing
+over $i$,
+\begin{equation}
+\label{eq:decomp-step3}
+\begin{aligned}
+x_{t+1}^{\pi(M)}
+&= \sum_{i=1}^H M^{(i)}\bigl(\psi_{t+1}^{(i)}-w_t\bigr)+\alpha(1-W)\rho_t+w_t \\
+&= \sum_{i=1}^H M^{(i)}\psi_{t+1}^{(i)} - Ww_t+\alpha(1-W)\rho_t+w_t.
+\end{aligned}
+\end{equation}
+Regrouping the terms in $w_t$ and $\rho_t$, and then applying
+\eqref{eq:rho-recursion},
 \[
 \begin{aligned}
 x_{t+1}^{\pi(M)}
-&= \alpha x_t^{\pi(M)} - \sum_{i=1}^H M^{(i)}\alpha^i w_{t-i} + w_t \\
-&= \Bigl(\alpha\langle M,\psi_t\rangle - \sum_{i=1}^H M^{(i)}\alpha^i w_{t-i}\Bigr) \\
-&\qquad + \alpha(1-W)\rho_t + w_t .
-\end{aligned}
-\]
-Canceling the $j=i$ term in each coordinate of $\alpha\psi_t$ yields
-\[
-\begin{aligned}
-&\alpha\langle M,\psi_t\rangle-\sum_{i=1}^H M^{(i)}\alpha^i w_{t-i} \\
-&\qquad=\sum_{i=1}^H M^{(i)}\!\left(\sum_{j=1}^{i-1}\alpha^j w_{t-j}\right) \\
-&\qquad=\sum_{i=1}^H M^{(i)}\bigl(\psi_{t+1}^{(i)}-w_t\bigr)
-=\langle M,\psi_{t+1}\rangle-W w_t ,
-\end{aligned}
-\]
-where the second equality uses $\psi_{t+1}^{(i)}=w_t+\sum_{j=1}^{i-1}\alpha^j
-w_{t-j}$. Substituting this together with $\rho_{t+1}=\alpha\rho_t+w_t$,
-\[
-\begin{aligned}
-x_{t+1}^{\pi(M)}
-&=\langle M,\psi_{t+1}\rangle - W w_t + \alpha(1-W)\rho_t + w_t \\
-&=\langle M,\psi_{t+1}\rangle + (1-W)\bigl(w_t+\alpha\rho_t\bigr) \\
-&=\langle M,\psi_{t+1}\rangle+(1-W)\rho_{t+1},
+&= \sum_{i=1}^H M^{(i)}\psi_{t+1}^{(i)} + (1-W)\bigl(w_t+\alpha\rho_t\bigr) \\
+&= \sum_{i=1}^H M^{(i)}\psi_{t+1}^{(i)} + (1-W)\rho_{t+1},
 \end{aligned}
 \]
 which is \eqref{eq:sdac-state-decomp} at time $t+1$.
 
 \emph{Bounds.} Each $\psi_t^{(i)}$ is the truncation to $j\le i$ of the nonnegative
-series defining $\rho_t$, so $0\le\psi_t^{(i)}\le\rho_t$; and since $w_\tau\in[0,1]$,
-the geometric series gives
-$\rho_t=\sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j}\le\sum_{j=1}^{\infty}\alpha^{j-1}=1/(1-\alpha)$.
-Affineness in $M$ is immediate, as $\psi_t$ and $\rho_t$ do not depend on $M$.
+series defining $\rho_t$, so $0\le\psi_t^{(i)}\le\rho_t$. Since $w_\tau\in[0,1]$,
+\[
+\rho_t=\sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j}\le\sum_{j=1}^{\infty}\alpha^{j-1}
+=\frac{1}{1-\alpha}.
+\]
+Affineness in $M$ holds because $\psi_t$ and $\rho_t$ do not depend on $M$.
 \end{proof}
 
 The first consequence of this decomposition is that feasibility is preserved within
