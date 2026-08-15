@@ -529,45 +529,103 @@ the class.
 
 \begin{lemma}[Feasibility of SDAC policies]
 \label{lem:sdac-feasibility}
-For every fixed $M\in\Delta_H$, the trajectory induced by
-\eqref{eq:def-sdac-policy}--\eqref{eq:sdac-state-update} satisfies
-\[
-0\le u_t^{\pi(M)}\le \alpha x_t^{\pi(M)} \quad \text{for all } t\in\{1,\ldots,T\}.
-\]
+For every $M\in\Delta_H$, the trajectory induced by
+\eqref{eq:def-sdac-policy} and \eqref{eq:sdac-state-update} satisfies
+\begin{equation}
+\label{eq:sdac-feasibility}
+0\le u_t^{\pi(M)}\le \alpha x_t^{\pi(M)}
+\qquad\text{for all }t\in\{1,\ldots,T\}.
+\end{equation}
 \end{lemma}
 
 \begin{proof}
-Nonnegativity of $u_t^{\pi(M)}$ follows from \eqref{eq:def-sdac-policy}, because
-$M^{(i)}\ge 0$, $\alpha^i\ge 0$, and $w_{t-i}\ge 0$ for every $i$.
-
-For the upper bound at $t=1$, we have $x_1^{\pi(M)}=0$ and $w_{1-i}=0$ for all $i\ge
-1$, so $u_1^{\pi(M)}=0=\alpha x_1^{\pi(M)}$.
-
-Now fix $t\in\{2,\ldots,T\}$. Lemma~\ref{lem:sdac-state-decomp} gives $x_t^{\pi(M)}=\langle
-M,\psi_t\rangle+(1-W)\rho_t$ with $W=\sum_{i=1}^H M^{(i)}\le 1$. Since
-$(1-W)\rho_t\ge 0$,
-\[
-\begin{aligned}
-\alpha x_t^{\pi(M)}
-&\ge \alpha\langle M,\psi_t\rangle
-= \alpha\sum_{i=1}^H M^{(i)}\!\left(\sum_{j=1}^{i}\alpha^{j-1}w_{t-j}\right) \\
-&= \sum_{i=1}^H M^{(i)}\!\left(\sum_{j=1}^{i}\alpha^j w_{t-j}\right).
-\end{aligned}
-\]
-Collecting the coefficient of each $w_{t-i}$ and using that all parameters are
-nonnegative, for every $i$ we have $\sum_{j=i}^{H} M^{(j)} \ge M^{(i)}$, so
-\[
-\begin{aligned}
-\alpha x_t^{\pi(M)}
-&\ge
-\sum_{i=1}^{H}\left(\sum_{j=i}^{H}M^{(j)}\right)\alpha^i w_{t-i} \\
-&\ge
-\sum_{i=1}^{H}M^{(i)}\alpha^i w_{t-i}
+By \eqref{eq:def-sdac-policy},
+\begin{equation}
+\label{eq:feas-u-sum}
+u_t^{\pi(M)}
 =
-u_t^{\pi(M)},
+\sum_{i=1}^H M^{(i)}\alpha^i w_{t-i}.
+\end{equation}
+The right-hand side of \eqref{eq:feas-u-sum} is nonnegative, so
+$u_t^{\pi(M)}\ge 0$.
+
+\emph{Upper bound, $t=1$.}
+By \eqref{eq:sdac-state-update}, $x_1^{\pi(M)}=0$. Specializing
+\eqref{eq:feas-u-sum} and using $w_{\tau}\equiv 0$ for $\tau\le 0$,
+\[
+\begin{aligned}
+u_1^{\pi(M)}
+&=
+\sum_{i=1}^H M^{(i)}\alpha^i w_{1-i} \\
+&=
+0 \\
+&=
+\alpha x_1^{\pi(M)}.
 \end{aligned}
 \]
-since $w_{t-i}\ge 0$.
+
+\emph{Upper bound, $t\ge 2$.}
+
+Let $W\triangleq\sum_{i=1}^H M^{(i)}$. Multiplying
+\eqref{eq:sdac-state-decomp} by $\alpha$, and then distributing $\alpha$,
+\begin{equation}
+\label{eq:feas-alpha-x}
+\begin{aligned}
+\alpha x_t^{\pi(M)}
+&=
+\alpha\Bigl(\sum_{i=1}^H M^{(i)}\psi_t^{(i)}+(1-W)\rho_t\Bigr) \\
+&=
+\alpha\sum_{i=1}^H M^{(i)}\psi_t^{(i)}+\alpha(1-W)\rho_t.
+\end{aligned}
+\end{equation}
+By \eqref{eq:def-simplex} and Lemma~\ref{lem:sdac-state-decomp}, $W\le 1$ and
+$\rho_t\ge 0$, so $\alpha(1-W)\rho_t\ge 0$. Thus \eqref{eq:feas-alpha-x} yields
+\begin{equation}
+\label{eq:feas-drop-rho}
+\alpha x_t^{\pi(M)}
+\ge
+\alpha\sum_{i=1}^H M^{(i)}\psi_t^{(i)}.
+\end{equation}
+Substituting the definition of $\psi_t^{(i)}$ into the right-hand side of
+\eqref{eq:feas-drop-rho}, and then distributing $\alpha$,
+\begin{equation}
+\label{eq:feas-expand-psi}
+\begin{aligned}
+\alpha\sum_{i=1}^H M^{(i)}\psi_t^{(i)}
+&=
+\alpha\sum_{i=1}^H M^{(i)}\Biggl(\sum_{j=1}^{i}\alpha^{j-1}w_{t-j}\Biggr) \\
+&=
+\sum_{i=1}^H M^{(i)}\Biggl(\sum_{j=1}^{i}\alpha^{j}w_{t-j}\Biggr).
+\end{aligned}
+\end{equation}
+Expanding the right-hand side of \eqref{eq:feas-expand-psi} as a double sum, and
+then changing the order of summation,
+\begin{equation}
+\label{eq:feas-switch}
+\begin{aligned}
+\sum_{i=1}^H M^{(i)}\Biggl(\sum_{j=1}^{i}\alpha^{j}w_{t-j}\Biggr)
+&=
+\sum_{i=1}^H\sum_{j=1}^{i} M^{(i)}\alpha^{j}w_{t-j} \\
+&=
+\sum_{j=1}^H\sum_{i=j}^{H} M^{(i)}\alpha^{j}w_{t-j} \\
+&=
+\sum_{j=1}^H\Biggl(\sum_{i=j}^{H} M^{(i)}\Biggr)\alpha^{j}w_{t-j}.
+\end{aligned}
+\end{equation}
+Since $M^{(i)}\ge 0$ and $\alpha^{j}w_{t-j}\ge 0$, and then applying
+\eqref{eq:feas-u-sum},
+\begin{equation}
+\label{eq:feas-bound-u}
+\begin{aligned}
+\sum_{j=1}^H\Biggl(\sum_{i=j}^{H} M^{(i)}\Biggr)\alpha^{j}w_{t-j}
+&\ge
+\sum_{j=1}^H M^{(j)}\alpha^{j}w_{t-j} \\
+&=
+u_t^{\pi(M)}.
+\end{aligned}
+\end{equation}
+Chaining \eqref{eq:feas-drop-rho}--\eqref{eq:feas-bound-u} gives the upper bound
+in \eqref{eq:sdac-feasibility}.
 \end{proof}
 
 The second consequence is that SDAC is compatible with online convex optimization:
@@ -581,67 +639,134 @@ Lipschitz constant, which we use later to tune the online algorithm's step size.
 \label{lem:sdac-surrogate}
 Define
 \[
-\ell_t(M) \triangleq c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr), \qquad M\in\Delta_H.
+\ell_t(M) \triangleq c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr), \qquad M\in\Delta_H,
 \]
-Then $\ell_t$ is convex on $\Delta_H$, and for all $M,M'\in\Delta_H$,
-\[
-|\ell_t(M)-\ell_t(M')|
-\le
-\left(\frac{L_x}{1-\alpha}+\alpha L_u\right)\|M-M'\|_1.
-\]
-Moreover, at every $M\in\Delta_H$, one can select a subgradient
-$g\in\partial\ell_t(M)$ satisfying $\|g\|_\infty\le L$, where
+and
 \begin{equation}
 \label{eq:def-surrogate-L}
 L\triangleq\alpha L_u+\frac{L_x}{1-\alpha}.
 \end{equation}
+Then $\ell_t$ is convex on $\Delta_H$, and for all $M,M'\in\Delta_H$,
+\[
+|\ell_t(M)-\ell_t(M')|
+\le
+L\|M-M'\|_1.
+\]
+Moreover, at every $M\in\Delta_H$, one can select a subgradient
+$g\in\partial\ell_t(M)$ satisfying $\|g\|_\infty\le L$.
 \end{lemma}
 
 \begin{proof}
-For $t=1$, both $x_1^{\pi(M)}$ and $u_1^{\pi(M)}$ are zero for every $M$, so
-$\ell_1$ is constant and the claims hold with $g=0$. Fix $t\ge2$ below.
-By Lemma~\ref{lem:sdac-state-decomp} and
-\eqref{eq:def-sdac-policy-vector}, with $W=\sum_{i=1}^H M^{(i)}$,
-\[
-\ell_t(M)=c_t\bigl(\langle M,\psi_t\rangle+(1-W)\rho_t,\ \langle
-M,\widetilde{w}_t\rangle\bigr).
-\]
-The map $M\mapsto\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr)$ is affine
-(Lemma~\ref{lem:sdac-state-decomp} and
-\eqref{eq:def-sdac-policy-vector}) and $c_t$ is convex, so $\ell_t$ is convex.
+For $t=1$, \eqref{eq:sdac-state-update} and \eqref{eq:def-sdac-policy} give
+$x_1^{\pi(M)}=u_1^{\pi(M)}=0$, so $\ell_1$ is constant and the claims hold with
+$g=0$. Fix $t\ge 2$, and write $W\triangleq\sum_{i=1}^H M^{(i)}$.
+By \eqref{eq:sdac-state-decomp}, and then substituting $W=\sum_{i=1}^H M^{(i)}$,
+\begin{equation}
+\label{eq:surr-x-affine}
+\begin{aligned}
+x_t^{\pi(M)}
+&=
+\sum_{i=1}^H M^{(i)}\psi_t^{(i)}+(1-W)\rho_t \\
+&=
+\sum_{i=1}^H M^{(i)}\bigl(\psi_t^{(i)}-\rho_t\bigr)+\rho_t.
+\end{aligned}
+\end{equation}
+The right-hand side of \eqref{eq:surr-x-affine} is affine in $M$, and
+\eqref{eq:def-sdac-policy} is linear in $M$. Since $c_t$ is convex, $\ell_t$
+is convex.
 
-For the Lipschitz estimate, the decomposition gives, for all $M,M'\in\Delta_H$,
-\[
+Subtracting \eqref{eq:surr-x-affine} at $M'$ from \eqref{eq:surr-x-affine} at $M$,
+and \eqref{eq:def-sdac-policy} at $M'$ from \eqref{eq:def-sdac-policy} at $M$,
+\begin{equation}
+\label{eq:surr-dxu}
 \begin{aligned}
 x_t^{\pi(M)}-x_t^{\pi(M')}
-&=\langle M-M',\psi_t\rangle-(W-W')\rho_t \\
-&=\langle M-M',\,\psi_t-\rho_t\mathbf{1}\rangle,
+&=
+\sum_{i=1}^H (M^{(i)}-M'^{(i)})(\psi_t^{(i)}-\rho_t), \\
+u_t^{\pi(M)}-u_t^{\pi(M')}
+&=
+\sum_{i=1}^H (M^{(i)}-M'^{(i)})\alpha^i w_{t-i}.
+\end{aligned}
+\end{equation}
+Substituting \eqref{eq:surr-dxu} into \eqref{eq:model-lipschitz},
+\begin{equation}
+\label{eq:surr-lip-sub}
+\begin{aligned}
+&\bigl|\ell_t(M)-\ell_t(M')\bigr| \\
+&\qquad\le
+L_x\bigl|x_t^{\pi(M)}-x_t^{\pi(M')}\bigr| \\
+&\qquad\quad
++
+L_u\bigl|u_t^{\pi(M)}-u_t^{\pi(M')}\bigr| \\
+&\qquad=
+L_x\biggl|\sum_{i=1}^H
+(M^{(i)}-M'^{(i)})(\psi_t^{(i)}-\rho_t)\biggr| \\
+&\qquad\quad
++
+L_u\biggl|\sum_{i=1}^H
+(M^{(i)}-M'^{(i)})\alpha^i w_{t-i}\biggr|.
+\end{aligned}
+\end{equation}
+Applying H\"older's inequality to \eqref{eq:surr-lip-sub},
+\begin{equation}
+\label{eq:surr-lip-holder}
+\begin{aligned}
+&\bigl|\ell_t(M)-\ell_t(M')\bigr| \\
+&\le
+\bigl(L_x\max_i|\psi_t^{(i)}-\rho_t|
++
+L_u\max_i \alpha^i w_{t-i}\bigr)\|M-M'\|_1.
+\end{aligned}
+\end{equation}
+By Lemma~\ref{lem:sdac-state-decomp}, $0\le\psi_t^{(i)}\le\rho_t\le 1/(1-\alpha)$,
+and $w_{t-i}\in[0,1]$ with $i\ge 1$, so
+\begin{equation}
+\label{eq:surr-coeff-bound}
+\begin{aligned}
+\max_i\bigl|\psi_t^{(i)}-\rho_t\bigr|
+&\le
+\frac{1}{1-\alpha}, \\
+\max_i \alpha^i w_{t-i}
+&\le
+\alpha.
+\end{aligned}
+\end{equation}
+Substituting \eqref{eq:surr-coeff-bound} into \eqref{eq:surr-lip-holder}, and then
+\eqref{eq:def-surrogate-L},
+\[
+\begin{aligned}
+\bigl|\ell_t(M)-\ell_t(M')\bigr|
+&\le
+\Bigl(\frac{L_x}{1-\alpha}+\alpha L_u\Bigr)\|M-M'\|_1 \\
+&=
+L\|M-M'\|_1.
 \end{aligned}
 \]
-using $W-W'=\langle M-M',\mathbf{1}\rangle$, while
-$u_t^{\pi(M)}-u_t^{\pi(M')}=\langle M-M',\widetilde{w}_t\rangle$. Hence, by
-\eqref{eq:model-lipschitz} and H\"older's inequality,
-\begin{align*}
-|\ell_t(M)-\ell_t(M')|
-&\le L_x\bigl|\langle M-M',\,\psi_t-\rho_t\mathbf{1}\rangle\bigr| \\
-&\quad + L_u\bigl|\langle M-M',\widetilde{w}_t\rangle\bigr| \\
-&\le \bigl(L_x\,\|\psi_t-\rho_t\mathbf{1}\|_\infty + L_u\,\|\widetilde{w}_t\|_\infty\bigr) \\
-&\qquad\cdot\|M-M'\|_1.
-\end{align*}
-Since $0\le\psi_t^{(i)}\le\rho_t\le 1/(1-\alpha)$
-(Lemma~\ref{lem:sdac-state-decomp}), we have
-$\|\psi_t-\rho_t\mathbf{1}\|_\infty=\max_i\bigl(\rho_t-\psi_t^{(i)}\bigr)\le\rho_t\le
-1/(1-\alpha)$, and $\|\widetilde{w}_t\|_\infty=\max_i\alpha^i w_{t-i}\le\alpha$
-because $w_\tau\in[0,1]$ and $i\ge 1$. This proves the Lipschitz bound.
 
-Finally, let $(s_x,s_u)$ be a cost subgradient returned by the bounded oracle at
-$\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr)$. The affine-composition rule gives
-\[
-g=s_x(\psi_t-\rho_t\mathbf{1})+s_u\widetilde{w}_t
-\in\partial\ell_t(M).
-\]
-The bounds above and $|s_x|\le L_x$, $|s_u|\le L_u$ imply
-$\|g\|_\infty\le L_x/(1-\alpha)+\alpha L_u=L$.
+Let $(s_x,s_u)\in\partial c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr)$ with
+$|s_x|\le L_x$ and $|s_u|\le L_u$, and set
+\begin{equation}
+\label{eq:surr-g}
+g^{(i)}
+\triangleq
+s_x\bigl(\psi_t^{(i)}-\rho_t\bigr)+s_u\alpha^i w_{t-i}.
+\end{equation}
+Affine composition with \eqref{eq:surr-x-affine} and \eqref{eq:def-sdac-policy}
+gives $g\in\partial\ell_t(M)$. Using \eqref{eq:surr-coeff-bound},
+\begin{equation}
+\label{eq:surr-g-bound}
+\begin{aligned}
+\bigl|g^{(i)}\bigr|
+&\le
+|s_x|\,\bigl|\psi_t^{(i)}-\rho_t\bigr|
++|s_u|\,\alpha^i w_{t-i} \\
+&\le
+\frac{L_x}{1-\alpha}+\alpha L_u \\
+&=
+L.
+\end{aligned}
+\end{equation}
+Thus $\|g\|_\infty\le L$.
 \end{proof}
 
 Regret minimization against the best fixed SDAC policy thus becomes online convex
