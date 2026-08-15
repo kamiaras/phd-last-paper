@@ -819,10 +819,7 @@ Then $M_q^\star\in\Delta_H$, and if each $c_t$ satisfies
 \Bigl(L_u+\frac{L_x}{1-\alpha}\Bigr)\frac{q\,\beta^H}{1-\beta}\,T.
 \end{aligned}
 \end{equation}
-For $q=0$ and $q=\alpha$, the right-hand side is zero and SDAC represents the
-corresponding policy exactly. For $q\in(0,\alpha)$, the cost error decays
-geometrically in $H$. The proof is deferred to
-Appendix~\ref{sec:appendix-proofs}.
+The proof is deferred to Appendix~\ref{sec:appendix-proofs}.
 \end{lemma}
 
 Theorem~\ref{thm:regret-bound} depends on the memory horizon only through
@@ -1117,90 +1114,179 @@ We first prove the linear-policy approximation guarantee stated in
 Section~\ref{subsec:sdac-expressiveness}.
 
 \begin{proof}[Proof of Lemma~\ref{lem:sdac-linear-approx}]
-Fix $q\in[0,\alpha]$, set $\beta=\alpha-q\in[0,\alpha]$, and recall $w_\tau\equiv 0$
-for $\tau\le 0$.
+Fix $q\in[0,\alpha]$, set $\beta\triangleq\alpha-q\in[0,\alpha]$, and recall
+$w_\tau\equiv 0$ for $\tau\le 0$.
 
-\emph{Feasibility and closed form of the linear policy.} Substituting
-$u_t^{\mathrm{lin}}=q\,x_t^{\mathrm{lin}}$ into its state update gives the closed-loop
+\emph{Feasibility and closed form.} Substituting
+$u_t^{\mathrm{lin}}=q\,x_t^{\mathrm{lin}}$ into \eqref{eq:model-dynamics},
 \begin{equation}
 \label{eq:model-closed-loop}
-x_{t+1}^{\mathrm{lin}}=\alpha x_t^{\mathrm{lin}}-q x_t^{\mathrm{lin}}+w_t=\beta x_t^{\mathrm{lin}}+w_t,
+\begin{aligned}
+x_{t+1}^{\mathrm{lin}}
+&=
+\alpha x_t^{\mathrm{lin}}-q x_t^{\mathrm{lin}}+w_t \\
+&=
+\beta x_t^{\mathrm{lin}}+w_t,
+\end{aligned}
 \end{equation}
-with $x_1^{\mathrm{lin}}=0$. Since $\beta\ge0$ and $w_t\ge 0$,
-induction yields $x_t^{\mathrm{lin}}\ge 0$, and then $0\le u_t^{\mathrm{lin}}=q
-x_t^{\mathrm{lin}}\le\alpha x_t^{\mathrm{lin}}$ because $q\le\alpha$; thus
-$\pi_q^{\mathrm{lin}}$ satisfies \eqref{eq:model-feasibility}. Unrolling the
-closed-loop recursion \eqref{eq:model-closed-loop} from the initialization
-$x_1^{\mathrm{lin}}=0$ (by \eqref{eq:model-init}) yields for all $t\in\{1,\ldots,T\}$,
+with $x_1^{\mathrm{lin}}=0$ by \eqref{eq:model-init}. Since $\beta\ge 0$ and
+$w_t\ge 0$, if $x_t^{\mathrm{lin}}\ge 0$ then
 \[
-x_t^{\mathrm{lin}}=\sum_{j=1}^{t-1}\beta^{j-1}w_{t-j},
-\quad \text{and} \quad
-u_t^{\mathrm{lin}}=q\sum_{j=1}^{t-1}\beta^{j-1}w_{t-j}.
+x_{t+1}^{\mathrm{lin}}=\beta x_t^{\mathrm{lin}}+w_t\ge 0.
 \]
+Thus $x_t^{\mathrm{lin}}\ge 0$ for all $t$, and $q\in[0,\alpha]$ gives
+\[
+0\le u_t^{\mathrm{lin}}=q\,x_t^{\mathrm{lin}}\le\alpha x_t^{\mathrm{lin}},
+\]
+which is \eqref{eq:model-feasibility}. Unrolling \eqref{eq:model-closed-loop}
+from $x_1^{\mathrm{lin}}=0$ yields, for all $t\in\{1,\ldots,T\}$,
+\begin{equation}
+\label{eq:lin-closed-form}
+\begin{aligned}
+x_t^{\mathrm{lin}}
+&=
+\sum_{j=1}^{t-1}\beta^{j-1}w_{t-j}, \\
+u_t^{\mathrm{lin}}
+&=
+q\sum_{j=1}^{t-1}\beta^{j-1}w_{t-j}.
+\end{aligned}
+\end{equation}
 
 \emph{Simplex membership.} Each
-$M_q^{\star(i)}=q\beta^{i-1}/\alpha^i\ge0$. If $q=0$, then $M_q^\star=0\in
-\Delta_H$. If $q>0$, using
-$1-\beta/\alpha=(\alpha-\beta)/\alpha=q/\alpha$ and the finite geometric sum gives
+$M_q^{\star(i)}=q\beta^{i-1}/\alpha^i\ge 0$. If $q=0$, then
+$M_q^\star=0\in\Delta_H$. If $q>0$,
+\begin{equation}
+\label{eq:lin-ratio}
+\begin{aligned}
+1-\frac{\beta}{\alpha}
+&=
+\frac{\alpha-\beta}{\alpha} \\
+&=
+\frac{q}{\alpha}.
+\end{aligned}
+\end{equation}
+Hence
 \[
 \begin{aligned}
 \sum_{i=1}^H M_q^{\star(i)}
-&=\frac{q}{\alpha}\cdot\frac{1-(\beta/\alpha)^H}{1-\beta/\alpha} \\
-&=\frac{q}{\alpha}\cdot\frac{\alpha}{q}\bigl(1-(\beta/\alpha)^H\bigr)
-=1-(\beta/\alpha)^H\le1,
+&=
+\sum_{i=1}^H\frac{q\,\beta^{i-1}}{\alpha^i} \\
+&=
+\frac{q}{\alpha}\sum_{i=1}^H\Bigl(\frac{\beta}{\alpha}\Bigr)^{i-1} \\
+&=
+\frac{q}{\alpha}\cdot\frac{1-(\beta/\alpha)^H}{1-\beta/\alpha} \\
+&=
+\frac{q}{\alpha}\cdot\frac{\alpha}{q}\bigl(1-(\beta/\alpha)^H\bigr) \\
+&=
+1-(\beta/\alpha)^H \\
+&\le
+1,
 \end{aligned}
 \]
-since $0\le\beta/\alpha<1$. Hence $M_q^\star\in\Delta_H$ and
-$\pi(M_q^\star)\in\mathrm{SDAC}_H$.
+where the fourth equality uses \eqref{eq:lin-ratio} and the inequality uses
+$0\le\beta/\alpha<1$. Thus $M_q^\star\in\Delta_H$.
 
-\emph{Action approximation.} By the SDAC definition \eqref{eq:def-sdac-policy} and the identity
-$M_q^{\star(i)}\alpha^i=q\beta^{i-1}$,
-\[
-u_t^{\pi(M_q^\star)}=\sum_{i=1}^H M_q^{\star(i)}\alpha^i w_{t-i}=q\sum_{i=1}^H\beta^{i-1}w_{t-i}.
-\]
-Truncating with $w_{t-i}=0$ for $i\ge t$ yields
-\[
-u_t^{\pi(M_q^\star)}=q\sum_{i=1}^{\min\{H,t-1\}}\beta^{i-1}w_{t-i}.
-\]
-Subtracting this from $u_t^{\mathrm{lin}}$ cancels the first $\min\{H,t-1\}$ terms:
-\[
-u_t^{\mathrm{lin}}-u_t^{\pi(M_q^\star)}=q\sum_{j=H+1}^{t-1}\beta^{j-1}w_{t-j}\ge 0,
-\]
-which equals $0$ when $t\le H+1$. Using $w_{t-j}\in[0,1]$ and summing the geometric
-tail,
-\[
-u_t^{\mathrm{lin}}-u_t^{\pi(M_q^\star)}\le q\sum_{j=H+1}^{\infty}\beta^{j-1}=\frac{q\,\beta^H}{1-\beta}.
-\]
+\emph{Action approximation.} By definition,
+$M_q^{\star(i)}\alpha^i=q\beta^{i-1}$. Substituting into
+\eqref{eq:def-sdac-policy},
+\begin{equation}
+\label{eq:lin-sdac-u}
+\begin{aligned}
+u_t^{\pi(M_q^\star)}
+&=
+\sum_{i=1}^H M_q^{\star(i)}\alpha^i w_{t-i} \\
+&=
+q\sum_{i=1}^H\beta^{i-1}w_{t-i}.
+\end{aligned}
+\end{equation}
+Using $w_{t-i}=0$ for $i\ge t$ in \eqref{eq:lin-sdac-u}, and then subtracting
+from \eqref{eq:lin-closed-form},
+\begin{equation}
+\label{eq:lin-u-gap}
+\begin{aligned}
+&u_t^{\mathrm{lin}}-u_t^{\pi(M_q^\star)} \\
+&\qquad=
+q\sum_{j=1}^{t-1}\beta^{j-1}w_{t-j} \\
+&\qquad\quad
+-
+q\sum_{i=1}^{\min\{H,t-1\}}\beta^{i-1}w_{t-i} \\
+&\qquad=
+q\sum_{j=H+1}^{t-1}\beta^{j-1}w_{t-j}.
+\end{aligned}
+\end{equation}
+The right-hand side of \eqref{eq:lin-u-gap} is nonnegative. Since
+$w_{t-j}\in[0,1]$,
+\begin{equation}
+\label{eq:lin-u-bound}
+\begin{aligned}
+u_t^{\mathrm{lin}}-u_t^{\pi(M_q^\star)}
+&\le
+q\sum_{j=H+1}^{\infty}\beta^{j-1} \\
+&=
+\frac{q\,\beta^H}{1-\beta}.
+\end{aligned}
+\end{equation}
 
-\emph{State approximation.} Let $\delta_t\triangleq x_t^{\pi(M_q^\star)}-x_t^{\mathrm{lin}}$ and
-$e_t\triangleq
-u_t^{\mathrm{lin}}-u_t^{\pi(M_q^\star)}\in\bigl[0,\,q\beta^H/(1-\beta)\bigr]$ by the
-action-approximation step. The two trajectories follow the same dynamics
-\eqref{eq:model-dynamics} driven by
-the same arrival, so the arrival cancels on subtraction:
-\[
-\delta_{t+1}=\alpha\,\delta_t-\bigl(u_t^{\pi(M_q^\star)}-u_t^{\mathrm{lin}}\bigr)=\alpha\,\delta_t+e_t,
-\qquad \delta_1=0.
-\]
-Unrolling gives $\delta_t=\sum_{s=1}^{t-1}\alpha^{t-1-s}e_s\ge 0$, and since $e_s\le
-q\beta^H/(1-\beta)$ and $\sum_{s=1}^{t-1}\alpha^{t-1-s}\le 1/(1-\alpha)$,
-\[
-0\le\delta_t\le\frac{q\,\beta^H}{1-\beta}\cdot\frac{1}{1-\alpha}=\frac{q\,\beta^H}{(1-\beta)(1-\alpha)}.
-\]
+\emph{State approximation.} Let
+$\delta_t\triangleq x_t^{\pi(M_q^\star)}-x_t^{\mathrm{lin}}$ and
+$e_t\triangleq u_t^{\mathrm{lin}}-u_t^{\pi(M_q^\star)}$.
+By \eqref{eq:lin-u-gap} and \eqref{eq:lin-u-bound},
+\begin{equation}
+\label{eq:lin-e-range}
+0\le e_t\le\frac{q\,\beta^H}{1-\beta}.
+\end{equation}
+Subtracting the two copies of \eqref{eq:model-dynamics},
+\begin{equation}
+\label{eq:lin-delta-dyn}
+\begin{aligned}
+\delta_{t+1}
+&=
+\bigl(\alpha x_t^{\pi(M_q^\star)}-u_t^{\pi(M_q^\star)}+w_t\bigr) \\
+&\qquad
+-
+\bigl(\alpha x_t^{\mathrm{lin}}-u_t^{\mathrm{lin}}+w_t\bigr) \\
+&=
+\alpha\delta_t+e_t,
+\end{aligned}
+\end{equation}
+with $\delta_1=0$. Unrolling \eqref{eq:lin-delta-dyn} gives
+\begin{equation}
+\label{eq:lin-delta-unroll}
+\delta_t=\sum_{s=1}^{t-1}\alpha^{t-1-s}e_s.
+\end{equation}
+By \eqref{eq:lin-e-range}, the right-hand side of \eqref{eq:lin-delta-unroll}
+is nonnegative. Substituting the upper bound of \eqref{eq:lin-e-range} into
+\eqref{eq:lin-delta-unroll},
+\begin{equation}
+\label{eq:lin-delta-bound}
+\begin{aligned}
+\delta_t
+&\le
+\frac{q\,\beta^H}{1-\beta}\sum_{s=1}^{t-1}\alpha^{t-1-s} \\
+&\le
+\frac{q\,\beta^H}{(1-\beta)(1-\alpha)}.
+\end{aligned}
+\end{equation}
 
-\emph{Cost approximation.} By \eqref{eq:model-lipschitz} and the action and state
-estimates above,
-for each $t\in\{1,\ldots,T\}$,
-\[
+\emph{Cost approximation.} By \eqref{eq:model-lipschitz}, and then substituting
+\eqref{eq:lin-delta-bound} and \eqref{eq:lin-e-range},
+\begin{equation}
+\label{eq:lin-cost-step}
 \begin{aligned}
 &\bigl|c_t\bigl(x_t^{\pi(M_q^\star)},u_t^{\pi(M_q^\star)}\bigr)
 -c_t\bigl(x_t^{\mathrm{lin}},u_t^{\mathrm{lin}}\bigr)\bigr| \\
-&\qquad\le L_x\,|\delta_t|+L_u\,|e_t|
-\le\Bigl(\frac{L_x}{1-\alpha}+L_u\Bigr)\frac{q\,\beta^H}{1-\beta}.
+&\qquad\le
+L_x|\delta_t|+L_u|e_t| \\
+&\qquad\le
+L_x\cdot\frac{q\,\beta^H}{(1-\beta)(1-\alpha)}
++
+L_u\cdot\frac{q\,\beta^H}{1-\beta} \\
+&\qquad=
+\Bigl(L_u+\frac{L_x}{1-\alpha}\Bigr)\frac{q\,\beta^H}{1-\beta}.
 \end{aligned}
-\]
-Summing over $t=1,\ldots,T$ and applying the triangle inequality proves
-\eqref{eq:sdac-lin-approx-cost}.
+\end{equation}
+Summing \eqref{eq:lin-cost-step} over $t=1,\ldots,T$ and applying the triangle
+inequality yields \eqref{eq:sdac-lin-approx-cost}.
 \end{proof}
 
 The remaining lemmas establish the OMD and stability estimates used in the proof of
