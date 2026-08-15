@@ -9,14 +9,14 @@
 \newtheorem{lemma}{Lemma}
 \newtheorem{theorem}{Theorem}
 \newtheorem{corollary}{Corollary}
-
+ 
 \newcommand{\RegSDAC}[1]{\mathrm{Reg}_{\scriptscriptstyle\mathrm{SDAC}}(#1)}
 \newcommand{\RegLin}[1]{\mathrm{Reg}_{\mathrm{lin}}(#1)}
 
 \title{Online Constrained Control of Storage Systems via Simplex Disturbance-Action
 Policies}
 
-\author{Kamiar~Asgari and Michael~J.~Neely% 
+\author{Kamiar~Asgari and Michael~J.~Neely%
 \thanks{K.~Asgari and M.~J.~Neely are with the Department of Electrical and
 Computer Engineering, University of Southern California, Los Angeles, CA 90089 USA
 (e-mail: kamiaras@usc.edu; mjneely@usc.edu).}%
@@ -266,9 +266,18 @@ The system then receives an arrival $w_t\in[0,1]$ and evolves according to
 \label{eq:model-dynamics}
 x_{t+1} = \alpha x_t - u_t + w_t.
 \end{equation}
-Every feasible trajectory therefore satisfies
-$0\le x_t\le(1-\alpha)^{-1}$ and
-$0\le u_t\le\alpha(1-\alpha)^{-1}$. Define the reachable state--action domain
+For every feasible trajectory,
+\[
+0\le x_{t+1}\le \alpha x_t+1.
+\]
+Since $x_1=0$, induction gives
+\[
+0\le x_t\le \frac{1-\alpha^{t-1}}{1-\alpha}
+\le \frac{1}{1-\alpha},
+\qquad
+0\le u_t\le \frac{\alpha}{1-\alpha}.
+\]
+Define the reachable state--action domain
 \begin{equation}
 \label{eq:model-domain}
 \mathcal{D}_\alpha
@@ -423,109 +432,113 @@ arguments below.
 
 \begin{lemma}[State decomposition under SDAC]
 \label{lem:sdac-state-decomp}
-Fix $H\in\mathbb{N}$ and $M\in\Delta_H$, and write $W\triangleq\sum_{i=1}^H
-M^{(i)}\le 1$. Let $\pi(M)$ be defined by \eqref{eq:def-sdac-policy} and
-\eqref{eq:sdac-state-update}. Define
+Fix $H\in\mathbb{N}$ and $M\in\Delta_H$, and write
 \[
-\psi_t^{(i)} \triangleq \sum_{j=1}^{i}\alpha^{j-1}w_{t-j}
-\quad(i=1,\ldots,H),
+W\triangleq\sum_{i=1}^H M^{(i)}\le 1.
 \]
+For $i\in\{1,\ldots,H\}$, define
 \[
-\rho_t \triangleq \sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j}.
+\psi_t^{(i)}
+\triangleq
+\sum_{j=1}^{i}\alpha^{j-1}w_{t-j},
+\qquad
+\rho_t
+\triangleq
+\sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j},
 \]
-Then for all $t\in\{2,\ldots,T\}$,
+where the second sum is empty when $t=1$. Then, for every
+$t\in\{1,\ldots,T\}$,
 \begin{equation}
 \label{eq:sdac-state-decomp}
 x_t^{\pi(M)}
 =
 \sum_{i=1}^H M^{(i)}\psi_t^{(i)}
-+\bigl(1-W\bigr)\rho_t,
++(1-W)\rho_t.
 \end{equation}
-and the coefficients satisfy $0\le \psi_t^{(i)}\le \rho_t\le 1/(1-\alpha)$. In
-particular, the map $M\mapsto x_t^{\pi(M)}$ is affine.
+Moreover,
+\[
+0\le \psi_t^{(i)}\le \rho_t\le\frac{1}{1-\alpha},
+\]
+and $M\mapsto x_t^{\pi(M)}$ is affine.
 \end{lemma}
 
 \begin{proof}
-We first record a one-step recursion for $\rho_t$: isolating the $j=1$ term in its
-definition and reindexing gives
+The auxiliary quantities satisfy
 \begin{equation}
 \label{eq:rho-recursion}
-\rho_{t+1}=\alpha\rho_t+w_t, \qquad \rho_1=0.
+\rho_{t+1}=\alpha\rho_t+w_t,
+\qquad
+\rho_1=0,
 \end{equation}
-We prove \eqref{eq:sdac-state-decomp} by induction on $t$.
-
-\emph{Base case $t=2$.} Since $x_1^{\pi(M)}=0$ and $w_{1-i}=0$ for $i\ge 1$,
-\eqref{eq:def-sdac-policy} and \eqref{eq:sdac-state-update} give
-\[
-x_2^{\pi(M)} = \alpha\cdot 0 - 0 + w_1 = w_1.
-\]
-Also $\psi_2^{(i)}=\rho_2=w_1$ for every $i$, so the right side of
-\eqref{eq:sdac-state-decomp} at $t=2$ is
-\[
-\sum_{i=1}^H M^{(i)}w_1+(1-W)w_1 = Ww_1+(1-W)w_1 = w_1 = x_2^{\pi(M)}.
-\]
-
-\emph{Inductive step.} Assume \eqref{eq:sdac-state-decomp} holds at time
-$t\in\{2,\ldots,T-1\}$. By \eqref{eq:sdac-state-update} and
-\eqref{eq:def-sdac-policy},
+and, for every $i\in\{1,\ldots,H\}$,
 \begin{equation}
-\label{eq:decomp-step1}
-x_{t+1}^{\pi(M)} = \alpha x_t^{\pi(M)} - \sum_{i=1}^H M^{(i)}\alpha^i w_{t-i} + w_t.
+\label{eq:psi-recursion}
+\begin{aligned}
+\alpha\psi_t^{(i)}-\alpha^i w_{t-i}
+&=\sum_{j=1}^{i-1}\alpha^j w_{t-j} \\
+&=\psi_{t+1}^{(i)}-w_t.
+\end{aligned}
 \end{equation}
-Substituting \eqref{eq:sdac-state-decomp} for $x_t^{\pi(M)}$ in
-\eqref{eq:decomp-step1}, and then distributing $\alpha$,
+For $i=1$, the sum in the first line is empty.
+
+At $t=1$, one has $x_1^{\pi(M)}=\psi_1^{(i)}=\rho_1=0$, so
+\eqref{eq:sdac-state-decomp} holds. Suppose it holds at time $t$. Using
+\eqref{eq:sdac-state-update} and \eqref{eq:def-sdac-policy},
 \begin{equation}
-\label{eq:decomp-step2}
+\label{eq:decomp-induction-1}
 \begin{aligned}
 x_{t+1}^{\pi(M)}
-&= \alpha\Bigl(\sum_{i=1}^H M^{(i)}\psi_t^{(i)}+(1-W)\rho_t\Bigr) \\
-&\qquad -\sum_{i=1}^H M^{(i)}\alpha^i w_{t-i}+w_t \\
-&= \sum_{i=1}^H M^{(i)}\Bigl(\alpha\psi_t^{(i)}-\alpha^i w_{t-i}\Bigr)
+&=
+\alpha\left(
+\sum_{i=1}^H M^{(i)}\psi_t^{(i)}
++(1-W)\rho_t
+\right) \\
+&\quad
+-\sum_{i=1}^H M^{(i)}\alpha^i w_{t-i}
++w_t \\
+&=
+\sum_{i=1}^H M^{(i)}
+\bigl(\alpha\psi_t^{(i)}-\alpha^i w_{t-i}\bigr) \\
+&\quad
 +\alpha(1-W)\rho_t+w_t.
 \end{aligned}
 \end{equation}
-By definition of $\psi_{t+1}^{(i)}$, for each $i$
+Substituting \eqref{eq:rho-recursion} and \eqref{eq:psi-recursion} into
+\eqref{eq:decomp-induction-1},
 \begin{equation}
-\label{eq:decomp-cancel}
-\begin{aligned}
-\alpha\psi_t^{(i)}-\alpha^i w_{t-i}
-&= \sum_{j=1}^{i}\alpha^j w_{t-j} - \alpha^i w_{t-i} \\
-&= \sum_{j=1}^{i-1}\alpha^j w_{t-j} \\
-&= \psi_{t+1}^{(i)} - w_t.
-\end{aligned}
-\end{equation}
-Substituting \eqref{eq:decomp-cancel} into \eqref{eq:decomp-step2}, and then summing
-over $i$,
-\begin{equation}
-\label{eq:decomp-step3}
+\label{eq:decomp-induction-2}
 \begin{aligned}
 x_{t+1}^{\pi(M)}
-&= \sum_{i=1}^H M^{(i)}\bigl(\psi_{t+1}^{(i)}-w_t\bigr)+\alpha(1-W)\rho_t+w_t \\
-&= \sum_{i=1}^H M^{(i)}\psi_{t+1}^{(i)} - Ww_t+\alpha(1-W)\rho_t+w_t.
+&=
+\sum_{i=1}^H M^{(i)}
+\bigl(\psi_{t+1}^{(i)}-w_t\bigr) \\
+&\quad
++(1-W)(\rho_{t+1}-w_t)+w_t \\
+&=
+\sum_{i=1}^H M^{(i)}\psi_{t+1}^{(i)}
++(1-W)\rho_{t+1},
 \end{aligned}
 \end{equation}
-Regrouping the terms in $w_t$ and $\rho_t$, and then applying
-\eqref{eq:rho-recursion},
-\[
-\begin{aligned}
-x_{t+1}^{\pi(M)}
-&= \sum_{i=1}^H M^{(i)}\psi_{t+1}^{(i)} + (1-W)\bigl(w_t+\alpha\rho_t\bigr) \\
-&= \sum_{i=1}^H M^{(i)}\psi_{t+1}^{(i)} + (1-W)\rho_{t+1},
-\end{aligned}
-\]
-which is \eqref{eq:sdac-state-decomp} at time $t+1$.
+because the total coefficient of $w_t$ in the first line is
+$-W-(1-W)+1=0$. This proves \eqref{eq:sdac-state-decomp} by induction.
 
-\emph{Bounds.} Each $\psi_t^{(i)}$ is the truncation to $j\le i$ of the nonnegative
-series defining $\rho_t$, so $0\le\psi_t^{(i)}\le\rho_t$. Since $w_\tau\in[0,1]$,
+All summands defining $\psi_t^{(i)}$ and $\rho_t$ are nonnegative. Since
+$w_\tau=0$ for $\tau\le0$, $\psi_t^{(i)}$ is a truncation of $\rho_t$; hence
 \[
-\rho_t=\sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j}\le\sum_{j=1}^{\infty}\alpha^{j-1}
+0\le\psi_t^{(i)}\le\rho_t
+\le\sum_{j=1}^{\infty}\alpha^{j-1}
 =\frac{1}{1-\alpha}.
 \]
-Affineness in $M$ holds because $\psi_t$ and $\rho_t$ do not depend on $M$.
+Finally,
+\[
+x_t^{\pi(M)}
+=
+\rho_t+\sum_{i=1}^H M^{(i)}\bigl(\psi_t^{(i)}-\rho_t\bigr),
+\]
+which is affine in $M$.
 \end{proof}
 
-The first consequence of this decomposition is that feasibility is preserved within
-the class.
+The first consequence of this decomposition is fixed-policy feasibility.
 
 \begin{lemma}[Feasibility of SDAC policies]
 \label{lem:sdac-feasibility}
@@ -534,112 +547,61 @@ For every $M\in\Delta_H$, the trajectory induced by
 \begin{equation}
 \label{eq:sdac-feasibility}
 0\le u_t^{\pi(M)}\le \alpha x_t^{\pi(M)}
-\qquad\text{for all }t\in\{1,\ldots,T\}.
+\qquad
+\text{for all }t\in\{1,\ldots,T\}.
 \end{equation}
 \end{lemma}
 
 \begin{proof}
-By \eqref{eq:def-sdac-policy},
-\begin{equation}
-\label{eq:feas-u-sum}
+Because $M^{(i)},\alpha$, and $w_{t-i}$ are nonnegative,
+\[
 u_t^{\pi(M)}
 =
-\sum_{i=1}^H M^{(i)}\alpha^i w_{t-i}.
-\end{equation}
-The right-hand side of \eqref{eq:feas-u-sum} is nonnegative, so
-$u_t^{\pi(M)}\ge 0$.
-
-\emph{Upper bound, $t=1$.}
-By \eqref{eq:sdac-state-update}, $x_1^{\pi(M)}=0$. Specializing
-\eqref{eq:feas-u-sum} and using $w_{\tau}\equiv 0$ for $\tau\le 0$,
-\[
-\begin{aligned}
-u_1^{\pi(M)}
-&=
-\sum_{i=1}^H M^{(i)}\alpha^i w_{1-i} \\
-&=
-0 \\
-&=
-\alpha x_1^{\pi(M)}.
-\end{aligned}
+\sum_{i=1}^H M^{(i)}\alpha^i w_{t-i}
+\ge0.
 \]
-
-\emph{Upper bound, $t\ge 2$.}
-
-Let $W\triangleq\sum_{i=1}^H M^{(i)}$. Multiplying
-\eqref{eq:sdac-state-decomp} by $\alpha$, and then distributing $\alpha$,
+For every $i\in\{1,\ldots,H\}$,
 \begin{equation}
-\label{eq:feas-alpha-x}
-\begin{aligned}
-\alpha x_t^{\pi(M)}
-&=
-\alpha\Bigl(\sum_{i=1}^H M^{(i)}\psi_t^{(i)}+(1-W)\rho_t\Bigr) \\
-&=
-\alpha\sum_{i=1}^H M^{(i)}\psi_t^{(i)}+\alpha(1-W)\rho_t.
-\end{aligned}
-\end{equation}
-By \eqref{eq:def-simplex} and Lemma~\ref{lem:sdac-state-decomp}, $W\le 1$ and
-$\rho_t\ge 0$, so $\alpha(1-W)\rho_t\ge 0$. Thus \eqref{eq:feas-alpha-x} yields
-\begin{equation}
-\label{eq:feas-drop-rho}
-\alpha x_t^{\pi(M)}
+\label{eq:feas-psi-term}
+\alpha\psi_t^{(i)}
+=
+\sum_{j=1}^{i}\alpha^j w_{t-j}
 \ge
-\alpha\sum_{i=1}^H M^{(i)}\psi_t^{(i)}.
+\alpha^i w_{t-i}.
 \end{equation}
-Substituting the definition of $\psi_t^{(i)}$ into the right-hand side of
-\eqref{eq:feas-drop-rho}, and then distributing $\alpha$,
+Let $W=\sum_{i=1}^H M^{(i)}$. By
+Lemma~\ref{lem:sdac-state-decomp}, $1-W\ge0$ and $\rho_t\ge0$. Therefore,
 \begin{equation}
-\label{eq:feas-expand-psi}
+\label{eq:feas-upper-direct}
 \begin{aligned}
-\alpha\sum_{i=1}^H M^{(i)}\psi_t^{(i)}
+\alpha x_t^{\pi(M)}
 &=
-\alpha\sum_{i=1}^H M^{(i)}\Biggl(\sum_{j=1}^{i}\alpha^{j-1}w_{t-j}\Biggr) \\
-&=
-\sum_{i=1}^H M^{(i)}\Biggl(\sum_{j=1}^{i}\alpha^{j}w_{t-j}\Biggr).
-\end{aligned}
-\end{equation}
-Expanding the right-hand side of \eqref{eq:feas-expand-psi} as a double sum, and
-then changing the order of summation,
-\begin{equation}
-\label{eq:feas-switch}
-\begin{aligned}
-\sum_{i=1}^H M^{(i)}\Biggl(\sum_{j=1}^{i}\alpha^{j}w_{t-j}\Biggr)
-&=
-\sum_{i=1}^H\sum_{j=1}^{i} M^{(i)}\alpha^{j}w_{t-j} \\
-&=
-\sum_{j=1}^H\sum_{i=j}^{H} M^{(i)}\alpha^{j}w_{t-j} \\
-&=
-\sum_{j=1}^H\Biggl(\sum_{i=j}^{H} M^{(i)}\Biggr)\alpha^{j}w_{t-j}.
-\end{aligned}
-\end{equation}
-Since $M^{(i)}\ge 0$ and $\alpha^{j}w_{t-j}\ge 0$, and then applying
-\eqref{eq:feas-u-sum},
-\begin{equation}
-\label{eq:feas-bound-u}
-\begin{aligned}
-\sum_{j=1}^H\Biggl(\sum_{i=j}^{H} M^{(i)}\Biggr)\alpha^{j}w_{t-j}
+\sum_{i=1}^H M^{(i)}\alpha\psi_t^{(i)}
++\alpha(1-W)\rho_t \\
 &\ge
-\sum_{j=1}^H M^{(j)}\alpha^{j}w_{t-j} \\
-&=
-u_t^{\pi(M)}.
+\sum_{i=1}^H M^{(i)}\alpha\psi_t^{(i)} \\
+&\ge
+\sum_{i=1}^H M^{(i)}\alpha^i w_{t-i}
+=
+u_t^{\pi(M)},
 \end{aligned}
 \end{equation}
-Chaining \eqref{eq:feas-drop-rho}--\eqref{eq:feas-bound-u} gives the upper bound
-in \eqref{eq:sdac-feasibility}.
+where the second inequality uses \eqref{eq:feas-psi-term}.
 \end{proof}
 
-The second consequence is that SDAC is compatible with online convex optimization:
-for fixed arrival sequences, $u_t^{\pi(M)}$ is linear in $M$ by
-\eqref{eq:def-sdac-policy-vector}, and $x_t^{\pi(M)}$ is affine in $M$ by
-Lemma~\ref{lem:sdac-state-decomp}. Since each $c_t$ is convex in $(x,u)$, this
-already shows that the induced cost is convex in $M$; the next lemma also quantifies its
-Lipschitz constant, which we use later to tune the online algorithm's step size.
+For fixed arrivals, both coordinates of the SDAC state--action pair are affine
+in $M$. The following lemma records the resulting convexity and the constants
+used by the online update.
 
 \begin{lemma}[Convexity and Lipschitz continuity of surrogate cost]
 \label{lem:sdac-surrogate}
 Define
 \[
-\ell_t(M) \triangleq c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr), \qquad M\in\Delta_H,
+\ell_t(M)
+\triangleq
+c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr),
+\qquad
+M\in\Delta_H,
 \]
 and
 \begin{equation}
@@ -652,124 +614,95 @@ Then $\ell_t$ is convex on $\Delta_H$, and for all $M,M'\in\Delta_H$,
 \le
 L\|M-M'\|_1.
 \]
-Moreover, at every $M\in\Delta_H$, one can select a subgradient
-$g\in\partial\ell_t(M)$ satisfying $\|g\|_\infty\le L$.
+Moreover, at every $M\in\Delta_H$, one can select
+$g\in\partial\ell_t(M)$ such that $\|g\|_\infty\le L$.
 \end{lemma}
 
 \begin{proof}
-For $t=1$, \eqref{eq:sdac-state-update} and \eqref{eq:def-sdac-policy} give
-$x_1^{\pi(M)}=u_1^{\pi(M)}=0$, so $\ell_1$ is constant and the claims hold with
-$g=0$. Fix $t\ge 2$, and write $W\triangleq\sum_{i=1}^H M^{(i)}$.
-By \eqref{eq:sdac-state-decomp}, and then substituting $W=\sum_{i=1}^H M^{(i)}$,
-\begin{equation}
-\label{eq:surr-x-affine}
-\begin{aligned}
-x_t^{\pi(M)}
-&=
-\sum_{i=1}^H M^{(i)}\psi_t^{(i)}+(1-W)\rho_t \\
-&=
-\sum_{i=1}^H M^{(i)}\bigl(\psi_t^{(i)}-\rho_t\bigr)+\rho_t.
-\end{aligned}
-\end{equation}
-The right-hand side of \eqref{eq:surr-x-affine} is affine in $M$, and
-\eqref{eq:def-sdac-policy} is linear in $M$. Since $c_t$ is convex, $\ell_t$
-is convex.
-
-Subtracting \eqref{eq:surr-x-affine} at $M'$ from \eqref{eq:surr-x-affine} at $M$,
-and \eqref{eq:def-sdac-policy} at $M'$ from \eqref{eq:def-sdac-policy} at $M$,
-\begin{equation}
-\label{eq:surr-dxu}
-\begin{aligned}
-x_t^{\pi(M)}-x_t^{\pi(M')}
-&=
-\sum_{i=1}^H (M^{(i)}-M'^{(i)})(\psi_t^{(i)}-\rho_t), \\
-u_t^{\pi(M)}-u_t^{\pi(M')}
-&=
-\sum_{i=1}^H (M^{(i)}-M'^{(i)})\alpha^i w_{t-i}.
-\end{aligned}
-\end{equation}
-Substituting \eqref{eq:surr-dxu} into \eqref{eq:model-lipschitz},
-\begin{equation}
-\label{eq:surr-lip-sub}
-\begin{aligned}
-&\bigl|\ell_t(M)-\ell_t(M')\bigr| \\
-&\qquad\le
-L_x\bigl|x_t^{\pi(M)}-x_t^{\pi(M')}\bigr| \\
-&\qquad\quad
-+
-L_u\bigl|u_t^{\pi(M)}-u_t^{\pi(M')}\bigr| \\
-&\qquad=
-L_x\biggl|\sum_{i=1}^H
-(M^{(i)}-M'^{(i)})(\psi_t^{(i)}-\rho_t)\biggr| \\
-&\qquad\quad
-+
-L_u\biggl|\sum_{i=1}^H
-(M^{(i)}-M'^{(i)})\alpha^i w_{t-i}\biggr|.
-\end{aligned}
-\end{equation}
-Applying H\"older's inequality to \eqref{eq:surr-lip-sub},
-\begin{equation}
-\label{eq:surr-lip-holder}
-\begin{aligned}
-&\bigl|\ell_t(M)-\ell_t(M')\bigr| \\
-&\le
-\bigl(L_x\max_i|\psi_t^{(i)}-\rho_t|
-+
-L_u\max_i \alpha^i w_{t-i}\bigr)\|M-M'\|_1.
-\end{aligned}
-\end{equation}
-By Lemma~\ref{lem:sdac-state-decomp}, $0\le\psi_t^{(i)}\le\rho_t\le 1/(1-\alpha)$,
-and $w_{t-i}\in[0,1]$ with $i\ge 1$, so
-\begin{equation}
-\label{eq:surr-coeff-bound}
-\begin{aligned}
-\max_i\bigl|\psi_t^{(i)}-\rho_t\bigr|
-&\le
-\frac{1}{1-\alpha}, \\
-\max_i \alpha^i w_{t-i}
-&\le
-\alpha.
-\end{aligned}
-\end{equation}
-Substituting \eqref{eq:surr-coeff-bound} into \eqref{eq:surr-lip-holder}, and then
-\eqref{eq:def-surrogate-L},
+For $i\in\{1,\ldots,H\}$, define
 \[
+a_t^{(i)}
+\triangleq
+\psi_t^{(i)}-\rho_t,
+\qquad
+b_t^{(i)}
+\triangleq
+\alpha^i w_{t-i}.
+\]
+Lemma~\ref{lem:sdac-state-decomp} and \eqref{eq:def-sdac-policy} give
+\begin{equation}
+\label{eq:surr-affine-pair}
+x_t^{\pi(M)}=\rho_t+\langle a_t,M\rangle,
+\qquad
+u_t^{\pi(M)}=\langle b_t,M\rangle.
+\end{equation}
+The coefficient bounds in Lemma~\ref{lem:sdac-state-decomp}, together with
+$w_{t-i}\in[0,1]$, imply
+\begin{equation}
+\label{eq:surr-coefficient-norms}
+\|a_t\|_\infty\le\frac{1}{1-\alpha},
+\qquad
+\|b_t\|_\infty\le\alpha.
+\end{equation}
+Since \eqref{eq:surr-affine-pair} is affine in $M$ and $c_t$ is convex,
+$\ell_t$ is convex.
+
+Let $\Delta M\triangleq M-M'$. By \eqref{eq:model-lipschitz} and
+\eqref{eq:surr-affine-pair},
+\begin{equation}
+\label{eq:surr-lipschitz-short}
 \begin{aligned}
-\bigl|\ell_t(M)-\ell_t(M')\bigr|
+|\ell_t(M)-\ell_t(M')|
 &\le
-\Bigl(\frac{L_x}{1-\alpha}+\alpha L_u\Bigr)\|M-M'\|_1 \\
+L_x|\langle a_t,\Delta M\rangle|
++
+L_u|\langle b_t,\Delta M\rangle| \\
+&\le
+\bigl(L_x\|a_t\|_\infty+L_u\|b_t\|_\infty\bigr)
+\|\Delta M\|_1 \\
+&\le
+\left(\frac{L_x}{1-\alpha}+\alpha L_u\right)
+\|\Delta M\|_1 \\
 &=
 L\|M-M'\|_1.
 \end{aligned}
-\]
+\end{equation}
 
-Let $(s_x,s_u)\in\partial c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr)$ with
+Choose $(s_x,s_u)\in
+\partial c_t(x_t^{\pi(M)},u_t^{\pi(M)})$ with
 $|s_x|\le L_x$ and $|s_u|\le L_u$, and set
 \begin{equation}
-\label{eq:surr-g}
-g^{(i)}
-\triangleq
-s_x\bigl(\psi_t^{(i)}-\rho_t\bigr)+s_u\alpha^i w_{t-i}.
+\label{eq:surr-subgradient-short}
+g\triangleq s_x a_t+s_u b_t.
 \end{equation}
-Affine composition with \eqref{eq:surr-x-affine} and \eqref{eq:def-sdac-policy}
-gives $g\in\partial\ell_t(M)$. Using \eqref{eq:surr-coeff-bound},
-\begin{equation}
-\label{eq:surr-g-bound}
-\begin{aligned}
-\bigl|g^{(i)}\bigr|
-&\le
-|s_x|\,\bigl|\psi_t^{(i)}-\rho_t\bigr|
-+|s_u|\,\alpha^i w_{t-i} \\
-&\le
-\frac{L_x}{1-\alpha}+\alpha L_u \\
+For every $M'\in\Delta_H$, the subgradient inequality and
+\eqref{eq:surr-affine-pair} yield
+\begin{align*}
+\ell_t(M')
+&\ge
+\ell_t(M)
++s_x\langle a_t,M'-M\rangle
++s_u\langle b_t,M'-M\rangle \\
 &=
+\ell_t(M)+\langle g,M'-M\rangle.
+\end{align*}
+Thus $g\in\partial\ell_t(M)$. Finally,
+\begin{equation}
+\label{eq:surr-subgradient-bound-short}
+\begin{aligned}
+\|g\|_\infty
+&\le
+|s_x|\|a_t\|_\infty+|s_u|\|b_t\|_\infty \\
+&\le
+\frac{L_x}{1-\alpha}+\alpha L_u
+=
 L.
 \end{aligned}
 \end{equation}
-Thus $\|g\|_\infty\le L$.
 \end{proof}
 
 Regret minimization against the best fixed SDAC policy thus becomes online convex
+optimization over the simplex.
 optimization over the simplex.
 
 \subsection{Expressiveness: Proportional State-Feedback Approximation}
@@ -838,7 +771,7 @@ makes this statement precise.
 We now present our online algorithm, which updates SDAC parameters by
 online mirror descent (OMD) with unnormalized negentropy (equivalently, the
 exponentiated gradient method) and a fixed step size $\eta>0$ over the
-sub-probability simplex $\Delta_H\subset\mathbb{R}^H$
+subprobability simplex $\Delta_H\subset\mathbb{R}^H$
 \cite{hazan2016introduction}.
 
 For each time $t\in\{1,\ldots,T\}$, let $M_t\in\Delta_H$ be the online parameter. We initialize
@@ -892,7 +825,8 @@ denote the unnormalized negentropy (with the convention $0\log0\triangleq0$), an
 D_\Psi(M\|V)\triangleq\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{V^{(i)}}-M^{(i)}+V^{(i)}\Bigr)
 \]
 be its Bregman divergence for $V\in\mathbb{R}_{>0}^H$, the generalized
-Kullback--Leibler divergence.
+Kullback--Leibler divergence. Terms with $M^{(i)}=0$ are interpreted by
+continuity as zero in the logarithmic part.
 
 We define the OMD update
 \begin{equation}
@@ -1012,28 +946,72 @@ $q\in[0,\alpha]$.
 \end{corollary}
 
 \begin{proof}
-Fix any $q\in[0,\alpha]$ and set $\beta=\alpha-q$. Theorem~\ref{thm:regret-bound},
-followed by Lemma~\ref{lem:sdac-linear-approx}, gives
+For $M\in\Delta_{H_T}$ and $q\in[0,\alpha]$, write
 \[
 \begin{aligned}
-&\sum_{t=1}^T c_t\bigl(x_t^{\mathcal{A}},u_t^{\mathcal{A}}\bigr)
--\sum_{t=1}^T c_t\bigl(x_t^{(q)},u_t^{(q)}\bigr) \\
-&\quad\le
-2L\sqrt{\Bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\Bigr)
-T\log(H_T+1)}
-+\Bigl(L_u+\frac{L_x}{1-\alpha}\Bigr)
-\frac{q\,\beta^{H_T}}{1-\beta}\,T.
+J_T(M)
+&\triangleq
+\sum_{t=1}^T c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr), \\
+J_T(q)
+&\triangleq
+\sum_{t=1}^T c_t\bigl(x_t^{(q)},u_t^{(q)}\bigr).
 \end{aligned}
 \]
-Because $q\le\alpha$, $\beta\le\alpha$, and $1-\beta\ge1-\alpha$,
+Let
 \[
-\frac{q\,\beta^{H_T}}{1-\beta}
-\le\frac{\alpha^{H_T+1}}{1-\alpha}.
+R_T
+\triangleq
+2L\sqrt{
+\left(\tfrac12+\tfrac{\alpha}{(1-\alpha)^2}\right)
+T\log(H_T+1)
+}.
 \]
-This uniform bound holds for every $q\in[0,\alpha]$; minimizing the comparator cost
-over $q$ proves the stated inequality. Finally, the definition of $H_T$ gives
-$\alpha^{H_T}\le1/T$ and $H_T=\Theta(\log T)$ as $T\to\infty$, which establishes
-the asymptotic rate.
+Fix $q\in[0,\alpha]$, set $\beta=\alpha-q$, and use the comparator
+$M_q^\star$ from Lemma~\ref{lem:sdac-linear-approx}. Then
+\begin{equation}
+\label{eq:linear-regret-decomposition}
+\begin{aligned}
+J_T(\mathcal{A})-J_T(q)
+&=
+\left(
+J_T(\mathcal{A})-\min_{M\in\Delta_{H_T}}J_T(M)
+\right) \\
+&\quad+
+\left(
+\min_{M\in\Delta_{H_T}}J_T(M)-J_T(q)
+\right) \\
+&\le
+R_T+J_T(M_q^\star)-J_T(q) \\
+&\le
+R_T+
+\left(L_u+\frac{L_x}{1-\alpha}\right)
+\frac{q\beta^{H_T}}{1-\beta}\,T.
+\end{aligned}
+\end{equation}
+The third line uses Theorem~\ref{thm:regret-bound}; the fourth uses
+Lemma~\ref{lem:sdac-linear-approx}. Since
+$q\le\alpha$, $\beta\le\alpha$, and $1-\beta\ge1-\alpha$,
+\begin{equation}
+\label{eq:linear-uniform-tail}
+\frac{q\beta^{H_T}}{1-\beta}
+\le
+\frac{\alpha^{H_T+1}}{1-\alpha}.
+\end{equation}
+The right-hand side is independent of $q$. Taking the minimum comparator cost
+over $q\in[0,\alpha]$ in \eqref{eq:linear-regret-decomposition} and applying
+\eqref{eq:linear-uniform-tail} proves the finite-time bound.
+
+Finally,
+\[
+H_T
+\ge
+\frac{\log T}{\log(1/\alpha)}
+\quad\Longrightarrow\quad
+\alpha^{H_T}\le\frac{1}{T}.
+\]
+Also $H_T=\Theta(\log T)$, so
+$\log(H_T+1)=O(\log\log T)$ as $T\to\infty$. These two estimates give the
+stated asymptotic rate.
 \end{proof}
 
 
@@ -1113,32 +1091,19 @@ We first prove the linear-policy approximation guarantee stated in
 Section~\ref{subsec:sdac-expressiveness}.
 
 \begin{proof}[Proof of Lemma~\ref{lem:sdac-linear-approx}]
-Fix $q\in[0,\alpha]$, set $\beta\triangleq\alpha-q\in[0,\alpha]$, and recall
-$w_\tau\equiv 0$ for $\tau\le 0$.
+Fix $q\in[0,\alpha]$ and set $\beta\triangleq\alpha-q\in[0,\alpha]$.
 
-\emph{Feasibility and closed form.} Substituting
-$u_t^{\mathrm{lin}}=q\,x_t^{\mathrm{lin}}$ into \eqref{eq:model-dynamics},
+\emph{Proportional-policy trajectory.}
+Substituting $u_t^{\mathrm{lin}}=q x_t^{\mathrm{lin}}$ into the dynamics gives
 \begin{equation}
 \label{eq:model-closed-loop}
-\begin{aligned}
 x_{t+1}^{\mathrm{lin}}
-&=
-\alpha x_t^{\mathrm{lin}}-q x_t^{\mathrm{lin}}+w_t \\
-&=
+=
 \beta x_t^{\mathrm{lin}}+w_t,
-\end{aligned}
+\qquad
+x_1^{\mathrm{lin}}=0.
 \end{equation}
-with $x_1^{\mathrm{lin}}=0$ by \eqref{eq:model-init}. Since $\beta\ge 0$ and
-$w_t\ge 0$, if $x_t^{\mathrm{lin}}\ge 0$ then
-\[
-x_{t+1}^{\mathrm{lin}}=\beta x_t^{\mathrm{lin}}+w_t\ge 0.
-\]
-Thus $x_t^{\mathrm{lin}}\ge 0$ for all $t$, and $q\in[0,\alpha]$ gives
-\[
-0\le u_t^{\mathrm{lin}}=q\,x_t^{\mathrm{lin}}\le\alpha x_t^{\mathrm{lin}},
-\]
-which is \eqref{eq:model-feasibility}. Unrolling \eqref{eq:model-closed-loop}
-from $x_1^{\mathrm{lin}}=0$ yields, for all $t\in\{1,\ldots,T\}$,
+Unrolling \eqref{eq:model-closed-loop},
 \begin{equation}
 \label{eq:lin-closed-form}
 \begin{aligned}
@@ -1150,142 +1115,130 @@ u_t^{\mathrm{lin}}
 q\sum_{j=1}^{t-1}\beta^{j-1}w_{t-j}.
 \end{aligned}
 \end{equation}
-
-\emph{Simplex membership.} Each
-$M_q^{\star(i)}=q\beta^{i-1}/\alpha^i\ge 0$. If $q=0$, then
-$M_q^\star=0\in\Delta_H$. If $q>0$,
-\begin{equation}
-\label{eq:lin-ratio}
-\begin{aligned}
-1-\frac{\beta}{\alpha}
-&=
-\frac{\alpha-\beta}{\alpha} \\
-&=
-\frac{q}{\alpha}.
-\end{aligned}
-\end{equation}
-Hence
+Thus $x_t^{\mathrm{lin}}\ge0$, and $q\in[0,\alpha]$ implies
 \[
+0\le u_t^{\mathrm{lin}}
+=
+q x_t^{\mathrm{lin}}
+\le
+\alpha x_t^{\mathrm{lin}}.
+\]
+
+\emph{Simplex membership.}
+Each coordinate of $M_q^\star$ is nonnegative. If $q=0$, then
+$M_q^\star=0\in\Delta_H$. Suppose $q>0$ and define
+\[
+r\triangleq\frac{\beta}{\alpha}\in[0,1).
+\]
+Since $q=\alpha-\beta$, one has $q/\alpha=1-r$. Consequently,
+\begin{equation}
+\label{eq:lin-simplex-sum}
 \begin{aligned}
 \sum_{i=1}^H M_q^{\star(i)}
 &=
-\sum_{i=1}^H\frac{q\,\beta^{i-1}}{\alpha^i} \\
+\frac{q}{\alpha}\sum_{i=1}^H r^{i-1} \\
 &=
-\frac{q}{\alpha}\sum_{i=1}^H\Bigl(\frac{\beta}{\alpha}\Bigr)^{i-1} \\
+(1-r)\frac{1-r^H}{1-r} \\
 &=
-\frac{q}{\alpha}\cdot\frac{1-(\beta/\alpha)^H}{1-\beta/\alpha} \\
-&=
-\frac{q}{\alpha}\cdot\frac{\alpha}{q}\bigl(1-(\beta/\alpha)^H\bigr) \\
-&=
-1-(\beta/\alpha)^H \\
-&\le
-1,
+1-r^H
+\le1.
 \end{aligned}
-\]
-where the fourth equality uses \eqref{eq:lin-ratio} and the inequality uses
-$0\le\beta/\alpha<1$. Thus $M_q^\star\in\Delta_H$.
+\end{equation}
+Hence $M_q^\star\in\Delta_H$.
 
-\emph{Action approximation.} By definition,
-$M_q^{\star(i)}\alpha^i=q\beta^{i-1}$. Substituting into
-\eqref{eq:def-sdac-policy},
+\emph{Action approximation.}
+The identity $M_q^{\star(i)}\alpha^i=q\beta^{i-1}$ gives
 \begin{equation}
 \label{eq:lin-sdac-u}
-\begin{aligned}
 u_t^{\pi(M_q^\star)}
-&=
-\sum_{i=1}^H M_q^{\star(i)}\alpha^i w_{t-i} \\
-&=
+=
 q\sum_{i=1}^H\beta^{i-1}w_{t-i}.
-\end{aligned}
 \end{equation}
-Using $w_{t-i}=0$ for $i\ge t$ in \eqref{eq:lin-sdac-u}, and then subtracting
-from \eqref{eq:lin-closed-form},
+Define
+\[
+e_t
+\triangleq
+u_t^{\mathrm{lin}}-u_t^{\pi(M_q^\star)}.
+\]
+Using $w_\tau=0$ for $\tau\le0$ in \eqref{eq:lin-closed-form} and
+\eqref{eq:lin-sdac-u},
 \begin{equation}
 \label{eq:lin-u-gap}
-\begin{aligned}
-&u_t^{\mathrm{lin}}-u_t^{\pi(M_q^\star)} \\
-&\qquad=
-q\sum_{j=1}^{t-1}\beta^{j-1}w_{t-j} \\
-&\qquad\quad
--
-q\sum_{i=1}^{\min\{H,t-1\}}\beta^{i-1}w_{t-i} \\
-&\qquad=
-q\sum_{j=H+1}^{t-1}\beta^{j-1}w_{t-j}.
-\end{aligned}
+e_t
+=
+q\sum_{j=H+1}^{t-1}\beta^{j-1}w_{t-j},
 \end{equation}
-The right-hand side of \eqref{eq:lin-u-gap} is nonnegative. Since
-$w_{t-j}\in[0,1]$,
+where the sum is empty when $t\le H+1$. Therefore,
 \begin{equation}
-\label{eq:lin-u-bound}
+\label{eq:lin-e-range}
 \begin{aligned}
-u_t^{\mathrm{lin}}-u_t^{\pi(M_q^\star)}
+0\le e_t
 &\le
 q\sum_{j=H+1}^{\infty}\beta^{j-1} \\
 &=
-\frac{q\,\beta^H}{1-\beta}.
+\frac{q\beta^H}{1-\beta}.
 \end{aligned}
 \end{equation}
 
-\emph{State approximation.} Let
-$\delta_t\triangleq x_t^{\pi(M_q^\star)}-x_t^{\mathrm{lin}}$ and
-$e_t\triangleq u_t^{\mathrm{lin}}-u_t^{\pi(M_q^\star)}$.
-By \eqref{eq:lin-u-gap} and \eqref{eq:lin-u-bound},
-\begin{equation}
-\label{eq:lin-e-range}
-0\le e_t\le\frac{q\,\beta^H}{1-\beta}.
-\end{equation}
-Subtracting the two copies of \eqref{eq:model-dynamics},
+\emph{State approximation.}
+Let
+\[
+\delta_t
+\triangleq
+x_t^{\pi(M_q^\star)}-x_t^{\mathrm{lin}}.
+\]
+Subtracting the two state recursions yields
 \begin{equation}
 \label{eq:lin-delta-dyn}
-\begin{aligned}
 \delta_{t+1}
-&=
-\bigl(\alpha x_t^{\pi(M_q^\star)}-u_t^{\pi(M_q^\star)}+w_t\bigr) \\
-&\qquad
--
-\bigl(\alpha x_t^{\mathrm{lin}}-u_t^{\mathrm{lin}}+w_t\bigr) \\
-&=
+=
 \alpha\delta_t+e_t,
-\end{aligned}
+\qquad
+\delta_1=0.
 \end{equation}
-with $\delta_1=0$. Unrolling \eqref{eq:lin-delta-dyn} gives
+Hence
 \begin{equation}
 \label{eq:lin-delta-unroll}
-\delta_t=\sum_{s=1}^{t-1}\alpha^{t-1-s}e_s.
+\delta_t
+=
+\sum_{s=1}^{t-1}\alpha^{t-1-s}e_s.
 \end{equation}
-By \eqref{eq:lin-e-range}, the right-hand side of \eqref{eq:lin-delta-unroll}
-is nonnegative. Substituting the upper bound of \eqref{eq:lin-e-range} into
-\eqref{eq:lin-delta-unroll},
+Combining \eqref{eq:lin-e-range} and \eqref{eq:lin-delta-unroll},
 \begin{equation}
 \label{eq:lin-delta-bound}
 \begin{aligned}
-\delta_t
+0\le\delta_t
 &\le
-\frac{q\,\beta^H}{1-\beta}\sum_{s=1}^{t-1}\alpha^{t-1-s} \\
+\frac{q\beta^H}{1-\beta}
+\sum_{s=1}^{t-1}\alpha^{t-1-s} \\
 &\le
-\frac{q\,\beta^H}{(1-\beta)(1-\alpha)}.
+\frac{q\beta^H}{(1-\beta)(1-\alpha)}.
 \end{aligned}
 \end{equation}
 
-\emph{Cost approximation.} By \eqref{eq:model-lipschitz}, and then substituting
-\eqref{eq:lin-delta-bound} and \eqref{eq:lin-e-range},
+\emph{Cost approximation.}
+By \eqref{eq:model-lipschitz}, \eqref{eq:lin-e-range}, and
+\eqref{eq:lin-delta-bound},
 \begin{equation}
 \label{eq:lin-cost-step}
 \begin{aligned}
-&\bigl|c_t\bigl(x_t^{\pi(M_q^\star)},u_t^{\pi(M_q^\star)}\bigr)
--c_t\bigl(x_t^{\mathrm{lin}},u_t^{\mathrm{lin}}\bigr)\bigr| \\
+&\left|
+c_t\bigl(x_t^{\pi(M_q^\star)},u_t^{\pi(M_q^\star)}\bigr)
+-c_t\bigl(x_t^{\mathrm{lin}},u_t^{\mathrm{lin}}\bigr)
+\right| \\
 &\qquad\le
-L_x|\delta_t|+L_u|e_t| \\
+L_x\delta_t+L_u e_t \\
 &\qquad\le
-L_x\cdot\frac{q\,\beta^H}{(1-\beta)(1-\alpha)}
+\frac{L_x q\beta^H}{(1-\beta)(1-\alpha)}
 +
-L_u\cdot\frac{q\,\beta^H}{1-\beta} \\
+\frac{L_u q\beta^H}{1-\beta} \\
 &\qquad=
-\Bigl(L_u+\frac{L_x}{1-\alpha}\Bigr)\frac{q\,\beta^H}{1-\beta}.
+\left(L_u+\frac{L_x}{1-\alpha}\right)
+\frac{q\beta^H}{1-\beta}.
 \end{aligned}
 \end{equation}
 Summing \eqref{eq:lin-cost-step} over $t=1,\ldots,T$ and applying the triangle
-inequality yields \eqref{eq:sdac-lin-approx-cost}.
+inequality proves \eqref{eq:sdac-lin-approx-cost}.
 \end{proof}
 
 The remaining lemmas establish the OMD and stability estimates used in the proof of
@@ -1311,86 +1264,65 @@ P(\widetilde{M})^{(i)}=
 \end{lemma}
 
 \begin{proof}
-Write
-\begin{equation}
-\label{eq:breg-F}
-F(M)\triangleq\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{\widetilde{M}^{(i)}}-M^{(i)}\Bigr).
-\end{equation}
-By definition of $D_\Psi$ and \eqref{eq:breg-F},
-\begin{equation}
-\label{eq:breg-DF}
-\begin{aligned}
-D_\Psi(M\|\widetilde{M})
-&=
-\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{\widetilde{M}^{(i)}}-M^{(i)}+\widetilde{M}^{(i)}\Bigr) \\
-&=
-F(M)+\sum_{i=1}^H\widetilde{M}^{(i)}.
-\end{aligned}
-\end{equation}
-The second sum in \eqref{eq:breg-DF} does not depend on $M$, so
-$P(\widetilde{M})$ minimizes $F$ over $\Delta_H$. The function $F$ is strictly
-convex on $\mathbb{R}_{\ge0}^H$ and $\Delta_H$ is closed and convex, so the
-minimizer is unique. Differentiating \eqref{eq:breg-F} on $\mathbb{R}_{>0}^H$,
+Up to the constant $\sum_i\widetilde{M}^{(i)}$, the objective is
+\[
+F(M)
+\triangleq
+\sum_{i=1}^H
+\left(
+M^{(i)}\log\frac{M^{(i)}}{\widetilde{M}^{(i)}}-M^{(i)}
+\right).
+\]
+The function $F$ is strictly convex, and, for $M^{(i)}>0$,
 \begin{equation}
 \label{eq:breg-grad}
-\frac{\partial F}{\partial M^{(i)}}=\log\bigl(M^{(i)}/\widetilde{M}^{(i)}\bigr).
+\frac{\partial F}{\partial M^{(i)}}
+=
+\log\frac{M^{(i)}}{\widetilde{M}^{(i)}}.
 \end{equation}
-Setting \eqref{eq:breg-grad} to zero,
-\begin{equation}
-\label{eq:breg-unconst}
-\begin{aligned}
-\log\bigl(M^{(i)}/\widetilde{M}^{(i)}\bigr)
-&=
-0 \\
-M^{(i)}
-&=
-\widetilde{M}^{(i)}.
-\end{aligned}
-\end{equation}
+Its unconstrained minimizer is therefore $M=\widetilde{M}$.
 
-\emph{Case $S\le 1$.} Then $\widetilde{M}\in\Delta_H$, so \eqref{eq:breg-unconst}
-is feasible and $P(\widetilde{M})=\widetilde{M}$.
-
-\emph{Case $S>1$.} Then $\widetilde{M}\notin\Delta_H$, so \eqref{eq:breg-unconst}
-is infeasible and $\sum_i M^{(i)}\le 1$ is active. Since
-$\widetilde{M}^{(i)}>0$, the optimum has $M^{(i)}>0$ and nonnegativity is inactive.
-KKT stationarity for $\sum_i M^{(i)}=1$ with multiplier $\lambda$ reads, by
-\eqref{eq:breg-grad},
+If $S\le1$, this minimizer belongs to $\Delta_H$, so
+$P(\widetilde{M})=\widetilde{M}$. Suppose $S>1$. The constraint
+$\sum_iM^{(i)}\le1$ is then active. Moreover, the minimizer has no zero
+coordinate: if $M^{(k)}=0$, transferring an arbitrarily small amount of mass
+from a positive coordinate to coordinate $k$ has directional derivative
+$-\infty$, because
+\[
+\lim_{z\downarrow0}\log\frac{z}{\widetilde{M}^{(k)}}=-\infty.
+\]
+Thus the nonnegativity constraints are inactive. With $\lambda\ge0$ denoting
+the multiplier of $\sum_iM^{(i)}\le1$, stationarity and complementary
+slackness give
 \begin{equation}
 \label{eq:breg-kkt}
-\begin{aligned}
-\log\bigl(M^{(i)}/\widetilde{M}^{(i)}\bigr)+\lambda
-&=
-0 \\
-M^{(i)}
-&=
-\widetilde{M}^{(i)}e^{-\lambda}.
-\end{aligned}
+\log\frac{M^{(i)}}{\widetilde{M}^{(i)}}+\lambda=0,
+\qquad
+\sum_{i=1}^H M^{(i)}=1.
 \end{equation}
-Substituting \eqref{eq:breg-kkt} into $\sum_{i=1}^H M^{(i)}=1$,
-\begin{equation}
-\label{eq:breg-lambda}
-\begin{aligned}
-\sum_{i=1}^H \widetilde{M}^{(i)}e^{-\lambda}
-&=
-1 \\
-e^{-\lambda}
-&=
-\frac{1}{S}.
-\end{aligned}
-\end{equation}
-Substituting \eqref{eq:breg-lambda} into \eqref{eq:breg-kkt},
+The first relation in \eqref{eq:breg-kkt} implies
 \[
-\begin{aligned}
 M^{(i)}
-&=
-\widetilde{M}^{(i)}e^{-\lambda} \\
-&=
-\frac{\widetilde{M}^{(i)}}{S}.
-\end{aligned}
+=
+\widetilde{M}^{(i)}e^{-\lambda}.
 \]
-From \eqref{eq:breg-lambda}, $\lambda=\log S>0$, so dual feasibility holds.
-Thus in both cases $P(\widetilde{M})^{(i)}=\widetilde{M}^{(i)}/\max\{1,S\}$.
+Summing over $i$ and using the second relation in \eqref{eq:breg-kkt},
+\[
+1
+=
+Se^{-\lambda},
+\qquad
+e^{-\lambda}
+=
+\frac{1}{S}.
+\]
+Hence $\lambda=\log S>0$ and
+\[
+P(\widetilde{M})^{(i)}
+=
+\frac{\widetilde{M}^{(i)}}{S}.
+\]
+Combining the cases $S\le1$ and $S>1$ proves the stated formula.
 \end{proof}
 
 \begin{lemma}[Closed-form solution of the OMD update]
@@ -1416,73 +1348,45 @@ initialization \eqref{eq:alg-init} keeps every algorithm iterate strictly positi
 \end{lemma}
 
 \begin{proof}
-For any $M\in\mathbb{R}_{\ge0}^H$, by definition of $D_\Psi$,
-\begin{equation}
-\label{eq:omd-cf-expand}
-\begin{aligned}
-&\eta\sum_{i=1}^H g_t^{(i)}M^{(i)}+D_\Psi(M\|M_t) \\
-&=
-\sum_{i=1}^H\Bigl(\eta g_t^{(i)}M^{(i)}
-+M^{(i)}\log\tfrac{M^{(i)}}{M_t^{(i)}}-M^{(i)}+M_t^{(i)}\Bigr).
-\end{aligned}
-\end{equation}
-Completing the logarithm,
+Fix $M\in\mathbb{R}_{\ge0}^H$ and a coordinate $i$, and abbreviate
+$m=M^{(i)}$, $m_t=M_t^{(i)}$, and
+$\widetilde m=\widetilde M_{t+1}^{(i)}$. Then
 \begin{equation}
 \label{eq:omd-cf-log}
 \begin{aligned}
-\eta g_t^{(i)}M^{(i)}+M^{(i)}\log\tfrac{M^{(i)}}{M_t^{(i)}}
+\eta g_t^{(i)}m
++
+m\log\frac{m}{m_t}
 &=
-M^{(i)}\Bigl(\log\tfrac{M^{(i)}}{M_t^{(i)}}+\eta g_t^{(i)}\Bigr) \\
+m
+\left(
+\eta g_t^{(i)}
++
+\log\frac{m}{m_t}
+\right) \\
 &=
-M^{(i)}\log\tfrac{M^{(i)}}{M_t^{(i)}e^{-\eta g_t^{(i)}}}.
+m\log\frac{m}{\widetilde m}.
 \end{aligned}
 \end{equation}
-Substituting \eqref{eq:omd-cf-log} into \eqref{eq:omd-cf-expand},
-\begin{equation}
-\label{eq:omd-cf-absorb}
-\begin{aligned}
-&\eta\sum_{i=1}^H g_t^{(i)}M^{(i)}+D_\Psi(M\|M_t) \\
-&=
-\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{M_t^{(i)}e^{-\eta g_t^{(i)}}}
--M^{(i)}+M_t^{(i)}\Bigr).
-\end{aligned}
-\end{equation}
-Substituting \eqref{eq:alg-omd-mult} into \eqref{eq:omd-cf-absorb},
-\begin{equation}
-\label{eq:omd-cf-tilde}
-\begin{aligned}
-&\eta\sum_{i=1}^H g_t^{(i)}M^{(i)}+D_\Psi(M\|M_t) \\
-&=
-\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{\widetilde{M}_{t+1}^{(i)}}
--M^{(i)}+M_t^{(i)}\Bigr).
-\end{aligned}
-\end{equation}
-Adding and subtracting $\sum_{i=1}^H\widetilde{M}_{t+1}^{(i)}$ in
-\eqref{eq:omd-cf-tilde},
+Substitution into the OMD objective gives
 \begin{equation}
 \label{eq:omd-cf-breg}
 \begin{aligned}
-&\eta\sum_{i=1}^H g_t^{(i)}M^{(i)}+D_\Psi(M\|M_t) \\
-&=
-\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{\widetilde{M}_{t+1}^{(i)}}
--M^{(i)}+\widetilde{M}_{t+1}^{(i)}\Bigr) \\
-&\quad+\sum_{i=1}^H\bigl(M_t^{(i)}-\widetilde{M}_{t+1}^{(i)}\bigr) \\
-&=
+&\eta\langle g_t,M\rangle+D_\Psi(M\|M_t) \\
+&\qquad=
 D_\Psi(M\|\widetilde{M}_{t+1})
-+\sum_{i=1}^H\bigl(M_t^{(i)}-\widetilde{M}_{t+1}^{(i)}\bigr).
++
+\sum_{i=1}^H
+\left(
+M_t^{(i)}-\widetilde{M}_{t+1}^{(i)}
+\right).
 \end{aligned}
 \end{equation}
-The second sum in \eqref{eq:omd-cf-breg} does not depend on $M$, so
-\[
-\begin{aligned}
-&\operatorname*{arg\,min}_{M\in\Delta_H}\Bigl\{\eta\sum_{i=1}^H g_t^{(i)}M^{(i)}+D_\Psi(M\|M_t)\Bigr\} \\
-&=
-\operatorname*{arg\,min}_{M\in\Delta_H} D_\Psi(M\|\widetilde{M}_{t+1})
-=
-P(\widetilde{M}_{t+1}).
-\end{aligned}
-\]
-Lemma~\ref{lem:bregman-projection} then yields \eqref{eq:alg-omd-proj}.
+The final sum is independent of $M$. Hence the two optimization problems have
+the same minimizer, and Lemma~\ref{lem:bregman-projection} gives
+\eqref{eq:alg-omd-proj}. Since $M_t>0$ coordinatewise, both the
+multiplicative step and the subsequent positive rescaling preserve strict
+positivity.
 \end{proof}
 
 \begin{lemma}[One-step movement of OMD]
@@ -1496,125 +1400,158 @@ In particular, if $\|g_t\|_\infty\le L$, then $\|M_{t+1}-M_t\|_1\le \eta L$.
 \end{lemma}
 
 \begin{proof}
-By \eqref{eq:alg-omd-argmin}, $M_{t+1}$ minimizes
+Write $\Delta_t\triangleq M_{t+1}-M_t$. First-order optimality of
+\eqref{eq:alg-omd-argmin}, evaluated at the feasible point $M_t$, gives
 \begin{equation}
-\label{eq:omd-F}
-F(M)\triangleq\eta\sum_{i=1}^H g_t^{(i)}M^{(i)}+D_\Psi(M\|M_t)
-\end{equation}
-over $\Delta_H$. Differentiating \eqref{eq:omd-F} on $\mathbb{R}_{>0}^H$,
-\begin{equation}
-\label{eq:omd-F-grad}
-\frac{\partial F}{\partial M^{(i)}}
-=
-\eta g_t^{(i)}+\nabla\Psi(M)^{(i)}-\nabla\Psi(M_t)^{(i)}.
-\end{equation}
-First-order optimality and \eqref{eq:omd-F-grad} give, for all $M\in\Delta_H$,
-\begin{equation}
-\label{eq:omd-foc}
+\label{eq:omd-movement-optimality}
 \begin{aligned}
-&\sum_{i=1}^H
-\bigl(\eta g_t^{(i)}+\nabla\Psi(M_{t+1})^{(i)}-\nabla\Psi(M_t)^{(i)}\bigr) \\
-&\qquad\times
-\bigl(M^{(i)}-M_{t+1}^{(i)}\bigr)
-\ge 0.
-\end{aligned}
-\end{equation}
-Taking $M=M_t$ in \eqref{eq:omd-foc}, and then rearranging,
-\begin{equation}
-\label{eq:omd-foc-Mt}
-\begin{aligned}
-&\sum_{i=1}^H
-\bigl(\eta g_t^{(i)}+\nabla\Psi(M_{t+1})^{(i)}-\nabla\Psi(M_t)^{(i)}\bigr) \\
-&\qquad\times
-\bigl(M_t^{(i)}-M_{t+1}^{(i)}\bigr)
-\ge 0 \\
-&\sum_{i=1}^H g_t^{(i)}\bigl(M_t^{(i)}-M_{t+1}^{(i)}\bigr) \\
-&\qquad\ge
-\tfrac{1}{\eta}\sum_{i=1}^H
-\bigl(\nabla\Psi(M_{t+1})^{(i)}-\nabla\Psi(M_t)^{(i)}\bigr) \\
-&\qquad\qquad\times
-\bigl(M_{t+1}^{(i)}-M_t^{(i)}\bigr).
-\end{aligned}
-\end{equation}
-By the Bregman identity,
-\begin{equation}
-\label{eq:omd-breg-id}
-\begin{aligned}
-&\sum_{i=1}^H
-\bigl(\nabla\Psi(M_{t+1})^{(i)}-\nabla\Psi(M_t)^{(i)}\bigr)
-\bigl(M_{t+1}^{(i)}-M_t^{(i)}\bigr) \\
-&\qquad=
-D_\Psi(M_{t+1}\|M_t)+D_\Psi(M_t\|M_{t+1}).
-\end{aligned}
-\end{equation}
-Substituting \eqref{eq:omd-breg-id} into \eqref{eq:omd-foc-Mt}, and then applying
-H\"older's inequality,
-\begin{equation}
-\label{eq:omd-breg-holder}
-\begin{aligned}
+&\left\langle
+\eta g_t+\nabla\Psi(M_{t+1})-\nabla\Psi(M_t),
+M_t-M_{t+1}
+\right\rangle
+\ge0, \\
 &D_\Psi(M_{t+1}\|M_t)+D_\Psi(M_t\|M_{t+1}) \\
 &\qquad\le
-\eta\sum_{i=1}^H g_t^{(i)}\bigl(M_t^{(i)}-M_{t+1}^{(i)}\bigr) \\
+\eta\langle g_t,M_t-M_{t+1}\rangle \\
 &\qquad\le
-\eta\,\|g_t\|_\infty\,\|M_{t+1}-M_t\|_1.
+\eta\|g_t\|_\infty\|\Delta_t\|_1.
 \end{aligned}
 \end{equation}
-From \eqref{eq:def-negentropy},
+The second line uses the symmetric Bregman identity.
+
+For every $Z\in\Delta_H\cap\mathbb{R}_{>0}^H$ and $v\in\mathbb{R}^H$,
 \begin{equation}
-\label{eq:omd-hess}
+\label{eq:omd-strong-convexity}
 \begin{aligned}
-\nabla^2\Psi(M)
+v^\top\nabla^2\Psi(Z)v
 &=
-\mathrm{diag}\bigl(1/M^{(i)}\bigr) \\
-v^\top\nabla^2\Psi(M)\,v
-&=
-\sum_{i=1}^H \frac{(v^{(i)})^2}{M^{(i)}}.
-\end{aligned}
-\end{equation}
-Applying Cauchy--Schwarz to \eqref{eq:omd-hess}, and then
-$\sum_{i=1}^H M^{(i)}\le 1$,
-\begin{equation}
-\label{eq:omd-cs}
-\begin{aligned}
-\sum_{i=1}^H \frac{(v^{(i)})^2}{M^{(i)}}
+\sum_{i=1}^H\frac{(v^{(i)})^2}{Z^{(i)}} \\
 &\ge
-\frac{\|v\|_1^2}{\sum_{i=1}^H M^{(i)}} \\
+\frac{\|v\|_1^2}{\sum_{i=1}^H Z^{(i)}} \\
 &\ge
 \|v\|_1^2.
 \end{aligned}
 \end{equation}
-Hence, by \eqref{eq:omd-cs}, $\Psi$ is $1$-strongly convex w.r.t.\
-$\|\cdot\|_1$ on $\Delta_H$, so
-\begin{equation}
-\label{eq:omd-pinsker}
+The first inequality is Cauchy--Schwarz. The segment joining $M_t$ and
+$M_{t+1}$ lies in $\Delta_H\cap\mathbb{R}_{>0}^H$ by
+Lemma~\ref{lem:omd-closed-form}; integrating
+\eqref{eq:omd-strong-convexity} along this segment yields
+\[
 \begin{aligned}
 D_\Psi(M_{t+1}\|M_t)
 &\ge
-\tfrac12\|M_{t+1}-M_t\|_1^2, \\
+\frac12\|\Delta_t\|_1^2, \\
 D_\Psi(M_t\|M_{t+1})
 &\ge
-\tfrac12\|M_{t+1}-M_t\|_1^2.
+\frac12\|\Delta_t\|_1^2.
+\end{aligned}
+\]
+Combining these inequalities with \eqref{eq:omd-movement-optimality},
+\[
+\|\Delta_t\|_1^2
+\le
+\eta\|g_t\|_\infty\|\Delta_t\|_1.
+\]
+The claim is immediate if $\Delta_t=0$; otherwise divide by
+$\|\Delta_t\|_1$.
+\end{proof}
+
+\begin{lemma}[OMD regret for the surrogate losses]
+\label{lem:omd-surrogate-regret}
+For every $M\in\Delta_H$, the update \eqref{eq:alg-omd-argmin} satisfies
+\begin{equation}
+\label{eq:omd-surrogate-regret}
+\sum_{t=1}^T\ell_t(M_t)
+-\sum_{t=1}^T\ell_t(M)
+\le
+\frac{D_\Psi(M\|M_1)}{\eta}
++
+\frac{\eta}{2}\sum_{t=1}^T\|g_t\|_\infty^2.
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Convexity of $\ell_t$ gives
+\begin{equation}
+\label{eq:omd-convexity-step}
+\begin{aligned}
+\ell_t(M_t)-\ell_t(M)
+&\le
+\langle g_t,M_t-M\rangle \\
+&=
+\langle g_t,M_t-M_{t+1}\rangle \\
+&\quad+
+\langle g_t,M_{t+1}-M\rangle.
 \end{aligned}
 \end{equation}
-Adding the two lines of \eqref{eq:omd-pinsker},
+Write
+$h_t\triangleq\nabla\Psi(M_{t+1})-\nabla\Psi(M_t)$.
+First-order optimality of \eqref{eq:alg-omd-argmin}, evaluated at
+$M\in\Delta_H$, yields
 \begin{equation}
-\label{eq:omd-pinsker-sum}
-D_\Psi(M_{t+1}\|M_t)+D_\Psi(M_t\|M_{t+1})
-\ge
-\|M_{t+1}-M_t\|_1^2.
+\label{eq:omd-three-point-step}
+\begin{aligned}
+\eta\langle g_t,M_{t+1}-M\rangle
+&\le
+\langle h_t,M-M_{t+1}\rangle \\
+&=
+D_\Psi(M\|M_t)
+-D_\Psi(M\|M_{t+1}) \\
+&\qquad
+-D_\Psi(M_{t+1}\|M_t).
+\end{aligned}
 \end{equation}
-Substituting \eqref{eq:omd-pinsker-sum} into \eqref{eq:omd-breg-holder},
+The equality is the three-point Bregman identity. Substituting
+\eqref{eq:omd-three-point-step} into \eqref{eq:omd-convexity-step},
+\begin{equation}
+\label{eq:omd-one-step-regret}
+\begin{aligned}
+\ell_t(M_t)-\ell_t(M)
+&\le
+\frac{D_\Psi(M\|M_t)}{\eta}
+-\frac{D_\Psi(M\|M_{t+1})}{\eta} \\
+&\quad+
+\langle g_t,M_t-M_{t+1}\rangle
+\\
+&\quad
+-\frac{D_\Psi(M_{t+1}\|M_t)}{\eta}.
+\end{aligned}
+\end{equation}
+Let $r_t\triangleq\|M_{t+1}-M_t\|_1$. The strong-convexity calculation
+\eqref{eq:omd-strong-convexity} and H\"older's inequality give
+\begin{equation}
+\label{eq:omd-young-step}
+\begin{aligned}
+&\langle g_t,M_t-M_{t+1}\rangle
+-\frac{D_\Psi(M_{t+1}\|M_t)}{\eta} \\
+&\qquad\le
+\|g_t\|_\infty r_t-\frac{r_t^2}{2\eta} \\
+&\qquad\le
+\frac{\eta}{2}\|g_t\|_\infty^2.
+\end{aligned}
+\end{equation}
+The last inequality is Young's inequality. Combining
+\eqref{eq:omd-one-step-regret} and \eqref{eq:omd-young-step}, and then summing
+over $t$, gives
 \[
-\|M_{t+1}-M_t\|_1^2
-\le
-\eta\,\|g_t\|_\infty\,\|M_{t+1}-M_t\|_1,
+\begin{aligned}
+\sum_{t=1}^T\ell_t(M_t)
+-\sum_{t=1}^T\ell_t(M)
+&\le
+\frac{D_\Psi(M\|M_1)}{\eta} \\
+&\quad
+-\frac{D_\Psi(M\|M_{T+1})}{\eta} \\
+&\quad+
+\frac{\eta}{2}\sum_{t=1}^T\|g_t\|_\infty^2.
+\end{aligned}
 \]
-so $\|M_{t+1}-M_t\|_1\le\eta\|g_t\|_\infty$.
+Since $D_\Psi(M\|M_{T+1})\ge0$, this proves
+\eqref{eq:omd-surrogate-regret}.
 \end{proof}
 
 \begin{lemma}[Cumulative movement]
 \label{lem:cum-move}
-For every \(t\in\{2,\ldots,T\}\) and every integer \(i\) with \(1\le i\le t-1\),
+For every $t\in\{2,\ldots,T\}$ and every integer $i$ with $1\le i\le t-1$,
 \[
 \|M_{t-i}-M_t\|_1 \le i\,\eta L.
 \]
@@ -1641,205 +1578,123 @@ i\,\eta L.
 \]
 \end{proof}
 
-\begin{lemma}[Control-action bounds relative to a counterfactual trajectory]
+\begin{lemma}[Clipping error]
 \label{lem:bounding-u-eff}
-For all \(t\in\{1,\ldots,T\}\),
-\begin{align}
+For $M\in\Delta_H$, define
+\begin{equation}
+\label{eq:def-state-gap}
+\Gamma_t^M
+\triangleq
+x_t^{\pi(M)}-x_t^{\mathcal{A}}.
+\end{equation}
+Define the clipping error
+\begin{equation}
+\label{eq:def-clipping-error}
+d_t
+\triangleq
+\widehat{u}_t-u_t^{\mathcal{A}}.
+\end{equation}
+Then, for every $t\in\{1,\ldots,T\}$,
+\begin{equation}
+\label{eq:clipping-error-bound}
 u_t^{\mathcal{A}}
-&\ge
-\sum_{i=1}^H M_t^{(i)}\widetilde{w}_t^{(i)}
-- \alpha\,[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}]_+,\label{eq:u-lower-bound-eff}\\[4pt]
-u_t^{\mathcal{A}}
-&\le
-\sum_{i=1}^H M_t^{(i)}\widetilde{w}_t^{(i)}.\label{eq:u-upper-bound-eff}
-\end{align}
+=
+u_t^{\pi(M_t)}-d_t,
+\qquad
+0\le d_t\le\alpha[\Gamma_t^{M_t}]_+.
+\end{equation}
 \end{lemma}
 
 \begin{proof}
-By \eqref{eq:alg-unconstrained-action}, \eqref{eq:alg-feasible-action},
-and $\min\{a,b\}=a-[a-b]_+$,
+The clipping rule and the identity $\min\{a,b\}=a-[a-b]_+$ give
 \begin{equation}
-\label{eq:u-clip-identity}
-\begin{aligned}
-\widehat{u}_t
-&=
-\sum_{i=1}^H M_t^{(i)}\widetilde{w}_t^{(i)}, \\
-u_t^{\mathcal{A}}
-&=
-\widehat{u}_t-\bigl[\widehat{u}_t-\alpha x_t^{\mathcal{A}}\bigr]_+.
-\end{aligned}
+\label{eq:clipping-error-positive-part}
+d_t
+=
+\bigl[\widehat{u}_t-\alpha x_t^{\mathcal{A}}\bigr]_+
+\ge0.
 \end{equation}
-From \eqref{eq:u-clip-identity} and $[\cdot]_+\ge 0$,
+By \eqref{eq:def-sdac-policy-vector},
+$\widehat{u}_t=u_t^{\pi(M_t)}$. Fixed-policy feasibility gives
 \[
-\begin{aligned}
-u_t^{\mathcal{A}}
-&=
-\widehat{u}_t-\bigl[\widehat{u}_t-\alpha x_t^{\mathcal{A}}\bigr]_+ \\
-&\le
-\widehat{u}_t \\
-&=
-\sum_{i=1}^H M_t^{(i)}\widetilde{w}_t^{(i)},
-\end{aligned}
-\]
-which is \eqref{eq:u-upper-bound-eff}.
-
-By \eqref{eq:def-sdac-policy}, \eqref{eq:def-w-tilde}, and \eqref{eq:u-clip-identity},
-$u_t^{\pi(M_t)}=\widehat{u}_t$.
-Specializing \eqref{eq:sdac-feasibility} to $M=M_t$,
-\begin{equation}
-\label{eq:u-pi-Mt-feas}
 \widehat{u}_t
+=
+u_t^{\pi(M_t)}
 \le
 \alpha x_t^{\pi(M_t)}.
-\end{equation}
-Subtracting $\alpha x_t^{\mathcal{A}}$ from both sides of \eqref{eq:u-pi-Mt-feas},
+\]
+Using monotonicity and positive homogeneity of $[\cdot]_+$ in
+\eqref{eq:clipping-error-positive-part},
 \begin{equation}
-\label{eq:u-pi-Mt-sub}
-\widehat{u}_t-\alpha x_t^{\mathcal{A}}
-\le
-\alpha x_t^{\pi(M_t)}-\alpha x_t^{\mathcal{A}}.
-\end{equation}
-Applying monotonicity of $[\cdot]_+$ to \eqref{eq:u-pi-Mt-sub}, and then
-positive homogeneity,
-\begin{equation}
-\label{eq:u-pospart-bound}
+\label{eq:clipping-error-gamma}
 \begin{aligned}
-\bigl[\widehat{u}_t-\alpha x_t^{\mathcal{A}}\bigr]_+
+d_t
 &\le
 \bigl[\alpha x_t^{\pi(M_t)}-\alpha x_t^{\mathcal{A}}\bigr]_+ \\
 &=
-\alpha\bigl[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}\bigr]_+.
+\alpha[\Gamma_t^{M_t}]_+.
 \end{aligned}
 \end{equation}
-Substituting \eqref{eq:u-pospart-bound} into \eqref{eq:u-clip-identity},
-\[
-\begin{aligned}
-u_t^{\mathcal{A}}
-&=
-\widehat{u}_t-\bigl[\widehat{u}_t-\alpha x_t^{\mathcal{A}}\bigr]_+ \\
-&\ge
-\widehat{u}_t-\alpha\bigl[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}\bigr]_+ \\
-&=
-\sum_{i=1}^H M_t^{(i)}\widetilde{w}_t^{(i)}
--\alpha\bigl[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}\bigr]_+,
-\end{aligned}
-\]
-which is \eqref{eq:u-lower-bound-eff}.
+Finally, \eqref{eq:def-clipping-error} and
+$\widehat{u}_t=u_t^{\pi(M_t)}$ give the first identity in
+\eqref{eq:clipping-error-bound}.
 \end{proof}
 
 \begin{lemma}[State-gap recursion]
 \label{lem:state-gap-recursion-eff}
-Define the state gap
+For every fixed $M\in\Delta_H$ and every $t\in\{1,\ldots,T\}$,
 \begin{equation}
-\label{eq:def-state-gap}
-\Gamma_t^M \triangleq x_t^{\pi(M)} - x_t^{\mathcal{A}}.
-\end{equation}
-For any fixed $M\in\Delta_H$ and every $t\in\{1,\ldots,T\}$,
-\begin{align}
+\label{eq:state-gap-exact}
 \Gamma_{t+1}^M
-&\ge
+=
 \alpha\Gamma_t^M
-+\sum_{i=1}^H (M_t^{(i)}-M^{(i)})\widetilde{w}_t^{(i)}
--\alpha[\Gamma_t^{M_t}]_+,
-\label{eq:GAMMA-Lower}\\[4pt]
++
+\langle M_t-M,\widetilde{w}_t\rangle
+-d_t.
+\end{equation}
+Consequently,
+\begin{align}
 \Gamma_{t+1}^M
 &\le
 \alpha\Gamma_t^M
-+\sum_{i=1}^H (M_t^{(i)}-M^{(i)})\widetilde{w}_t^{(i)}.
-\label{eq:GAMMA-Upper}
++
+\langle M_t-M,\widetilde{w}_t\rangle,
+\label{eq:GAMMA-Upper}\\
+\Gamma_{t+1}^M
+&\ge
+\alpha\Gamma_t^M
++
+\langle M_t-M,\widetilde{w}_t\rangle
+-\alpha[\Gamma_t^{M_t}]_+.
+\label{eq:GAMMA-Lower}
 \end{align}
 \end{lemma}
 
 \begin{proof}
-By \eqref{eq:def-state-gap}, \eqref{eq:sdac-state-update}, and
-\eqref{eq:alg-state-update},
+The two trajectories use the same arrival $w_t$. Hence
 \begin{equation}
-\label{eq:state-gap-identity}
-\begin{aligned}
-\Gamma_{t+1}^M
-&=
-\bigl(\alpha x_t^{\pi(M)}-u_t^{\pi(M)}+w_t\bigr)
--
-\bigl(\alpha x_t^{\mathcal{A}}-u_t^{\mathcal{A}}+w_t\bigr) \\
-&=
-\alpha\bigl(x_t^{\pi(M)}-x_t^{\mathcal{A}}\bigr)
--\bigl(u_t^{\pi(M)}-u_t^{\mathcal{A}}\bigr) \\
-&=
-\alpha\Gamma_t^M
--\bigl(u_t^{\pi(M)}-u_t^{\mathcal{A}}\bigr).
-\end{aligned}
-\end{equation}
-By \eqref{eq:def-sdac-policy} and \eqref{eq:def-w-tilde},
-\begin{equation}
-\label{eq:u-pi-M-sum}
-u_t^{\pi(M)}
-=
-\sum_{i=1}^H M^{(i)}\widetilde{w}_t^{(i)}.
-\end{equation}
-From \eqref{eq:u-pi-M-sum} and \eqref{eq:u-upper-bound-eff},
-\begin{equation}
-\label{eq:u-diff-lower}
-\begin{aligned}
-u_t^{\pi(M)}-u_t^{\mathcal{A}}
-&\ge
-u_t^{\pi(M)}
--\sum_{i=1}^H M_t^{(i)}\widetilde{w}_t^{(i)} \\
-&=
-\sum_{i=1}^H M^{(i)}\widetilde{w}_t^{(i)}
--\sum_{i=1}^H M_t^{(i)}\widetilde{w}_t^{(i)} \\
-&=
--\sum_{i=1}^H (M_t^{(i)}-M^{(i)})\widetilde{w}_t^{(i)}.
-\end{aligned}
-\end{equation}
-Substituting \eqref{eq:u-diff-lower} into \eqref{eq:state-gap-identity},
-\[
+\label{eq:state-gap-short}
 \begin{aligned}
 \Gamma_{t+1}^M
 &=
 \alpha\Gamma_t^M
--\bigl(u_t^{\pi(M)}-u_t^{\mathcal{A}}\bigr) \\
-&\le
+-u_t^{\pi(M)}
++u_t^{\mathcal{A}} \\
+&=
 \alpha\Gamma_t^M
-+\sum_{i=1}^H (M_t^{(i)}-M^{(i)})\widetilde{w}_t^{(i)},
-\end{aligned}
-\]
-which is \eqref{eq:GAMMA-Upper}.
-
-From \eqref{eq:u-pi-M-sum}, \eqref{eq:u-lower-bound-eff}, and
-\eqref{eq:def-state-gap},
-\begin{equation}
-\label{eq:u-diff-upper}
-\begin{aligned}
-u_t^{\pi(M)}-u_t^{\mathcal{A}}
-&\le
-u_t^{\pi(M)}
--\sum_{i=1}^H M_t^{(i)}\widetilde{w}_t^{(i)} \\
-&\qquad
-+\alpha\bigl[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}\bigr]_+ \\
+-u_t^{\pi(M)}
++u_t^{\pi(M_t)}
+-d_t \\
 &=
-\sum_{i=1}^H M^{(i)}\widetilde{w}_t^{(i)}
--\sum_{i=1}^H M_t^{(i)}\widetilde{w}_t^{(i)} \\
-&\qquad
-+\alpha\bigl[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}\bigr]_+ \\
-&=
--\sum_{i=1}^H (M_t^{(i)}-M^{(i)})\widetilde{w}_t^{(i)}
-+\alpha[\Gamma_t^{M_t}]_+.
+\alpha\Gamma_t^M
++
+\langle M_t-M,\widetilde{w}_t\rangle
+-d_t.
 \end{aligned}
 \end{equation}
-Substituting \eqref{eq:u-diff-upper} into \eqref{eq:state-gap-identity},
-\[
-\begin{aligned}
-\Gamma_{t+1}^M
-&=
-\alpha\Gamma_t^M
--\bigl(u_t^{\pi(M)}-u_t^{\mathcal{A}}\bigr) \\
-&\ge
-\alpha\Gamma_t^M
-+\sum_{i=1}^H (M_t^{(i)}-M^{(i)})\widetilde{w}_t^{(i)}
--\alpha[\Gamma_t^{M_t}]_+,
-\end{aligned}
-\]
-which is \eqref{eq:GAMMA-Lower}.
+This proves \eqref{eq:state-gap-exact}. The two bounds follow from
+$0\le d_t\le\alpha[\Gamma_t^{M_t}]_+$ in
+Lemma~\ref{lem:bounding-u-eff}.
 \end{proof}
 
 \begin{lemma}[State deviation bound]
@@ -1855,175 +1710,97 @@ For every $t\in\{1,\ldots,T\}$, with $\Gamma_t^{M}$ as in \eqref{eq:def-state-ga
 \end{lemma}
 
 \begin{proof}
-By \eqref{eq:def-state-gap}, \eqref{eq:sdac-state-update}, and
-\eqref{eq:alg-state-update}, $\Gamma_1^{M}=0$ for every $M\in\Delta_H$.
-If $X_{s+1}\le\alpha X_s+b_s$ and $X_1=0$, then for every $k\ge 1$,
+Fix $t\in\{1,\ldots,T\}$. For $s<t$, define
+\[
+\xi_{s,t}
+\triangleq
+\langle M_s-M_t,\widetilde{w}_s\rangle.
+\]
+Since $\widetilde{w}_s^{(i)}=\alpha^i w_{s-i}$,
+\[
+\|\widetilde{w}_s\|_\infty\le\alpha.
+\]
+Lemma~\ref{lem:cum-move} and H\"older's inequality therefore give
 \begin{equation}
-\label{eq:affine-unroll}
-X_k
-\le
-\sum_{s=1}^{k-1}\alpha^{k-1-s}b_s.
-\end{equation}
-Both sides vanish at $k=1$. If \eqref{eq:affine-unroll} holds at $k$, then
-\begin{equation}
-\label{eq:affine-unroll-step}
+\label{eq:xi-movement-short}
 \begin{aligned}
-X_{k+1}
-&\le
-\alpha X_k+b_k \\
-&\le
-\alpha\sum_{s=1}^{k-1}\alpha^{k-1-s}b_s+b_k \\
-&=
-\sum_{s=1}^{k}\alpha^{k-s}b_s,
-\end{aligned}
-\end{equation}
-which is \eqref{eq:affine-unroll} at $k+1$. If $X_{s+1}\ge\alpha X_s+b_s$ and
-$X_1=0$, the same induction yields $X_k\ge\sum_{s=1}^{k-1}\alpha^{k-1-s}b_s$.
-
-Fix $M\in\Delta_H$ and write
-$\xi_s(M)\triangleq\sum_{i=1}^H(M_s^{(i)}-M^{(i)})\widetilde{w}_s^{(i)}$.
-Applying \eqref{eq:affine-unroll} to \eqref{eq:GAMMA-Upper} at $k=t$ gives
-\begin{equation}
-\label{eq:gamma-unroll-ub}
-\Gamma_t^{M}
-\le
-\sum_{s=1}^{t-1}\alpha^{t-1-s}\xi_s(M).
-\end{equation}
-The reverse form applied to \eqref{eq:GAMMA-Lower} gives
-\begin{equation}
-\label{eq:gamma-unroll-lb}
-\begin{aligned}
-\Gamma_t^{M}
-&\ge
-\sum_{s=1}^{t-1}\alpha^{t-1-s}\bigl(\xi_s(M)-\alpha[\Gamma_s^{M_s}]_+\bigr) \\
-&=
-\sum_{s=1}^{t-1}\alpha^{t-1-s}\xi_s(M)
--
-\sum_{s=1}^{t-1}\alpha^{t-s}[\Gamma_s^{M_s}]_+.
-\end{aligned}
-\end{equation}
-
-From \eqref{eq:def-w-tilde} and $w_\tau\in[0,1]$,
-\begin{equation}
-\label{eq:wtilde-inf}
-\|\widetilde{w}_s\|_\infty
-=
-\max_{1\le i\le H}\alpha^i w_{s-i}
-\le
-\alpha.
-\end{equation}
-H\"older's inequality and \eqref{eq:wtilde-inf} yield
-\begin{equation}
-\label{eq:xi-holder}
-\begin{aligned}
-\bigl|\xi_s(M_t)\bigr|
+|\xi_{s,t}|
 &\le
 \|M_s-M_t\|_1\|\widetilde{w}_s\|_\infty \\
 &\le
-\alpha\|M_s-M_t\|_1.
+\alpha\eta L(t-s).
 \end{aligned}
 \end{equation}
-Substituting Lemma~\ref{lem:cum-move} into \eqref{eq:xi-holder},
+
+For the fixed comparator $M_t$, unrolling
+\eqref{eq:state-gap-exact} from $\Gamma_1^{M_t}=0$ gives
 \begin{equation}
-\label{eq:xi-move}
-\bigl|\xi_s(M_t)\bigr|
-\le
-\alpha\,\eta L\,(t-s).
-\end{equation}
-From \eqref{eq:gamma-unroll-ub} with $M=M_t$ and \eqref{eq:xi-move},
-\begin{equation}
-\label{eq:gamma-ub-sum}
-\begin{aligned}
+\label{eq:gamma-exact-unroll}
 \Gamma_t^{M_t}
-&\le
-\sum_{s=1}^{t-1}\alpha^{t-1-s}\bigl|\xi_s(M_t)\bigr| \\
-&\le
-\alpha\,\eta L\sum_{s=1}^{t-1}\alpha^{t-1-s}(t-s).
-\end{aligned}
-\end{equation}
-The substitution $j=t-s$ gives
-\begin{equation}
-\label{eq:reindex-j}
-\sum_{s=1}^{t-1}\alpha^{t-1-s}(t-s)
 =
-\sum_{j=1}^{t-1} j\,\alpha^{j-1}.
+\sum_{s=1}^{t-1}
+\alpha^{t-1-s}\bigl(\xi_{s,t}-d_s\bigr).
 \end{equation}
-The identity
-\begin{equation}
-\label{eq:geom-j}
-\sum_{j=1}^{\infty} j\,\alpha^{j-1}
-=
-\frac{1}{(1-\alpha)^2}
-\end{equation}
-together with \eqref{eq:gamma-ub-sum} and \eqref{eq:reindex-j} yields
+Since $d_s\ge0$, \eqref{eq:xi-movement-short} implies
 \begin{equation}
 \label{eq:gamma-upper-final}
 \begin{aligned}
 \Gamma_t^{M_t}
 &\le
-\alpha\,\eta L\sum_{j=1}^{t-1} j\,\alpha^{j-1} \\
+\sum_{s=1}^{t-1}\alpha^{t-1-s}|\xi_{s,t}| \\
 &\le
-\alpha\,\eta L\sum_{j=1}^{\infty} j\,\alpha^{j-1} \\
+\alpha\eta L
+\sum_{s=1}^{t-1}\alpha^{t-1-s}(t-s) \\
 &=
-\frac{\alpha\,\eta L}{(1-\alpha)^2}.
+\alpha\eta L
+\sum_{j=1}^{t-1}j\alpha^{j-1} \\
+&\le
+\frac{\alpha\eta L}{(1-\alpha)^2}.
 \end{aligned}
 \end{equation}
+The last line uses
+$\sum_{j=1}^{\infty}j\alpha^{j-1}=(1-\alpha)^{-2}$.
 
-From \eqref{eq:gamma-unroll-lb} with $M=M_t$,
+Applying \eqref{eq:clipping-error-bound} and
+\eqref{eq:gamma-upper-final} at time $s$,
 \begin{equation}
-\label{eq:gamma-lb-abs}
+\label{eq:clipping-error-uniform}
+\begin{aligned}
+0\le d_s
+&\le
+\alpha[\Gamma_s^{M_s}]_+ \\
+&\le
+\frac{\alpha^2\eta L}{(1-\alpha)^2}.
+\end{aligned}
+\end{equation}
+This use of \eqref{eq:gamma-upper-final} is noncircular: its derivation used
+only $d_s\ge0$. From \eqref{eq:gamma-exact-unroll},
+\eqref{eq:xi-movement-short}, and \eqref{eq:clipping-error-uniform},
+\begin{equation}
+\label{eq:gamma-lower-final}
 \begin{aligned}
 \Gamma_t^{M_t}
 &\ge
--\sum_{s=1}^{t-1}\alpha^{t-1-s}\bigl|\xi_s(M_t)\bigr| \\
-&\qquad
--
-\sum_{s=1}^{t-1}\alpha^{t-s}[\Gamma_s^{M_s}]_+.
-\end{aligned}
-\end{equation}
-Substituting \eqref{eq:xi-move} and \eqref{eq:gamma-upper-final} at each earlier
-$s$ into \eqref{eq:gamma-lb-abs},
-\begin{equation}
-\label{eq:gamma-lb-finite}
-\begin{aligned}
-\Gamma_t^{M_t}
+-\sum_{s=1}^{t-1}\alpha^{t-1-s}|\xi_{s,t}|
+-\sum_{s=1}^{t-1}\alpha^{t-1-s}d_s \\
 &\ge
--\alpha\,\eta L\sum_{s=1}^{t-1}\alpha^{t-1-s}(t-s)
--\frac{\alpha\,\eta L}{(1-\alpha)^2}\sum_{s=1}^{t-1}\alpha^{t-s} \\
-&=
--\alpha\,\eta L\sum_{j=1}^{t-1} j\,\alpha^{j-1}
--\frac{\alpha\,\eta L}{(1-\alpha)^2}\sum_{j=1}^{t-1}\alpha^j,
-\end{aligned}
-\end{equation}
-where the equality uses \eqref{eq:reindex-j} and $j=t-s$ in the second sum.
-Extending both sums and using \eqref{eq:geom-j} together with
-\begin{equation}
-\label{eq:geom-alpha}
-\sum_{j=1}^{\infty}\alpha^j
-=
-\frac{\alpha}{1-\alpha},
-\end{equation}
-\begin{equation}
-\label{eq:gamma-lb-final}
-\begin{aligned}
-\Gamma_t^{M_t}
+-\frac{\alpha\eta L}{(1-\alpha)^2}
+-\frac{\alpha^2\eta L}{(1-\alpha)^2}
+\sum_{s=1}^{t-1}\alpha^{t-1-s} \\
 &\ge
--\alpha\,\eta L\sum_{j=1}^{\infty} j\,\alpha^{j-1}
--\frac{\alpha\,\eta L}{(1-\alpha)^2}\sum_{j=1}^{\infty}\alpha^j \\
+-\frac{\alpha\eta L}{(1-\alpha)^2}
+-\frac{\alpha^2\eta L}{(1-\alpha)^3} \\
 &=
--\frac{\alpha\,\eta L}{(1-\alpha)^2}
--\frac{\alpha\,\eta L}{(1-\alpha)^2}\cdot\frac{\alpha}{1-\alpha} \\
-&=
--\frac{\alpha\,\eta L\bigl((1-\alpha)+\alpha\bigr)}{(1-\alpha)^3} \\
-&=
--\frac{\alpha\,\eta L}{(1-\alpha)^3}.
+-\frac{\alpha\eta L}{(1-\alpha)^3}.
 \end{aligned}
 \end{equation}
+Together, \eqref{eq:gamma-upper-final} and
+\eqref{eq:gamma-lower-final} prove the claim.
 \end{proof}
 
-\begin{lemma}[Action-state gap]
+\begin{lemma}[Action gap induced by clipping]
 \label{lem:u-gap-by-b-gap-eff}
-For all \(t\in\{1,\ldots,T\}\),
+For all $t\in\{1,\ldots,T\}$,
 \[
 0
 \le
@@ -2034,59 +1811,28 @@ u_t^{\pi(M_t)}-u_t^{\mathcal{A}}
 \end{lemma}
 
 \begin{proof}
-By \eqref{eq:u-pi-M-sum} at $M=M_t$ and \eqref{eq:u-clip-identity},
-\begin{equation}
-\label{eq:u-pi-Mt-hat}
-\begin{aligned}
-u_t^{\pi(M_t)}
-&=
-\sum_{i=1}^H M_t^{(i)}\widetilde{w}_t^{(i)} \\
-&=
-\widehat{u}_t.
-\end{aligned}
-\end{equation}
-Substituting \eqref{eq:u-pi-Mt-hat} and \eqref{eq:u-clip-identity},
-\begin{equation}
-\label{eq:u-gap-as-pospart}
-\begin{aligned}
+By \eqref{eq:clipping-error-bound},
+\[
 u_t^{\pi(M_t)}-u_t^{\mathcal{A}}
-&=
-\widehat{u}_t-\bigl(\widehat{u}_t-\bigl[\widehat{u}_t-\alpha x_t^{\mathcal{A}}\bigr]_+\bigr) \\
-&=
-\bigl[\widehat{u}_t-\alpha x_t^{\mathcal{A}}\bigr]_+ \\
-&\ge
-0.
-\end{aligned}
-\end{equation}
-By \eqref{eq:u-pospart-bound} and \eqref{eq:def-state-gap},
-\begin{equation}
-\label{eq:u-gap-le-gamma}
-\begin{aligned}
-\bigl[\widehat{u}_t-\alpha x_t^{\mathcal{A}}\bigr]_+
-&\le
-\alpha\bigl[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}\bigr]_+ \\
-&=
-\alpha[\Gamma_t^{M_t}]_+.
-\end{aligned}
-\end{equation}
-From \eqref{eq:u-gap-as-pospart}, \eqref{eq:u-gap-le-gamma}, and
-\eqref{eq:gamma-upper-final},
+=
+d_t
+\ge0.
+\]
+The same bound and Lemma~\ref{lem:state-gap-bound} give
 \[
 \begin{aligned}
-u_t^{\pi(M_t)}-u_t^{\mathcal{A}}
-&=
-\bigl[\widehat{u}_t-\alpha x_t^{\mathcal{A}}\bigr]_+ \\
+d_t
 &\le
 \alpha[\Gamma_t^{M_t}]_+ \\
 &\le
-\frac{\alpha^2\,\eta L}{(1-\alpha)^2}.
+\frac{\alpha^2\eta L}{(1-\alpha)^2}.
 \end{aligned}
 \]
 \end{proof}
 
 \begin{lemma}[Stability term]
 \label{lem:stab-sum}
-For all horizons \(T\),
+For all horizons $T$,
 \[
 \sum_{t=1}^T \Bigl(c_t(x_t^{\mathcal{A}},u_t^{\mathcal{A}})
 -c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr)\Bigr)
@@ -2096,249 +1842,219 @@ For all horizons \(T\),
 \end{lemma}
 
 \begin{proof}
-By \eqref{eq:model-lipschitz},
+Both state--action pairs lie in $\mathcal{D}_\alpha$. Hence
+\eqref{eq:model-lipschitz}, Lemma~\ref{lem:state-gap-bound}, and
+Lemma~\ref{lem:u-gap-by-b-gap-eff} give
 \begin{equation}
-\label{eq:stab-lip}
+\label{eq:stability-one-step-short}
 \begin{aligned}
-&c_t\bigl(x_t^{\mathcal{A}},u_t^{\mathcal{A}}\bigr)
--
-c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr) \\
+&c_t(x_t^{\mathcal{A}},u_t^{\mathcal{A}})
+-c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr) \\
 &\qquad\le
-L_u \bigl|u_t^{\mathcal{A}} - u_t^{\pi(M_t)}\bigr|
-+ L_x \bigl|x_t^{\mathcal{A}} - x_t^{\pi(M_t)}\bigr|.
-\end{aligned}
-\end{equation}
-From Lemma~\ref{lem:u-gap-by-b-gap-eff},
-\begin{equation}
-\label{eq:stab-u-gap}
-\begin{aligned}
-\bigl|u_t^{\mathcal{A}} - u_t^{\pi(M_t)}\bigr|
-&=
-u_t^{\pi(M_t)}-u_t^{\mathcal{A}} \\
-&\le
-\frac{\alpha^2\,\eta L}{(1-\alpha)^2}.
-\end{aligned}
-\end{equation}
-By \eqref{eq:def-state-gap} and Lemma~\ref{lem:state-gap-bound},
-\begin{equation}
-\label{eq:stab-x-gap}
-\begin{aligned}
-\bigl|x_t^{\mathcal{A}} - x_t^{\pi(M_t)}\bigr|
-&=
-\bigl|\Gamma_t^{M_t}\bigr| \\
-&\le
-\frac{\alpha\,\eta L}{(1-\alpha)^3}.
-\end{aligned}
-\end{equation}
-Substituting \eqref{eq:stab-u-gap} and \eqref{eq:stab-x-gap} into \eqref{eq:stab-lip},
-\begin{equation}
-\label{eq:stab-per-t}
-\begin{aligned}
-&c_t\bigl(x_t^{\mathcal{A}},u_t^{\mathcal{A}}\bigr)
--
-c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr) \\
+L_x|\Gamma_t^{M_t}|
++
+L_u\bigl|u_t^{\mathcal{A}}-u_t^{\pi(M_t)}\bigr| \\
 &\qquad\le
-L_u \frac{\alpha^2\,\eta L}{(1-\alpha)^2}
-+ L_x \frac{\alpha\,\eta L}{(1-\alpha)^3}.
-\end{aligned}
-\end{equation}
-Summing \eqref{eq:stab-per-t} over $t=1,\ldots,T$,
-\begin{equation}
-\label{eq:stab-sum-raw}
-\begin{aligned}
-&\sum_{t=1}^T
-\Bigl(
-c_t(x_t^{\mathcal{A}},u_t^{\mathcal{A}})
--
-c_t(x_t^{\pi(M_t)},u_t^{\pi(M_t)})
-\Bigr) \\
-&\qquad\le
-T\Biggl(
-L_u \frac{\alpha^2\,\eta L}{(1-\alpha)^2}
-+ L_x \frac{\alpha\,\eta L}{(1-\alpha)^3}
-\Biggr).
-\end{aligned}
-\end{equation}
-Factoring the right-hand side of \eqref{eq:stab-sum-raw} and substituting
-\eqref{eq:def-surrogate-L},
-\[
-\begin{aligned}
-&T\Biggl(
-L_u \frac{\alpha^2\,\eta L}{(1-\alpha)^2}
-+ L_x \frac{\alpha\,\eta L}{(1-\alpha)^3}
-\Biggr) \\
+\frac{\alpha\eta L L_x}{(1-\alpha)^3}
++
+\frac{\alpha^2\eta L L_u}{(1-\alpha)^2} \\
 &\qquad=
-\frac{\alpha\,T\eta L}{(1-\alpha)^2}
-\Biggl(
-\alpha L_u
-+\frac{L_x}{1-\alpha}
-\Biggr) \\
+\frac{\alpha\eta L}{(1-\alpha)^2}
+\left(
+\frac{L_x}{1-\alpha}+\alpha L_u
+\right) \\
 &\qquad=
-\frac{\alpha\,T\eta L^2}{(1-\alpha)^2}.
+\frac{\alpha\eta L^2}{(1-\alpha)^2}.
 \end{aligned}
-\]
+\end{equation}
+Summing \eqref{eq:stability-one-step-short} over $t=1,\ldots,T$ proves the
+claim.
 \end{proof}
 
 
 
 \begin{proof}[Proof of Theorem~\ref{thm:regret-bound}]
-By \eqref{eq:def-regret} and \eqref{eq:def-cumulative-cost},
-\begin{equation}
-\label{eq:regret-as-sum}
-\begin{aligned}
-\RegSDAC{T}
-&=
-\sum_{t=1}^T c_t(x_t^{\mathcal{A}},u_t^{\mathcal{A}}) \\
-&\quad-
-\min_{M\in\Delta_H}\sum_{t=1}^T c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr).
-\end{aligned}
-\end{equation}
-Adding and subtracting $\sum_{t=1}^T c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr)$
-in \eqref{eq:regret-as-sum},
+Define the stability term
+\[
+S_T
+\triangleq
+\sum_{t=1}^T
+\left(
+c_t(x_t^{\mathcal{A}},u_t^{\mathcal{A}})
+-\ell_t(M_t)
+\right).
+\]
+Using
+$\ell_t(M)=c_t(x_t^{\pi(M)},u_t^{\pi(M)})$, the regret decomposes as
 \begin{equation}
 \label{eq:regret-decomp}
 \begin{aligned}
 \RegSDAC{T}
 &=
-\sum_{t=1}^T \Bigl(c_t(x_t^{\mathcal{A}},u_t^{\mathcal{A}})
--c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr)\Bigr) \\
-&\quad+
-\sum_{t=1}^T c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr) \\
-&\quad-
-\min_{M\in\Delta_H}\sum_{t=1}^T c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr).
+S_T
++
+\sum_{t=1}^T\ell_t(M_t)
+-
+\min_{M\in\Delta_H}\sum_{t=1}^T\ell_t(M).
 \end{aligned}
 \end{equation}
-We call the first sum the stability term, and the second sum the OMD term.
 
-We bound the OMD term using the update \eqref{eq:alg-omd-argmin} with $\Psi$
-and $D_\Psi$ from \eqref{eq:def-negentropy}. Under \eqref{eq:alg-init}, for any
-$M^\star\in\Delta_H$ with $W^\star\triangleq\sum_{i=1}^H M^{\star(i)}$,
-\begin{equation}
-\label{eq:breg-init-sub}
-\begin{aligned}
-&D_\Psi(M^\star\|M_1) \\
-&\quad=
-\sum_{i=1}^H\Bigl(M^{\star(i)}\log\bigl((H+1)M^{\star(i)}\bigr)
--M^{\star(i)}+\tfrac{1}{H+1}\Bigr).
-\end{aligned}
-\end{equation}
-Expanding the logarithm in \eqref{eq:breg-init-sub},
+We first bound the initial Bregman divergence. Fix $M\in\Delta_H$ and set
+$W\triangleq\sum_{i=1}^H M^{(i)}\in[0,1]$. Since
+$M_1^{(i)}=1/(H+1)$,
 \begin{equation}
 \label{eq:breg-init-expand}
 \begin{aligned}
-&D_\Psi(M^\star\|M_1) \\
-&\quad=
-\sum_{i=1}^H M^{\star(i)}\log M^{\star(i)}
-+
-W^\star\log(H+1)
--
-W^\star
-+
-\tfrac{H}{H+1}.
+D_\Psi(M\|M_1)
+&=
+\sum_{i=1}^H
+M^{(i)}\log\bigl((H+1)M^{(i)}\bigr) \\
+&\quad
+-W+\frac{H}{H+1} \\
+&=
+\sum_{i=1}^H M^{(i)}\log M^{(i)}
++W\log(H+1) \\
+&\quad
+-W+\frac{H}{H+1}.
 \end{aligned}
 \end{equation}
-Since $M^{\star(i)}\in[0,1]$, one has $M^{\star(i)}\log M^{\star(i)}\le 0$, so
+Define the affine function
+\[
+f_H(W)
+\triangleq
+W\log(H+1)-W+\frac{H}{H+1}.
+\]
+Because $z\log z\le0$ for $z\in[0,1]$,
 \begin{equation}
-\label{eq:breg-init-drop}
-D_\Psi(M^\star\|M_1)
+\label{eq:breg-init-affine}
+D_\Psi(M\|M_1)
 \le
-W^\star\log(H+1)-W^\star+\tfrac{H}{H+1}.
+f_H(W).
 \end{equation}
-The right-hand side of \eqref{eq:breg-init-drop} is affine in $W^\star\in[0,1]$
-and does not exceed $\log(H+1)$ at the endpoints $W^\star=0$ and $W^\star=1$.
-Hence
+The function $f_H$ is affine on $[0,1]$, and
+\[
+\begin{aligned}
+f_H(0)
+&=
+\frac{H}{H+1}
+\le
+\log(H+1), \\
+f_H(1)
+&=
+\log(H+1)-\frac{1}{H+1}
+\le
+\log(H+1).
+\end{aligned}
+\]
+Here the first inequality follows from
+$\log z\ge1-z^{-1}$ for $z\ge1$. Therefore,
 \begin{equation}
 \label{eq:breg-init-bound}
-D_\Psi(M^\star\|M_1)\le\log(H+1).
+D_\Psi(M\|M_1)
+\le
+\log(H+1)
+\qquad
+\text{for every }M\in\Delta_H.
 \end{equation}
-The surrogate costs $\ell_t$ from \eqref{eq:alg-surrogate-cost} are convex, and the
-chosen subgradients satisfy $\|g_t\|_\infty\le L$ by
-Lemma~\ref{lem:sdac-surrogate}. The standard OMD regret bound with Bregman
-divergence $D_\Psi$ on $\Delta_H$ \cite{hazan2016introduction} therefore gives,
-for every $M^\star\in\Delta_H$,
+
+Lemma~\ref{lem:omd-surrogate-regret},
+$\|g_t\|_\infty\le L$, and \eqref{eq:breg-init-bound} imply, for every
+$M\in\Delta_H$,
 \begin{equation}
 \label{eq:omd-ell-raw}
 \begin{aligned}
-&\sum_{t=1}^T \ell_t(M_t)-\sum_{t=1}^T \ell_t(M^\star) \\
-&\qquad\le
-\frac{D_\Psi(M^\star\|M_1)}{\eta}+\frac{\eta L^2 T}{2}.
+\sum_{t=1}^T\bigl(\ell_t(M_t)-\ell_t(M)\bigr)
+&\le
+\frac{D_\Psi(M\|M_1)}{\eta}
++
+\frac{\eta}{2}\sum_{t=1}^T\|g_t\|_\infty^2 \\
+&\le
+\frac{\log(H+1)}{\eta}
++
+\frac{\eta L^2T}{2}.
 \end{aligned}
 \end{equation}
-Substituting \eqref{eq:breg-init-bound} into \eqref{eq:omd-ell-raw} and minimizing
-over $M^\star\in\Delta_H$,
-\begin{equation}
-\label{eq:omd-ell}
-\begin{aligned}
-&\sum_{t=1}^T \ell_t(M_t)-\min_{M\in\Delta_H}\sum_{t=1}^T \ell_t(M) \\
-&\qquad\le
-\frac{\log(H+1)}{\eta}+\frac{\eta L^2 T}{2}.
-\end{aligned}
-\end{equation}
-Substituting \eqref{eq:alg-surrogate-cost} into \eqref{eq:omd-ell},
+Since \eqref{eq:omd-ell-raw} holds uniformly over $M$,
 \begin{equation}
 \label{eq:omd-term}
-\begin{aligned}
-&\sum_{t=1}^T c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr) \\
-&\quad-
-\min_{M\in\Delta_H}\sum_{t=1}^T c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr) \\
-&\qquad\le
-\frac{\log(H+1)}{\eta}+\frac{\eta L^2 T}{2}.
-\end{aligned}
+\sum_{t=1}^T\ell_t(M_t)
+-
+\min_{M\in\Delta_H}\sum_{t=1}^T\ell_t(M)
+\le
+\frac{\log(H+1)}{\eta}
++
+\frac{\eta L^2T}{2}.
 \end{equation}
-
-From Lemma~\ref{lem:stab-sum},
+Lemma~\ref{lem:stab-sum} gives
 \begin{equation}
 \label{eq:stab-term}
-\begin{aligned}
-&\sum_{t=1}^T c_t(x_t^{\mathcal{A}},u_t^{\mathcal{A}})
--
-\sum_{t=1}^T c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr) \\
-&\qquad\le
-\frac{\alpha\,\eta L^2 T}{(1-\alpha)^2}.
-\end{aligned}
+S_T
+\le
+\frac{\alpha\eta L^2T}{(1-\alpha)^2}.
 \end{equation}
-Adding \eqref{eq:omd-term} and \eqref{eq:stab-term} and using
+Substituting \eqref{eq:omd-term} and \eqref{eq:stab-term} into
 \eqref{eq:regret-decomp},
 \begin{equation}
-\label{eq:regret-sum}
-\begin{aligned}
-\RegSDAC{T}
-&\le
-\frac{\log(H+1)}{\eta}
-+
-\frac{\eta L^2 T}{2}
-+
-\frac{\alpha\,\eta L^2 T}{(1-\alpha)^2}.
-\end{aligned}
-\end{equation}
-Factoring the coefficient of $\eta$ in \eqref{eq:regret-sum},
-\begin{equation}
 \label{eq:regret-eta}
-\begin{aligned}
 \RegSDAC{T}
-&\le
+\le
 \frac{\log(H+1)}{\eta}
 +
-\eta L^2 T\Bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\Bigr).
-\end{aligned}
+\eta L^2T
+\left(
+\frac12+\frac{\alpha}{(1-\alpha)^2}
+\right).
 \end{equation}
-For $A,B>0$, the function $A/\eta+B\eta$ is minimized over $\eta>0$ at
-$\eta=\sqrt{A/B}$, where its value is $2\sqrt{AB}$. Taking
-$A=\log(H+1)$ and
-$B=L^2T\bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\bigr)$ in
-\eqref{eq:regret-eta} yields the step size
+
+Set
+\[
+A\triangleq\log(H+1),
+\qquad
+B\triangleq
+L^2T
+\left(
+\frac12+\frac{\alpha}{(1-\alpha)^2}
+\right).
+\]
+Both constants are positive. The right-hand side of
+\eqref{eq:regret-eta} is $A/\eta+B\eta$, whose derivative is
+\[
+-\frac{A}{\eta^2}+B.
+\]
+Its unique minimizer is therefore
 \begin{equation}
 \label{eq:eta-star}
 \eta^*
 =
-\sqrt{\frac{\log(H+1)}{L^2 T\bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\bigr)}}.
+\sqrt{\frac{A}{B}}
+=
+\sqrt{
+\frac{\log(H+1)}
+{L^2T\left(\tfrac12+\tfrac{\alpha}{(1-\alpha)^2}\right)}
+}.
 \end{equation}
-and the bound
+At this value,
+\[
+\frac{A}{\eta^*}
+=
+\sqrt{AB},
+\qquad
+B\eta^*
+=
+\sqrt{AB}.
+\]
+Thus \eqref{eq:regret-eta} becomes
 \begin{equation}
 \label{eq:regret-opt}
 \RegSDAC{T}
 \le
-2L\sqrt{\Bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\Bigr)T\log(H+1)}.
+2L
+\sqrt{
+\left(
+\frac12+\frac{\alpha}{(1-\alpha)^2}
+\right)
+T\log(H+1)
+}.
 \end{equation}
 \end{proof}
 
