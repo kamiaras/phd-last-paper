@@ -1297,8 +1297,8 @@ and surrogate-cost lemmas already established in Section~\ref{sec:sdac}
 
 \begin{lemma}[Bregman projection onto $\Delta_H$]
 \label{lem:bregman-projection}
-Let $\Psi$ and $D_\Psi$ be the unnormalized negentropy and its Bregman divergence
-from \eqref{eq:def-negentropy}. Fix $\widetilde{M}\in\mathbb{R}_{>0}^H$ and set
+Let $D_\Psi$ be the Bregman divergence of the unnormalized negentropy
+\eqref{eq:def-negentropy}. Fix $\widetilde{M}\in\mathbb{R}_{>0}^H$ and set
 $S\triangleq\sum_{i=1}^H \widetilde{M}^{(i)}$. Then the Bregman projection of
 $\widetilde{M}$ onto $\Delta_H=\{M\in\mathbb{R}_{\ge0}^H:\sum_{i} M^{(i)}\le1\}$,
 \[
@@ -1312,33 +1312,86 @@ P(\widetilde{M})^{(i)}=
 \end{lemma}
 
 \begin{proof}
-Since $\widetilde{M}$ is fixed, the terms $+\widetilde{M}^{(i)}$ are constant, so
-$P(\widetilde{M})$ minimizes
-\[
-F(M)\triangleq\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{\widetilde{M}^{(i)}}-M^{(i)}\Bigr)
-\]
-over $\Delta_H$. The function $F$ is strictly convex on $\mathbb{R}_{\ge0}^H$ and
-$\Delta_H$ is closed and convex, so the minimizer is unique. On
-$\mathbb{R}_{>0}^H$, its partial derivatives are
-$\partial F/\partial M^{(i)}=\log\bigl(M^{(i)}/\widetilde{M}^{(i)}\bigr)$.
+Write
+\begin{equation}
+\label{eq:breg-F}
+F(M)\triangleq\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{\widetilde{M}^{(i)}}-M^{(i)}\Bigr).
+\end{equation}
+By definition of $D_\Psi$ and \eqref{eq:breg-F},
+\begin{equation}
+\label{eq:breg-DF}
+\begin{aligned}
+D_\Psi(M\|\widetilde{M})
+&=
+\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{\widetilde{M}^{(i)}}-M^{(i)}+\widetilde{M}^{(i)}\Bigr) \\
+&=
+F(M)+\sum_{i=1}^H\widetilde{M}^{(i)}.
+\end{aligned}
+\end{equation}
+The second sum in \eqref{eq:breg-DF} does not depend on $M$, so
+$P(\widetilde{M})$ minimizes $F$ over $\Delta_H$. The function $F$ is strictly
+convex on $\mathbb{R}_{\ge0}^H$ and $\Delta_H$ is closed and convex, so the
+minimizer is unique. Differentiating \eqref{eq:breg-F} on $\mathbb{R}_{>0}^H$,
+\begin{equation}
+\label{eq:breg-grad}
+\frac{\partial F}{\partial M^{(i)}}=\log\bigl(M^{(i)}/\widetilde{M}^{(i)}\bigr).
+\end{equation}
+Setting \eqref{eq:breg-grad} to zero,
+\begin{equation}
+\label{eq:breg-unconst}
+\begin{aligned}
+\log\bigl(M^{(i)}/\widetilde{M}^{(i)}\bigr)
+&=
+0 \\
+M^{(i)}
+&=
+\widetilde{M}^{(i)}.
+\end{aligned}
+\end{equation}
 
-\emph{Case $S\le 1$.} Here $\widetilde{M}\in\Delta_H$. Setting $\partial F/\partial
-M^{(i)}=0$ gives the unconstrained minimizer $M=\widetilde{M}$ over
-$\mathbb{R}_{\ge0}^H$, which is feasible; hence $P(\widetilde{M})=\widetilde{M}$.
+\emph{Case $S\le 1$.} Then $\widetilde{M}\in\Delta_H$, so \eqref{eq:breg-unconst}
+is feasible and $P(\widetilde{M})=\widetilde{M}$.
 
-\emph{Case $S>1$.} Here $\widetilde{M}\notin\Delta_H$, so the constraint $\sum_i
-M^{(i)}\le1$ must be active at the optimum. As $\widetilde{M}^{(i)}>0$, the optimal
-coordinates are strictly positive and the nonnegativity constraints are inactive;
-introducing a multiplier $\lambda$ for $\sum_i M^{(i)}=1$, KKT stationarity reads
+\emph{Case $S>1$.} Then $\widetilde{M}\notin\Delta_H$, so \eqref{eq:breg-unconst}
+is infeasible and $\sum_i M^{(i)}\le 1$ is active. Since
+$\widetilde{M}^{(i)}>0$, the optimum has $M^{(i)}>0$ and nonnegativity is inactive.
+KKT stationarity for $\sum_i M^{(i)}=1$ with multiplier $\lambda$ reads, by
+\eqref{eq:breg-grad},
+\begin{equation}
+\label{eq:breg-kkt}
+\begin{aligned}
+\log\bigl(M^{(i)}/\widetilde{M}^{(i)}\bigr)+\lambda
+&=
+0 \\
+M^{(i)}
+&=
+\widetilde{M}^{(i)}e^{-\lambda}.
+\end{aligned}
+\end{equation}
+Substituting \eqref{eq:breg-kkt} into $\sum_{i=1}^H M^{(i)}=1$,
+\begin{equation}
+\label{eq:breg-lambda}
+\begin{aligned}
+\sum_{i=1}^H \widetilde{M}^{(i)}e^{-\lambda}
+&=
+1 \\
+e^{-\lambda}
+&=
+\frac{1}{S}.
+\end{aligned}
+\end{equation}
+Substituting \eqref{eq:breg-lambda} into \eqref{eq:breg-kkt},
 \[
-\log\bigl(M^{(i)}/\widetilde{M}^{(i)}\bigr)+\lambda=0
-\quad\Longrightarrow\quad
-M^{(i)}=\widetilde{M}^{(i)}e^{-\lambda}.
+\begin{aligned}
+M^{(i)}
+&=
+\widetilde{M}^{(i)}e^{-\lambda} \\
+&=
+\frac{\widetilde{M}^{(i)}}{S}.
+\end{aligned}
 \]
-The active constraint $\sum_i M^{(i)}=1$ forces $e^{-\lambda}=1/S$, so
-$M^{(i)}=\widetilde{M}^{(i)}/S$; moreover $\lambda=\log S>0$, so dual feasibility
-holds. Equivalently, $P(\widetilde{M})^{(i)}=\widetilde{M}^{(i)}/\max\{1,S\}$ in both
-cases.
+From \eqref{eq:breg-lambda}, $\lambda=\log S>0$, so dual feasibility holds.
+Thus in both cases $P(\widetilde{M})^{(i)}=\widetilde{M}^{(i)}/\max\{1,S\}$.
 \end{proof}
 
 \begin{lemma}[Closed-form solution of the OMD update]
