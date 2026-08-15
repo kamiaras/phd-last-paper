@@ -943,15 +943,14 @@ assumptions of Section~\ref{sec:model-setup}. Then the OMD controller with
 action clipping from Section~\ref{sec:online-algorithm}, initialized as in
 \eqref{eq:alg-init} and using step size $\eta>0$, satisfies
 \[
-\begin{aligned}
 \RegSDAC{T}
-&\le
+\le
 \frac{\log(H+1)}{\eta}
 +
-\eta L^2 T\Bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\Bigr), \\
-L &\triangleq \alpha L_u + \tfrac{L_x}{1-\alpha}.
-\end{aligned}
+\eta L^2 T\Bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\Bigr),
 \]
+where $L\triangleq\alpha L_u+\tfrac{L_x}{1-\alpha}$ as in
+\eqref{eq:def-surrogate-L}.
 In particular, the choice
 \[
 \eta^*
@@ -1622,70 +1621,110 @@ For every \(t\in\{2,\ldots,T\}\) and every integer \(i\) with \(1\le i\le t-1\),
 \end{lemma}
 
 \begin{proof}
-The range \(1\le i\le t-1\) ensures that every index \(t-j\) for \(j=1,\ldots,i\)
-satisfies \(t-j\ge 1\). By the triangle inequality and Lemma~\ref{lem:omd-move},
-\[
+By the triangle inequality,
+\begin{equation}
+\label{eq:cum-move-tri}
 \|M_{t-i}-M_t\|_1
 \le
-\sum_{j=1}^i \|M_{t-j}-M_{t-j+1}\|_1
-\le i\,\eta L.
+\sum_{j=1}^i \|M_{t-j}-M_{t-j+1}\|_1.
+\end{equation}
+Substituting $\|M_{t-j}-M_{t-j+1}\|_1\le\eta L$ from Lemma~\ref{lem:omd-move}
+into \eqref{eq:cum-move-tri},
+\[
+\begin{aligned}
+\|M_{t-i}-M_t\|_1
+&\le
+\sum_{j=1}^i \eta L \\
+&=
+i\,\eta L.
+\end{aligned}
 \]
 \end{proof}
 
 \begin{lemma}[Control-action bounds relative to a counterfactual trajectory]
 \label{lem:bounding-u-eff}
 For all \(t\in\{1,\ldots,T\}\),
-\begin{align*}
+\begin{align}
 u_t^{\mathcal{A}}
 &\ge
-\langle M_t,\widetilde{w}_t\rangle
-- \alpha\,[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}]_+,\\[4pt]
+\sum_{i=1}^H M_t^{(i)}\widetilde{w}_t^{(i)}
+- \alpha\,[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}]_+,\label{eq:u-lower-bound-eff}\\[4pt]
 u_t^{\mathcal{A}}
 &\le
-\langle M_t,\widetilde{w}_t\rangle.
-\end{align*}
+\sum_{i=1}^H M_t^{(i)}\widetilde{w}_t^{(i)}.\label{eq:u-upper-bound-eff}
+\end{align}
 \end{lemma}
 
 \begin{proof}
-Recall from \eqref{eq:alg-unconstrained-action}--\eqref{eq:alg-feasible-action} that
-\[
-\widehat{u}_t = \langle M_t,\widetilde{w}_t\rangle,
-\qquad
-u_t^{\mathcal{A}}=\min\{\widehat{u}_t,\alpha x_t^{\mathcal{A}}\}.
-\]
-Therefore,
-\[
+By \eqref{eq:alg-unconstrained-action}, \eqref{eq:alg-feasible-action},
+and $\min\{a,b\}=a-[a-b]_+$,
+\begin{equation}
+\label{eq:u-clip-identity}
+\begin{aligned}
+\widehat{u}_t
+&=
+\sum_{i=1}^H M_t^{(i)}\widetilde{w}_t^{(i)}, \\
 u_t^{\mathcal{A}}
-=
-\widehat{u}_t-\bigl[\widehat{u}_t-\alpha x_t^{\mathcal{A}}\bigr]_+
-=
-\langle M_t,\widetilde{w}_t\rangle
--\bigl[\langle M_t,\widetilde{w}_t\rangle-\alpha x_t^{\mathcal{A}}\bigr]_+.
-\]
-This identity gives the upper bound immediately, since the subtracted term is
-nonnegative.
-
-For the lower bound, Lemma~\ref{lem:sdac-feasibility} applied to the counterfactual
-fixed policy $\pi(M_t)$ yields, using \eqref{eq:def-sdac-policy-vector},
-\[
-u_t^{\pi(M_t)}
-=
-\langle M_t,\widetilde{w}_t\rangle
-\le \alpha x_t^{\pi(M_t)}.
-\]
-Subtracting \(\alpha x_t^{\mathcal{A}}\) from both sides and applying monotonicity of
-\([\cdot]_+\) gives
+&=
+\widehat{u}_t-\bigl[\widehat{u}_t-\alpha x_t^{\mathcal{A}}\bigr]_+.
+\end{aligned}
+\end{equation}
+From \eqref{eq:u-clip-identity} and $[\cdot]_+\ge 0$,
 \[
 \begin{aligned}
-&\bigl[\langle M_t,\widetilde{w}_t\rangle-\alpha x_t^{\mathcal{A}}\bigr]_+ \\
-&\qquad\le
-\bigl[\alpha x_t^{\pi(M_t)}-\alpha x_t^{\mathcal{A}}\bigr]_+
-=
-\alpha\bigl[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}\bigr]_+.
+u_t^{\mathcal{A}}
+&=
+\widehat{u}_t-\bigl[\widehat{u}_t-\alpha x_t^{\mathcal{A}}\bigr]_+ \\
+&\le
+\widehat{u}_t \\
+&=
+\sum_{i=1}^H M_t^{(i)}\widetilde{w}_t^{(i)},
 \end{aligned}
 \]
-Substituting this bound into the expression above for \(u_t^{\mathcal{A}}\) yields
-the stated lower bound.
+which is \eqref{eq:u-upper-bound-eff}.
+
+By \eqref{eq:def-sdac-policy}, \eqref{eq:def-w-tilde}, and \eqref{eq:u-clip-identity},
+$u_t^{\pi(M_t)}=\widehat{u}_t$.
+Specializing \eqref{eq:sdac-feasibility} to $M=M_t$,
+\begin{equation}
+\label{eq:u-pi-Mt-feas}
+\widehat{u}_t
+\le
+\alpha x_t^{\pi(M_t)}.
+\end{equation}
+Subtracting $\alpha x_t^{\mathcal{A}}$ from both sides of \eqref{eq:u-pi-Mt-feas},
+\begin{equation}
+\label{eq:u-pi-Mt-sub}
+\widehat{u}_t-\alpha x_t^{\mathcal{A}}
+\le
+\alpha x_t^{\pi(M_t)}-\alpha x_t^{\mathcal{A}}.
+\end{equation}
+Applying monotonicity of $[\cdot]_+$ to \eqref{eq:u-pi-Mt-sub}, and then
+positive homogeneity,
+\begin{equation}
+\label{eq:u-pospart-bound}
+\begin{aligned}
+\bigl[\widehat{u}_t-\alpha x_t^{\mathcal{A}}\bigr]_+
+&\le
+\bigl[\alpha x_t^{\pi(M_t)}-\alpha x_t^{\mathcal{A}}\bigr]_+ \\
+&=
+\alpha\bigl[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}\bigr]_+.
+\end{aligned}
+\end{equation}
+Substituting \eqref{eq:u-pospart-bound} into \eqref{eq:u-clip-identity},
+\[
+\begin{aligned}
+u_t^{\mathcal{A}}
+&=
+\widehat{u}_t-\bigl[\widehat{u}_t-\alpha x_t^{\mathcal{A}}\bigr]_+ \\
+&\ge
+\widehat{u}_t-\alpha\bigl[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}\bigr]_+ \\
+&=
+\sum_{i=1}^H M_t^{(i)}\widetilde{w}_t^{(i)}
+-\alpha\bigl[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}\bigr]_+,
+\end{aligned}
+\]
+which is \eqref{eq:u-lower-bound-eff}.
 \end{proof}
 
 \begin{lemma}[State-gap recursion]
@@ -1695,174 +1734,296 @@ Define the state gap
 \label{eq:def-state-gap}
 \Gamma_t^M \triangleq x_t^{\pi(M)} - x_t^{\mathcal{A}}.
 \end{equation}
-For any fixed $M\in\Delta_H$ and every $t\in\{1,\ldots,T\}$, the following two-sided recursion
-holds:
+For any fixed $M\in\Delta_H$ and every $t\in\{1,\ldots,T\}$,
 \begin{align}
 \Gamma_{t+1}^M
-&\ge \alpha\Gamma_t^M + \langle M_t-M,\widetilde{w}_t\rangle - \alpha[\Gamma_t^{M_t}]_+,\label{eq:GAMMA-Lower}\\[4pt]
+&\ge
+\alpha\Gamma_t^M
++\sum_{i=1}^H (M_t^{(i)}-M^{(i)})\widetilde{w}_t^{(i)}
+-\alpha[\Gamma_t^{M_t}]_+,
+\label{eq:GAMMA-Lower}\\[4pt]
 \Gamma_{t+1}^M
-&\le \alpha\Gamma_t^M + \langle M_t-M,\widetilde{w}_t\rangle.\label{eq:GAMMA-Upper}
+&\le
+\alpha\Gamma_t^M
++\sum_{i=1}^H (M_t^{(i)}-M^{(i)})\widetilde{w}_t^{(i)}.
+\label{eq:GAMMA-Upper}
 \end{align}
 \end{lemma}
 
 \begin{proof}
-From the state updates \eqref{eq:sdac-state-update} (for $\pi(M)$) and
-\eqref{eq:alg-state-update} (for the algorithm), the arrival $w_t$ cancels and
-we obtain the exact identity
+By \eqref{eq:def-state-gap}, \eqref{eq:sdac-state-update}, and
+\eqref{eq:alg-state-update},
 \begin{equation}
-    \label{eq:state-gap-identity}
-    \Gamma_{t+1}^M = x_{t+1}^{\pi(M)}-x_{t+1}^{\mathcal{A}} = \alpha\Gamma_t^M - \bigl(u_t^{\pi(M)}-u_t^{\mathcal{A}}\bigr).
+\label{eq:state-gap-identity}
+\begin{aligned}
+\Gamma_{t+1}^M
+&=
+\bigl(\alpha x_t^{\pi(M)}-u_t^{\pi(M)}+w_t\bigr)
+-
+\bigl(\alpha x_t^{\mathcal{A}}-u_t^{\mathcal{A}}+w_t\bigr) \\
+&=
+\alpha\bigl(x_t^{\pi(M)}-x_t^{\mathcal{A}}\bigr)
+-\bigl(u_t^{\pi(M)}-u_t^{\mathcal{A}}\bigr) \\
+&=
+\alpha\Gamma_t^M
+-\bigl(u_t^{\pi(M)}-u_t^{\mathcal{A}}\bigr).
+\end{aligned}
 \end{equation}
-Consequently, bounding $\Gamma_{t+1}^M$ reduces to bounding the control-action
-difference $u_t^{\pi(M)}-u_t^{\mathcal{A}}$.
-
-Using the SDAC representation \eqref{eq:def-sdac-policy-vector} for the benchmark
-control action and the bounds of Lemma~\ref{lem:bounding-u-eff} for the algorithm
-control action, we have
-\[
-u_t^{\pi(M)} = \langle M,\widetilde{w}_t\rangle,
-\]
-and
-\[
-\langle M_t,\widetilde{w}_t\rangle-\alpha[\Gamma_t^{M_t}]_+ \le u_t^{\mathcal{A}} \le
-\langle M_t,\widetilde{w}_t\rangle.
-\]
-Subtracting the upper bound on $u_t^{\mathcal{A}}$ from $u_t^{\pi(M)}$ yields the
-lower bound on $u_t^{\pi(M)}-u_t^{\mathcal{A}}$:
-\[
+By \eqref{eq:def-sdac-policy} and \eqref{eq:def-w-tilde},
+\begin{equation}
+\label{eq:u-pi-M-sum}
+u_t^{\pi(M)}
+=
+\sum_{i=1}^H M^{(i)}\widetilde{w}_t^{(i)}.
+\end{equation}
+From \eqref{eq:u-pi-M-sum} and \eqref{eq:u-upper-bound-eff},
+\begin{equation}
+\label{eq:u-diff-lower}
+\begin{aligned}
 u_t^{\pi(M)}-u_t^{\mathcal{A}}
-\ge \langle M,\widetilde{w}_t\rangle - \langle M_t,\widetilde{w}_t\rangle
-= - \langle M_t-M,\widetilde{w}_t\rangle.
-\]
-Inserting this into the identity \eqref{eq:state-gap-identity} gives
+&\ge
+u_t^{\pi(M)}
+-\sum_{i=1}^H M_t^{(i)}\widetilde{w}_t^{(i)} \\
+&=
+\sum_{i=1}^H M^{(i)}\widetilde{w}_t^{(i)}
+-\sum_{i=1}^H M_t^{(i)}\widetilde{w}_t^{(i)} \\
+&=
+-\sum_{i=1}^H (M_t^{(i)}-M^{(i)})\widetilde{w}_t^{(i)}.
+\end{aligned}
+\end{equation}
+Substituting \eqref{eq:u-diff-lower} into \eqref{eq:state-gap-identity},
 \[
-\Gamma_{t+1}^M \le \alpha\Gamma_t^M + \langle M_t-M,\widetilde{w}_t\rangle,
+\begin{aligned}
+\Gamma_{t+1}^M
+&=
+\alpha\Gamma_t^M
+-\bigl(u_t^{\pi(M)}-u_t^{\mathcal{A}}\bigr) \\
+&\le
+\alpha\Gamma_t^M
++\sum_{i=1}^H (M_t^{(i)}-M^{(i)})\widetilde{w}_t^{(i)},
+\end{aligned}
 \]
 which is \eqref{eq:GAMMA-Upper}.
 
-Similarly, using the lower bound on $u_t^{\mathcal{A}}$ produces an upper bound on
-$u_t^{\pi(M)}-u_t^{\mathcal{A}}$:
-\[
+From \eqref{eq:u-pi-M-sum}, \eqref{eq:u-lower-bound-eff}, and
+\eqref{eq:def-state-gap},
+\begin{equation}
+\label{eq:u-diff-upper}
 \begin{aligned}
 u_t^{\pi(M)}-u_t^{\mathcal{A}}
-&\le \langle M,\widetilde{w}_t\rangle - \Bigl(\langle M_t,\widetilde{w}_t\rangle-\alpha[\Gamma_t^{M_t}]_+\Bigr) \\
-&= - \langle M_t-M,\widetilde{w}_t\rangle + \alpha[\Gamma_t^{M_t}]_+.
+&\le
+u_t^{\pi(M)}
+-\sum_{i=1}^H M_t^{(i)}\widetilde{w}_t^{(i)} \\
+&\qquad
++\alpha\bigl[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}\bigr]_+ \\
+&=
+\sum_{i=1}^H M^{(i)}\widetilde{w}_t^{(i)}
+-\sum_{i=1}^H M_t^{(i)}\widetilde{w}_t^{(i)} \\
+&\qquad
++\alpha\bigl[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}\bigr]_+ \\
+&=
+-\sum_{i=1}^H (M_t^{(i)}-M^{(i)})\widetilde{w}_t^{(i)}
++\alpha[\Gamma_t^{M_t}]_+.
+\end{aligned}
+\end{equation}
+Substituting \eqref{eq:u-diff-upper} into \eqref{eq:state-gap-identity},
+\[
+\begin{aligned}
+\Gamma_{t+1}^M
+&=
+\alpha\Gamma_t^M
+-\bigl(u_t^{\pi(M)}-u_t^{\mathcal{A}}\bigr) \\
+&\ge
+\alpha\Gamma_t^M
++\sum_{i=1}^H (M_t^{(i)}-M^{(i)})\widetilde{w}_t^{(i)}
+-\alpha[\Gamma_t^{M_t}]_+,
 \end{aligned}
 \]
-Substituting this bound into the identity \eqref{eq:state-gap-identity} yields
-\[
-\Gamma_{t+1}^M \ge \alpha\Gamma_t^M + \langle M_t-M,\widetilde{w}_t\rangle - \alpha[\Gamma_t^{M_t}]_+,
-\]
-which is \eqref{eq:GAMMA-Lower} and completes the proof.
+which is \eqref{eq:GAMMA-Lower}.
 \end{proof}
 
 \begin{lemma}[State deviation bound]
 \label{lem:state-gap-bound}
-For every $t\in\{1,\ldots,T\}$, let the state gap be defined by \eqref{eq:def-state-gap}. Then
+For every $t\in\{1,\ldots,T\}$, with $\Gamma_t^{M}$ as in \eqref{eq:def-state-gap},
 \[
 -\frac{\alpha\,\eta L}{(1-\alpha)^3}
 \le
 \Gamma_t^{M_t}
-=
-x_t^{\pi(M_t)}-x_t^{\mathcal{A}}
 \le
 \frac{\alpha\,\eta L}{(1-\alpha)^2}.
 \]
 \end{lemma}
 
 \begin{proof}
-From \eqref{eq:GAMMA-Upper}, for any fixed benchmark $M\in\Delta_H$ and every
-$s\in\{1,\ldots,T\}$,
-\[
-\Gamma_{s+1}^{M}
+By \eqref{eq:def-state-gap}, \eqref{eq:sdac-state-update}, and
+\eqref{eq:alg-state-update}, $\Gamma_1^{M}=0$ for every $M\in\Delta_H$.
+If $X_{s+1}\le\alpha X_s+b_s$ and $X_1=0$, then for every $k\ge 1$,
+\begin{equation}
+\label{eq:affine-unroll}
+X_k
 \le
-\alpha\Gamma_s^{M} + \langle M_s-M,\widetilde{w}_s\rangle.
-\]
-Applying the recursion repeatedly up to time $t$ yields
-\[
+\sum_{s=1}^{k-1}\alpha^{k-1-s}b_s.
+\end{equation}
+Both sides vanish at $k=1$. If \eqref{eq:affine-unroll} holds at $k$, then
+\begin{equation}
+\label{eq:affine-unroll-step}
+\begin{aligned}
+X_{k+1}
+&\le
+\alpha X_k+b_k \\
+&\le
+\alpha\sum_{s=1}^{k-1}\alpha^{k-1-s}b_s+b_k \\
+&=
+\sum_{s=1}^{k}\alpha^{k-s}b_s,
+\end{aligned}
+\end{equation}
+which is \eqref{eq:affine-unroll} at $k+1$. If $X_{s+1}\ge\alpha X_s+b_s$ and
+$X_1=0$, the same induction yields $X_k\ge\sum_{s=1}^{k-1}\alpha^{k-1-s}b_s$.
+
+Fix $M\in\Delta_H$ and write
+$\xi_s(M)\triangleq\sum_{i=1}^H(M_s^{(i)}-M^{(i)})\widetilde{w}_s^{(i)}$.
+Applying \eqref{eq:affine-unroll} to \eqref{eq:GAMMA-Upper} at $k=t$ gives
+\begin{equation}
+\label{eq:gamma-unroll-ub}
+\Gamma_t^{M}
+\le
+\sum_{s=1}^{t-1}\alpha^{t-1-s}\xi_s(M).
+\end{equation}
+The reverse form applied to \eqref{eq:GAMMA-Lower} gives
+\begin{equation}
+\label{eq:gamma-unroll-lb}
 \begin{aligned}
 \Gamma_t^{M}
-&\le \alpha\Gamma_{t-1}^{M} + \langle M_{t-1}-M,\widetilde{w}_{t-1}\rangle \\
-&\le \alpha^2\Gamma_{t-2}^{M} + \alpha\langle M_{t-2}-M,\widetilde{w}_{t-2}\rangle \\
-&\qquad\qquad + \langle M_{t-1}-M,\widetilde{w}_{t-1}\rangle \\
-&\ \vdots \\
-&\le \alpha^{t-1}\Gamma_1^{M}
- + \sum_{s=1}^{t-1}\alpha^{t-1-s}\langle M_s-M,\widetilde{w}_s\rangle.
-\end{aligned}
-\]
-In this bound, choose the fixed comparison parameter to be $M=M_t$.
-Since $x_1^{\pi(M_t)}=x_1^{\mathcal{A}}=0$, we have $\Gamma_1^{M_t}=0$, and therefore
-\[
-\Gamma_t^{M_t}
-\le
-\sum_{s=1}^{t-1}\alpha^{t-1-s}\langle M_s-M_t,\widetilde{w}_s\rangle.
-\]
-Note that $\|\widetilde{w}_s\|_\infty = \max_{i\le H}\alpha^i w_{s-i} \le \alpha$
-since $w_\tau\in[0,1]$ and $i\ge1$. Hence,
-\[
-\begin{aligned}
-\Gamma_t^{M_t}
-&\le \sum_{s=1}^{t-1}\alpha^{t-1-s}\bigl|\langle M_s-M_t,\widetilde{w}_s\rangle\bigr| \\
-&\le \sum_{s=1}^{t-1}\alpha^{t-1-s}\|M_s-M_t\|_1\|\widetilde{w}_s\|_\infty \\
-&\le \alpha\,\eta L\sum_{s=1}^{t-1}\alpha^{t-1-s}(t-s) \\
-&= \alpha\,\eta L\sum_{j=1}^{t-1} j\,\alpha^{j-1}
-\le \alpha\,\eta L\sum_{j=1}^{\infty} j\,\alpha^{j-1}
-= \frac{\alpha\,\eta L}{(1-\alpha)^2}.
-\end{aligned}
-\]
-Here we used the geometric-series identity
-\[
-\sum_{j=1}^{\infty} j\,\alpha^{j-1} = \frac{1}{(1-\alpha)^2}.
-\]
-
-Similarly, for the lower bound, unrolling \eqref{eq:GAMMA-Lower} with the same fixed
-comparison parameter $M=M_t$ yields
-\[
-\Gamma_t^{M_t}
-\ge
-\sum_{s=1}^{t-1}\alpha^{t-1-s}\langle M_s-M_t,\widetilde{w}_s\rangle
+&\ge
+\sum_{s=1}^{t-1}\alpha^{t-1-s}\bigl(\xi_s(M)-\alpha[\Gamma_s^{M_s}]_+\bigr) \\
+&=
+\sum_{s=1}^{t-1}\alpha^{t-1-s}\xi_s(M)
 -
 \sum_{s=1}^{t-1}\alpha^{t-s}[\Gamma_s^{M_s}]_+.
-\]
-The upper bound just proved applies to every earlier time $s$, so
-$[\Gamma_s^{M_s}]_+\le \alpha\eta L/(1-\alpha)^2$. Also, by H\"older's inequality and
-Lemma~\ref{lem:cum-move},
-\begin{align*}
+\end{aligned}
+\end{equation}
+
+From \eqref{eq:def-w-tilde} and $w_\tau\in[0,1]$,
+\begin{equation}
+\label{eq:wtilde-inf}
+\|\widetilde{w}_s\|_\infty
+=
+\max_{1\le i\le H}\alpha^i w_{s-i}
+\le
+\alpha.
+\end{equation}
+H\"older's inequality and \eqref{eq:wtilde-inf} yield
+\begin{equation}
+\label{eq:xi-holder}
+\begin{aligned}
+\bigl|\xi_s(M_t)\bigr|
+&\le
+\|M_s-M_t\|_1\|\widetilde{w}_s\|_\infty \\
+&\le
+\alpha\|M_s-M_t\|_1.
+\end{aligned}
+\end{equation}
+Substituting Lemma~\ref{lem:cum-move} into \eqref{eq:xi-holder},
+\begin{equation}
+\label{eq:xi-move}
+\bigl|\xi_s(M_t)\bigr|
+\le
+\alpha\,\eta L\,(t-s).
+\end{equation}
+From \eqref{eq:gamma-unroll-ub} with $M=M_t$ and \eqref{eq:xi-move},
+\begin{equation}
+\label{eq:gamma-ub-sum}
+\begin{aligned}
+\Gamma_t^{M_t}
+&\le
+\sum_{s=1}^{t-1}\alpha^{t-1-s}\bigl|\xi_s(M_t)\bigr| \\
+&\le
+\alpha\,\eta L\sum_{s=1}^{t-1}\alpha^{t-1-s}(t-s).
+\end{aligned}
+\end{equation}
+The substitution $j=t-s$ gives
+\begin{equation}
+\label{eq:reindex-j}
+\sum_{s=1}^{t-1}\alpha^{t-1-s}(t-s)
+=
+\sum_{j=1}^{t-1} j\,\alpha^{j-1}.
+\end{equation}
+The identity
+\begin{equation}
+\label{eq:geom-j}
+\sum_{j=1}^{\infty} j\,\alpha^{j-1}
+=
+\frac{1}{(1-\alpha)^2}
+\end{equation}
+together with \eqref{eq:gamma-ub-sum} and \eqref{eq:reindex-j} yields
+\begin{equation}
+\label{eq:gamma-upper-final}
+\begin{aligned}
+\Gamma_t^{M_t}
+&\le
+\alpha\,\eta L\sum_{j=1}^{t-1} j\,\alpha^{j-1} \\
+&\le
+\alpha\,\eta L\sum_{j=1}^{\infty} j\,\alpha^{j-1} \\
+&=
+\frac{\alpha\,\eta L}{(1-\alpha)^2}.
+\end{aligned}
+\end{equation}
+
+From \eqref{eq:gamma-unroll-lb} with $M=M_t$,
+\begin{equation}
+\label{eq:gamma-lb-abs}
+\begin{aligned}
 \Gamma_t^{M_t}
 &\ge
--\alpha\,\eta L\sum_{s=1}^{t-1}\alpha^{t-1-s}(t-s) \\
-&\quad -\frac{\alpha\,\eta L}{(1-\alpha)^2}\sum_{s=1}^{t-1}\alpha^{t-s} \\
-&= -\alpha\,\eta L\sum_{j=1}^{t-1} j\,\alpha^{j-1}
- -\frac{\alpha\,\eta L}{(1-\alpha)^2}\sum_{j=1}^{t-1}\alpha^j.
-\end{align*}
-Extending both sums to infinity gives
-\[
+-\sum_{s=1}^{t-1}\alpha^{t-1-s}\bigl|\xi_s(M_t)\bigr| \\
+&\qquad
+-
+\sum_{s=1}^{t-1}\alpha^{t-s}[\Gamma_s^{M_s}]_+.
+\end{aligned}
+\end{equation}
+Substituting \eqref{eq:xi-move} and \eqref{eq:gamma-upper-final} at each earlier
+$s$ into \eqref{eq:gamma-lb-abs},
+\begin{equation}
+\label{eq:gamma-lb-finite}
+\begin{aligned}
 \Gamma_t^{M_t}
-\ge
--\alpha\,\eta L\sum_{j=1}^{\infty} j\,\alpha^{j-1}
--\frac{\alpha\,\eta L}{(1-\alpha)^2}\sum_{j=1}^{\infty}\alpha^j.
-\]
-Using the geometric-series identities
-\[
-\sum_{j=1}^{\infty} j\,\alpha^{j-1} = \frac{1}{(1-\alpha)^2},
-\qquad
-\sum_{j=1}^{\infty}\alpha^j = \frac{\alpha}{1-\alpha},
-\]
-we obtain
-\[
-\Gamma_t^{M_t}
-\ge
--\frac{\alpha\,\eta L}{(1-\alpha)^2}
--\frac{\alpha^2\,\eta L}{(1-\alpha)^3}
+&\ge
+-\alpha\,\eta L\sum_{s=1}^{t-1}\alpha^{t-1-s}(t-s)
+-\frac{\alpha\,\eta L}{(1-\alpha)^2}\sum_{s=1}^{t-1}\alpha^{t-s} \\
+&=
+-\alpha\,\eta L\sum_{j=1}^{t-1} j\,\alpha^{j-1}
+-\frac{\alpha\,\eta L}{(1-\alpha)^2}\sum_{j=1}^{t-1}\alpha^j,
+\end{aligned}
+\end{equation}
+where the equality uses \eqref{eq:reindex-j} and $j=t-s$ in the second sum.
+Extending both sums and using \eqref{eq:geom-j} together with
+\begin{equation}
+\label{eq:geom-alpha}
+\sum_{j=1}^{\infty}\alpha^j
 =
+\frac{\alpha}{1-\alpha},
+\end{equation}
+\begin{equation}
+\label{eq:gamma-lb-final}
+\begin{aligned}
+\Gamma_t^{M_t}
+&\ge
+-\alpha\,\eta L\sum_{j=1}^{\infty} j\,\alpha^{j-1}
+-\frac{\alpha\,\eta L}{(1-\alpha)^2}\sum_{j=1}^{\infty}\alpha^j \\
+&=
+-\frac{\alpha\,\eta L}{(1-\alpha)^2}
+-\frac{\alpha\,\eta L}{(1-\alpha)^2}\cdot\frac{\alpha}{1-\alpha} \\
+&=
+-\frac{\alpha\,\eta L\bigl((1-\alpha)+\alpha\bigr)}{(1-\alpha)^3} \\
+&=
 -\frac{\alpha\,\eta L}{(1-\alpha)^3}.
-\]
-Hence the claim follows.
+\end{aligned}
+\end{equation}
 \end{proof}
 
 \begin{lemma}[Action-state gap]
 \label{lem:u-gap-by-b-gap-eff}
-Let the state gap be defined by \eqref{eq:def-state-gap}. Then for all \(t\in\{1,\ldots,T\}\),
+For all \(t\in\{1,\ldots,T\}\),
 \[
 0
 \le
@@ -1873,78 +2034,105 @@ u_t^{\pi(M_t)}-u_t^{\mathcal{A}}
 \end{lemma}
 
 \begin{proof}
-By \eqref{eq:def-sdac-policy-vector} and \eqref{eq:alg-unconstrained-action}, the
-counterfactual control action equals the nominal control action, $u_t^{\pi(M_t)} =
-\langle M_t,\widetilde{w}_t\rangle = \widehat{u}_t\), while
-\(u_t^{\mathcal{A}}=\min\{\widehat{u}_t,\alpha x_t^{\mathcal{A}}\}\le \widehat{u}_t\)
-by \eqref{eq:alg-feasible-action}. Hence the gap is nonnegative and
-\[
-u_t^{\pi(M_t)} - u_t^{\mathcal{A}}
-=
-\widehat{u}_t - \min\{\widehat{u}_t,\alpha x_t^{\mathcal{A}}\}
-=
-\bigl[\langle M_t,\widetilde{w}_t\rangle - \alpha x_t^{\mathcal{A}}\bigr]_+ .
-\]
-As established in the proof of Lemma~\ref{lem:bounding-u-eff} (using feasibility of
-\(\pi(M_t)\)),
-\[
-\bigl[\langle M_t,\widetilde{w}_t\rangle - \alpha x_t^{\mathcal{A}}\bigr]_+
-\le
-\alpha\,[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}]_+
-=
-\alpha\,[\Gamma_t^{M_t}]_+ .
-\]
-By Lemma~\ref{lem:state-gap-bound},
-\([\Gamma_t^{M_t}]_+ \le \dfrac{\alpha\,\eta L}{(1-\alpha)^2}\), so
-\[
+By \eqref{eq:u-pi-M-sum} at $M=M_t$ and \eqref{eq:u-clip-identity},
+\begin{equation}
+\label{eq:u-pi-Mt-hat}
+\begin{aligned}
+u_t^{\pi(M_t)}
+&=
+\sum_{i=1}^H M_t^{(i)}\widetilde{w}_t^{(i)} \\
+&=
+\widehat{u}_t.
+\end{aligned}
+\end{equation}
+Substituting \eqref{eq:u-pi-Mt-hat} and \eqref{eq:u-clip-identity},
+\begin{equation}
+\label{eq:u-gap-as-pospart}
+\begin{aligned}
 u_t^{\pi(M_t)}-u_t^{\mathcal{A}}
-\le
-\alpha\,[\Gamma_t^{M_t}]_+
-\le
-\frac{\alpha^2\,\eta L}{(1-\alpha)^2},
+&=
+\widehat{u}_t-\bigl(\widehat{u}_t-\bigl[\widehat{u}_t-\alpha x_t^{\mathcal{A}}\bigr]_+\bigr) \\
+&=
+\bigl[\widehat{u}_t-\alpha x_t^{\mathcal{A}}\bigr]_+ \\
+&\ge
+0.
+\end{aligned}
+\end{equation}
+By \eqref{eq:u-pospart-bound} and \eqref{eq:def-state-gap},
+\begin{equation}
+\label{eq:u-gap-le-gamma}
+\begin{aligned}
+\bigl[\widehat{u}_t-\alpha x_t^{\mathcal{A}}\bigr]_+
+&\le
+\alpha\bigl[x_t^{\pi(M_t)}-x_t^{\mathcal{A}}\bigr]_+ \\
+&=
+\alpha[\Gamma_t^{M_t}]_+.
+\end{aligned}
+\end{equation}
+From \eqref{eq:u-gap-as-pospart}, \eqref{eq:u-gap-le-gamma}, and
+\eqref{eq:gamma-upper-final},
+\[
+\begin{aligned}
+u_t^{\pi(M_t)}-u_t^{\mathcal{A}}
+&=
+\bigl[\widehat{u}_t-\alpha x_t^{\mathcal{A}}\bigr]_+ \\
+&\le
+\alpha[\Gamma_t^{M_t}]_+ \\
+&\le
+\frac{\alpha^2\,\eta L}{(1-\alpha)^2}.
+\end{aligned}
 \]
-which completes the proof.
 \end{proof}
 
 \begin{lemma}[Stability term]
 \label{lem:stab-sum}
 For all horizons \(T\),
 \[
-\begin{aligned}
 \sum_{t=1}^T \Bigl(c_t(x_t^{\mathcal{A}},u_t^{\mathcal{A}})
 -c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr)\Bigr)
 \le
-\frac{\alpha\,T\eta L^2}{(1-\alpha)^2},
-\end{aligned}
+\frac{\alpha\,T\eta L^2}{(1-\alpha)^2}.
 \]
-where \(L=\alpha L_u+\tfrac{L_x}{1-\alpha}\).
 \end{lemma}
 
 \begin{proof}
-By Lipschitz continuity of \(c_t\) (see equation \eqref{eq:model-lipschitz}),
-\[
+By \eqref{eq:model-lipschitz},
+\begin{equation}
+\label{eq:stab-lip}
 \begin{aligned}
 &c_t\bigl(x_t^{\mathcal{A}},u_t^{\mathcal{A}}\bigr)
 -
 c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr) \\
 &\qquad\le
-L_u \big|u_t^{\mathcal{A}} - u_t^{\pi(M_t)}\big|
-+ L_x \big|x_t^{\mathcal{A}} - x_t^{\pi(M_t)}\big|.
+L_u \bigl|u_t^{\mathcal{A}} - u_t^{\pi(M_t)}\bigr|
++ L_x \bigl|x_t^{\mathcal{A}} - x_t^{\pi(M_t)}\bigr|.
 \end{aligned}
-\]
+\end{equation}
 From Lemma~\ref{lem:u-gap-by-b-gap-eff},
-\[
-|u_t^{\mathcal{A}} - u_t^{\pi(M_t)}|
-\le \frac{\alpha^2\,\eta L}{(1-\alpha)^2}.
-\]
-Also, by Lemma~\ref{lem:state-gap-bound} and \eqref{eq:def-state-gap},
-\[
-|x_t^{\mathcal{A}} - x_t^{\pi(M_t)}|
-= |\Gamma_t^{M_t}|
-\le \frac{\alpha\,\eta L}{(1-\alpha)^3}.
-\]
-Therefore, for each \(t\in\{1,\ldots,T\}\),
-\[
+\begin{equation}
+\label{eq:stab-u-gap}
+\begin{aligned}
+\bigl|u_t^{\mathcal{A}} - u_t^{\pi(M_t)}\bigr|
+&=
+u_t^{\pi(M_t)}-u_t^{\mathcal{A}} \\
+&\le
+\frac{\alpha^2\,\eta L}{(1-\alpha)^2}.
+\end{aligned}
+\end{equation}
+By \eqref{eq:def-state-gap} and Lemma~\ref{lem:state-gap-bound},
+\begin{equation}
+\label{eq:stab-x-gap}
+\begin{aligned}
+\bigl|x_t^{\mathcal{A}} - x_t^{\pi(M_t)}\bigr|
+&=
+\bigl|\Gamma_t^{M_t}\bigr| \\
+&\le
+\frac{\alpha\,\eta L}{(1-\alpha)^3}.
+\end{aligned}
+\end{equation}
+Substituting \eqref{eq:stab-u-gap} and \eqref{eq:stab-x-gap} into \eqref{eq:stab-lip},
+\begin{equation}
+\label{eq:stab-per-t}
 \begin{aligned}
 &c_t\bigl(x_t^{\mathcal{A}},u_t^{\mathcal{A}}\bigr)
 -
@@ -1953,9 +2141,10 @@ c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr) \\
 L_u \frac{\alpha^2\,\eta L}{(1-\alpha)^2}
 + L_x \frac{\alpha\,\eta L}{(1-\alpha)^3}.
 \end{aligned}
-\]
-Summing over $t=1,\ldots,T$ gives
-\[
+\end{equation}
+Summing \eqref{eq:stab-per-t} over $t=1,\ldots,T$,
+\begin{equation}
+\label{eq:stab-sum-raw}
 \begin{aligned}
 &\sum_{t=1}^T
 \Bigl(
@@ -1964,46 +2153,80 @@ c_t(x_t^{\mathcal{A}},u_t^{\mathcal{A}})
 c_t(x_t^{\pi(M_t)},u_t^{\pi(M_t)})
 \Bigr) \\
 &\qquad\le
-\frac{\alpha\,T\eta L}{(1-\alpha)^2}\left(
+T\Biggl(
+L_u \frac{\alpha^2\,\eta L}{(1-\alpha)^2}
++ L_x \frac{\alpha\,\eta L}{(1-\alpha)^3}
+\Biggr).
+\end{aligned}
+\end{equation}
+Factoring the right-hand side of \eqref{eq:stab-sum-raw} and substituting
+\eqref{eq:def-surrogate-L},
+\[
+\begin{aligned}
+&T\Biggl(
+L_u \frac{\alpha^2\,\eta L}{(1-\alpha)^2}
++ L_x \frac{\alpha\,\eta L}{(1-\alpha)^3}
+\Biggr) \\
+&\qquad=
+\frac{\alpha\,T\eta L}{(1-\alpha)^2}
+\Biggl(
 \alpha L_u
 +\frac{L_x}{1-\alpha}
-\right)
-=
-\frac{\alpha\,T\eta L^2}{(1-\alpha)^2},
+\Biggr) \\
+&\qquad=
+\frac{\alpha\,T\eta L^2}{(1-\alpha)^2}.
 \end{aligned}
 \]
-where we used \(L = \alpha L_u + \tfrac{L_x}{1-\alpha}\) in the final step.
 \end{proof}
 
 
 
 \begin{proof}[Proof of Theorem~\ref{thm:regret-bound}]
-
-Starting from \eqref{eq:def-regret}, we have the following decomposition of the
-regret:
-\begin{align*}
+By \eqref{eq:def-regret} and \eqref{eq:def-cumulative-cost},
+\begin{equation}
+\label{eq:regret-as-sum}
+\begin{aligned}
 \RegSDAC{T}
-&= \sum_{t=1}^T c_t(x_t^{\mathcal{A}},u_t^{\mathcal{A}}) \\
-&\quad - \min_{M\in\Delta_H}\sum_{t=1}^T c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr) \\
-&= \sum_{t=1}^T c_t(x_t^{\mathcal{A}},u_t^{\mathcal{A}})
- - \sum_{t=1}^T c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr) \\
-&\quad + \sum_{t=1}^T c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr) \\
-&\quad - \min_{M\in\Delta_H}\sum_{t=1}^T c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr).
-\end{align*}
-We call the first sum the stability term, and the second sum the OMD term. We will
-bound each term separately.
+&=
+\sum_{t=1}^T c_t(x_t^{\mathcal{A}},u_t^{\mathcal{A}}) \\
+&\quad-
+\min_{M\in\Delta_H}\sum_{t=1}^T c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr).
+\end{aligned}
+\end{equation}
+Adding and subtracting $\sum_{t=1}^T c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr)$
+in \eqref{eq:regret-as-sum},
+\begin{equation}
+\label{eq:regret-decomp}
+\begin{aligned}
+\RegSDAC{T}
+&=
+\sum_{t=1}^T \Bigl(c_t(x_t^{\mathcal{A}},u_t^{\mathcal{A}})
+-c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr)\Bigr) \\
+&\quad+
+\sum_{t=1}^T c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr) \\
+&\quad-
+\min_{M\in\Delta_H}\sum_{t=1}^T c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr).
+\end{aligned}
+\end{equation}
+We call the first sum the stability term, and the second sum the OMD term.
 
-We bound the OMD term using the OMD update \eqref{eq:alg-omd-argmin} with
-the unnormalized negentropy $\Psi$ and Bregman divergence $D_\Psi$ from
-\eqref{eq:def-negentropy}. Under the initialization \eqref{eq:alg-init}, for any
-benchmark $M^\star\in\Delta_H$ with $W^\star\triangleq\sum_{i=1}^H M^{\star(i)}$, so
-$W^\star\le 1$,
-\[
+We bound the OMD term using the update \eqref{eq:alg-omd-argmin} with $\Psi$
+and $D_\Psi$ from \eqref{eq:def-negentropy}. Under \eqref{eq:alg-init}, for any
+$M^\star\in\Delta_H$ with $W^\star\triangleq\sum_{i=1}^H M^{\star(i)}$,
+\begin{equation}
+\label{eq:breg-init-sub}
 \begin{aligned}
 &D_\Psi(M^\star\|M_1) \\
 &\quad=
 \sum_{i=1}^H\Bigl(M^{\star(i)}\log\bigl((H+1)M^{\star(i)}\bigr)
--M^{\star(i)}+\tfrac{1}{H+1}\Bigr) \\
+-M^{\star(i)}+\tfrac{1}{H+1}\Bigr).
+\end{aligned}
+\end{equation}
+Expanding the logarithm in \eqref{eq:breg-init-sub},
+\begin{equation}
+\label{eq:breg-init-expand}
+\begin{aligned}
+&D_\Psi(M^\star\|M_1) \\
 &\quad=
 \sum_{i=1}^H M^{\star(i)}\log M^{\star(i)}
 +
@@ -2013,92 +2236,110 @@ W^\star
 +
 \tfrac{H}{H+1}.
 \end{aligned}
-\]
-Since each $M^{\star(i)}\in[0,1]$, one has $M^{\star(i)}\log M^{\star(i)}\le 0$, and
-therefore
-\[
+\end{equation}
+Since $M^{\star(i)}\in[0,1]$, one has $M^{\star(i)}\log M^{\star(i)}\le 0$, so
+\begin{equation}
+\label{eq:breg-init-drop}
 D_\Psi(M^\star\|M_1)
 \le
 W^\star\log(H+1)-W^\star+\tfrac{H}{H+1}.
-\]
-The right-hand side is at most $\log(H+1)$ for every $W^\star\in[0,1]$: equivalently,
-\[
-(1-W^\star)\log(H+1)+W^\star-\tfrac{H}{H+1}\ge 0,
-\]
-which holds because the left-hand side is affine in $W^\star$ and nonnegative at the
-endpoints $W^\star=0$ and $W^\star=1$. Hence $D_\Psi(M^\star\|M_1)\le\log(H+1)$. The
-surrogate costs $\ell_t$ from \eqref{eq:alg-surrogate-cost} are convex, and the
+\end{equation}
+The right-hand side of \eqref{eq:breg-init-drop} is affine in $W^\star\in[0,1]$
+and does not exceed $\log(H+1)$ at the endpoints $W^\star=0$ and $W^\star=1$.
+Hence
+\begin{equation}
+\label{eq:breg-init-bound}
+D_\Psi(M^\star\|M_1)\le\log(H+1).
+\end{equation}
+The surrogate costs $\ell_t$ from \eqref{eq:alg-surrogate-cost} are convex, and the
 chosen subgradients satisfy $\|g_t\|_\infty\le L$ by
-Lemma~\ref{lem:sdac-surrogate}. Hence, the standard OMD regret bound
-with Bregman divergence $D_\Psi$ on $\Delta_H$ \cite{hazan2016introduction} yields
-\begin{align*}
-\sum_{t=1}^T \ell_t(M_t) - \min_{M\in\Delta_H}\sum_{t=1}^T \ell_t(M)
-&\le
-\frac{\log(H+1)}{\eta} + \frac{\eta L^2 T}{2}.
-\end{align*}
-Using \eqref{eq:alg-surrogate-cost}, we substitute
-\(\ell_t(M)=c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr)\), so that
-\begin{align*}
-\sum_{t=1}^T \ell_t(M_t)
-&=
-\sum_{t=1}^T c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr), \\
-\min_{M\in\Delta_H}\sum_{t=1}^T \ell_t(M)
-&=
-\min_{M\in\Delta_H}\sum_{t=1}^T c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr).
-\end{align*}
-Thus this term becomes
-\begin{align*}
+Lemma~\ref{lem:sdac-surrogate}. The standard OMD regret bound with Bregman
+divergence $D_\Psi$ on $\Delta_H$ \cite{hazan2016introduction} therefore gives,
+for every $M^\star\in\Delta_H$,
+\begin{equation}
+\label{eq:omd-ell-raw}
+\begin{aligned}
+&\sum_{t=1}^T \ell_t(M_t)-\sum_{t=1}^T \ell_t(M^\star) \\
+&\qquad\le
+\frac{D_\Psi(M^\star\|M_1)}{\eta}+\frac{\eta L^2 T}{2}.
+\end{aligned}
+\end{equation}
+Substituting \eqref{eq:breg-init-bound} into \eqref{eq:omd-ell-raw} and minimizing
+over $M^\star\in\Delta_H$,
+\begin{equation}
+\label{eq:omd-ell}
+\begin{aligned}
+&\sum_{t=1}^T \ell_t(M_t)-\min_{M\in\Delta_H}\sum_{t=1}^T \ell_t(M) \\
+&\qquad\le
+\frac{\log(H+1)}{\eta}+\frac{\eta L^2 T}{2}.
+\end{aligned}
+\end{equation}
+Substituting \eqref{eq:alg-surrogate-cost} into \eqref{eq:omd-ell},
+\begin{equation}
+\label{eq:omd-term}
+\begin{aligned}
 &\sum_{t=1}^T c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr) \\
 &\quad-
 \min_{M\in\Delta_H}\sum_{t=1}^T c_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr) \\
 &\qquad\le
-\frac{\log(H+1)}{\eta} + \frac{\eta L^2 T}{2}.
-\end{align*}
+\frac{\log(H+1)}{\eta}+\frac{\eta L^2 T}{2}.
+\end{aligned}
+\end{equation}
 
-
-From Lemma~\ref{lem:stab-sum}, the stability term satisfies
-\[
+From Lemma~\ref{lem:stab-sum},
+\begin{equation}
+\label{eq:stab-term}
 \begin{aligned}
 &\sum_{t=1}^T c_t(x_t^{\mathcal{A}},u_t^{\mathcal{A}})
-- \sum_{t=1}^T c_t(x_t^{\pi(M_t)},u_t^{\pi(M_t)}) \\
+-
+\sum_{t=1}^T c_t\bigl(x_t^{\pi(M_t)},u_t^{\pi(M_t)}\bigr) \\
 &\qquad\le
 \frac{\alpha\,\eta L^2 T}{(1-\alpha)^2}.
 \end{aligned}
-\]
-Adding the OMD term and the stability term yields the combined bound
-\[
+\end{equation}
+Adding \eqref{eq:omd-term} and \eqref{eq:stab-term} and using
+\eqref{eq:regret-decomp},
+\begin{equation}
+\label{eq:regret-sum}
 \begin{aligned}
 \RegSDAC{T}
-\;\le\;
+&\le
 \frac{\log(H+1)}{\eta}
-\;+\;
++
 \frac{\eta L^2 T}{2}
-\;+\;
++
 \frac{\alpha\,\eta L^2 T}{(1-\alpha)^2}.
 \end{aligned}
-\]
-Rearranging by factoring out the \(\eta\) term gives
-\[
+\end{equation}
+Factoring the coefficient of $\eta$ in \eqref{eq:regret-sum},
+\begin{equation}
+\label{eq:regret-eta}
+\begin{aligned}
 \RegSDAC{T}
-\;\le\;
+&\le
 \frac{\log(H+1)}{\eta}
-\;+\;
++
 \eta L^2 T\Bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\Bigr).
-\]
+\end{aligned}
+\end{equation}
 For $A,B>0$, the function $A/\eta+B\eta$ is minimized over $\eta>0$ at
 $\eta=\sqrt{A/B}$, where its value is $2\sqrt{AB}$. Taking
 $A=\log(H+1)$ and
-$B=L^2T\bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\bigr)$ yields the optimal
-step size
-\[
-\eta^* = \sqrt{\frac{\log(H+1)}{L^2
-T\bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\bigr)}},
-\]
-and the resulting regret bound
-\[
-\RegSDAC{T} \;\le\;
+$B=L^2T\bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\bigr)$ in
+\eqref{eq:regret-eta} yields the step size
+\begin{equation}
+\label{eq:eta-star}
+\eta^*
+=
+\sqrt{\frac{\log(H+1)}{L^2 T\bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\bigr)}}.
+\end{equation}
+and the bound
+\begin{equation}
+\label{eq:regret-opt}
+\RegSDAC{T}
+\le
 2L\sqrt{\Bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\Bigr)T\log(H+1)}.
-\]
+\end{equation}
 \end{proof}
 
 
