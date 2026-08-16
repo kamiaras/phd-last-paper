@@ -407,7 +407,7 @@ with the same convention $w_\tau\equiv 0$ for $\tau\le 0$, so that
 \eqref{eq:def-sdac-policy} can be written as
 \begin{equation}
 \label{eq:def-sdac-policy-vector}
-u_t^{\pi(M)} = \langle M,\widetilde{w}_t\rangle.
+u_t^{\pi(M)} = \langle \widetilde{w}_t,M\rangle.
 \end{equation}
 
 The induced state trajectory satisfies
@@ -788,7 +788,7 @@ Theorem~\ref{thm:regret-bound}).
 The controller first forms the nominal SDAC action
 \begin{equation}
 \label{eq:alg-unconstrained-action}
-\widehat{u}_t \triangleq \langle M_t,\widetilde{w}_t\rangle,
+\widehat{u}_t \triangleq \langle \widetilde{w}_t,M_t\rangle,
 \end{equation}
 and clips it to the admissible interval $[0,\alpha x_t^{\mathcal{A}}]$:
 \begin{equation}
@@ -1333,7 +1333,7 @@ $\widetilde{M}_{t+1}$ be defined coordinatewise by \eqref{eq:alg-omd-mult},
 i.e.\ $\widetilde{M}_{t+1}^{(i)}=M_t^{(i)}e^{-\eta g_t^{(i)}}$. Then
 \[
 \begin{aligned}
-&\operatorname*{arg\,min}_{M\in\Delta_H}\Bigl\{\eta\sum_{i=1}^H g_t^{(i)}M^{(i)}+D_\Psi(M\|M_t)\Bigr\} \\
+&\operatorname*{arg\,min}_{M\in\Delta_H}\Bigl\{\eta\langle g_t,M\rangle+D_\Psi(M\|M_t)\Bigr\} \\
 &\quad=
 \operatorname*{arg\,min}_{M\in\Delta_H} D_\Psi(M\|\widetilde{M}_{t+1})
 =
@@ -1649,7 +1649,7 @@ For every fixed $M\in\Delta_H$ and every $t\in\{1,\ldots,T\}$,
 =
 \alpha\Gamma_t^M
 +
-\langle M_t-M,\widetilde{w}_t\rangle
+\langle \widetilde{w}_t,M_t-M\rangle
 -d_t.
 \end{equation}
 Consequently,
@@ -1658,13 +1658,13 @@ Consequently,
 &\le
 \alpha\Gamma_t^M
 +
-\langle M_t-M,\widetilde{w}_t\rangle,
+\langle \widetilde{w}_t,M_t-M\rangle,
 \label{eq:GAMMA-Upper}\\
 \Gamma_{t+1}^M
 &\ge
 \alpha\Gamma_t^M
 +
-\langle M_t-M,\widetilde{w}_t\rangle
+\langle \widetilde{w}_t,M_t-M\rangle
 -\alpha[\Gamma_t^{M_t}]_+.
 \label{eq:GAMMA-Lower}
 \end{align}
@@ -1688,7 +1688,7 @@ The two trajectories use the same arrival $w_t$. Hence
 &=
 \alpha\Gamma_t^M
 +
-\langle M_t-M,\widetilde{w}_t\rangle
+\langle \widetilde{w}_t,M_t-M\rangle
 -d_t.
 \end{aligned}
 \end{equation}
@@ -1714,7 +1714,7 @@ Fix $t\in\{1,\ldots,T\}$. For $s<t$, define
 \[
 \xi_{s,t}
 \triangleq
-\langle M_s-M_t,\widetilde{w}_s\rangle.
+\langle \widetilde{w}_s,M_s-M_t\rangle.
 \]
 Since $\widetilde{w}_s^{(i)}=\alpha^i w_{s-i}$,
 \[
