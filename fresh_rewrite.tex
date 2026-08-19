@@ -38,9 +38,13 @@ simplex-constrained finite-memory policy class whose fixed policies satisfy the
 per-step action constraint by construction. For online adaptation, an entropic
 online mirror descent (OMD) update maintains the SDAC parameters on the
 subprobability simplex, while scalar action clipping ensures feasibility of the
-actual time-varying trajectory. We prove
-$O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy, where
-$H$ is the memory horizon. We further show that SDAC geometrically approximates
+actual time-varying trajectory. We show that this scalar clipping is exactly the
+action induced by an entropic Bregman projection onto the current availability
+constraint, although the projected parameter need not be computed. We prove
+$O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy, with
+a leading constant that is $\Theta(\alpha)$ as $\alpha\downarrow0$ and
+$\Theta((1-\alpha)^{-3/2})$ as $\alpha\uparrow1$, where $H$ is the memory horizon.
+We further show that SDAC geometrically approximates
 every feasible proportional state-feedback policy; choosing $H=\Theta(\log T)$
 yields $O\!\left(\sqrt{T\log\log T}\right)$ regret against the best policy in this
 class. The setting is motivated by energy-harvesting battery management and related
@@ -126,8 +130,12 @@ Our contributions are as follows:
     \item \textbf{Online control and regret.} We develop an entropic OMD controller
         over SDAC parameters. A Bregman projection maintains the simplex constraint
         on the parameters, and scalar action clipping maintains feasibility of the actual
-        trajectory. The controller achieves
-        $O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy
+        trajectory. The clipping has an equivalent Bregman-projection interpretation,
+        but its direct implementation requires only a scalar minimum. A sharp
+        coordinatewise gradient estimate and a contractive trajectory comparison give
+        $O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy,
+        with leading dependence $\Theta(\alpha)$ as $\alpha\downarrow0$ and
+        $\Theta((1-\alpha)^{-3/2})$ as $\alpha\uparrow1$,
         and, with $H=\Theta(\log T)$, achieves
         $O\!\left(\sqrt{T\log\log T}\right)$ regret against the best feasible
         proportional state-feedback policy.
@@ -659,16 +667,19 @@ c_t\bigl(x_t(\mathbf{m}),u_t(\mathbf{m})\bigr),
 and
 \begin{equation}
 \label{eq:def-surrogate-G}
-G\triangleq\frac{L_x}{1-\alpha}+\alpha L_u.
+G_\alpha
+\triangleq
+\alpha\left(\frac{L_x}{1-\alpha}+L_u\right).
 \end{equation}
 Then $\ell_t$ is convex on $\mathcal{M}_H$, and for all $\mathbf{m},\mathbf{m}'\in\mathcal{M}_H$,
 \[
 |\ell_t(\mathbf{m})-\ell_t(\mathbf{m}')|
 \le
-G\|\mathbf{m}-\mathbf{m}'\|_1.
+G_\alpha\|\mathbf{m}-\mathbf{m}'\|_1.
 \]
 Moreover, at every $\mathbf{m}\in\mathcal{M}_H$, one can select
-$\mathbf{g}_t\in\partial\ell_t(\mathbf{m})$ such that $\|\mathbf{g}_t\|_\infty\le G$.
+$\mathbf{g}_t\in\partial\ell_t(\mathbf{m})$ such that
+$\|\mathbf{g}_t\|_\infty\le G_\alpha$.
 \end{lemma}
 
 \begin{proof}
@@ -679,11 +690,37 @@ x_t(\mathbf{m})=r_t+\langle \boldsymbol{\phi}_t^x,\mathbf{m}\rangle,
 \qquad
 u_t(\mathbf{m})=\langle \boldsymbol{\phi}_t^u,\mathbf{m}\rangle.
 \end{equation}
-The coefficient bounds in Lemma~\ref{lem:sdac-state-decomp}, together with
-$w_{t-i}\in[0,1]$, imply
+For every $i\in\{1,\ldots,H\}$, the definitions of $r_{t,i}$ and $r_t$ give
+\begin{equation}
+\label{eq:phi-x-exact-tail}
+\begin{aligned}
+(\boldsymbol{\phi}_t^x)_i
+&=
+r_{t,i}-r_t \\
+&=
+-\sum_{j=i+1}^{t-1}\alpha^{j-1}w_{t-j},
+\end{aligned}
+\end{equation}
+where the sum is empty when $i\ge t-1$. Hence
+\begin{equation}
+\label{eq:surr-coordinate-decay}
+\begin{aligned}
+\bigl|(\boldsymbol{\phi}_t^x)_i\bigr|
+&\le
+\sum_{j=i+1}^{\infty}\alpha^{j-1}
+=
+\frac{\alpha^i}{1-\alpha}, \\
+0\le(\boldsymbol{\phi}_t^u)_i
+&=
+\alpha^i w_{t-i}
+\le
+\alpha^i.
+\end{aligned}
+\end{equation}
+Taking the largest coordinate, attained in these upper bounds at $i=1$, yields
 \begin{equation}
 \label{eq:surr-coefficient-norms}
-\|\boldsymbol{\phi}_t^x\|_\infty\le\frac{1}{1-\alpha},
+\|\boldsymbol{\phi}_t^x\|_\infty\le\frac{\alpha}{1-\alpha},
 \qquad
 \|\boldsymbol{\phi}_t^u\|_\infty\le\alpha.
 \end{equation}
@@ -704,10 +741,10 @@ L_u\bigl|\langle \boldsymbol{\phi}_t^u,\mathbf{m}-\mathbf{m}'\rangle\bigr| \\
 \bigl(L_x\|\boldsymbol{\phi}_t^x\|_\infty+L_u\|\boldsymbol{\phi}_t^u\|_\infty\bigr)
 \|\mathbf{m}-\mathbf{m}'\|_1 \\
 &\le
-\left(\frac{L_x}{1-\alpha}+\alpha L_u\right)
+\alpha\left(\frac{L_x}{1-\alpha}+L_u\right)
 \|\mathbf{m}-\mathbf{m}'\|_1 \\
 &=
-G\|\mathbf{m}-\mathbf{m}'\|_1.
+G_\alpha\|\mathbf{m}-\mathbf{m}'\|_1.
 \end{aligned}
 \end{equation}
 
@@ -729,18 +766,27 @@ For every $\mathbf{m}'\in\mathcal{M}_H$, the subgradient inequality and
 &=
 \ell_t(\mathbf{m})+\langle \mathbf{g}_t,\mathbf{m}'-\mathbf{m}\rangle.
 \end{align*}
-Thus $\mathbf{g}_t\in\partial\ell_t(\mathbf{m})$. Finally,
+Thus $\mathbf{g}_t\in\partial\ell_t(\mathbf{m})$. For each
+$i\in\{1,\ldots,H\}$, the exact coordinate decay in
+\eqref{eq:surr-coordinate-decay} gives
+\begin{equation}
+\label{eq:surr-subgradient-coordinate-bound}
+\begin{aligned}
+|g_{t,i}|
+&\le
+|\zeta_t^x|\bigl|(\boldsymbol{\phi}_t^x)_i\bigr|
++|\zeta_t^u|(\boldsymbol{\phi}_t^u)_i \\
+&\le
+\alpha^i\left(\frac{L_x}{1-\alpha}+L_u\right) \\
+&\le
+\alpha\left(\frac{L_x}{1-\alpha}+L_u\right)
+=G_\alpha.
+\end{aligned}
+\end{equation}
+Taking the maximum over $i$ proves
 \begin{equation}
 \label{eq:surr-subgradient-bound-short}
-\begin{aligned}
-\|\mathbf{g}_t\|_\infty
-&\le
-|\zeta_t^x|\,\|\boldsymbol{\phi}_t^x\|_\infty+|\zeta_t^u|\,\|\boldsymbol{\phi}_t^u\|_\infty \\
-&\le
-\frac{L_x}{1-\alpha}+\alpha L_u
-=
-G.
-\end{aligned}
+\|\mathbf{g}_t\|_\infty\le G_\alpha.
 \end{equation}
 \end{proof}
 
@@ -877,6 +923,106 @@ with $x_1=0$ and $w_t\in[0,1]$, induction on
 \eqref{eq:alg-state-update} yields $x_t\ge 0$ for all $t\in[T+1]$,
 so the online trajectory satisfies \eqref{eq:model-feasibility}.
 
+The scalar correction in \eqref{eq:alg-feasible-action} also has an exact
+Bregman-projection interpretation. This interpretation is useful conceptually, but
+it does not add a projection to the implementation. The positive initialization
+and multiplicative OMD update keep $\mathbf m_t$ strictly positive for every $t$;
+see Lemma~\ref{lem:omd-closed-form}.
+
+\begin{lemma}[Availability clipping as a Bregman projection]
+\label{lem:availability-projection}
+At time $t$, define the parameter set compatible with the available state by
+\begin{equation}
+\label{eq:def-availability-set}
+\mathcal F_t(x_t)
+\triangleq
+\left\{
+\mathbf m\in\mathcal M_H:
+\langle\boldsymbol\phi_t^u,\mathbf m\rangle
+\le \alpha x_t
+\right\}.
+\end{equation}
+For the negentropy $\Psi$ in \eqref{eq:def-negentropy}, let
+\begin{equation}
+\label{eq:def-exec-projection}
+\mathbf m_t^{\mathrm{exec}}
+\in
+\operatorname*{arg\,min}_{\mathbf m\in\mathcal F_t(x_t)}
+D_\Psi(\mathbf m\|\mathbf m_t).
+\end{equation}
+Then
+\begin{equation}
+\label{eq:availability-projection-action}
+\left\langle
+\boldsymbol\phi_t^u,\mathbf m_t^{\mathrm{exec}}
+\right\rangle
+=
+\min\!\left\{
+\left\langle\boldsymbol\phi_t^u,\mathbf m_t\right\rangle,
+\alpha x_t
+\right\}
+=u_t.
+\end{equation}
+Thus the projection formulation and the scalar clipping rule induce exactly the
+same executed action.
+\end{lemma}
+
+\begin{proof}
+The set $\mathcal F_t(x_t)$ is nonempty because it contains $\mathbf0$, and it is
+compact and convex. Since $\mathbf m_t$ is strictly positive coordinatewise,
+$D_\Psi(\cdot\|\mathbf m_t)$ is strictly convex on $\mathcal M_H$ and is minimized
+uniquely at $\mathbf m_t$ over any feasible set containing $\mathbf m_t$.
+Consequently, if
+\[
+\langle\boldsymbol\phi_t^u,\mathbf m_t\rangle
+\le \alpha x_t,
+\]
+then $\mathbf m_t^{\mathrm{exec}}=\mathbf m_t$, which proves
+\eqref{eq:availability-projection-action} in the feasible case.
+
+Suppose instead that $\mathbf m_t$ is infeasible. We claim that the availability
+constraint is active at $\mathbf m_t^{\mathrm{exec}}$. If it were slack, then
+\begin{equation}
+\label{eq:availability-projection-slack}
+\langle\boldsymbol\phi_t^u,\mathbf m_t^{\mathrm{exec}}\rangle
+<\alpha x_t
+<\langle\boldsymbol\phi_t^u,\mathbf m_t\rangle.
+\end{equation}
+For sufficiently small $\lambda\in(0,1)$, the point
+\[
+\mathbf m_\lambda
+\triangleq
+(1-\lambda)\mathbf m_t^{\mathrm{exec}}+\lambda\mathbf m_t
+\]
+would still belong to $\mathcal F_t(x_t)$. Strict convexity and
+$D_\Psi(\mathbf m_t\|\mathbf m_t)=0$ would then give
+\begin{align*}
+D_\Psi(\mathbf m_\lambda\|\mathbf m_t)
+&<
+(1-\lambda)D_\Psi(\mathbf m_t^{\mathrm{exec}}\|\mathbf m_t) \\
+&<
+D_\Psi(\mathbf m_t^{\mathrm{exec}}\|\mathbf m_t),
+\end{align*}
+contradicting \eqref{eq:def-exec-projection}. Hence
+\[
+\langle\boldsymbol\phi_t^u,\mathbf m_t^{\mathrm{exec}}\rangle
+=\alpha x_t
+\]
+in the infeasible case, which completes the proof.
+\end{proof}
+
+Lemma~\ref{lem:availability-projection} does not define a different physical
+controller. The implemented rule remains the scalar minimum
+\eqref{eq:alg-feasible-action}; the full $H$-dimensional vector
+$\mathbf m_t^{\mathrm{exec}}$ is never calculated because only its scalar induced
+action is executed. Forming the feature vectors and their inner products, followed
+by the OMD update below, takes $O(H)$ time and $O(H)$ memory per round. In
+particular, the next unconstrained OMD update uses the internal iterate
+$\mathbf m_t$, not $\mathbf m_t^{\mathrm{exec}}$. Therefore the internal iterates
+remain on the fixed domain $\mathcal M_H$, and the analysis does not acquire a
+time-varying comparator set. The clipped and projection-interpreted descriptions
+produce the same actions, states, and internal OMD iterates.
+
 \paragraph{Surrogate cost and OMD update}
 After $(w_t,c_t)$ is revealed, define the surrogate cost by
 \begin{equation}
@@ -884,9 +1030,12 @@ After $(w_t,c_t)$ is revealed, define the surrogate cost by
 \ell_t(\mathbf{m}) \triangleq c_t\bigl(x_t(\mathbf{m}),u_t(\mathbf{m})\bigr), \qquad \mathbf{m}\in\mathcal{M}_H,
 \end{equation}
 which is convex and Lipschitz by Lemma~\ref{lem:sdac-surrogate}. Select a subgradient
-$\mathbf{g}_t\in\partial\ell_t(\mathbf{m}_t)$ satisfying $\|\mathbf{g}_t\|_\infty\le G$ as in
+$\mathbf{g}_t\in\partial\ell_t(\mathbf{m}_t)$ satisfying
+$\|\mathbf{g}_t\|_\infty\le G_\alpha$ as in
 \eqref{eq:def-surrogate-G}, whose existence and
-construction are given in that lemma.
+construction are given in that lemma. This step uses the revealed cost function and
+the full-information subgradient oracle from Section~\ref{sec:model-setup}; it is
+not a bandit-feedback update.
 We define the OMD update
 \begin{equation}
 \label{eq:alg-omd-argmin}
@@ -941,28 +1090,58 @@ Suppose the cost functions satisfy the regularity and bounded-subgradient
 assumptions of Section~\ref{sec:model-setup}. Then the OMD controller with
 action clipping from Section~\ref{sec:online-algorithm}, initialized as in
 \eqref{eq:alg-init} and using step size $\eta>0$, satisfies
-\[
+\begin{equation}
+\label{eq:regret-theorem-bound}
 \RegSDAC{T}
 \le
 \frac{\log(H+1)}{\eta}
 +
-\eta G^2 T\Bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\Bigr),
-\]
-where $G\triangleq\tfrac{L_x}{1-\alpha}+\alpha L_u$ as in
+\eta T\Gamma_\alpha,
+\end{equation}
+where
+\begin{equation}
+\label{eq:def-Gamma-alpha}
+\Gamma_\alpha
+\triangleq
+\frac{G_\alpha^2}{2}
++
+\frac{\alpha G_\alpha(L_x+\alpha L_u)}{(1-\alpha)^2},
+\end{equation}
+and $G_\alpha=\alpha\bigl(\frac{L_x}{1-\alpha}+L_u\bigr)$ as in
 \eqref{eq:def-surrogate-G}.
 In particular, the choice
 \[
 \eta^*
 =
-\sqrt{\frac{\log(H+1)}{G^2 T\bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\bigr)}}
+\sqrt{\frac{\log(H+1)}{T\Gamma_\alpha}}
 \]
 gives
 \[
 \RegSDAC{T}
 \le
-2G\sqrt{\Bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\Bigr)T\log(H+1)}.
+2\sqrt{\Gamma_\alpha T\log(H+1)}.
+\]
+For fixed $L_x,L_u>0$, the leading factor obeys
+\[
+\sqrt{\Gamma_\alpha}=\Theta(\alpha)
+\quad\text{as }\alpha\downarrow0,
+\]
+and
+\[
+\sqrt{\Gamma_\alpha}
+=\Theta\!\left((1-\alpha)^{-3/2}\right)
+\quad\text{as }\alpha\uparrow1.
 \]
 \end{theorem}
+
+The two asymptotic regimes improve the coarser analysis that ignores the exact
+coordinate decay in \eqref{eq:surr-coordinate-decay} and the positive-part
+contraction in \eqref{eq:transition-contraction}. That analysis gives a leading
+factor that remains nonzero as $\alpha\downarrow0$ and grows as
+$(1-\alpha)^{-2}$ as $\alpha\uparrow1$. The projection interpretation in
+Lemma~\ref{lem:availability-projection} does not cause this improvement; it only
+reexpresses the same scalar clipping rule. The sharper rate follows from the
+gradient and stability estimates.
 
 
 Combining Theorem~\ref{thm:regret-bound} with
@@ -995,12 +1174,12 @@ Then
 \begin{aligned}
 \RegProp{T}
 &\le
-2G\sqrt{\Bigl(\tfrac{1}{2}+\tfrac{\alpha}{(1-\alpha)^2}\Bigr)T\log(H_T+1)} \\
+2\sqrt{\Gamma_\alpha T\log(H_T+1)} \\
 &\quad +\Bigl(L_u+\frac{L_x}{1-\alpha}\Bigr)
 \frac{\alpha^{H_T+1}}{1-\alpha}\,T,
 \end{aligned}
 \]
-where $G=\tfrac{L_x}{1-\alpha}+\alpha L_u$. Since
+where $\Gamma_\alpha$ is defined in \eqref{eq:def-Gamma-alpha}. Since
 $\alpha^{H_T}\le1/T$, the second term is $O(1)$, while
 $\log(H_T+1)=O(\log\log T)$ as $T\to\infty$. Consequently,
 \[
@@ -1039,17 +1218,11 @@ J_T^{\mathrm{on}}-\min_{\mathbf{m}\in\mathcal{M}_{H_T}}J_T(\mathbf{m})
 \min_{\mathbf{m}\in\mathcal{M}_{H_T}}J_T(\mathbf{m})-J_T(k)
 \right) \\
 &\le
-2G\sqrt{
-\left(\tfrac12+\tfrac{\alpha}{(1-\alpha)^2}\right)
-T\log(H_T+1)
-} \\
+2\sqrt{\Gamma_\alpha T\log(H_T+1)} \\
 &\qquad
 +J_T\bigl(\mathbf{m}_{H_T}^\star(k)\bigr)-J_T(k) \\
 &\le
-2G\sqrt{
-\left(\tfrac12+\tfrac{\alpha}{(1-\alpha)^2}\right)
-T\log(H_T+1)
-} \\
+2\sqrt{\Gamma_\alpha T\log(H_T+1)} \\
 &\qquad
 +
 \left(L_u+\frac{L_x}{1-\alpha}\right)
@@ -1133,8 +1306,13 @@ We studied adversarial online control of a storage system under a state-dependen
 action constraint. Every fixed SDAC policy is feasible by construction. For the
 time-varying online controller, a Bregman projection maintains the SDAC parameter
 constraint, while scalar action clipping maintains feasibility of the actual
-trajectory. The resulting controller achieves
-$O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy. The
+trajectory. The clipping is also exactly the action induced by projecting the
+current parameter onto the state-dependent availability set, although this second
+projection need not be computed. Exact feature decay and the contraction of the
+clipped state update yield
+$O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy,
+with leading dependence $\Theta(\alpha)$ as $\alpha\downarrow0$ and
+$\Theta((1-\alpha)^{-3/2})$ as $\alpha\uparrow1$. The
 SDAC approximation result further gives
 $O\!\left(\sqrt{T\log\log T}\right)$ regret against the best feasible proportional
 state-feedback policy when $H=\Theta(\log T)$. The model applies directly to
@@ -1462,7 +1640,8 @@ $\mathbf{g}_t\in\partial \ell_t(\mathbf{m}_t)$,
 \[
 \|\mathbf{m}_{t+1}-\mathbf{m}_t\|_1 \le \eta\,\|\mathbf{g}_t\|_\infty.
 \]
-In particular, if $\|\mathbf{g}_t\|_\infty\le G$, then $\|\mathbf{m}_{t+1}-\mathbf{m}_t\|_1\le \eta G$.
+In particular, since $\|\mathbf{g}_t\|_\infty\le G_\alpha$,
+$\|\mathbf{m}_{t+1}-\mathbf{m}_t\|_1\le \eta G_\alpha$.
 \end{lemma}
 
 \begin{proof}
@@ -1614,289 +1793,204 @@ Since $D_\Psi(\mathbf{m}\|\mathbf{m}_{T+1})\ge0$, this proves
 \eqref{eq:omd-surrogate-regret}.
 \end{proof}
 
-\begin{lemma}[Cumulative movement]
-\label{lem:cum-move}
-For every $t\in\{2,\ldots,T\}$ and every integer $i$ with $1\le i\le t-1$,
-\[
-\|\mathbf{m}_{t-i}-\mathbf{m}_t\|_1 \le i\,\eta G.
-\]
-\end{lemma}
-
-\begin{proof}
-By the triangle inequality,
+\begin{lemma}[Positive-part representation of the dynamics]
+\label{lem:positive-part-dynamics}
+For $\mathbf m\in\mathcal M_H$, define
 \begin{equation}
-\label{eq:cum-move-tri}
-\|\mathbf{m}_{t-i}-\mathbf{m}_t\|_1
-\le
-\sum_{j=1}^i \|\mathbf{m}_{t-j}-\mathbf{m}_{t-j+1}\|_1.
-\end{equation}
-Substituting $\|\mathbf{m}_{t-j}-\mathbf{m}_{t-j+1}\|_1\le\eta G$ from Lemma~\ref{lem:omd-move}
-into \eqref{eq:cum-move-tri},
-\[
-\begin{aligned}
-\|\mathbf{m}_{t-i}-\mathbf{m}_t\|_1
-&\le
-\sum_{j=1}^i \eta G \\
-&=
-i\,\eta G.
-\end{aligned}
-\]
-\end{proof}
-
-\begin{lemma}[Clipping error]
-\label{lem:bounding-u-eff}
-For $\mathbf{m}\in\mathcal{M}_H$, define
-\begin{equation}
-\label{eq:def-state-gap}
-\Delta_t^x(\mathbf{m})
+\label{eq:def-contractive-transition}
+F_t(x;\mathbf m)
 \triangleq
-x_t(\mathbf{m})-x_t.
+\left[\alpha x-\langle\boldsymbol\phi_t^u,\mathbf m\rangle\right]_+
++w_t.
 \end{equation}
-Here $x_t(\mathbf{m}_t)$ is the counterfactual state obtained by applying the single
-fixed parameter $\mathbf{m}_t$ from time $1$ through time $t$; it is not the state
-generated by the time-varying sequence $\mathbf{m}_1,\ldots,\mathbf{m}_t$.
-
-Define the clipping error
+Then the clipped online state and every fixed-policy state satisfy
 \begin{equation}
-\label{eq:def-clipping-error}
-\varepsilon_t^{\mathrm{clip}}
-\triangleq
-\widehat{u}_t-u_t.
-\end{equation}
-Then, for every $t\in[T]$,
-\begin{equation}
-\label{eq:clipping-error-bound}
-u_t
-=
-u_t(\mathbf{m}_t)-\varepsilon_t^{\mathrm{clip}},
+\label{eq:positive-part-transitions}
+x_{t+1}=F_t(x_t;\mathbf m_t),
 \qquad
-0\le \varepsilon_t^{\mathrm{clip}}\le\alpha[\Delta_t^x(\mathbf{m}_t)]_+.
+x_{t+1}(\mathbf m)=F_t(x_t(\mathbf m);\mathbf m).
+\end{equation}
+Moreover, for all $x,x'\ge0$ and $\mathbf m,\mathbf m'\in\mathcal M_H$,
+\begin{equation}
+\label{eq:transition-contraction}
+\begin{aligned}
+&|F_t(x;\mathbf m)-F_t(x';\mathbf m')| \\
+&\quad\le
+\left|
+\alpha(x-x')
+-\langle\boldsymbol\phi_t^u,\mathbf m-\mathbf m'\rangle
+\right| \\
+&\quad\le
+\alpha|x-x'|
++\|\boldsymbol\phi_t^u\|_\infty
+\|\mathbf m-\mathbf m'\|_1.
+\end{aligned}
 \end{equation}
 \end{lemma}
 
 \begin{proof}
-The clipping rule and the identity $\min\{a,b\}=a-[a-b]_+$ give
+For the online trajectory, \eqref{eq:alg-feasible-action} implies
 \begin{equation}
-\label{eq:clipping-error-positive-part}
-\varepsilon_t^{\mathrm{clip}}
-=
-\bigl[\widehat{u}_t-\alpha x_t\bigr]_+
-\ge0.
-\end{equation}
-By \eqref{eq:def-sdac-policy},
-$\widehat{u}_t=u_t(\mathbf{m}_t)$. Fixed-policy feasibility gives
-\[
-\widehat{u}_t
-=
-u_t(\mathbf{m}_t)
-\le
-\alpha x_t(\mathbf{m}_t).
-\]
-Using monotonicity and positive homogeneity of $[\cdot]_+$ in
-\eqref{eq:clipping-error-positive-part},
-\begin{equation}
-\label{eq:clipping-error-Delta}
+\label{eq:clipped-positive-part-identity}
 \begin{aligned}
-\varepsilon_t^{\mathrm{clip}}
-&\le
-\bigl[\alpha x_t(\mathbf{m}_t)-\alpha x_t\bigr]_+ \\
+\alpha x_t-u_t
 &=
-\alpha[\Delta_t^x(\mathbf{m}_t)]_+.
+\alpha x_t-
+\min\!\left\{
+\langle\boldsymbol\phi_t^u,\mathbf m_t\rangle,
+\alpha x_t
+\right\} \\
+&=
+\left[
+\alpha x_t-
+\langle\boldsymbol\phi_t^u,\mathbf m_t\rangle
+\right]_+.
 \end{aligned}
 \end{equation}
-Finally, \eqref{eq:def-clipping-error} and
-$\widehat{u}_t=u_t(\mathbf{m}_t)$ give the first identity in
-\eqref{eq:clipping-error-bound}.
+For a fixed $\mathbf m$, Lemma~\ref{lem:sdac-feasibility} gives
+\[
+\alpha x_t(\mathbf m)
+-\langle\boldsymbol\phi_t^u,\mathbf m\rangle
+\ge0,
+\]
+so inserting a positive part does not change its state update. This proves
+\eqref{eq:positive-part-transitions}. Finally, the map $z\mapsto[z]_+$ is
+nonexpansive:
+\[
+|[z]_+-[z']_+|\le|z-z'|.
+\]
+Apply this inequality to the two arguments in
+\eqref{eq:def-contractive-transition}, and then apply H\"older's inequality, to
+obtain \eqref{eq:transition-contraction}.
 \end{proof}
 
-\begin{lemma}[State-gap recursion]
-\label{lem:state-gap-recursion-eff}
-For every fixed $\mathbf{m}\in\mathcal{M}_H$ and every $t\in[T]$,
-\begin{equation}
-\label{eq:state-gap-exact}
-\Delta_{t+1}^x(\mathbf{m})
-=
-\alpha\Delta_t^x(\mathbf{m})
-+
-\langle \boldsymbol{\phi}_t^u,\mathbf{m}_t-\mathbf{m}\rangle
--\varepsilon_t^{\mathrm{clip}}.
-\end{equation}
-Consequently,
+\begin{lemma}[Contractive state and action deviation]
+\label{lem:contractive-deviation}
+For the clipped online trajectory and the counterfactual fixed-policy trajectory
+associated with the current internal iterate, one has, for every $t\in[T]$,
 \begin{align}
-\Delta_{t+1}^x(\mathbf{m})
+\left|x_t-x_t(\mathbf m_t)\right|
 &\le
-\alpha\Delta_t^x(\mathbf{m})
-+
-\langle \boldsymbol{\phi}_t^u,\mathbf{m}_t-\mathbf{m}\rangle,
-\label{eq:Delta-Upper}\\
-\Delta_{t+1}^x(\mathbf{m})
-&\ge
-\alpha\Delta_t^x(\mathbf{m})
-+
-\langle \boldsymbol{\phi}_t^u,\mathbf{m}_t-\mathbf{m}\rangle
--\alpha[\Delta_t^x(\mathbf{m}_t)]_+.
-\label{eq:Delta-Lower}
+\frac{\alpha\eta G_\alpha}{(1-\alpha)^2},
+\label{eq:contractive-state-bound}\\
+0\le u_t(\mathbf m_t)-u_t
+&\le
+\frac{\alpha^2\eta G_\alpha}{(1-\alpha)^2}.
+\label{eq:contractive-action-bound}
 \end{align}
+Here $x_t(\mathbf m_t)$ is generated by using the single fixed parameter
+$\mathbf m_t$ from time $1$ through time $t$.
 \end{lemma}
 
 \begin{proof}
-The two trajectories use the same arrival $w_t$. Hence
+Define
+\[
+d_t\triangleq|x_t-x_t(\mathbf m_t)|.
+\]
+Since $x_1=x_1(\mathbf m_1)=0$, one has $d_1=0$. For
+$t\in\{1,\ldots,T-1\}$, Lemma~\ref{lem:positive-part-dynamics} gives
 \begin{equation}
-\label{eq:state-gap-short}
+\label{eq:contractive-deviation-start}
 \begin{aligned}
-\Delta_{t+1}^x(\mathbf{m})
+d_{t+1}
 &=
-\alpha\Delta_t^x(\mathbf{m})
--u_t(\mathbf{m})
-+u_t \\
-&=
-\alpha\Delta_t^x(\mathbf{m})
--u_t(\mathbf{m})
-+u_t(\mathbf{m}_t)
--\varepsilon_t^{\mathrm{clip}} \\
-&=
-\alpha\Delta_t^x(\mathbf{m})
-+
-\langle \boldsymbol{\phi}_t^u,\mathbf{m}_t-\mathbf{m}\rangle
--\varepsilon_t^{\mathrm{clip}}.
+\left|
+F_t(x_t;\mathbf m_t)
+-F_t(x_t(\mathbf m_{t+1});\mathbf m_{t+1})
+\right| \\
+&\le
+\alpha\left|x_t-x_t(\mathbf m_{t+1})\right|
++\|\boldsymbol\phi_t^u\|_\infty
+\|\mathbf m_{t+1}-\mathbf m_t\|_1.
 \end{aligned}
 \end{equation}
-This proves \eqref{eq:state-gap-exact}. The two bounds follow from
-$0\le \varepsilon_t^{\mathrm{clip}}\le\alpha[\Delta_t^x(\mathbf{m}_t)]_+$ in
-Lemma~\ref{lem:bounding-u-eff}.
-\end{proof}
-
-\begin{lemma}[State deviation bound]
-\label{lem:state-gap-bound}
-For every $t\in[T]$, with $\Delta_t^x(\mathbf{m})$ as in \eqref{eq:def-state-gap},
-\[
--\frac{\alpha\,\eta G}{(1-\alpha)^3}
+The affine state representation \eqref{eq:surr-affine-pair} implies
+\begin{equation}
+\label{eq:fixed-state-parameter-difference}
+\begin{aligned}
+\left|x_t(\mathbf m_t)-x_t(\mathbf m_{t+1})\right|
+&=
+\left|
+\left\langle
+\boldsymbol\phi_t^x,
+\mathbf m_t-\mathbf m_{t+1}
+\right\rangle
+\right| \\
+&\le
+\|\boldsymbol\phi_t^x\|_\infty
+\|\mathbf m_{t+1}-\mathbf m_t\|_1.
+\end{aligned}
+\end{equation}
+Combining the triangle inequality with
+\eqref{eq:contractive-deviation-start} and
+\eqref{eq:fixed-state-parameter-difference} yields
+\begin{equation}
+\label{eq:contractive-deviation-recursion-raw}
+\begin{aligned}
+d_{t+1}
+&\le
+\alpha d_t \\
+&\quad+
+\left(
+\alpha\|\boldsymbol\phi_t^x\|_\infty
++\|\boldsymbol\phi_t^u\|_\infty
+\right)
+\|\mathbf m_{t+1}-\mathbf m_t\|_1.
+\end{aligned}
+\end{equation}
+By \eqref{eq:surr-coefficient-norms},
+\begin{equation}
+\label{eq:combined-feature-bound}
+\begin{aligned}
+\alpha\|\boldsymbol\phi_t^x\|_\infty
++\|\boldsymbol\phi_t^u\|_\infty
+&\le
+\frac{\alpha^2}{1-\alpha}+\alpha \\
+&=
+\frac{\alpha}{1-\alpha}.
+\end{aligned}
+\end{equation}
+Lemma~\ref{lem:omd-move} and
+$\|\mathbf g_t\|_\infty\le G_\alpha$ therefore reduce
+\eqref{eq:contractive-deviation-recursion-raw} to
+\begin{equation}
+\label{eq:contractive-deviation-recursion}
+d_{t+1}
 \le
-\Delta_t^x(\mathbf{m}_t)
-\le
-\frac{\alpha\,\eta G}{(1-\alpha)^2}.
-\]
-\end{lemma}
-
-\begin{proof}
-Fix $t\in[T]$. For $s<t$, define
-\[
-\varepsilon_{s,t}^{\mathrm{drift}}
-\triangleq
-\langle \boldsymbol{\phi}_s^u,\mathbf{m}_s-\mathbf{m}_t\rangle.
-\]
-Since $(\boldsymbol{\phi}_s^u)_i=\alpha^i w_{s-i}$,
-\[
-\|\boldsymbol{\phi}_s^u\|_\infty\le\alpha.
-\]
-Lemma~\ref{lem:cum-move} and H\"older's inequality therefore give
+\alpha d_t
++\frac{\alpha\eta G_\alpha}{1-\alpha}.
+\end{equation}
+Unrolling from $d_1=0$ gives
 \begin{equation}
-\label{eq:drift-movement-short}
+\label{eq:contractive-state-unroll}
 \begin{aligned}
-\bigl|\varepsilon_{s,t}^{\mathrm{drift}}\bigr|
+d_t
 &\le
-\|\mathbf{m}_s-\mathbf{m}_t\|_1\|\boldsymbol{\phi}_s^u\|_\infty \\
+\frac{\alpha\eta G_\alpha}{1-\alpha}
+\sum_{j=0}^{t-2}\alpha^j \\
 &\le
-\alpha\eta G(t-s).
+\frac{\alpha\eta G_\alpha}{(1-\alpha)^2},
 \end{aligned}
 \end{equation}
+with an empty sum when $t=1$. This proves
+\eqref{eq:contractive-state-bound}.
 
-For the fixed comparator $\mathbf{m}_t$, unrolling
-\eqref{eq:state-gap-exact} from $\Delta_1^x(\mathbf{m}_t)=0$ gives
+Finally, $\widehat u_t=u_t(\mathbf m_t)$ and fixed-policy feasibility imply
 \begin{equation}
-\label{eq:Delta-exact-unroll}
-\Delta_t^x(\mathbf{m}_t)
-=
-\sum_{s=1}^{t-1}
-\alpha^{t-1-s}\bigl(\varepsilon_{s,t}^{\mathrm{drift}}-\varepsilon_s^{\mathrm{clip}}\bigr).
-\end{equation}
-Since $\varepsilon_s^{\mathrm{clip}}\ge0$, \eqref{eq:drift-movement-short} implies
-\begin{equation}
-\label{eq:Delta-upper-final}
+\label{eq:contractive-action-start}
 \begin{aligned}
-\Delta_t^x(\mathbf{m}_t)
-&\le
-\sum_{s=1}^{t-1}\alpha^{t-1-s}\bigl|\varepsilon_{s,t}^{\mathrm{drift}}\bigr| \\
-&\le
-\alpha\eta G
-\sum_{s=1}^{t-1}\alpha^{t-1-s}(t-s) \\
+0\le u_t(\mathbf m_t)-u_t
 &=
-\alpha\eta G
-\sum_{j=1}^{t-1}j\alpha^{j-1} \\
+\left[u_t(\mathbf m_t)-\alpha x_t\right]_+ \\
 &\le
-\frac{\alpha\eta G}{(1-\alpha)^2}.
+\left[\alpha x_t(\mathbf m_t)-\alpha x_t\right]_+ \\
+&\le
+\alpha d_t.
 \end{aligned}
 \end{equation}
-The last line uses
-$\sum_{j=1}^{\infty}j\alpha^{j-1}=(1-\alpha)^{-2}$.
-
-Applying \eqref{eq:clipping-error-bound} and
-\eqref{eq:Delta-upper-final} at time $s$,
-\begin{equation}
-\label{eq:clipping-error-uniform}
-\begin{aligned}
-0\le \varepsilon_s^{\mathrm{clip}}
-&\le
-\alpha[\Delta_s^x(\mathbf{m}_s)]_+ \\
-&\le
-\frac{\alpha^2\eta G}{(1-\alpha)^2}.
-\end{aligned}
-\end{equation}
-This use of \eqref{eq:Delta-upper-final} is noncircular: its derivation used
-only $\varepsilon_s^{\mathrm{clip}}\ge0$. From \eqref{eq:Delta-exact-unroll},
-\eqref{eq:drift-movement-short}, and \eqref{eq:clipping-error-uniform},
-\begin{equation}
-\label{eq:Delta-lower-final}
-\begin{aligned}
-\Delta_t^x(\mathbf{m}_t)
-&\ge
--\sum_{s=1}^{t-1}\alpha^{t-1-s}\bigl|\varepsilon_{s,t}^{\mathrm{drift}}\bigr|
--\sum_{s=1}^{t-1}\alpha^{t-1-s}\varepsilon_s^{\mathrm{clip}} \\
-&\ge
--\frac{\alpha\eta G}{(1-\alpha)^2}
--\frac{\alpha^2\eta G}{(1-\alpha)^2}
-\sum_{s=1}^{t-1}\alpha^{t-1-s} \\
-&\ge
--\frac{\alpha\eta G}{(1-\alpha)^2}
--\frac{\alpha^2\eta G}{(1-\alpha)^3} \\
-&=
--\frac{\alpha\eta G}{(1-\alpha)^3}.
-\end{aligned}
-\end{equation}
-Together, \eqref{eq:Delta-upper-final} and
-\eqref{eq:Delta-lower-final} prove the claim.
-\end{proof}
-
-\begin{lemma}[Action gap induced by clipping]
-\label{lem:u-gap-by-b-gap-eff}
-For all $t\in[T]$,
-\[
-0
-\le
-u_t(\mathbf{m}_t)-u_t
-\le
-\frac{\alpha^2\,\eta G}{(1-\alpha)^2}.
-\]
-\end{lemma}
-
-\begin{proof}
-By \eqref{eq:clipping-error-bound},
-\[
-u_t(\mathbf{m}_t)-u_t
-=
-\varepsilon_t^{\mathrm{clip}}
-\ge0.
-\]
-The same bound and Lemma~\ref{lem:state-gap-bound} give
-\[
-\begin{aligned}
-\varepsilon_t^{\mathrm{clip}}
-&\le
-\alpha[\Delta_t^x(\mathbf{m}_t)]_+ \\
-&\le
-\frac{\alpha^2\eta G}{(1-\alpha)^2}.
-\end{aligned}
-\]
+Combining \eqref{eq:contractive-action-start} with
+\eqref{eq:contractive-state-bound} proves
+\eqref{eq:contractive-action-bound}.
 \end{proof}
 
 \begin{lemma}[Stability term]
@@ -1906,34 +2000,28 @@ For all horizons $T$,
 \sum_{t=1}^T \Bigl(c_t(x_t,u_t)
 -\ell_t(\mathbf{m}_t)\Bigr)
 \le
-\frac{\alpha\,T\eta G^2}{(1-\alpha)^2}.
+\frac{\alpha\eta T G_\alpha(L_x+\alpha L_u)}{(1-\alpha)^2}.
 \]
 \end{lemma}
 
 \begin{proof}
 Both state--action pairs lie in $\mathcal{D}_\alpha$. Hence
-\eqref{eq:model-lipschitz}, Lemma~\ref{lem:state-gap-bound}, and
-Lemma~\ref{lem:u-gap-by-b-gap-eff} give
+\eqref{eq:model-lipschitz} and Lemma~\ref{lem:contractive-deviation} give
 \begin{equation}
 \label{eq:stability-one-step-short}
 \begin{aligned}
 &c_t(x_t,u_t)
 -\ell_t(\mathbf{m}_t) \\
 &\qquad\le
-L_x\bigl|\Delta_t^x(\mathbf{m}_t)\bigr|
+L_x\bigl|x_t-x_t(\mathbf m_t)\bigr|
 +
 L_u\bigl|u_t-u_t(\mathbf{m}_t)\bigr| \\
 &\qquad\le
-\frac{\alpha\eta G L_x}{(1-\alpha)^3}
+\frac{\alpha\eta G_\alpha L_x}{(1-\alpha)^2}
 +
-\frac{\alpha^2\eta G L_u}{(1-\alpha)^2} \\
+\frac{\alpha^2\eta G_\alpha L_u}{(1-\alpha)^2} \\
 &\qquad=
-\frac{\alpha\eta G}{(1-\alpha)^2}
-\left(
-\frac{L_x}{1-\alpha}+\alpha L_u
-\right) \\
-&\qquad=
-\frac{\alpha\eta G^2}{(1-\alpha)^2}.
+\frac{\alpha\eta G_\alpha(L_x+\alpha L_u)}{(1-\alpha)^2}.
 \end{aligned}
 \end{equation}
 Summing \eqref{eq:stability-one-step-short} over $t=1,\ldots,T$ proves the
@@ -2017,7 +2105,7 @@ D_\Psi(\mathbf{m}\|\mathbf{m}_1)
 \end{equation}
 
 Lemma~\ref{lem:omd-surrogate-regret},
-$\|\mathbf{g}_t\|_\infty\le G$, and \eqref{eq:breg-init-bound} imply, for every
+$\|\mathbf{g}_t\|_\infty\le G_\alpha$, and \eqref{eq:breg-init-bound} imply, for every
 $\mathbf{m}\in\mathcal{M}_H$,
 \begin{equation}
 \label{eq:omd-ell-raw}
@@ -2030,7 +2118,7 @@ $\mathbf{m}\in\mathcal{M}_H$,
 &\le
 \frac{\log(H+1)}{\eta}
 +
-\frac{\eta G^2T}{2}.
+\frac{\eta G_\alpha^2T}{2}.
 \end{aligned}
 \end{equation}
 Since \eqref{eq:omd-ell-raw} holds uniformly over $\mathbf{m}$,
@@ -2042,27 +2130,30 @@ Since \eqref{eq:omd-ell-raw} holds uniformly over $\mathbf{m}$,
 \le
 \frac{\log(H+1)}{\eta}
 +
-\frac{\eta G^2T}{2}.
+\frac{\eta G_\alpha^2T}{2}.
 \end{equation}
 Lemma~\ref{lem:stab-sum} gives
 \begin{equation}
 \label{eq:stab-term}
 \operatorname{Stab}_T
 \le
-\frac{\alpha\eta G^2T}{(1-\alpha)^2}.
+\frac{\alpha\eta T G_\alpha(L_x+\alpha L_u)}{(1-\alpha)^2}.
 \end{equation}
 Substituting \eqref{eq:omd-term} and \eqref{eq:stab-term} into
 \eqref{eq:regret-decomp},
 \begin{equation}
 \label{eq:regret-eta}
+\begin{aligned}
 \RegSDAC{T}
-\le
+&\le
 \frac{\log(H+1)}{\eta}
-+
-\eta G^2T
-\left(
-\frac12+\frac{\alpha}{(1-\alpha)^2}
-\right).
++\frac{\eta T G_\alpha^2}{2} \\
+&\quad
++\frac{\alpha\eta T G_\alpha(L_x+\alpha L_u)}{(1-\alpha)^2} \\
+&=
+\frac{\log(H+1)}{\eta}
++\eta T\Gamma_\alpha.
+\end{aligned}
 \end{equation}
 
 The right-hand side of \eqref{eq:regret-eta} is positive for every $\eta>0$.
@@ -2070,10 +2161,7 @@ Differentiating with respect to $\eta$ yields
 \[
 -\frac{\log(H+1)}{\eta^2}
 +
-G^2T
-\left(
-\frac12+\frac{\alpha}{(1-\alpha)^2}
-\right).
+T\Gamma_\alpha.
 \]
 The unique minimizer is therefore
 \begin{equation}
@@ -2082,7 +2170,7 @@ The unique minimizer is therefore
 =
 \sqrt{
 \frac{\log(H+1)}
-{G^2T\left(\tfrac12+\tfrac{\alpha}{(1-\alpha)^2}\right)}
+{T\Gamma_\alpha}
 }.
 \end{equation}
 At this value the two summands in \eqref{eq:regret-eta} are equal, so
@@ -2090,14 +2178,42 @@ At this value the two summands in \eqref{eq:regret-eta} are equal, so
 \label{eq:regret-opt}
 \RegSDAC{T}
 \le
-2G
-\sqrt{
-\left(
-\frac12+\frac{\alpha}{(1-\alpha)^2}
-\right)
-T\log(H+1)
-}.
+2\sqrt{\Gamma_\alpha T\log(H+1)}.
 \end{equation}
+
+It remains to verify the dependence on $\alpha$. As $\alpha\downarrow0$,
+\begin{align*}
+\frac{G_\alpha}{\alpha}
+&=
+\frac{L_x}{1-\alpha}+L_u
+\longrightarrow L_x+L_u, \\
+\frac{\Gamma_\alpha}{\alpha^2}
+&=
+\frac12\left(\frac{G_\alpha}{\alpha}\right)^2
++
+\frac{G_\alpha}{\alpha}
+\frac{L_x+\alpha L_u}{(1-\alpha)^2} \\
+&\longrightarrow
+\frac{(L_x+L_u)^2}{2}+L_x(L_x+L_u)>0.
+\end{align*}
+Therefore $\sqrt{\Gamma_\alpha}=\Theta(\alpha)$ as
+$\alpha\downarrow0$. As $\alpha\uparrow1$, write
+$\varepsilon=1-\alpha$. Then
+\begin{align*}
+\varepsilon G_\alpha
+&=
+\alpha(L_x+\varepsilon L_u)
+\longrightarrow L_x, \\
+\varepsilon^3\Gamma_\alpha
+&=
+\frac{\varepsilon^3G_\alpha^2}{2}
++\alpha(\varepsilon G_\alpha)(L_x+\alpha L_u) \\
+&\longrightarrow
+L_x(L_x+L_u)>0.
+\end{align*}
+Thus
+$\sqrt{\Gamma_\alpha}=\Theta((1-\alpha)^{-3/2})$ as
+$\alpha\uparrow1$.
 \end{proof}
 
 
