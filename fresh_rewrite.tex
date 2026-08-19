@@ -44,6 +44,10 @@ constraint, although the projected parameter need not be computed. We prove
 $O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy, with
 a leading constant that is $\Theta(\alpha)$ as $\alpha\downarrow0$ and
 $\Theta((1-\alpha)^{-3/2})$ as $\alpha\uparrow1$, where $H$ is the memory horizon.
+We also prove a minimax lower bound that matches the small-$\alpha$ power. Once
+$T$ is at least the mixing scale $\Theta((1-\alpha)^{-1})$, the lower bound is
+$\Omega((1-\alpha)^{-1}\sqrt{T})$ as $\alpha\uparrow1$, leaving a square-root
+gap in the stability-margin dependence of the upper and lower bounds.
 We further show that SDAC geometrically approximates
 every feasible proportional state-feedback policy; choosing $H=\Theta(\log T)$
 yields $O\!\left(\sqrt{T\log\log T}\right)$ regret against the best policy in this
@@ -134,11 +138,19 @@ Our contributions are as follows:
         but its direct implementation requires only a scalar minimum. A sharp
         coordinatewise gradient estimate and a contractive trajectory comparison give
         $O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy,
-        with leading dependence $\Theta(\alpha)$ as $\alpha\downarrow0$ and
+        with upper-bound dependence $\Theta(\alpha)$ as $\alpha\downarrow0$ and
         $\Theta((1-\alpha)^{-3/2})$ as $\alpha\uparrow1$,
         and, with $H=\Theta(\log T)$, achieves
         $O\!\left(\sqrt{T\log\log T}\right)$ regret against the best feasible
         proportional state-feedback policy.
+    \item \textbf{Minimax lower bound.} We construct an oblivious sequence of
+        arrivals and convex costs for which every causal feasible controller has
+        expected SDAC regret $\Omega(G_\alpha\sqrt{T})$ after the mixing scale,
+        where $G_\alpha=\alpha(L_x/(1-\alpha)+L_u)$. This matches the
+        small-$\alpha$ power of the upper bound. As $\alpha\uparrow1$, it gives
+        $\Omega((1-\alpha)^{-1}\sqrt{T})$ once
+        $T=\Omega((1-\alpha)^{-1})$, leaving a factor
+        $(1-\alpha)^{-1/2}$ (apart from the memory logarithm) to be closed.
 \end{itemize}
 
 \subsection{Related Work}
@@ -235,7 +247,7 @@ Section~\ref{sec:model-setup} formalizes the adversarial storage-control model,
 assumptions, and regret benchmark. Section~\ref{sec:sdac} introduces the SDAC policy
 class and summarizes its structural properties. Section~\ref{sec:online-algorithm}
 presents the online controller, Section~\ref{sec:regret-analysis} develops regret
-guarantees, Section~\ref{sec:extensions} discusses possible extensions, and
+upper and lower bounds, Section~\ref{sec:extensions} discusses possible extensions, and
 Section~\ref{sec:conclusion} concludes. Deferred proofs appear in the
 Appendix.
 
@@ -1134,6 +1146,92 @@ and
 \]
 \end{theorem}
 
+The next result shows that the $\sqrt{T}$ dependence is unavoidable and
+quantifies the stability-margin dependence that any causal feasible controller
+must incur. Its proof is deferred to Appendix~\ref{sec:appendix-proofs}.
+
+\begin{theorem}[Minimax SDAC regret lower bound]
+\label{thm:sdac-lower-bound}
+Fix $H\ge1$ and $T\ge2$. For every causal feasible online controller
+$\mathcal A$, possibly randomized, there exists a deterministic oblivious sequence
+of arrivals and costs satisfying the assumptions of
+Section~\ref{sec:model-setup} such that
+\begin{equation}
+\label{eq:sdac-lower-exact}
+\begin{aligned}
+\mathbb E_{\mathcal A}\!\left[\RegSDAC{T}\right]
+&\ge
+\frac{1}{2\sqrt{2}}
+\Biggl[
+\sum_{t=2}^T
+\alpha^2 \\
+&\qquad\quad {}
+\times
+\left(
+L_u+
+\frac{L_x(1-\alpha^{t-2})}{1-\alpha}
+\right)^2
+\Biggr]^{1/2}.
+\end{aligned}
+\end{equation}
+The expectation is only over the internal randomization of $\mathcal A$; the
+adversarial sequence whose existence is asserted is deterministic and fixed before
+the interaction.
+\end{theorem}
+
+\begin{corollary}[Lower bound beyond the mixing scale]
+\label{cor:sdac-lower-mixing}
+Define
+\begin{equation}
+\label{eq:def-q-alpha}
+q_\alpha
+\triangleq
+\left\lceil
+\frac{\log 2}{\log(1/\alpha)}
+\right\rceil.
+\end{equation}
+If $T\ge2q_\alpha+2$, then every causal feasible controller $\mathcal A$
+admits a deterministic oblivious sequence for which
+\begin{equation}
+\label{eq:sdac-lower-mixing}
+\mathbb E_{\mathcal A}\!\left[\RegSDAC{T}\right]
+\ge
+\frac{G_\alpha}{8}\sqrt{T},
+\end{equation}
+where $G_\alpha=\alpha(L_x/(1-\alpha)+L_u)$.
+\end{corollary}
+
+For fixed $L_x,L_u>0$, Corollary~\ref{cor:sdac-lower-mixing} matches the
+$\Theta(\alpha)$ power of the upper bound as $\alpha\downarrow0$. As
+$\alpha\uparrow1$, $q_\alpha=\Theta((1-\alpha)^{-1})$ and the corollary gives
+\begin{equation}
+\label{eq:sdac-lower-large-alpha}
+\mathbb E_{\mathcal A}\!\left[\RegSDAC{T}\right]
+=
+\Omega\!\left(\frac{\sqrt{T}}{1-\alpha}\right)
+\end{equation}
+whenever $T$ is at least the mixing scale. The upper bound in
+Theorem~\ref{thm:regret-bound} is
+$O((1-\alpha)^{-3/2}\sqrt{T\log(H+1)})$, so a factor
+$(1-\alpha)^{-1/2}$ in the stability margin remains open, apart from the
+memory-dependent logarithm.
+
+The mixing-scale qualification is essential for interpreting the large-$\alpha$
+asymptotic. If $T$ is fixed while $\alpha\uparrow1$, then
+\[
+\frac{1-\alpha^{t-2}}{1-\alpha}\longrightarrow t-2,
+\]
+and the right-hand side of \eqref{eq:sdac-lower-exact} converges to the finite
+quantity
+\[
+\frac{1}{2\sqrt{2}}
+\left[
+\sum_{t=2}^T\bigl(L_u+L_x(t-2)\bigr)^2
+\right]^{1/2}.
+\]
+Thus the exact finite-horizon formula, rather than the steady-state scaling in
+\eqref{eq:sdac-lower-large-alpha}, applies in this regime.
+
 The two asymptotic regimes improve the coarser analysis that ignores the exact
 coordinate decay in \eqref{eq:surr-coordinate-decay} and the positive-part
 contraction in \eqref{eq:transition-contraction}. That analysis gives a leading
@@ -1311,8 +1409,14 @@ current parameter onto the state-dependent availability set, although this secon
 projection need not be computed. Exact feature decay and the contraction of the
 clipped state update yield
 $O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy,
-with leading dependence $\Theta(\alpha)$ as $\alpha\downarrow0$ and
+with upper-bound dependence $\Theta(\alpha)$ as $\alpha\downarrow0$ and
 $\Theta((1-\alpha)^{-3/2})$ as $\alpha\uparrow1$. The
+minimax lower bound matches the small-$\alpha$ power. Once the horizon is at
+least the mixing scale $\Theta((1-\alpha)^{-1})$, it gives
+$\Omega((1-\alpha)^{-1}\sqrt{T})$ regret as $\alpha\uparrow1$; hence a
+square-root stability-margin gap remains open. For fixed $T$ and
+$\alpha\uparrow1$, the exact finite-horizon lower bound must be used instead,
+because the steady-state scale has not yet been reached. The
 SDAC approximation result further gives
 $O\!\left(\sqrt{T\log\log T}\right)$ regret against the best feasible proportional
 state-feedback policy when $H=\Theta(\log T)$. The model applies directly to
@@ -1326,15 +1430,314 @@ extensions to $\alpha\ge1$, vector allocation, and diagonal multi-storage system
 \section{Deferred Proofs}
 \label{sec:appendix-proofs}
 
-This appendix collects the deferred proof of the proportional-state-feedback
-approximation guarantee from Section~\ref{sec:sdac}, together with the OMD and
-stability lemmas leading up to the regret bound stated in
-Section~\ref{sec:regret-analysis}.
+This appendix proves the minimax lower bound from
+Section~\ref{sec:regret-analysis} and collects the deferred proof of the
+proportional-state-feedback approximation guarantee from Section~\ref{sec:sdac},
+together with the OMD and stability lemmas leading up to the upper regret bound.
 
 Recall that we set $w_\tau\equiv 0$ for $\tau\le 0$, which is used in several
 base-case arguments below.
 
-We first prove the proportional-policy approximation guarantee stated in
+We first prove the lower bound. The construction embeds a two-comparator online
+linear problem into the two endpoint SDAC policies $\mathbf 0$ and
+$\mathbf e_1$.
+
+\begin{proof}[Proof of Theorem~\ref{thm:sdac-lower-bound}]
+Fix a causal feasible controller $\mathcal A$. Let
+$\xi_1,\ldots,\xi_T$ be independent Rademacher random variables, sampled before
+the interaction and independently of the internal randomization of $\mathcal A$.
+Consider the oblivious random construction
+\begin{equation}
+\label{eq:lower-hard-instance}
+w_t=1,
+\qquad
+c_t(x,u)
+=
+C_\alpha+\xi_t(L_xx-L_uu),
+\end{equation}
+where
+\begin{equation}
+\label{eq:lower-cost-offset}
+C_\alpha
+\triangleq
+\frac{L_x+\alpha L_u}{1-\alpha}.
+\end{equation}
+Each $c_t$ is affine and hence convex. For any two points in
+$\mathcal D_\alpha$,
+\begin{equation}
+\label{eq:lower-lipschitz-check}
+\begin{aligned}
+|c_t(x,u)-c_t(x',u')|
+&=
+|L_x(x-x')-L_u(u-u')| \\
+&\le
+L_x|x-x'|+L_u|u-u'|.
+\end{aligned}
+\end{equation}
+The constant gradient
+$\xi_t(L_x,-L_u)$ also obeys the bounded-subgradient assumption. Moreover, for
+$(x,u)\in\mathcal D_\alpha$,
+\begin{equation}
+\label{eq:lower-cost-nonnegative}
+\begin{aligned}
+|L_xx-L_uu|
+&\le L_xx+L_uu \\
+&\le \frac{L_x+\alpha L_u}{1-\alpha}
+=C_\alpha.
+\end{aligned}
+\end{equation}
+Thus the offset even makes the costs nonnegative on the feasible domain, although
+it will cancel from regret.
+
+Because $H\ge1$, both
+\begin{equation}
+\label{eq:lower-endpoint-parameters}
+\mathbf m^{(0)}\triangleq\mathbf 0,
+\qquad
+\mathbf m^{(1)}\triangleq\mathbf e_1
+\end{equation}
+belong to $\mathcal M_H$. Under the arrivals in
+\eqref{eq:lower-hard-instance}, the first endpoint has
+\begin{equation}
+\label{eq:lower-endpoint-zero-trajectory}
+u_t(\mathbf m^{(0)})=0,
+\qquad
+x_t(\mathbf m^{(0)})
+=
+\rho_t
+\triangleq
+\frac{1-\alpha^{t-1}}{1-\alpha}.
+\end{equation}
+Indeed, this follows by unrolling
+$x_{t+1}=\alpha x_t+1$ from $x_1=0$. At the second endpoint,
+\begin{equation}
+\label{eq:lower-endpoint-one-action}
+u_1(\mathbf m^{(1)})=0,
+\qquad
+u_t(\mathbf m^{(1)})=\alpha,
+\quad t\ge2.
+\end{equation}
+The state satisfies $x_2(\mathbf m^{(1)})=1$. If it equals one at a time
+$t\ge2$, then
+\[
+x_{t+1}(\mathbf m^{(1)})
+=\alpha-\alpha+1
+=1.
+\]
+Consequently,
+\begin{equation}
+\label{eq:lower-endpoint-one-trajectory}
+x_t(\mathbf m^{(1)})=1,
+\qquad
+u_t(\mathbf m^{(1)})=\alpha,
+\quad t\ge2.
+\end{equation}
+For $t\ge2$, the state difference between the endpoints is
+\begin{equation}
+\label{eq:lower-endpoint-state-gap}
+\begin{aligned}
+d_t
+&\triangleq
+x_t(\mathbf m^{(0)})-x_t(\mathbf m^{(1)}) \\
+&=\rho_t-1 \\
+&=\frac{\alpha(1-\alpha^{t-2})}{1-\alpha}.
+\end{aligned}
+\end{equation}
+
+Remove the common offset by defining the centered online and endpoint costs
+\begin{equation}
+\label{eq:lower-centered-costs}
+\begin{aligned}
+\widehat J_T^{\mathrm{on}}
+&\triangleq
+\sum_{t=1}^T\xi_t(L_xx_t-L_uu_t), \\
+\widehat J_T^{(j)}
+&\triangleq
+\sum_{t=1}^T\xi_t
+\left(
+L_xx_t(\mathbf m^{(j)})
+-L_uu_t(\mathbf m^{(j)})
+\right),
+\quad j\in\{0,1\}.
+\end{aligned}
+\end{equation}
+At time $t$, the pair $(x_t,u_t)$ is determined by the past observations and the
+controller randomization used before $c_t$ is revealed. It is therefore
+independent of the fresh sign $\xi_t$. Conditional mean zero gives
+\begin{equation}
+\label{eq:lower-online-mean-zero}
+\begin{aligned}
+\mathbb E\!\left[
+\xi_t(L_xx_t-L_uu_t)
+\,\middle|\,
+x_t,u_t
+\right]
+&=0, \\
+\mathbb E\!\left[\widehat J_T^{\mathrm{on}}\right]
+&=0.
+\end{aligned}
+\end{equation}
+Likewise, the two fixed endpoint trajectories do not depend on the signs, so
+\begin{equation}
+\label{eq:lower-endpoint-means-zero}
+\mathbb E\!\left[\widehat J_T^{(0)}\right]
+=
+\mathbb E\!\left[\widehat J_T^{(1)}\right]
+=0.
+\end{equation}
+
+Since the two endpoints agree at $t=1$, equations
+\eqref{eq:lower-endpoint-one-trajectory}--\eqref{eq:lower-endpoint-state-gap}
+give
+\begin{equation}
+\label{eq:lower-endpoint-cost-gap}
+\begin{aligned}
+\widehat J_T^{(0)}-\widehat J_T^{(1)}
+&=
+\sum_{t=2}^T\xi_t(L_xd_t+\alpha L_u) \\
+&=
+\sum_{t=2}^T\xi_t a_t,
+\end{aligned}
+\end{equation}
+where
+\begin{equation}
+\label{eq:lower-a-t}
+a_t
+\triangleq
+\alpha
+\left(
+L_u+
+\frac{L_x(1-\alpha^{t-2})}{1-\alpha}
+\right).
+\end{equation}
+
+Minimizing over all of $\mathcal M_H$ can only decrease the comparator cost.
+After canceling the common term $TC_\alpha$, the regret therefore satisfies
+pointwise
+\begin{equation}
+\label{eq:lower-two-comparator-reduction}
+\RegSDAC{T}
+\ge
+\widehat J_T^{\mathrm{on}}
+-
+\min\!\left\{
+\widehat J_T^{(0)},
+\widehat J_T^{(1)}
+\right\}.
+\end{equation}
+Using
+$\min\{a,b\}=(a+b-|a-b|)/2$ together with
+\eqref{eq:lower-online-mean-zero} and
+\eqref{eq:lower-endpoint-means-zero}, we obtain
+\begin{equation}
+\label{eq:lower-absolute-rademacher}
+\begin{aligned}
+\mathbb E\!\left[\RegSDAC{T}\right]
+&\ge
+\frac12
+\mathbb E\!\left[
+\left|
+\widehat J_T^{(0)}-\widehat J_T^{(1)}
+\right|
+\right] \\
+&=
+\frac12
+\mathbb E\!\left[
+\left|
+\sum_{t=2}^T\xi_ta_t
+\right|
+\right].
+\end{aligned}
+\end{equation}
+Khintchine's inequality for Rademacher sums implies
+\begin{equation}
+\label{eq:lower-khintchine}
+\mathbb E\!\left[
+\left|
+\sum_{t=2}^T\xi_ta_t
+\right|
+\right]
+\ge
+\frac{1}{\sqrt{2}}
+\left(
+\sum_{t=2}^Ta_t^2
+\right)^{1/2}.
+\end{equation}
+Substitution of \eqref{eq:lower-a-t} into
+\eqref{eq:lower-absolute-rademacher}--\eqref{eq:lower-khintchine} proves
+\eqref{eq:sdac-lower-exact} under the joint randomization of the signs and the
+controller.
+
+It remains to make the adversarial sequence deterministic. For a fixed sign vector
+$\boldsymbol\xi\in\{-1,1\}^T$, let
+\[
+R_{\mathcal A}(\boldsymbol\xi)
+\triangleq
+\mathbb E_{\mathcal A}\!\left[
+\RegSDAC{T}\,\middle|\,\boldsymbol\xi
+\right].
+\]
+The bound just proved states that the average of
+$R_{\mathcal A}(\boldsymbol\xi)$ over the $2^T$ sign vectors is at least the
+right-hand side of \eqref{eq:sdac-lower-exact}. Hence at least one deterministic
+vector $\boldsymbol\xi^\star$ attains that value. Fixing
+$\boldsymbol\xi^\star$ in \eqref{eq:lower-hard-instance} produces a deterministic
+oblivious admissible sequence, and the only remaining expectation is over the
+internal randomization of $\mathcal A$.
+\end{proof}
+
+\begin{proof}[Proof of Corollary~\ref{cor:sdac-lower-mixing}]
+The definition of $q_\alpha$ gives
+\begin{equation}
+\label{eq:lower-mixing-geometric}
+\alpha^{q_\alpha}
+\le
+\alpha^{\log 2/\log(1/\alpha)}
+=\frac12.
+\end{equation}
+Therefore, for every $t\ge q_\alpha+2$,
+\begin{equation}
+\label{eq:lower-a-post-mixing}
+\begin{aligned}
+a_t
+&\ge
+\alpha\left(
+L_u+\frac{L_x}{2(1-\alpha)}
+\right) \\
+&\ge
+\frac{\alpha}{2}
+\left(
+L_u+\frac{L_x}{1-\alpha}
+\right)
+=\frac{G_\alpha}{2}.
+\end{aligned}
+\end{equation}
+There are $T-q_\alpha-1$ indices in
+$\{q_\alpha+2,\ldots,T\}$. If $T\ge2q_\alpha+2$, then
+\begin{equation}
+\label{eq:lower-post-mixing-count}
+T-q_\alpha-1
+\ge
+\frac{T}{2}.
+\end{equation}
+Applying Theorem~\ref{thm:sdac-lower-bound} and retaining only these indices,
+\begin{equation}
+\label{eq:lower-mixing-final}
+\begin{aligned}
+\mathbb E_{\mathcal A}\!\left[\RegSDAC{T}\right]
+&\ge
+\frac{1}{2\sqrt{2}}
+\left[
+\frac{T}{2}\left(\frac{G_\alpha}{2}\right)^2
+\right]^{1/2} \\
+&=
+\frac{G_\alpha}{8}\sqrt{T}.
+\end{aligned}
+\end{equation}
+This is \eqref{eq:sdac-lower-mixing}.
+\end{proof}
+
+We next prove the proportional-policy approximation guarantee stated in
 Section~\ref{subsec:sdac-expressiveness}.
 
 \begin{proof}[Proof of Lemma~\ref{lem:sdac-linear-approx}]
