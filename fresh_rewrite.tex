@@ -236,7 +236,7 @@ Appendix.
 \label{sec:notation}
 
 We write $[T]\triangleq\{1,\ldots,T\}$ and $[z]_+ \triangleq \max\{z,0\}$.
-States may be indexed over $[T+1]$. For $\mathbf{v}\in\mathbb{R}^n$, the $i$-th
+For $\mathbf{v}\in\mathbb{R}^n$, the $i$-th
 coordinate is $v_i$; in particular, the coordinates of $\mathbf{m}_t$ and
 $\mathbf{g}_t$ are $m_{t,i}$ and $g_{t,i}$. We write $\mathbf{1}$ for the all-ones vector (dimension
 is clear from context). The Euclidean inner product is denoted by
@@ -251,10 +251,9 @@ introduced, unadorned $x_t$ and $u_t$ denote the realized clipped trajectory.
 \section{Model and Problem Setup}
 \label{sec:model-setup}
 
-Let $T$ be a positive integer. Actions, arrivals, and costs are indexed by
-$t\in[T]$, while states are indexed by $t\in[T+1]$. The
-system state $x_t\in\mathbb{R}_{\ge 0}$ denotes the resource level at the
-beginning of time $t$. The initial state is given as
+Let $T$ be a positive integer. The system state $x_t\in\mathbb{R}_{\ge 0}$
+denotes the resource level at the beginning of time $t$. The initial state
+is given as
 \begin{equation}
 \label{eq:model-init}
 x_1 = 0.
@@ -271,34 +270,27 @@ The system then receives an arrival $w_t\in[0,1]$ and evolves according to
 \label{eq:model-dynamics}
 x_{t+1} = \alpha x_t - u_t + w_t.
 \end{equation}
-In particular, the terminal state $x_{T+1}$ is well-defined. For every feasible
-trajectory and every $t\in[T]$,
+For every feasible trajectory,
 \[
 0\le x_{t+1}\le \alpha x_t+1.
 \]
 Since $x_1=0$, induction gives
 \[
-0\le x_t\le \frac{1-\alpha^{t-1}}{1-\alpha}
+0\le x_t
+\le \frac{1-\alpha^{t-1}}{1-\alpha}
 \le \frac{1}{1-\alpha},
-\qquad
-t\in[T+1],
+\qquad t\in[T+1].
 \]
-and
-\[
-0\le u_t\le \frac{\alpha}{1-\alpha},
-\qquad
-t\in[T].
-\]
-Define the compact state--action envelope
+Thus, every feasible state--action pair belongs to the compact set
 \begin{equation}
 \label{eq:model-domain}
 \mathcal{D}_\alpha
 \triangleq
-\left\{(x,u):0\le x\le\frac{1}{1-\alpha},\ 0\le u\le\alpha x\right\}.
+\left\{(x,u):
+0\le x\le\frac{1}{1-\alpha},\
+0\le u\le\alpha x
+\right\}.
 \end{equation}
-Every feasible pair $(x_t,u_t)$ lies in $\mathcal{D}_\alpha$; the set is a
-uniform compact envelope and need not coincide with the exact finite-time
-reachable set.
 
 After the control action is selected, a convex cost function
 \[
@@ -325,28 +317,24 @@ satisfying
 \qquad
 |\zeta_t^u(x,u)|\le L_u.
 \]
-This oracle condition holds, for
-example, when the Lipschitz property above extends to an open neighborhood of
-$\mathcal{D}_\alpha$.
+The stated subgradient bounds hold, for example, when
+\eqref{eq:model-lipschitz} extends to an open neighborhood of
+$\mathcal{D}_\alpha$; see \cite[Thm.~9.13]{rockafellar1998variational}.
 
-The information pattern is adversarial and non-anticipatory. At time $t$, the
-environment may choose $(w_t,c_t)$ as a function of the history through time $t-1$,
-but not of the current action (or current randomization). The controller chooses
-$u_t$ without observing $(w_t,c_t)$; the pair is then revealed. Subject to this
-timing and the stated regularity conditions, the arrival and cost sequences may be
-arbitrary.
 
 \paragraph{Assumptions}
 
 \begin{enumerate}
     \item \textbf{Retention coefficient:} $\alpha\in(0,1)$ is fixed and known (a fraction
-        $1-\alpha$ of the state is lost each period).
+        $1-\alpha$ of the state is lost each period).\footnote{We focus on
+        $\alpha\in(0,1)$; the case $\alpha\ge 1$ is discussed in
+        Section~\ref{sec:extensions}.}
     \item \textbf{Arrival bounds:} $w_t\in[0,1]$ for all $t\in[T]$.
         In particular, arrivals are nonnegative resource increments, in contrast to
         signed process-noise disturbances common in classical control.
-    \item \textbf{Adversarial timing:} $(w_t,c_t)$ may depend on the history through
-        time $t-1$ but not on the current action, and is revealed only after $u_t$ is
-        chosen.
+    \item \textbf{Information pattern:} $(w_t,c_t)$ may depend on the history
+        through time $t-1$, but not on the current action or randomization, and is
+        revealed only after $u_t$ is chosen.
     \item \textbf{Cost regularity:} each $c_t$ is convex in $(x,u)$, obeys
         \eqref{eq:model-lipschitz} on $\mathcal{D}_\alpha$, and admits the bounded
         subgradient oracle described above.
@@ -354,8 +342,6 @@ arbitrary.
         policies are required to satisfy \eqref{eq:model-feasibility} under
         \eqref{eq:model-dynamics}.
 \end{enumerate}
-We focus on $\alpha\in(0,1)$; the case $\alpha\ge 1$ is discussed in
-Section~\ref{sec:extensions}.
 
 Let $\{(x_t,u_t)\}_{t=1}^T$ denote the realized trajectory of the online
 controller. Define its cumulative cost by
@@ -771,7 +757,7 @@ is written $u_t=k x_t$. In our scalar model, the feasible proportional
 state-feedback policies are exactly those with gain
 $k\in[0,\alpha]$: since $x_t\ge 0$, the feasibility constraint $0\le u_t\le\alpha
 x_t$ in \eqref{eq:model-feasibility} holds if and only if $k\in[0,\alpha]$. The next
-lemma gives an explicit approximation within the feasible class $\Pi_H^{\mathrm{SDAC}}$; the two endpoint policies are represented exactly.
+lemma gives an explicit approximation within the feasible class $\Pi_H^{\mathrm{SDAC}}$.
 
 \begin{lemma}[SDAC approximation of proportional state feedback]
 \label{lem:sdac-linear-approx}
