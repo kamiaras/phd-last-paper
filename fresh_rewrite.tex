@@ -434,7 +434,7 @@ arguments below.
 \label{lem:sdac-state-decomp}
 Fix $H\in\mathbb{N}$ and $M\in\Delta_H$, and write
 \[
-W\triangleq\sum_{i=1}^H M^{(i)}\le 1.
+s_M \triangleq \sum_{i=1}^H M^{(i)}.
 \]
 For $i\in\{1,\ldots,H\}$, define
 \[
@@ -453,7 +453,7 @@ $t\in\{1,\ldots,T\}$,
 x_t^{\pi(M)}
 =
 \sum_{i=1}^H M^{(i)}\psi_t^{(i)}
-+(1-W)\rho_t.
++(1-s_M)\rho_t.
 \end{equation}
 Moreover,
 \[
@@ -481,8 +481,18 @@ and, for every $i\in\{1,\ldots,H\}$,
 \end{equation}
 For $i=1$, the sum in the first line is empty.
 
-At $t=1$, one has $x_1^{\pi(M)}=\psi_1^{(i)}=\rho_1=0$, so
-\eqref{eq:sdac-state-decomp} holds. Suppose it holds at time $t$. Using
+At $t=1$, since $w_{\tau}\equiv 0$ for $\tau\le 0$,
+\begin{align*}
+\psi_1^{(i)}
+&=
+\sum_{j=1}^{i}\alpha^{j-1}w_{1-j}
+=0,\\
+\rho_1
+&=0,\\
+x_1^{\pi(M)}
+&=0,
+\end{align*}
+so \eqref{eq:sdac-state-decomp} holds. Suppose it holds at time $t$. Using
 \eqref{eq:sdac-state-update} and \eqref{eq:def-sdac-policy},
 \begin{equation}
 \label{eq:decomp-induction-1}
@@ -491,7 +501,7 @@ x_{t+1}^{\pi(M)}
 &=
 \alpha\left(
 \sum_{i=1}^H M^{(i)}\psi_t^{(i)}
-+(1-W)\rho_t
++(1-s_M)\rho_t
 \right) \\
 &\quad
 -\sum_{i=1}^H M^{(i)}\alpha^i w_{t-i}
@@ -500,7 +510,7 @@ x_{t+1}^{\pi(M)}
 \sum_{i=1}^H M^{(i)}
 \bigl(\alpha\psi_t^{(i)}-\alpha^i w_{t-i}\bigr) \\
 &\quad
-+\alpha(1-W)\rho_t+w_t.
++\alpha(1-s_M)\rho_t+w_t.
 \end{aligned}
 \end{equation}
 Substituting \eqref{eq:rho-recursion} and \eqref{eq:psi-recursion} into
@@ -513,14 +523,14 @@ x_{t+1}^{\pi(M)}
 \sum_{i=1}^H M^{(i)}
 \bigl(\psi_{t+1}^{(i)}-w_t\bigr) \\
 &\quad
-+(1-W)(\rho_{t+1}-w_t)+w_t \\
++(1-s_M)(\rho_{t+1}-w_t)+w_t \\
 &=
 \sum_{i=1}^H M^{(i)}\psi_{t+1}^{(i)}
-+(1-W)\rho_{t+1},
++(1-s_M)\rho_{t+1},
 \end{aligned}
 \end{equation}
 because the total coefficient of $w_t$ in the first line is
-$-W-(1-W)+1=0$. This proves \eqref{eq:sdac-state-decomp} by induction.
+$-s_M-(1-s_M)+1=0$. This proves \eqref{eq:sdac-state-decomp} by induction.
 
 All summands defining $\psi_t^{(i)}$ and $\rho_t$ are nonnegative. Since
 $w_\tau=0$ for $\tau\le0$, $\psi_t^{(i)}$ is a truncation of $\rho_t$; hence
@@ -569,15 +579,14 @@ For every $i\in\{1,\ldots,H\}$,
 \ge
 \alpha^i w_{t-i}.
 \end{equation}
-Let $W=\sum_{i=1}^H M^{(i)}$. By
-Lemma~\ref{lem:sdac-state-decomp}, $1-W\ge0$ and $\rho_t\ge0$. Therefore,
+By Lemma~\ref{lem:sdac-state-decomp}, $1-s_M\ge0$ and $\rho_t\ge0$. Therefore,
 \begin{equation}
 \label{eq:feas-upper-direct}
 \begin{aligned}
 \alpha x_t^{\pi(M)}
 &=
 \sum_{i=1}^H M^{(i)}\alpha\psi_t^{(i)}
-+\alpha(1-W)\rho_t \\
++\alpha(1-s_M)\rho_t \\
 &\ge
 \sum_{i=1}^H M^{(i)}\alpha\psi_t^{(i)} \\
 &\ge
@@ -1900,7 +1909,7 @@ S_T
 \end{equation}
 
 We first bound the initial Bregman divergence. Fix $M\in\Delta_H$ and set
-$W\triangleq\sum_{i=1}^H M^{(i)}\in[0,1]$. Since
+$s_M\triangleq\sum_{i=1}^H M^{(i)}\in[0,1]$. Since
 $M_1^{(i)}=1/(H+1)$,
 \begin{equation}
 \label{eq:breg-init-expand}
@@ -1910,26 +1919,25 @@ D_\Psi(M\|M_1)
 \sum_{i=1}^H
 M^{(i)}\log\bigl((H+1)M^{(i)}\bigr) \\
 &\quad
--W+\frac{H}{H+1} \\
+-s_M+\frac{H}{H+1} \\
 &=
 \sum_{i=1}^H M^{(i)}\log M^{(i)}
-+W\log(H+1) \\
++s_M\log(H+1) \\
 &\quad
--W+\frac{H}{H+1}.
+-s_M+\frac{H}{H+1}.
 \end{aligned}
 \end{equation}
 Define the affine function
 \[
-f_H(W)
-\triangleq
-W\log(H+1)-W+\frac{H}{H+1}.
+f_H(s)\triangleq s\log(H+1)-s+\frac{H}{H+1},
+\qquad s\in[0,1].
 \]
 Because $z\log z\le0$ for $z\in[0,1]$,
 \begin{equation}
 \label{eq:breg-init-affine}
 D_\Psi(M\|M_1)
 \le
-f_H(W).
+f_H(s_M).
 \end{equation}
 The function $f_H$ is affine on $[0,1]$, and
 \[
