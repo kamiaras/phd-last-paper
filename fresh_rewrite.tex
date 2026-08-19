@@ -238,8 +238,8 @@ Appendix.
 We write $[z]_+ \triangleq \max\{z,0\}$. For $v\in\mathbb{R}^n$, the $i$-th
 coordinate is $v^{(i)}$. We write $\mathbf{1}$ for the all-ones vector (dimension
 is clear from context). The Euclidean inner product is denoted by
-$\langle\cdot,\cdot\rangle$. We set $w_\tau\equiv0$ for $\tau\le0$. We write
-$\mathcal{A}$ for the online
+$\langle\cdot,\cdot\rangle$. We write $\log$ for the natural logarithm. We set
+$w_\tau\equiv0$ for $\tau\le0$. We write $\mathcal{A}$ for the online
 algorithm and $\pi$ for a fixed policy (also written $\pi(M)$ when parameterized
 by a vector $M$).
 
@@ -247,16 +247,17 @@ by a vector $M$).
 \section{Model and Problem Setup}
 \label{sec:model-setup}
 
-We consider a discrete-time process indexed by $t\in\{1,\ldots,T\}$. The system
-state $x_t\in\mathbb{R}_{\ge 0}$ denotes the resource level at the beginning of
-time $t$. The initial state is given as
+Let $T$ be a positive integer. Actions, arrivals, and costs are indexed by
+$t\in\{1,\ldots,T\}$, while states are indexed by $t\in\{1,\ldots,T+1\}$. The
+system state $x_t\in\mathbb{R}_{\ge 0}$ denotes the resource level at the
+beginning of time $t$. The initial state is given as
 \begin{equation}
 \label{eq:model-init}
 x_1 = 0.
 \end{equation}
-Fix a retention coefficient $\alpha\in(0,1)$. At each time $t$, the controller
-chooses a control action $u_t\in\mathbb{R}_{\ge 0}$ subject to the state-dependent
-action constraint
+Fix a retention coefficient $\alpha\in(0,1)$. At each time $t\in\{1,\ldots,T\}$,
+the controller chooses a control action $u_t\in\mathbb{R}_{\ge 0}$ subject to the
+state-dependent action constraint
 \begin{equation}
 \label{eq:model-feasibility}
 0 \le u_t \le \alpha x_t.
@@ -266,7 +267,8 @@ The system then receives an arrival $w_t\in[0,1]$ and evolves according to
 \label{eq:model-dynamics}
 x_{t+1} = \alpha x_t - u_t + w_t.
 \end{equation}
-For every feasible trajectory,
+In particular, the terminal state $x_{T+1}$ is well-defined. For every feasible
+trajectory and every $t\in\{1,\ldots,T\}$,
 \[
 0\le x_{t+1}\le \alpha x_t+1.
 \]
@@ -275,15 +277,24 @@ Since $x_1=0$, induction gives
 0\le x_t\le \frac{1-\alpha^{t-1}}{1-\alpha}
 \le \frac{1}{1-\alpha},
 \qquad
-0\le u_t\le \frac{\alpha}{1-\alpha}.
+t\in\{1,\ldots,T+1\},
 \]
-Define the reachable state--action domain
+and
+\[
+0\le u_t\le \frac{\alpha}{1-\alpha},
+\qquad
+t\in\{1,\ldots,T\}.
+\]
+Define the compact state--action envelope
 \begin{equation}
 \label{eq:model-domain}
 \mathcal{D}_\alpha
 \triangleq
 \left\{(x,u):0\le x\le\frac{1}{1-\alpha},\ 0\le u\le\alpha x\right\}.
 \end{equation}
+Every feasible pair $(x_t,u_t)$ lies in $\mathcal{D}_\alpha$; the set is a
+uniform compact envelope and need not coincide with the exact finite-time
+reachable set.
 
 After the control action is selected, a convex cost function
 \[
@@ -298,8 +309,19 @@ that for all $(x,u),(x',u')\in\mathcal{D}_\alpha$,
 |c_t(x,u)-c_t(x',u')| \le L_x|x-x'| + L_u|u-u'|.
 \end{equation}
 We also assume access, at every $(x,u)\in\mathcal{D}_\alpha$, to a cost subgradient
-$s_t(x,u)=(s_{x,t},s_{u,t})\in\partial c_t(x,u)$ satisfying
-$|s_{x,t}|\le L_x$ and $|s_{u,t}|\le L_u$. This oracle condition holds, for
+\[
+s_t(x,u)
+=
+\bigl(s_{x,t}(x,u),s_{u,t}(x,u)\bigr)
+\in\partial c_t(x,u)
+\]
+satisfying
+\[
+|s_{x,t}(x,u)|\le L_x,
+\qquad
+|s_{u,t}(x,u)|\le L_u.
+\]
+This oracle condition holds, for
 example, when the Lipschitz property above extends to an open neighborhood of
 $\mathcal{D}_\alpha$.
 
@@ -370,8 +392,8 @@ representative form
 \label{eq:dac-param}
 u_t = \sum_{i=1}^{H} M^{(i)} w_{t-i},
 \end{equation}
-where $H\in\mathbb{N}$ is the memory horizon and $M\in\mathbb{R}^H$ is a linear
-filter. We allow nonpositive indices in such sums, with the convention $w_\tau\equiv
+where $H$ is a positive integer (the memory horizon) and $M\in\mathbb{R}^H$ is a
+linear filter. We allow nonpositive indices in such sums, with the convention $w_\tau\equiv
 0$ for $\tau\le 0$.
 
 For our constrained model, an unrestricted filter is insufficient: its action can
@@ -383,7 +405,7 @@ online updates.
 
 
 \subsection{SDAC Definition}
-Fix a memory horizon $H\in\mathbb{N}$. Let
+Fix a memory horizon $H\in\mathbb{N}_{>0}$. Let
 \begin{equation}
 \label{eq:def-simplex}
 \Delta_H \triangleq \left\{M\in\mathbb{R}_{\ge 0}^H:\; \sum_{i=1}^H
@@ -416,6 +438,13 @@ The induced state trajectory satisfies
 x_{t+1}^{\pi(M)} = \alpha x_t^{\pi(M)} - u_t^{\pi(M)} + w_t,
 \qquad x_1^{\pi(M)}=0.
 \end{equation}
+The SDAC policy class is
+\begin{equation}
+\label{eq:def-sdac-class}
+\mathrm{SDAC}_H
+\triangleq
+\{\pi(M):M\in\Delta_H\}.
+\end{equation}
 The weights $\alpha^i$ align the arrival filter with the retention coefficient
 $\alpha$ in \eqref{eq:model-dynamics}.
 
@@ -432,7 +461,7 @@ arguments below.
 
 \begin{lemma}[State decomposition under SDAC]
 \label{lem:sdac-state-decomp}
-Fix $H\in\mathbb{N}$ and $M\in\Delta_H$, and write
+Fix a positive integer $H$ and $M\in\Delta_H$, and write
 \[
 s_M \triangleq \sum_{i=1}^H M^{(i)}.
 \]
@@ -628,7 +657,7 @@ $g\in\partial\ell_t(M)$ such that $\|g\|_\infty\le L$.
 \end{lemma}
 
 \begin{proof}
-For $i\in\{1,\ldots,H\}$, define
+Define the vectors $a_t,b_t\in\mathbb{R}^H$ coordinatewise by
 \[
 a_t^{(i)}
 \triangleq
@@ -636,7 +665,9 @@ a_t^{(i)}
 \qquad
 b_t^{(i)}
 \triangleq
-\alpha^i w_{t-i}.
+\alpha^i w_{t-i},
+\qquad
+i\in\{1,\ldots,H\}.
 \]
 Lemma~\ref{lem:sdac-state-decomp} and \eqref{eq:def-sdac-policy} give
 \begin{equation}
@@ -677,12 +708,12 @@ L\|M-M'\|_1.
 \end{aligned}
 \end{equation}
 
-Choose $(s_x,s_u)\in
-\partial c_t(x_t^{\pi(M)},u_t^{\pi(M)})$ with
-$|s_x|\le L_x$ and $|s_u|\le L_u$, and set
+Let $(s_{x,t},s_{u,t})$ denote the components of the bounded subgradient
+$s_t\bigl(x_t^{\pi(M)},u_t^{\pi(M)}\bigr)$ from Section~\ref{sec:model-setup},
+and set
 \begin{equation}
 \label{eq:surr-subgradient-short}
-g\triangleq s_x a_t+s_u b_t.
+g\triangleq s_{x,t}\,a_t+s_{u,t}\,b_t.
 \end{equation}
 For every $M'\in\Delta_H$, the subgradient inequality and
 \eqref{eq:surr-affine-pair} yield
@@ -690,8 +721,8 @@ For every $M'\in\Delta_H$, the subgradient inequality and
 \ell_t(M')
 &\ge
 \ell_t(M)
-+s_x\langle a_t,M'-M\rangle
-+s_u\langle b_t,M'-M\rangle \\
++s_{x,t}\langle a_t,M'-M\rangle
++s_{u,t}\langle b_t,M'-M\rangle \\
 &=
 \ell_t(M)+\langle g,M'-M\rangle.
 \end{align*}
@@ -701,7 +732,7 @@ Thus $g\in\partial\ell_t(M)$. Finally,
 \begin{aligned}
 \|g\|_\infty
 &\le
-|s_x|\|a_t\|_\infty+|s_u|\|b_t\|_\infty \\
+|s_{x,t}|\,\|a_t\|_\infty+|s_{u,t}|\,\|b_t\|_\infty \\
 &\le
 \frac{L_x}{1-\alpha}+\alpha L_u
 =
@@ -711,7 +742,6 @@ L.
 \end{proof}
 
 Regret minimization against the best fixed SDAC policy thus becomes online convex
-optimization over the simplex.
 optimization over the simplex.
 
 \subsection{Expressiveness: Proportional State-Feedback Approximation}
@@ -733,30 +763,33 @@ the two endpoint policies are represented exactly.
 
 \begin{lemma}[SDAC approximation of proportional state feedback]
 \label{lem:sdac-linear-approx}
-Fix $q\in[0,\alpha]$, set $\beta\triangleq\alpha-q$, and let $\pi_q^{\mathrm{lin}}$
-denote the feasible linear policy
+Fix $q\in[0,\alpha]$ and set $\beta\triangleq\alpha-q$. Let
+$\bigl(x_t^{(q)},u_t^{(q)}\bigr)$ denote the trajectory of the feasible
+proportional policy $u_t^{(q)}=q\,x_t^{(q)}$, so that
 \[
 \begin{aligned}
-u_t^{\mathrm{lin}}&=q\,x_t^{\mathrm{lin}},
-\qquad
-x_{t+1}^{\mathrm{lin}}=\beta\,x_t^{\mathrm{lin}}+w_t, \\
+x_{t+1}^{(q)}&=\beta\,x_t^{(q)}+w_t, \\
 t&\in\{1,\ldots,T\},
 \qquad
-x_1^{\mathrm{lin}}=0.
+x_1^{(q)}=0.
 \end{aligned}
 \]
 Define $M_q^\star\in\mathbb{R}^H$ by
 \[
-M_q^{\star(i)}\triangleq\frac{q\,\beta^{i-1}}{\alpha^i},
-\qquad i=1,\ldots,H.
+M_q^{\star(1)}\triangleq\frac{q}{\alpha},
+\qquad
+M_q^{\star(i)}\triangleq\frac{q\,\beta^{i-1}}{\alpha^i}
+\quad\text{for }i=2,\ldots,H.
 \]
+This definition satisfies $M_q^{\star(i)}\alpha^i=q\beta^{i-1}$ for every
+$i\in\{1,\ldots,H\}$, where $\beta^0\triangleq 1$.
 Then $M_q^\star\in\Delta_H$, and if each $c_t$ satisfies
 \eqref{eq:model-lipschitz}, then for every $\{w_t\}\subset[0,1]$,
 \begin{equation}
 \label{eq:sdac-lin-approx-cost}
 \begin{aligned}
 &\Bigl|\sum_{t=1}^T c_t\bigl(x_t^{\pi(M_q^\star)},u_t^{\pi(M_q^\star)}\bigr)
--\sum_{t=1}^T c_t\bigl(x_t^{\mathrm{lin}},u_t^{\mathrm{lin}}\bigr)\Bigr| \\
+-\sum_{t=1}^T c_t\bigl(x_t^{(q)},u_t^{(q)}\bigr)\Bigr| \\
 &\qquad\le
 \Bigl(L_u+\frac{L_x}{1-\alpha}\Bigr)\frac{q\,\beta^H}{1-\beta}\,T.
 \end{aligned}
@@ -781,7 +814,28 @@ We now present our online algorithm, which updates SDAC parameters by
 online mirror descent (OMD) with unnormalized negentropy (equivalently, the
 exponentiated gradient method) and a fixed step size $\eta>0$ over the
 subprobability simplex $\Delta_H\subset\mathbb{R}^H$
-\cite{hazan2016introduction}.
+\cite{hazan2016introduction}. Let
+\begin{equation}
+\label{eq:def-negentropy}
+\Psi(M) \triangleq \sum_{i=1}^H\bigl(M^{(i)}\log M^{(i)}-M^{(i)}\bigr), \qquad
+M\in\mathbb{R}_{\ge0}^H,
+\end{equation}
+denote the unnormalized negentropy (with the convention $0\log0\triangleq0$).
+Its Bregman divergence is the generalized Kullback--Leibler divergence
+\begin{equation}
+\label{eq:def-bregman}
+D_\Psi(M\|V)
+\triangleq
+\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{V^{(i)}}-M^{(i)}+V^{(i)}\Bigr),
+\end{equation}
+defined for
+\[
+M\in\mathbb{R}_{\ge0}^H,
+\qquad
+V\in\mathbb{R}_{>0}^H.
+\]
+Terms with $M^{(i)}=0$ are interpreted by continuity as zero in the logarithmic
+part.
 
 For each time $t\in\{1,\ldots,T\}$, let $M_t\in\Delta_H$ be the online parameter. We initialize
 at
@@ -812,7 +866,7 @@ x_{t+1}^{\mathcal{A}} = \alpha x_t^{\mathcal{A}} - u_t^{\mathcal{A}} + w_t,
 \end{equation}
 By construction, $\widehat{u}_t\ge 0$ and $u_t^{\mathcal{A}}\in[0,\alpha x_t^{\mathcal{A}}]$;
 with $x_1^{\mathcal{A}}=0$ and $w_t\in[0,1]$, induction on
-\eqref{eq:alg-state-update} yields $x_t^{\mathcal{A}}\ge 0$ for all $t\in\{1,\ldots,T\}$,
+\eqref{eq:alg-state-update} yields $x_t^{\mathcal{A}}\ge 0$ for all $t\in\{1,\ldots,T+1\}$,
 so the online trajectory satisfies \eqref{eq:model-feasibility}.
 
 \paragraph{Surrogate cost and OMD update}
@@ -823,20 +877,7 @@ After $(w_t,c_t)$ is revealed, define the surrogate cost by
 \end{equation}
 which is convex and Lipschitz by Lemma~\ref{lem:sdac-surrogate}. Select a subgradient
 $g_t\in\partial\ell_t(M_t)$ satisfying $\|g_t\|_\infty\le L$, whose existence and
-construction are given in that lemma. Let
-\begin{equation}
-\label{eq:def-negentropy}
-\Psi(M) \triangleq \sum_{i=1}^H\bigl(M^{(i)}\log M^{(i)}-M^{(i)}\bigr), \qquad
-M\in\mathbb{R}_{\ge0}^H,
-\end{equation}
-denote the unnormalized negentropy (with the convention $0\log0\triangleq0$), and let
-\[
-D_\Psi(M\|V)\triangleq\sum_{i=1}^H\Bigl(M^{(i)}\log\tfrac{M^{(i)}}{V^{(i)}}-M^{(i)}+V^{(i)}\Bigr)
-\]
-be its Bregman divergence for $V\in\mathbb{R}_{>0}^H$, the generalized
-Kullback--Leibler divergence. Terms with $M^{(i)}=0$ are interpreted by
-continuity as zero in the logarithmic part.
-
+construction are given in that lemma.
 We define the OMD update
 \begin{equation}
 \label{eq:alg-omd-argmin}
@@ -1050,8 +1091,9 @@ $(x,u)$. The fixed-policy SDAC construction lifts by replacing the filter vector
 $M\in\Delta_H$ with a matrix
 $M\in\mathbb{R}_{\ge 0}^{n\times H}$ whose entries sum to at most one (a matrix
 simplex), with each row corresponding to a task and each column to a memory lag.
-OMD can then run over this matrix simplex, with radial action clipping when the
-nominal total allocation exceeds $\alpha x_t$.
+OMD can then run over this matrix simplex. If the nominal total allocation
+exceeds $\alpha x_t$, the action vector is scaled by a nonnegative factor so that
+$\mathbf{1}^\top u_t=\alpha x_t$.
 
 \paragraph{Multiple storages with diagonal dynamics.}
 Suppose the state is $x_t\in\mathbb{R}_{\ge 0}^d$ and evolves as
@@ -1096,41 +1138,41 @@ Section~\ref{sec:regret-analysis}.
 Recall that we set $w_\tau\equiv 0$ for $\tau\le 0$, which is used in several
 base-case arguments below.
 
-We first prove the linear-policy approximation guarantee stated in
+We first prove the proportional-policy approximation guarantee stated in
 Section~\ref{subsec:sdac-expressiveness}.
 
 \begin{proof}[Proof of Lemma~\ref{lem:sdac-linear-approx}]
 Fix $q\in[0,\alpha]$ and set $\beta\triangleq\alpha-q\in[0,\alpha]$.
 
 \emph{Proportional-policy trajectory.}
-Substituting $u_t^{\mathrm{lin}}=q x_t^{\mathrm{lin}}$ into the dynamics gives
+Substituting $u_t^{(q)}=q x_t^{(q)}$ into the dynamics gives
 \begin{equation}
 \label{eq:model-closed-loop}
-x_{t+1}^{\mathrm{lin}}
+x_{t+1}^{(q)}
 =
-\beta x_t^{\mathrm{lin}}+w_t,
+\beta x_t^{(q)}+w_t,
 \qquad
-x_1^{\mathrm{lin}}=0.
+x_1^{(q)}=0.
 \end{equation}
 Unrolling \eqref{eq:model-closed-loop},
 \begin{equation}
 \label{eq:lin-closed-form}
 \begin{aligned}
-x_t^{\mathrm{lin}}
+x_t^{(q)}
 &=
 \sum_{j=1}^{t-1}\beta^{j-1}w_{t-j}, \\
-u_t^{\mathrm{lin}}
+u_t^{(q)}
 &=
 q\sum_{j=1}^{t-1}\beta^{j-1}w_{t-j}.
 \end{aligned}
 \end{equation}
-Thus $x_t^{\mathrm{lin}}\ge0$, and $q\in[0,\alpha]$ implies
+Thus $x_t^{(q)}\ge0$, and $q\in[0,\alpha]$ implies
 \[
-0\le u_t^{\mathrm{lin}}
+0\le u_t^{(q)}
 =
-q x_t^{\mathrm{lin}}
+q x_t^{(q)}
 \le
-\alpha x_t^{\mathrm{lin}}.
+\alpha x_t^{(q)}.
 \]
 
 \emph{Simplex membership.}
@@ -1145,9 +1187,12 @@ Since $q=\alpha-\beta$, one has $q/\alpha=1-r$. Consequently,
 \begin{aligned}
 \sum_{i=1}^H M_q^{\star(i)}
 &=
-\frac{q}{\alpha}\sum_{i=1}^H r^{i-1} \\
+\frac{q}{\alpha}
++\sum_{i=2}^H \frac{q\,\beta^{i-1}}{\alpha^i} \\
 &=
-(1-r)\frac{1-r^H}{1-r} \\
+\frac{q}{\alpha}\bigl(1+r+\cdots+r^{H-1}\bigr) \\
+&=
+(1-r)\bigl(1+r+\cdots+r^{H-1}\bigr) \\
 &=
 1-r^H
 \le1.
@@ -1156,7 +1201,8 @@ Since $q=\alpha-\beta$, one has $q/\alpha=1-r$. Consequently,
 Hence $M_q^\star\in\Delta_H$.
 
 \emph{Action approximation.}
-The identity $M_q^{\star(i)}\alpha^i=q\beta^{i-1}$ gives
+The identity $M_q^{\star(i)}\alpha^i=q\beta^{i-1}$ (with $\beta^0\triangleq 1$)
+gives
 \begin{equation}
 \label{eq:lin-sdac-u}
 u_t^{\pi(M_q^\star)}
@@ -1167,7 +1213,7 @@ Define
 \[
 e_t
 \triangleq
-u_t^{\mathrm{lin}}-u_t^{\pi(M_q^\star)}.
+u_t^{(q)}-u_t^{\pi(M_q^\star)}.
 \]
 Using $w_\tau=0$ for $\tau\le0$ in \eqref{eq:lin-closed-form} and
 \eqref{eq:lin-sdac-u},
@@ -1194,7 +1240,7 @@ Let
 \[
 \delta_t
 \triangleq
-x_t^{\pi(M_q^\star)}-x_t^{\mathrm{lin}}.
+x_t^{\pi(M_q^\star)}-x_t^{(q)}.
 \]
 Subtracting the two state recursions yields
 \begin{equation}
@@ -1233,7 +1279,7 @@ By \eqref{eq:model-lipschitz}, \eqref{eq:lin-e-range}, and
 \begin{aligned}
 &\left|
 c_t\bigl(x_t^{\pi(M_q^\star)},u_t^{\pi(M_q^\star)}\bigr)
--c_t\bigl(x_t^{\mathrm{lin}},u_t^{\mathrm{lin}}\bigr)
+-c_t\bigl(x_t^{(q)},u_t^{(q)}\bigr)
 \right| \\
 &\qquad\le
 L_x\delta_t+L_u e_t \\
@@ -1258,8 +1304,8 @@ and surrogate-cost lemmas already established in Section~\ref{sec:sdac}
 
 \begin{lemma}[Bregman projection onto $\Delta_H$]
 \label{lem:bregman-projection}
-Let $D_\Psi$ be the Bregman divergence of the unnormalized negentropy
-\eqref{eq:def-negentropy}. Fix $\widetilde{M}\in\mathbb{R}_{>0}^H$ and set
+Let $D_\Psi$ be the Bregman divergence \eqref{eq:def-bregman} of the unnormalized
+negentropy \eqref{eq:def-negentropy}. Fix $\widetilde{M}\in\mathbb{R}_{>0}^H$ and set
 $S\triangleq\sum_{i=1}^H \widetilde{M}^{(i)}$. Then the Bregman projection of
 $\widetilde{M}$ onto $\Delta_H=\{M\in\mathbb{R}_{\ge0}^H:\sum_{i} M^{(i)}\le1\}$,
 \[
@@ -1596,6 +1642,10 @@ For $M\in\Delta_H$, define
 \triangleq
 x_t^{\pi(M)}-x_t^{\mathcal{A}}.
 \end{equation}
+Here $x_t^{\pi(M_t)}$ is the counterfactual state obtained by applying the single
+fixed parameter $M_t$ from time $1$ through time $t$; it is not the state
+generated by the time-varying sequence $M_1,\ldots,M_t$.
+
 Define the clipping error
 \begin{equation}
 \label{eq:def-clipping-error}
