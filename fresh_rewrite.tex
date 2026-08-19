@@ -399,9 +399,9 @@ our scalar storage model, specializing the baseline feedback term to zero gives 
 representative form
 \begin{equation}
 \label{eq:dac-param}
-u_t = \sum_{i=1}^{H} m_i w_{t-i},
+u_t = \sum_{i=1}^{H} \theta_i w_{t-i},
 \end{equation}
-where $H$ is a positive integer (the memory horizon) and $\mathbf{m}\in\mathbb{R}^H$ is a
+where $H$ is a positive integer (the memory horizon) and $\boldsymbol{\theta}=(\theta_1,\ldots,\theta_H)^\top\in\mathbb{R}^H$ is a
 linear filter. We allow nonpositive indices in such sums, with the convention $w_\tau\equiv
 0$ for $\tau\le 0$.
 
@@ -489,7 +489,7 @@ $t\in[T]$,
 x_t(\mathbf{m})
 =
 \sum_{i=1}^H m_i r_{t,i}
-+(1-\|\mathbf{m}\|_1)r_t.
++\bigl(1-\mathbf{1}^\top\mathbf{m}\bigr)r_t.
 \end{equation}
 Define
 \[
@@ -553,7 +553,7 @@ x_{t+1}(\mathbf{m})
 &=
 \alpha\left(
 \sum_{i=1}^H m_i r_{t,i}
-+(1-\|\mathbf{m}\|_1)r_t
++\bigl(1-\mathbf{1}^\top\mathbf{m}\bigr)r_t
 \right) \\
 &\quad
 -\sum_{i=1}^H m_i\alpha^i w_{t-i}
@@ -562,7 +562,7 @@ x_{t+1}(\mathbf{m})
 \sum_{i=1}^H m_i
 \bigl(\alpha r_{t,i}-\alpha^i w_{t-i}\bigr) \\
 &\quad
-+\alpha(1-\|\mathbf{m}\|_1)r_t+w_t.
++\alpha\bigl(1-\mathbf{1}^\top\mathbf{m}\bigr)r_t+w_t.
 \end{aligned}
 \end{equation}
 Substituting \eqref{eq:r-recursion} and \eqref{eq:r-coord-recursion} into
@@ -575,14 +575,14 @@ x_{t+1}(\mathbf{m})
 \sum_{i=1}^H m_i
 \bigl(r_{t+1,i}-w_t\bigr) \\
 &\quad
-+(1-\|\mathbf{m}\|_1)(r_{t+1}-w_t)+w_t \\
++\bigl(1-\mathbf{1}^\top\mathbf{m}\bigr)(r_{t+1}-w_t)+w_t \\
 &=
 \sum_{i=1}^H m_i r_{t+1,i}
-+(1-\|\mathbf{m}\|_1)r_{t+1},
++\bigl(1-\mathbf{1}^\top\mathbf{m}\bigr)r_{t+1},
 \end{aligned}
 \end{equation}
 because the total coefficient of $w_t$ in the first line is
-$-\|\mathbf{m}\|_1-(1-\|\mathbf{m}\|_1)+1=0$. This proves \eqref{eq:sdac-state-decomp} by induction.
+$-\mathbf{1}^\top\mathbf{m}-\bigl(1-\mathbf{1}^\top\mathbf{m}\bigr)+1=0$. This proves \eqref{eq:sdac-state-decomp} by induction.
 
 All summands defining $r_{t,i}$ and $r_t$ are nonnegative. Since
 $w_\tau=0$ for $\tau\le0$, $r_{t,i}$ is a truncation of $r_t$; hence
@@ -633,14 +633,14 @@ For every $i\in\{1,\ldots,H\}$,
 \ge
 \alpha^i w_{t-i}.
 \end{equation}
-By Lemma~\ref{lem:sdac-state-decomp}, $1-\|\mathbf{m}\|_1\ge0$ and $r_t\ge0$. Therefore,
+By Lemma~\ref{lem:sdac-state-decomp}, $1-\mathbf{1}^\top\mathbf{m}\ge0$ and $r_t\ge0$. Therefore,
 \begin{equation}
 \label{eq:feas-upper-direct}
 \begin{aligned}
 \alpha x_t(\mathbf{m})
 &=
 \sum_{i=1}^H m_i\alpha r_{t,i}
-+\alpha(1-\|\mathbf{m}\|_1)r_t \\
++\alpha\bigl(1-\mathbf{1}^\top\mathbf{m}\bigr)r_t \\
 &\ge
 \sum_{i=1}^H m_i\alpha r_{t,i} \\
 &\ge
@@ -788,12 +788,18 @@ x_1(k)=0.
 \]
 Define $\mathbf{m}_H^\star(k)\in\mathbb{R}^H$ by
 \[
-m_{H,1}^\star(k)\triangleq\frac{k}{\alpha},
-\qquad
-m_{H,i}^\star(k)\triangleq\frac{k\,\lambda_k^{i-1}}{\alpha^i}
-\quad\text{for }i=2,\ldots,H.
+\begin{aligned}
+\bigl[\mathbf{m}_H^\star(k)\bigr]_1
+&\triangleq
+\frac{k}{\alpha},
+\\
+\bigl[\mathbf{m}_H^\star(k)\bigr]_i
+&\triangleq
+\frac{k\,\lambda_k^{i-1}}{\alpha^i},
+\qquad i=2,\ldots,H.
+\end{aligned}
 \]
-This definition satisfies $m_{H,i}^\star(k)\alpha^i=k\lambda_k^{i-1}$ for every
+This definition satisfies $\bigl[\mathbf{m}_H^\star(k)\bigr]_i\alpha^i=k\lambda_k^{i-1}$ for every
 $i\in\{1,\ldots,H\}$, where $\lambda_k^0\triangleq 1$.
 Then $\mathbf{m}_H^\star(k)\in\mathcal{M}_H$, and if each $c_t$ satisfies
 \eqref{eq:model-lipschitz}, then for every $\{w_t\}\subset[0,1]$,
@@ -1201,14 +1207,14 @@ k x_t(k)
 \emph{Simplex membership.}
 Each coordinate of $\mathbf{m}_H^\star(k)$ is nonnegative. If $k=0$, then
 $\mathbf{m}_H^\star(0)=\mathbf{0}\in\mathcal{M}_H$. If $k=\alpha$, then
-$\lambda_k=0$, so $m_{H,1}^\star(\alpha)=1$ and $m_{H,i}^\star(\alpha)=0$ for
+$\lambda_k=0$, so $\bigl[\mathbf{m}_H^\star(\alpha)\bigr]_1=1$ and $\bigl[\mathbf{m}_H^\star(\alpha)\bigr]_i=0$ for
 $i=2,\ldots,H$, hence $\mathbf{m}_H^\star(\alpha)\in\mathcal{M}_H$. Now suppose
 $0<k<\alpha$. Since $k=\alpha-\lambda_k$, one has $k/\alpha=1-\lambda_k/\alpha$,
 and $\lambda_k/\alpha\in(0,1)$. Consequently,
 \begin{equation}
 \label{eq:lin-simplex-sum}
 \begin{aligned}
-\sum_{i=1}^H m_{H,i}^\star(k)
+\sum_{i=1}^H \bigl[\mathbf{m}_H^\star(k)\bigr]_i
 &=
 \frac{k}{\alpha}
 +\sum_{i=2}^H \frac{k\,\lambda_k^{i-1}}{\alpha^i} \\
@@ -1225,7 +1231,7 @@ and $\lambda_k/\alpha\in(0,1)$. Consequently,
 Hence $\mathbf{m}_H^\star(k)\in\mathcal{M}_H$.
 
 \emph{Action approximation.}
-The identity $m_{H,i}^\star(k)\alpha^i=k\lambda_k^{i-1}$ (with $\lambda_k^0\triangleq 1$)
+The identity $\bigl[\mathbf{m}_H^\star(k)\bigr]_i\alpha^i=k\lambda_k^{i-1}$ (with $\lambda_k^0\triangleq 1$)
 gives
 \begin{equation}
 \label{eq:lin-sdac-u}
