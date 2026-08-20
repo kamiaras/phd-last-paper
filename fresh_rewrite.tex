@@ -172,16 +172,12 @@ supports efficient no-regret updates. Extensions include partial observability
 Constrained online-control methods have also been developed for affine and general
 static state--input constraints \cite{li2021onlineConstrained,
 liu2023constrainedControl}. Our focus is the storage-specific constraint
-\eqref{eq:model-feasibility}, whose feasible action set depends on the current state.
-Exploiting nonnegative arrivals, SDAC uses a simplex parameterization to make every
-fixed policy feasible; scalar action clipping preserves feasibility when the
-parameter changes online.
+\eqref{eq:model-feasibility}, whose feasible set depends on the current state; SDAC
+handles this dependence with a simplex parameterization.
 
-Some lower-bound results in online nonstochastic control establish optimality in
-the horizon $T$ without resolving all stability-parameter dependence;
-for example, Simchowitz et al. establish the optimal $\sqrt{T}$ horizon dependence
-for known systems in their fully adversarial setting
-\cite{simchowitz2020improper}. Kumar et al. develop matching
+Simchowitz et al. establish the optimal $\sqrt{T}$ horizon dependence for known
+systems in the fully adversarial setting, without resolving all stability-parameter
+dependence \cite{simchowitz2020improper}. Kumar et al. develop matching
 memory-dependent upper and lower bounds for online convex optimization with
 unbounded memory \cite{kumar2023unbounded}. Their discounted-memory specialization
 has lower-bound order $\sqrt{T}/(1-\rho)$. This scaling motivates comparison with
