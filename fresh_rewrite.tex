@@ -181,6 +181,19 @@ Exploiting nonnegative arrivals, SDAC uses a simplex parameterization to make ev
 fixed policy feasible; scalar action clipping preserves feasibility when the
 parameter changes online.
 
+Some lower-bound results in online nonstochastic control establish optimality in
+the horizon $T$ without resolving all stability-parameter dependence;
+for example, Simchowitz et al. establish the optimal $\sqrt{T}$ horizon dependence
+for known systems in their fully adversarial setting
+\cite{simchowitz2020improper}. Kumar et al. develop matching
+memory-dependent upper and lower bounds for online convex optimization with
+unbounded memory \cite{kumar2023unbounded}. Their discounted-memory specialization
+has lower-bound order $\sqrt{T}/(1-\rho)$. This scaling motivates comparison with
+our large-$\alpha$ result, but their theorem does not directly imply ours: their
+loss may inspect separate coordinates of the decision history, whereas our stage
+cost observes only the scalar state--action pair $(x_t,u_t)$ under the storage
+feasibility constraint.
+
 \paragraph{Energy harvesting}
 Lin et al. \cite{lin2025optimal} study online age-of-information optimization in an
 energy-harvesting system with related battery dynamics. They compare with an
@@ -1214,7 +1227,12 @@ whenever $T$ is at least the mixing scale. The upper bound in
 Theorem~\ref{thm:regret-bound} is
 $O((1-\alpha)^{-3/2}\sqrt{T\log(H+1)})$, so a factor
 $(1-\alpha)^{-1/2}$ in the stability margin remains open, apart from the
-memory-dependent logarithm.
+memory-dependent logarithm. The lower-bound scaling in
+\eqref{eq:sdac-lower-large-alpha} agrees with the discounted-memory obstruction in
+online convex optimization with unbounded memory \cite{kumar2023unbounded}. This is
+a comparison of rates rather than a reduction: Theorem~\ref{thm:sdac-lower-bound}
+is proved directly under the scalar state--action loss and storage-feasibility
+structure of our model.
 
 The mixing-scale qualification is essential for interpreting the large-$\alpha$
 asymptotic. If $T$ is fixed while $\alpha\uparrow1$, then
@@ -1438,9 +1456,10 @@ together with the OMD and stability lemmas leading up to the upper regret bound.
 Recall that we set $w_\tau\equiv 0$ for $\tau\le 0$, which is used in several
 base-case arguments below.
 
-We first prove the lower bound. The construction embeds a two-comparator online
-linear problem into the two endpoint SDAC policies $\mathbf 0$ and
-$\mathbf e_1$.
+We first prove the lower bound. Following the standard random-sign mechanism for
+online linear-optimization lower bounds \cite{hazan2016introduction}, the
+construction embeds a two-comparator online linear problem into the two endpoint
+SDAC policies $\mathbf 0$ and $\mathbf e_1$.
 
 \begin{proof}[Proof of Theorem~\ref{thm:sdac-lower-bound}]
 Fix a causal feasible controller $\mathcal A$. Let
