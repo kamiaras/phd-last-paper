@@ -12,6 +12,7 @@
  
 \newcommand{\RegSDAC}[1]{\operatorname{Reg}_{#1}^{\mathrm{SDAC}}}
 \newcommand{\RegProp}[1]{\operatorname{Reg}_{#1}^{\mathrm{prop}}}
+\newcommand{\RegAlloc}[1]{\operatorname{Reg}_{#1}^{\mathrm{alloc}}}
 
 \title{Online Constrained Control of Storage Systems via Simplex Disturbance-Action
 Policies}
@@ -48,11 +49,12 @@ We also prove a minimax lower bound that matches the small-$\alpha$ power. Once
 $T$ is at least the mixing scale $\Theta((1-\alpha)^{-1})$, the lower bound is
 $\Omega((1-\alpha)^{-1}\sqrt{T})$ as $\alpha\uparrow1$, leaving a square-root
 gap in the stability-margin dependence of the upper and lower bounds.
-We further show that SDAC geometrically approximates
-every feasible proportional state-feedback policy; choosing $H=\Theta(\log T)$
-yields $O\!\left(\sqrt{T\log\log T}\right)$ regret against the best policy in this
-class. The setting is motivated by energy-harvesting battery management and related
-storage systems.
+We further show that SDAC geometrically approximates every feasible proportional
+state-feedback policy and a broader class of decreasing allocation-sequence
+policies motivated by energy-harvesting battery management. Choosing
+$H=\Theta(\log T)$ yields $O\!\left(\sqrt{T\log\log T}\right)$ regret against
+the best policy in either class. The setting also applies to related storage
+systems.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -130,7 +132,7 @@ Our contributions are as follows:
         $0\le u_t\le\alpha x_t$. We prove that every fixed SDAC policy is feasible,
         its induced loss is convex and Lipschitz in the policy parameter, and the
         class geometrically approximates feasible proportional state-feedback
-        policies.
+        policies and a broader class of decreasing allocation-sequence policies.
     \item \textbf{Online control and regret.} We develop an entropic OMD controller
         over SDAC parameters. A Bregman projection maintains the simplex constraint
         on the parameters, and scalar action clipping maintains feasibility of the actual
@@ -142,7 +144,8 @@ Our contributions are as follows:
         $\Theta((1-\alpha)^{-3/2})$ as $\alpha\uparrow1$,
         and, with $H=\Theta(\log T)$, achieves
         $O\!\left(\sqrt{T\log\log T}\right)$ regret against the best feasible
-        proportional state-feedback policy.
+        allocation-sequence policy, and hence also against the best proportional
+        state-feedback policy.
     \item \textbf{Minimax lower bound.} We construct an oblivious sequence of
         arrivals and convex costs for which every causal feasible controller has
         expected SDAC regret $\Omega(G_\alpha\sqrt{T})$ after the mixing scale,
@@ -195,6 +198,27 @@ cost observes only the scalar state--action pair $(x_t,u_t)$ under the storage
 feasibility constraint.
 
 \paragraph{Energy harvesting}
+Online energy-harvesting control commonly uses simple battery-responsive rules.
+Shaviv and \"Ozg\"ur \cite{shaviv2016universally} introduced a fixed-fraction
+power policy and established distribution-uniform additive and multiplicative
+performance guarantees for i.i.d. energy arrivals. Arafa et al.
+\cite{arafa2018online} extended this viewpoint to general concave utilities and,
+for Bernoulli recharges, characterized optimal post-recharge expenditure through
+a generally nongeometric allocation sequence. Allocation-sequence structure also
+appears in look-ahead power control: Zibaeenejad and Chen
+\cite{zibaeenejad2019lookahead} characterize an optimal positive decreasing
+sequence between recharge epochs. These models reveal the current harvested
+energy before transmission and use stochastic arrivals and a finite battery that
+may saturate.
+
+Motivated by this literature, we introduce a comparator that assigns every arrival
+cohort the same decreasing release sequence, shifted by one slot to respect our
+information pattern. The resulting policy permits nongeometric expenditure profiles
+while remaining feasible under leakage. Unlike the renewal models above, different
+arrival cohorts may overlap, arrivals are adversarial, and performance is measured
+by regret for general convex state--action costs. Section~\ref{subsec:allocation-sequences}
+shows that finite-memory SDAC policies geometrically approximate this entire class.
+
 Lin et al. \cite{lin2025optimal} study online age-of-information optimization in an
 energy-harvesting system with related battery dynamics. They compare with an
 unrestricted offline optimum through competitive ratio; their objective depends on
@@ -258,7 +282,8 @@ under state constraints.
 \subsection{Paper Organization}
 Section~\ref{sec:model-setup} formalizes the adversarial storage-control model,
 assumptions, and regret benchmark. Section~\ref{sec:sdac} introduces the SDAC policy
-class and summarizes its structural properties. Section~\ref{sec:online-algorithm}
+class, its structural properties, and its approximation of proportional and
+allocation-sequence policies. Section~\ref{sec:online-algorithm}
 presents the online controller, Section~\ref{sec:regret-analysis} develops regret
 upper and lower bounds, Section~\ref{sec:extensions} discusses possible extensions, and
 Section~\ref{sec:conclusion} concludes. Deferred proofs appear in the
@@ -277,7 +302,8 @@ $\langle\cdot,\cdot\rangle$. We write $\log$ for the natural logarithm. We set
 $w_\tau\equiv0$ for $\tau\le0$. A fixed SDAC policy with parameter
 $\mathbf{m}$ is written $\pi_{\mathbf{m}}$, with induced trajectories
 $x_t(\mathbf{m})$ and $u_t(\mathbf{m})$. A feasible proportional policy with
-gain $k$ induces $x_t(k)$ and $u_t(k)$. After the online algorithm is
+gain $k$ induces $x_t(k)$ and $u_t(k)$. A decreasing allocation sequence
+$\mathbf q$ induces $x_t(\mathbf q)$ and $u_t(\mathbf q)$. After the online algorithm is
 introduced, unadorned $x_t$ and $u_t$ denote the realized clipped trajectory.
 
 
@@ -883,6 +909,122 @@ feasible proportional state-feedback policy; Corollary~\ref{cor:regret-vs-linear
 makes this statement precise.
 
 
+\subsection{Expressiveness: Decreasing Allocation Sequences}
+\label{subsec:allocation-sequences}
+
+Energy-harvesting policies for Bernoulli recharges can be described by the
+sequence of expenditures following each recharge
+\cite{arafa2018online,zibaeenejad2019lookahead}. This suggests an age-based
+benchmark for the present additive-arrival model: each unit arriving at time $s$
+is assigned the same release sequence over times $s+1,s+2,\ldots$. Unlike
+proportional feedback, this sequence need not be geometric.
+
+Define the set of decreasing feasible allocation sequences
+\begin{equation}
+\label{eq:def-allocation-sequences}
+\mathcal Q_\alpha^\downarrow
+\triangleq
+\left\{
+\mathbf q=(q_i)_{i\ge1}:
+q_1\ge q_2\ge\cdots\ge0,
+\quad
+\sum_{i=1}^{\infty}\frac{q_i}{\alpha^i}\le1
+\right\}.
+\end{equation}
+For $\mathbf q\in\mathcal Q_\alpha^\downarrow$, define
+\begin{equation}
+\label{eq:def-allocation-policy}
+u_t(\mathbf q)
+\triangleq
+\sum_{i=1}^{t-1}q_iw_{t-i},
+\qquad
+x_{t+1}(\mathbf q)
+=
+\alpha x_t(\mathbf q)-u_t(\mathbf q)+w_t,
+\quad x_1(\mathbf q)=0.
+\end{equation}
+Here $q_iw_s$ is the release at age $i$ assigned to the arrival cohort $w_s$.
+The weighted budget in \eqref{eq:def-allocation-sequences} accounts for leakage:
+reserving $q_i$ units for release at age $i$ consumes $q_i/\alpha^i$ of the
+cohort's normalized release budget. Let
+\[
+\Pi_\alpha^{\mathrm{alloc}}
+\triangleq
+\{\pi_{\mathbf q}:\mathbf q\in\mathcal Q_\alpha^\downarrow\}.
+\]
+
+\begin{lemma}[SDAC approximation of decreasing allocation sequences]
+\label{lem:sdac-allocation-approx}
+Every policy in $\Pi_\alpha^{\mathrm{alloc}}$ is feasible. Fix
+$\mathbf q\in\mathcal Q_\alpha^\downarrow$ and $H\ge1$, and define
+\begin{equation}
+\label{eq:allocation-truncation}
+m_{H,i}(\mathbf q)
+\triangleq
+\frac{q_i}{\alpha^i},
+\qquad i\in[H].
+\end{equation}
+Then $\mathbf m_H(\mathbf q)\in\mathcal M_H$. With
+\[
+R_H(\mathbf q)
+\triangleq
+\sum_{i=H+1}^{\infty}q_i,
+\]
+the corresponding trajectories satisfy, for every arrival sequence in $[0,1]$,
+\begin{align}
+0
+&\le
+u_t(\mathbf q)-u_t\bigl(\mathbf m_H(\mathbf q)\bigr)
+\le R_H(\mathbf q),
+\label{eq:allocation-action-gap}\\
+0
+&\le
+x_t\bigl(\mathbf m_H(\mathbf q)\bigr)-x_t(\mathbf q)
+\le \frac{R_H(\mathbf q)}{1-\alpha}.
+\label{eq:allocation-state-gap}
+\end{align}
+Consequently,
+\begin{equation}
+\label{eq:allocation-cost-gap}
+\begin{aligned}
+&\left|
+\sum_{t=1}^T c_t\bigl(x_t(\mathbf m_H(\mathbf q)),
+u_t(\mathbf m_H(\mathbf q))\bigr)
+-
+\sum_{t=1}^T c_t\bigl(x_t(\mathbf q),u_t(\mathbf q)\bigr)
+\right|\\
+&\qquad\le
+\left(L_u+\frac{L_x}{1-\alpha}\right)R_H(\mathbf q)T
+\le
+\left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H+1}T.
+\end{aligned}
+\end{equation}
+The proof is deferred to Appendix~\ref{sec:appendix-proofs}.
+\end{lemma}
+
+This class contains every feasible proportional policy. Indeed, for
+$k\in(0,\alpha]$ and $\lambda_k=\alpha-k$, the sequence
+\begin{equation}
+\label{eq:proportional-as-allocation}
+q_i(k)=k\lambda_k^{i-1},
+\qquad i\ge1,
+\end{equation}
+is decreasing and satisfies
+\[
+\sum_{i=1}^{\infty}\frac{q_i(k)}{\alpha^i}
+=
+\frac{k}{\alpha}
+\sum_{j=0}^{\infty}\left(\frac{\lambda_k}{\alpha}\right)^j
+=1.
+\]
+Equations \eqref{eq:lin-closed-form} and \eqref{eq:def-allocation-policy}
+then induce the same action and state trajectories. The zero-gain policy
+corresponds to $\mathbf q=\mathbf0$. Thus
+the proportional policy family is contained in
+$\Pi_\alpha^{\mathrm{alloc}}$, generally strictly:
+the allocation class also permits nongeometric decreasing release profiles.
+
+
 
 
 
@@ -1372,6 +1514,75 @@ stated asymptotic rate.
 \end{proof}
 
 
+The same memory choice yields a stronger guarantee for the allocation-sequence
+class, which contains all proportional policies.
+
+\begin{corollary}[No-regret against decreasing allocation sequences]
+\label{cor:regret-vs-allocation}
+Run the OMD controller with the horizon $H_T$ and step size specified in
+Corollary~\ref{cor:regret-vs-linear}. For
+$\mathbf q\in\mathcal Q_\alpha^\downarrow$, define
+\[
+J_T(\mathbf q)
+\triangleq
+\sum_{t=1}^T c_t\bigl(x_t(\mathbf q),u_t(\mathbf q)\bigr)
+\]
+and
+\[
+\RegAlloc{T}
+\triangleq
+J_T^{\mathrm{on}}
+-
+\inf_{\mathbf q\in\mathcal Q_\alpha^\downarrow}J_T(\mathbf q).
+\]
+Then
+\begin{equation}
+\label{eq:allocation-regret-bound}
+\begin{aligned}
+\RegAlloc{T}
+&\le
+2\sqrt{\Gamma_\alpha T\log(H_T+1)}\\
+&\quad+
+\left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H_T+1}T.
+\end{aligned}
+\end{equation}
+Consequently,
+\[
+\RegAlloc{T}
+=
+O\!\left(\sqrt{T\log\log T}\right)
+=o(T).
+\]
+Since every feasible proportional policy belongs to
+$\Pi_\alpha^{\mathrm{alloc}}$, this is a stronger comparator guarantee than
+Corollary~\ref{cor:regret-vs-linear}.
+\end{corollary}
+
+\begin{proof}
+Fix $\mathbf q\in\mathcal Q_\alpha^\downarrow$ and use the SDAC comparator
+$\mathbf m_{H_T}(\mathbf q)$ from
+Lemma~\ref{lem:sdac-allocation-approx}. Theorem~\ref{thm:regret-bound} and
+\eqref{eq:allocation-cost-gap} give
+\[
+\begin{aligned}
+J_T^{\mathrm{on}}-J_T(\mathbf q)
+&\le
+2\sqrt{\Gamma_\alpha T\log(H_T+1)}\\
+&\quad+
+\left(L_u+\frac{L_x}{1-\alpha}\right)
+R_{H_T}(\mathbf q)T\\
+&\le
+2\sqrt{\Gamma_\alpha T\log(H_T+1)}\\
+&\quad+
+\left(L_u+\frac{L_x}{1-\alpha}\right)
+\alpha^{H_T+1}T.
+\end{aligned}
+\]
+The bound is uniform in $\mathbf q$, so taking the infimum comparator cost proves
+\eqref{eq:allocation-regret-bound}. Finally,
+$\alpha^{H_T}\le1/T$ and $\log(H_T+1)=O(\log\log T)$.
+\end{proof}
+
 \section{Extensions}
 \label{sec:extensions}
 
@@ -1435,9 +1646,11 @@ $\Omega((1-\alpha)^{-1}\sqrt{T})$ regret as $\alpha\uparrow1$; hence a
 square-root stability-margin gap remains open. For fixed $T$ and
 $\alpha\uparrow1$, the exact finite-horizon lower bound must be used instead,
 because the steady-state scale has not yet been reached. The
-SDAC approximation result further gives
-$O\!\left(\sqrt{T\log\log T}\right)$ regret against the best feasible proportional
-state-feedback policy when $H=\Theta(\log T)$. The model applies directly to
+SDAC approximation results further give
+$O\!\left(\sqrt{T\log\log T}\right)$ regret against the best decreasing
+allocation-sequence policy when $H=\Theta(\log T)$. This class contains all
+feasible proportional state-feedback policies and also permits nongeometric
+release profiles. The model applies directly to
 energy-harvesting battery management and related settings in which storage limits
 must be respected in real time. Section~\ref{sec:extensions} discusses possible
 extensions to $\alpha\ge1$, vector allocation, and diagonal multi-storage systems.
@@ -1449,8 +1662,9 @@ extensions to $\alpha\ge1$, vector allocation, and diagonal multi-storage system
 \label{sec:appendix-proofs}
 
 This appendix proves the minimax lower bound from
-Section~\ref{sec:regret-analysis} and collects the deferred proof of the
-proportional-state-feedback approximation guarantee from Section~\ref{sec:sdac},
+Section~\ref{sec:regret-analysis} and collects the deferred proofs of the
+proportional-state-feedback and allocation-sequence approximation guarantees from
+Section~\ref{sec:sdac},
 together with the OMD and stability lemmas leading up to the upper regret bound.
 
 Recall that we set $w_\tau\equiv 0$ for $\tau\le 0$, which is used in several
@@ -1915,6 +2129,123 @@ Summing \eqref{eq:lin-cost-step} over $t=1,\ldots,T$ and applying the triangle
 inequality proves \eqref{eq:sdac-lin-approx-cost}.
 \end{proof}
 
+\begin{proof}[Proof of Lemma~\ref{lem:sdac-allocation-approx}]
+Fix $\mathbf q\in\mathcal Q_\alpha^\downarrow$ and set
+\[
+a_i\triangleq\frac{q_i}{\alpha^i},
+\qquad
+b_j\triangleq1-\sum_{i=1}^{j-1}a_i,
+\qquad j\ge1.
+\]
+The weighted-budget constraint gives $a_i\ge0$ and $b_j\ge0$. Moreover,
+\begin{equation}
+\label{eq:allocation-state-decomposition}
+x_t(\mathbf q)
+=
+\sum_{j=1}^{t-1}\alpha^{j-1}b_jw_{t-j}.
+\end{equation}
+Indeed, the identity is immediate at $t=1$. If it holds at time $t$, then
+\begin{align*}
+x_{t+1}(\mathbf q)
+&=
+w_t+
+\sum_{j=1}^{t-1}
+\bigl(\alpha^jb_j-q_j\bigr)w_{t-j}\\
+&=
+w_t+
+\sum_{j=1}^{t-1}\alpha^jb_{j+1}w_{t-j},
+\end{align*}
+because $q_j=\alpha^ja_j$ and $b_{j+1}=b_j-a_j$. Reindexing gives
+\eqref{eq:allocation-state-decomposition} at time $t+1$.
+
+For each $j\ge1$,
+\[
+a_j
+\le
+1-\sum_{i=1}^{j-1}a_i
+=b_j.
+\]
+Consequently,
+\begin{align*}
+0\le u_t(\mathbf q)
+&=
+\sum_{j=1}^{t-1}\alpha^ja_jw_{t-j}\\
+&\le
+\sum_{j=1}^{t-1}\alpha^jb_jw_{t-j}
+=\alpha x_t(\mathbf q),
+\end{align*}
+which proves feasibility.
+
+For the truncated vector in \eqref{eq:allocation-truncation},
+\[
+m_{H,i}(\mathbf q)=a_i\ge0,
+\qquad
+\sum_{i=1}^H m_{H,i}(\mathbf q)
+\le
+\sum_{i=1}^{\infty}a_i
+\le1.
+\]
+Thus $\mathbf m_H(\mathbf q)\in\mathcal M_H$. Its SDAC action is
+\[
+u_t\bigl(\mathbf m_H(\mathbf q)\bigr)
+=
+\sum_{i=1}^{\min\{H,t-1\}}q_iw_{t-i}.
+\]
+It follows that
+\[
+0\le
+u_t(\mathbf q)-u_t\bigl(\mathbf m_H(\mathbf q)\bigr)
+=
+\sum_{i=H+1}^{t-1}q_iw_{t-i}
+\le R_H(\mathbf q),
+\]
+where the middle sum is empty when $t\le H+1$. This proves
+\eqref{eq:allocation-action-gap}.
+
+Define
+\[
+e_t^x
+\triangleq
+x_t\bigl(\mathbf m_H(\mathbf q)\bigr)-x_t(\mathbf q),
+\qquad
+e_t^u
+\triangleq
+u_t(\mathbf q)-u_t\bigl(\mathbf m_H(\mathbf q)\bigr).
+\]
+The two state recursions give
+\[
+e_{t+1}^x=\alpha e_t^x+e_t^u,
+\qquad e_1^x=0.
+\]
+Since $0\le e_t^u\le R_H(\mathbf q)$,
+\[
+0\le e_t^x
+=
+\sum_{s=1}^{t-1}\alpha^{t-1-s}e_s^u
+\le
+\frac{R_H(\mathbf q)}{1-\alpha},
+\]
+which proves \eqref{eq:allocation-state-gap}. The Lipschitz property now yields
+\[
+\left|
+c_t\bigl(x_t(\mathbf m_H(\mathbf q)),u_t(\mathbf m_H(\mathbf q))\bigr)
+-c_t\bigl(x_t(\mathbf q),u_t(\mathbf q)\bigr)
+\right|
+\le
+\left(L_u+\frac{L_x}{1-\alpha}\right)R_H(\mathbf q).
+\]
+Finally,
+\begin{align*}
+R_H(\mathbf q)
+&=
+\sum_{i=H+1}^{\infty}\alpha^ia_i\\
+&\le
+\alpha^{H+1}\sum_{i=H+1}^{\infty}a_i
+\le\alpha^{H+1}.
+\end{align*}
+Summing the per-period cost bound proves \eqref{eq:allocation-cost-gap}.
+\end{proof}
+
 The remaining lemmas establish the OMD and stability estimates used in the proof of
 Theorem~\ref{thm:regret-bound}; they rely on the state-decomposition, feasibility,
 and surrogate-cost lemmas already established in Section~\ref{sec:sdac}
@@ -2373,7 +2704,7 @@ By \eqref{eq:surr-coefficient-norms},
 \end{aligned}
 \end{equation}
 Lemma~\ref{lem:omd-move} and
-$\|\mathbf g_t\|_\infty\le G_\alpha$ therefore reduce
+$\|\mathbf q_t\|_\infty\le G_\alpha$ therefore reduce
 \eqref{eq:contractive-deviation-recursion-raw} to
 \begin{equation}
 \label{eq:contractive-deviation-recursion}
