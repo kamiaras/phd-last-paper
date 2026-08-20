@@ -31,30 +31,26 @@ Computer Engineering, University of Southern California, Los Angeles, CA 90089 U
 \maketitle
 
 \begin{abstract}
-We study online control of a scalar storage system under nonnegative adversarial
-arrivals, convex state--action costs, and state-dependent action constraints. At each
-time, the controller chooses a feasible action before the current arrival and cost
-are revealed. We introduce \emph{Simplex Disturbance-Action Control} (SDAC), a
-simplex-constrained finite-memory policy class whose fixed policies satisfy the
-per-step action constraint by construction. For online adaptation, an entropic
-online mirror descent (OMD) update maintains the SDAC parameters on the
-subprobability simplex, while scalar action clipping ensures feasibility of the
-actual time-varying trajectory. We show that this scalar clipping is exactly the
-action induced by an entropic Bregman projection onto the current availability
-constraint, although the projected parameter need not be computed. We prove
-$O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy, with
-a leading constant that is $\Theta(\alpha)$ as $\alpha\downarrow0$ and
-$\Theta((1-\alpha)^{-3/2})$ as $\alpha\uparrow1$, where $H$ is the memory horizon.
-We also prove a minimax lower bound that matches the small-$\alpha$ power. Once
-$T$ is at least the mixing scale $\Theta((1-\alpha)^{-1})$, the lower bound is
-$\Omega((1-\alpha)^{-1}\sqrt{T})$ as $\alpha\uparrow1$, leaving a square-root
-gap in the stability-margin dependence of the upper and lower bounds.
-We further show that SDAC geometrically approximates every feasible proportional
-state-feedback policy and a broader class of decreasing allocation-sequence
-policies motivated by energy-harvesting battery management. Choosing
-$H=\Theta(\log T)$ yields $O\!\left(\sqrt{T\log\log T}\right)$ regret against
-the best policy in either class. The setting also applies to related storage
-systems.
+Storage controllers must respect instantaneous resource limits even when future
+inflows and operating costs are unknown. We consider a scalar storage system in
+which each action is chosen before a nonnegative adversarial arrival and a convex
+state--action cost are revealed. To handle the resulting coupling between
+feasibility and online learning, we introduce \emph{Simplex Disturbance-Action
+Control} (SDAC), an $H$-dimensional finite-memory policy class parameterized by a
+subprobability simplex. Every fixed SDAC policy is feasible by construction. Our
+adaptive controller updates these parameters by entropic online mirror descent while
+preserving feasibility along the time-varying trajectory. We prove regret
+$O\!\left(\sqrt{T\log(H+1)}\right)$ relative to the best fixed SDAC policy. As the
+retention coefficient $\alpha$ approaches one, the leading factor scales as
+$\Theta((1-\alpha)^{-3/2})$. We also derive a minimax lower bound which, for
+sufficiently large $T$, scales as
+$\Omega((1-\alpha)^{-1}\sqrt{T})$ near $\alpha=1$, leaving a square-root gap in
+the stability-margin dependence. We also show that SDAC geometrically approximates
+all feasible proportional state-feedback policies and a broader family of
+decreasing allocation-sequence policies. With $H=\Theta(\log T)$, the resulting
+regret against either family is
+$O\!\left(\sqrt{T\log\log T}\right)$. The framework applies to energy-harvesting
+batteries and other storage-constrained resource systems.
 \end{abstract}
 
 \begin{IEEEkeywords}
