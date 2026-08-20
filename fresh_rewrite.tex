@@ -67,9 +67,7 @@ regret minimization, state-dependent action constraints.
 
 \subsection{Motivation and Problem Setting}
 \IEEEPARstart{M}{any} dynamic resource systems can be modeled by a storage state that
-evolves over time and constrains the control action at every time. The controller
-must choose an action subject to a state-dependent action constraint before observing the
-corresponding arrival and cost.
+evolves over time and constrains the control action at every time.
 
 This creates a constrained discrete-time control problem with state--action
 coupling: aggressive early actions can harm later performance, while overly
@@ -81,9 +79,10 @@ class that approximates feasible proportional state-feedback policies.
 We study a discrete-time storage system with state $x_t \geq 0$, where $x_t$ models
 the storage level at the beginning of time $t$. At each time $t$, the controller
 chooses a control action $u_t$ under the state-dependent action constraint
-\[
+\begin{equation}
+\label{eq:model-feasibility}
 0 \leq u_t \leq \alpha x_t,
-\]
+\end{equation}
 where $\alpha\in(0,1)$ is a fixed known retention coefficient (so a fraction
 $1-\alpha$ of the state is lost each period). After the action is chosen, a
 nonnegative adversarial arrival $w_t$ (a resource inflow) is revealed, and the state
@@ -100,36 +99,33 @@ interpretation and to the feasibility properties of SDAC.
 Unlike stochastic models, our formulation is adversarial and non-anticipatory. At
 time $t$, the environment may select $w_t$ and $c_t$ using the history through time
 $t-1$, but not the current action; the controller then chooses $u_t$, after which
-$w_t$ and the entire function $c_t$ are revealed. The goal is low cumulative cost
-relative to the best fixed policy in a class defined below, with both the online and
-benchmark trajectories remaining feasible.
+$w_t$ and the entire function $c_t$ are revealed. Both the online and benchmark
+trajectories must remain feasible.
 
 \subsection{Application Domains}
-This abstraction captures a broad set of domains:
+This abstraction captures a broad set of domains; in each case, the action is
+limited by \eqref{eq:model-feasibility}:
 \begin{itemize}
     \item \textbf{Energy harvesting and battery management:} $x_t$ is battery state
         of charge (retention coefficient $\alpha$ after self-discharge), $w_t$ is
-        harvested energy, and $u_t$ is discharge or consumption bounded by available
-        energy $\alpha x_t$.
+        harvested energy, and $u_t$ is discharge or consumption.
     \item \textbf{Queueing networks and buffer management:} $x_t$ is queue/buffer
         occupancy, $w_t$ is
-        packet arrivals, and $u_t$ is service bounded by $\alpha x_t$.
+        packet arrivals, and $u_t$ is service.
     \item \textbf{Inventory control:} $x_t$ is on-hand inventory (retention coefficient
         $\alpha$ after spoilage/deterioration), $w_t$ is supply or replenishment, and
-        $u_t$ is sales bounded by $\alpha x_t$.
+        $u_t$ is sales.
     \item \textbf{Water-reservoir management:} $x_t$ is stored water
         (retention coefficient $\alpha$ after evaporation/seepage), $w_t$ is inflow, and
-        $u_t$ is controlled release bounded by $\alpha x_t$.
+        $u_t$ is controlled release.
 \end{itemize}
-We take energy harvesting as the running interpretation; the other domains share the
-same storage dynamics and state-dependent action constraint.
+We take energy harvesting as the running interpretation.
 
 \subsection{Contributions}
 Our contributions are as follows:
 \begin{itemize}
-    \item \textbf{Policy class.} We introduce SDAC, a DAC-inspired policy class for
-        storage dynamics with the state-dependent action constraint
-        $0\le u_t\le\alpha x_t$. We prove that every fixed SDAC policy is feasible,
+    \item \textbf{Policy class.} We introduce SDAC, a DAC-inspired policy class.
+        We prove that every fixed SDAC policy is feasible,
         its induced loss is convex and Lipschitz in the policy parameter, and the
         class geometrically approximates feasible proportional state-feedback
         policies and a broader class of decreasing allocation-sequence policies.
@@ -165,10 +161,7 @@ relative to a benchmark policy class chosen in hindsight, under suitable stabili
 conditions \cite{agarwal2019online,agarwal2019logarithmic,
 simchowitz2020improper}; see \cite{hazan2026introduction} for an overview.
 
-A central idea in this literature is \emph{Disturbance-Action Control}
-(DAC),\footnote{``Disturbance-Action Control'' is the standard name in the
-online-control literature. In this paper the underlying signal is the nonnegative
-arrival $w_t$; we retain the DAC/SDAC names for continuity with that literature.}
+A central idea in this literature is \emph{Disturbance-Action Control} (DAC),
 a policy parameterization that combines a stabilizing state-feedback term with a
 finite linear filter of past disturbances. Under standard assumptions, this
 representation yields tractable surrogate losses in the policy parameters and
@@ -179,7 +172,7 @@ supports efficient no-regret updates. Extensions include partial observability
 Constrained online-control methods have also been developed for affine and general
 static state--input constraints \cite{li2021onlineConstrained,
 liu2023constrainedControl}. Our focus is the storage-specific constraint
-$0\le u_t\le\alpha x_t$, whose feasible action set depends on the current state.
+\eqref{eq:model-feasibility}, whose feasible action set depends on the current state.
 Exploiting nonnegative arrivals, SDAC uses a simplex parameterization to make every
 fixed policy feasible; scalar action clipping preserves feasibility when the
 parameter changes online.
@@ -319,11 +312,7 @@ x_1 = 0.
 \end{equation}
 Fix a retention coefficient $\alpha\in(0,1)$. At each time $t\in[T]$,
 the controller chooses a control action $u_t\in\mathbb{R}_{\ge 0}$ subject to the
-state-dependent action constraint
-\begin{equation}
-\label{eq:model-feasibility}
-0 \le u_t \le \alpha x_t.
-\end{equation}
+state-dependent action constraint \eqref{eq:model-feasibility}.
 The system then receives an arrival $w_t\in[0,1]$ and evolves according to
 \begin{equation}
 \label{eq:model-dynamics}
@@ -344,7 +333,8 @@ Thus, the storage level is uniformly bounded over time. In particular, a
 storage device with capacity \(1/(1-\alpha)\) suffices to realize every feasible
 trajectory, including the trajectory generated by our online controller, without
 overflow.
-Thus, every feasible state--action pair belongs to the compact set
+Together with the state bound above, \eqref{eq:model-feasibility} implies that every
+feasible state--action pair belongs to the compact set
 \begin{equation}
 \label{eq:model-domain}
 \mathcal{D}_\alpha
@@ -656,7 +646,8 @@ The first consequence of this decomposition is fixed-policy feasibility.
 \begin{lemma}[Feasibility of SDAC policies]
 \label{lem:sdac-feasibility}
 For every $\mathbf{m}\in\mathcal{M}_H$, the trajectory induced by
-\eqref{eq:def-sdac-policy} and \eqref{eq:sdac-state-update} satisfies
+\eqref{eq:def-sdac-policy} and \eqref{eq:sdac-state-update} satisfies the action
+constraint \eqref{eq:model-feasibility}; explicitly,
 \begin{equation}
 \label{eq:sdac-feasibility}
 0\le u_t(\mathbf{m})\le \alpha x_t(\mathbf{m})
@@ -856,8 +847,8 @@ approximation error decaying geometrically in the memory horizon $H$
 Under our sign convention, positive $u_t$ drains storage, so proportional feedback
 is written $u_t=k x_t$. In our scalar model, the feasible proportional
 state-feedback policies are exactly those with gain
-$k\in[0,\alpha]$: since $x_t\ge 0$, the feasibility constraint $0\le u_t\le\alpha
-x_t$ in \eqref{eq:model-feasibility} holds if and only if $k\in[0,\alpha]$. The next
+$k\in[0,\alpha]$: for $x_t\ge 0$, substituting $u_t=kx_t$ into
+\eqref{eq:model-feasibility} gives this condition. The next
 lemma gives an explicit approximation within the feasible class $\Pi_H^{\mathrm{SDAC}}$.
 
 \begin{lemma}[SDAC approximation of proportional state feedback]
@@ -1074,7 +1065,7 @@ The controller first forms the nominal SDAC action
 \label{eq:alg-unconstrained-action}
 \widehat{u}_t \triangleq \langle \boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle,
 \end{equation}
-and clips it to the admissible interval $[0,\alpha x_t]$:
+and clips it to the admissible interval in \eqref{eq:model-feasibility}:
 \begin{equation}
 \label{eq:alg-feasible-action}
 u_t \triangleq \min\{\widehat{u}_t,\,\alpha x_t\}.
@@ -1085,10 +1076,10 @@ The state update is
 x_{t+1} = \alpha x_t - u_t + w_t,
 \qquad x_1=0.
 \end{equation}
-By construction, $\widehat{u}_t\ge 0$ and $u_t\in[0,\alpha x_t]$;
-with $x_1=0$ and $w_t\in[0,1]$, induction on
-\eqref{eq:alg-state-update} yields $x_t\ge 0$ for all $t\in[T+1]$,
-so the online trajectory satisfies \eqref{eq:model-feasibility}.
+Because $\widehat{u}_t\ge 0$, the clipping rule and induction on
+\eqref{eq:alg-state-update}, starting from $x_1=0$ with $w_t\in[0,1]$, yield
+$x_t\ge0$ for all $t\in[T+1]$ and show that the online trajectory satisfies
+\eqref{eq:model-feasibility}.
 
 The scalar correction in \eqref{eq:alg-feasible-action} also has an exact
 Bregman-projection interpretation. This interpretation is useful conceptually, but
@@ -1595,7 +1586,8 @@ $\bar\alpha\triangleq\alpha-K\in(0,1)$, and write $u_t=Kx_t+v_t$. The residual
 dynamics become $x_{t+1}=\bar\alpha x_t-v_t+w_t$. An SDAC filter for $v_t$ should
 therefore use the powers $\bar\alpha^i$, not $\alpha^i$. If
 $0\le v_t\le\bar\alpha x_t$, then
-$0\le u_t\le(K+\bar\alpha)x_t=\alpha x_t$. This reduction suggests an extension of
+$0\le u_t\le(K+\bar\alpha)x_t=\alpha x_t$, so \eqref{eq:model-feasibility} holds.
+This reduction suggests an extension of
 the present analysis with transformed cost and Lipschitz constants; we do not pursue
 the details here.
 
@@ -2006,6 +1998,7 @@ k x_t(k)
 \le
 \alpha x_t(k).
 \]
+Thus, the proportional policy satisfies \eqref{eq:model-feasibility}.
 
 \emph{Simplex membership.}
 Each coordinate of $\mathbf{m}_H^\star(k)$ is nonnegative. If $k=0$, then
@@ -2174,7 +2167,7 @@ Consequently,
 \sum_{j=1}^{t-1}\alpha^jb_jw_{t-j}
 =\alpha x_t(\mathbf q),
 \end{align*}
-which proves feasibility.
+which proves \eqref{eq:model-feasibility} for the allocation-sequence policy.
 
 For the truncated vector in \eqref{eq:allocation-truncation},
 \[
