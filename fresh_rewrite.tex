@@ -32,9 +32,9 @@ Computer Engineering, University of Southern California, Los Angeles, CA 90089 U
 
 \begin{abstract}
 Storage controllers must respect instantaneous resource limits even when future
-inflows and operating costs are unknown. We consider a scalar storage system in
-which each action is chosen before a nonnegative adversarial arrival and a convex
-state--action cost are revealed. To handle the resulting coupling between
+resource arrivals and operating costs are unknown. We consider a scalar storage
+system in which each action is chosen before a nonnegative adversarial arrival and
+a convex state--action cost are revealed. To handle the resulting coupling between
 feasibility and online learning, we introduce \emph{Simplex Disturbance-Action
 Control} (SDAC), an $H$-dimensional finite-memory policy class parameterized by a
 subprobability simplex. Every fixed SDAC policy is feasible by construction. Our
@@ -81,12 +81,12 @@ chooses a control action $u_t$ under the state-dependent action constraint
 \end{equation}
 where $\alpha\in(0,1)$ is a fixed known retention coefficient (so a fraction
 $1-\alpha$ of the state is lost each period). After the action is chosen, a
-nonnegative adversarial arrival $w_t$ (a resource inflow) is revealed, and the state
+nonnegative adversarial resource arrival $w_t$ is revealed, and the state
 evolves according to
 \[
 x_{t+1} = \alpha x_t - u_t + w_t.
 \]
-Although this input is commonly called a disturbance in the online-control
+Although this quantity is commonly called a disturbance in the online-control
 literature, we call $w_t\in[0,1]$ an \emph{arrival} to emphasize its nonnegativity;
 we retain the standard names Disturbance-Action Control (DAC) and Simplex
 Disturbance-Action Control (SDAC). Nonnegativity is essential to the storage
@@ -244,18 +244,18 @@ Yang et al. \cite{yang2020online} study online procurement under inventory
 constraints. The controller observes the current demand and price, then procures
 supply while ensuring that demand is met; performance is measured by competitive
 ratio for aggregate procurement cost. Our controller instead chooses an outflow
-before observing the current inflow and cost, and permits convex state--action
-costs.
+before observing the current resource arrival and cost, and permits convex
+state--action costs.
 
 Hihat and Fermanian \cite{hihat2024online} consider an
 inventory-control formulation with potentially nonlinear and nondifferentiable
 state-transition functions and study base-stock policies. While that model is more
 general in scope, its decision structure differs from ours: as in
 \cite{yang2020online}, the controller chooses supply and then observes demand through
-the transition, whereas our controller chooses an outflow and then observes incoming
-supply. Our scalar linear recursion and simplex policy class yield explicit
-feasibility and regret guarantees; the two frameworks target different dynamics,
-decisions, and policy classes.
+the transition, whereas our controller chooses an outflow and then observes the
+resource arrival. Our scalar linear recursion and simplex policy class yield
+explicit feasibility and regret guarantees; the two frameworks target different
+dynamics, decisions, and policy classes.
 
 \paragraph{Water-reservoir management}
 Classical dam theory studies storage dynamics with random inflows and controlled
@@ -375,7 +375,7 @@ $\mathcal{D}_\alpha$; see \cite[Thm.~9.13]{rockafellar1998variational}.
         $\alpha\in(0,1)$; the case $\alpha\ge 1$ is discussed in
         Section~\ref{sec:extensions}.}
     \item \textbf{Arrival bounds:} $w_t\in[0,1]$ for all $t\in[T]$.
-        In particular, arrivals are nonnegative resource increments, in contrast to
+        In particular, resource arrivals are nonnegative, in contrast to
         signed process-noise disturbances common in classical control.
     \item \textbf{Information pattern:} $(w_t,c_t)$ may depend on the history
         through time $t-1$, but not on the current action or randomization, and is
