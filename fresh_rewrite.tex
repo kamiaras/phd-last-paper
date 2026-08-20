@@ -31,15 +31,16 @@ Computer Engineering, University of Southern California, Los Angeles, CA 90089 U
 \maketitle
 
 \begin{abstract}
-Storage controllers must respect instantaneous resource limits even when future
-resource arrivals and operating costs are unknown. We consider a scalar storage
-system in which each action is chosen before a nonnegative adversarial arrival and
-a convex state--action cost are revealed. To handle the resulting coupling between
-feasibility and online learning, we introduce \emph{Simplex Disturbance-Action
+We study online control of a scalar storage system with nonnegative adversarial
+resource arrivals, convex state--action costs, and state-dependent action
+constraints. At each time, the controller selects a feasible action before the
+current resource arrival and cost are revealed. To handle the resulting coupling
+between feasibility and online learning, we introduce \emph{Simplex Disturbance-Action
 Control} (SDAC), an $H$-dimensional finite-memory policy class parameterized by a
-subprobability simplex. Every fixed SDAC policy is feasible by construction. Our
-adaptive controller updates these parameters by entropic online mirror descent while
-preserving feasibility along the time-varying trajectory. We prove regret
+subprobability simplex. The key feature of SDAC is that every fixed policy in the
+class is feasible by construction. Our adaptive controller updates these parameters
+by entropic online mirror descent while preserving feasibility along the
+time-varying trajectory. We prove regret
 $O\!\left(\sqrt{T\log(H+1)}\right)$ relative to the best fixed SDAC policy. As the
 retention coefficient $\alpha$ approaches one, the leading factor scales as
 $\Theta((1-\alpha)^{-3/2})$. We also derive a minimax lower bound which, for
@@ -81,7 +82,7 @@ chooses a control action $u_t$ under the state-dependent action constraint
 \end{equation}
 where $\alpha\in(0,1)$ is a fixed known retention coefficient (so a fraction
 $1-\alpha$ of the state is lost each period). After the action is chosen, a
-nonnegative adversarial resource arrival $w_t$ is revealed, and the state
+nonnegative resource arrival $w_t$ is revealed, and the state
 evolves according to
 \[
 x_{t+1} = \alpha x_t - u_t + w_t.
@@ -126,23 +127,21 @@ Our contributions are as follows:
         class geometrically approximates feasible proportional state-feedback
         policies and a broader class of decreasing allocation-sequence policies.
     \item \textbf{Online control and regret.} We develop an entropic OMD controller
-        over SDAC parameters. A Bregman projection maintains the simplex constraint
-        on the parameters, and scalar action clipping maintains feasibility of the actual
-        trajectory. The clipping has an equivalent Bregman-projection interpretation,
-        but its direct implementation requires only a scalar minimum. A sharp
-        coordinatewise gradient estimate and a contractive trajectory comparison give
+        that updates SDAC parameters over the subprobability simplex while maintaining
+        feasibility of the online trajectory. Our analysis yields
         $O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy,
-        with upper-bound dependence $\Theta(\alpha)$ as $\alpha\downarrow0$ and
-        $\Theta((1-\alpha)^{-3/2})$ as $\alpha\uparrow1$,
-        and, with $H=\Theta(\log T)$, achieves
-        $O\!\left(\sqrt{T\log\log T}\right)$ regret against the best feasible
-        allocation-sequence policy, and hence also against the best proportional
-        state-feedback policy.
-    \item \textbf{Minimax lower bound.} We construct an oblivious sequence of
-        arrivals and convex costs for which every causal feasible controller has
-        expected SDAC regret $\Omega(G_\alpha\sqrt{T})$ after the mixing scale,
-        where $G_\alpha=\alpha(L_x/(1-\alpha)+L_u)$. This matches the
-        small-$\alpha$ power of the upper bound. As $\alpha\uparrow1$, it gives
+        as stated in Theorem~\ref{thm:regret-bound}. The challenging regime is
+        $\alpha\uparrow1$, where stored resources persist longer and the leading
+        factor scales as $\Theta((1-\alpha)^{-3/2})$. The SDAC approximation
+        guarantees extend the regret result: choosing $H=\Theta(\log T)$ gives
+        $O\!\left(\sqrt{T\log\log T}\right)$ regret against the best decreasing
+        allocation-sequence policy and, as a special case, the best proportional
+        state-feedback policy; see Corollaries~\ref{cor:regret-vs-linear}
+        and~\ref{cor:regret-vs-allocation}.
+    \item \textbf{Minimax lower bound.} We show that every causal feasible controller
+        admits an oblivious sequence of arrivals and convex costs for which its
+        expected SDAC regret is $\Omega(G_\alpha\sqrt{T})$ after the mixing scale,
+        where $G_\alpha=\alpha(L_x/(1-\alpha)+L_u)$. As $\alpha\uparrow1$, this gives
         $\Omega((1-\alpha)^{-1}\sqrt{T})$ once
         $T=\Omega((1-\alpha)^{-1})$, leaving a factor
         $(1-\alpha)^{-1/2}$ (apart from the memory logarithm) to be closed.
@@ -265,7 +264,7 @@ long-run performance quantities. It provides historical context for storage cont
 under state constraints.
 
 \subsection{Paper Organization}
-Section~\ref{sec:model-setup} formalizes the adversarial storage-control model,
+Section~\ref{sec:model-setup} formalizes the storage-control model,
 assumptions, and regret benchmark. Section~\ref{sec:sdac} introduces the SDAC policy
 class, its structural properties, and its approximation of proportional and
 allocation-sequence policies. Section~\ref{sec:online-algorithm}
@@ -1339,9 +1338,10 @@ admits a deterministic oblivious sequence for which
 where $G_\alpha=\alpha(L_x/(1-\alpha)+L_u)$.
 \end{corollary}
 
-For fixed $L_x,L_u>0$, Corollary~\ref{cor:sdac-lower-mixing} matches the
-$\Theta(\alpha)$ power of the upper bound as $\alpha\downarrow0$. As
-$\alpha\uparrow1$, $q_\alpha=\Theta((1-\alpha)^{-1})$ and the corollary gives
+The near-lossless regime $\alpha\uparrow1$ is the more challenging one because
+stored arrivals persist longer and the mixing scale grows. In this regime,
+$q_\alpha=\Theta((1-\alpha)^{-1})$, and
+Corollary~\ref{cor:sdac-lower-mixing} gives
 \begin{equation}
 \label{eq:sdac-lower-large-alpha}
 \mathbb E_{\mathcal A}\!\left[\RegSDAC{T}\right]
@@ -1375,14 +1375,13 @@ quantity
 Thus the exact finite-horizon formula, rather than the steady-state scaling in
 \eqref{eq:sdac-lower-large-alpha}, applies in this regime.
 
-The two asymptotic regimes improve the coarser analysis that ignores the exact
+The large-$\alpha$ dependence improves the coarser analysis that ignores the exact
 coordinate decay in \eqref{eq:surr-coordinate-decay} and the positive-part
 contraction in \eqref{eq:transition-contraction}. That analysis gives a leading
-factor that remains nonzero as $\alpha\downarrow0$ and grows as
-$(1-\alpha)^{-2}$ as $\alpha\uparrow1$. The projection interpretation in
-Lemma~\ref{lem:availability-projection} does not cause this improvement; it only
-reexpresses the same scalar clipping rule. The sharper rate follows from the
-gradient and stability estimates.
+factor of order $(1-\alpha)^{-2}$ as $\alpha\uparrow1$. The projection
+interpretation in Lemma~\ref{lem:availability-projection} does not cause this
+improvement; it only reexpresses the same scalar clipping rule. The sharper rate
+follows from the gradient and stability estimates.
 
 
 Combining Theorem~\ref{thm:regret-bound} with
@@ -1622,10 +1621,9 @@ current parameter onto the state-dependent availability set, although this secon
 projection need not be computed. Exact feature decay and the contraction of the
 clipped state update yield
 $O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy,
-with upper-bound dependence $\Theta(\alpha)$ as $\alpha\downarrow0$ and
-$\Theta((1-\alpha)^{-3/2})$ as $\alpha\uparrow1$. The
-minimax lower bound matches the small-$\alpha$ power. Once the horizon is at
-least the mixing scale $\Theta((1-\alpha)^{-1})$, it gives
+with upper-bound dependence $\Theta((1-\alpha)^{-3/2})$ as
+$\alpha\uparrow1$. Once the horizon is at least the mixing scale
+$\Theta((1-\alpha)^{-1})$, the minimax lower bound gives
 $\Omega((1-\alpha)^{-1}\sqrt{T})$ regret as $\alpha\uparrow1$; hence a
 square-root stability-margin gap remains open. For fixed $T$ and
 $\alpha\uparrow1$, the exact finite-horizon lower bound must be used instead,
