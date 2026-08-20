@@ -1,0 +1,11 @@
+{
+  "latex-workshop.latex.autoBuild.run": "never",
+  "latex-workshop.latex.search.rootFiles.include": ["fresh_rewrite.tex"],
+  "latex-workshop.latex.rootFile.doNotPrompt": true,
+  "latex-workshop.view.pdf.refocus": false,
+  "task.allowAutomaticTasks": "on",
+  "[latex]": {
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 4000
+  }
+}

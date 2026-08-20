@@ -40,3 +40,4 @@ Fresh rewrite of the thesis chapter for publication.
 
 - Build artifacts are gitignored (`.aux`, `.log`, `.bbl`, etc.).
 - PDF outputs (e.g. `fresh_rewrite.pdf`) are tracked.
+- `fresh_rewrite.pdf` rebuilds automatically from `fresh_rewrite.tex` via `latexmk -pvc` (VS Code folder-open task) and the `.cursor/hooks` after-edit hook.
