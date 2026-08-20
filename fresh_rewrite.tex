@@ -126,7 +126,8 @@ Our contributions are as follows:
         its induced loss is convex and Lipschitz in the policy parameter, and the
         class geometrically approximates feasible proportional state-feedback
         policies and a broader class of decreasing allocation-sequence policies.
-    \item \textbf{Online control and regret.} We develop an entropic OMD controller
+    \item \textbf{Online control and regret.} We develop an entropic online mirror
+        descent (OMD) controller
         that updates SDAC parameters over the subprobability simplex while maintaining
         feasibility of the online trajectory. Our analysis yields
         $O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy,
@@ -155,10 +156,13 @@ Our contributions are as follows:
 A recent line of work studies online control of linear dynamical systems under
 adversarial disturbances and costs. Its performance criterion is cumulative regret
 relative to a benchmark policy class chosen in hindsight, under suitable stability
-conditions \cite{agarwal2019online,agarwal2019logarithmic,
-simchowitz2020improper}; see \cite{hazan2026introduction} for an overview.
+conditions \cite{agarwal2019online,agarwal2019logarithmic}; see
+\cite{hazan2026introduction} for an overview. For
+known systems in the fully adversarial setting, Simchowitz et al. establish the
+optimal $\sqrt{T}$ horizon dependence without resolving all stability-parameter
+dependence \cite{simchowitz2020improper}.
 
-A central idea in this literature is \emph{Disturbance-Action Control} (DAC),
+A central idea in this literature is DAC,
 a policy parameterization that combines a stabilizing state-feedback term with a
 finite linear filter of past disturbances. Under standard assumptions, this
 representation yields tractable surrogate losses in the policy parameters and
@@ -172,22 +176,22 @@ liu2023constrainedControl}. Our focus is the storage-specific constraint
 \eqref{eq:model-feasibility}, whose feasible set depends on the current state; SDAC
 handles this dependence with a simplex parameterization.
 
-Simchowitz et al. establish the optimal $\sqrt{T}$ horizon dependence for known
-systems in the fully adversarial setting, without resolving all stability-parameter
-dependence \cite{simchowitz2020improper}. Kumar et al. develop matching
-memory-dependent upper and lower bounds for online convex optimization with
-unbounded memory \cite{kumar2023unbounded}. Their discounted-memory specialization
-has lower-bound order $\sqrt{T}/(1-\rho)$. This scaling motivates comparison with
-our large-$\alpha$ result, but their theorem does not directly imply ours: their
-loss may inspect separate coordinates of the decision history, whereas our stage
-cost observes only the scalar state--action pair $(x_t,u_t)$ under the storage
-feasibility constraint.
+Beyond algorithm design, our lower-bound analysis studies the joint dependence of
+regret on the horizon $T$ and the coefficient $\alpha$. Kumar et al.
+establish matching memory-dependent upper and lower bounds for online convex
+optimization with unbounded memory \cite{kumar2023unbounded}. For discounted
+memory, their lower bound is of order $\sqrt{T}/(1-\rho)$, paralleling the
+$\Omega(\sqrt{T}/(1-\alpha))$ rate in our sufficiently-long-horizon regime; see
+Corollary~\ref{cor:sdac-lower-mixing}. This agreement is at the level of scaling,
+while our lower bound is established directly for state--action costs under the
+storage-feasibility constraint.
 
 \paragraph{Energy harvesting}
 Online energy-harvesting control commonly uses simple battery-responsive rules.
 Shaviv and \"Ozg\"ur \cite{shaviv2016universally} introduced a fixed-fraction
 power policy and established distribution-uniform additive and multiplicative
-performance guarantees for i.i.d. energy arrivals. Arafa et al.
+performance guarantees for independent and identically distributed (i.i.d.) energy
+arrivals. Arafa et al.
 \cite{arafa2018online} extended this viewpoint to general concave utilities and,
 for Bernoulli recharges, characterized optimal post-recharge expenditure through
 a generally nongeometric allocation sequence. Allocation-sequence structure also
@@ -424,7 +428,7 @@ The objective is to design an online policy that satisfies
 \label{sec:sdac}
 
 \subsection{From Disturbance-Action Control to SDAC}
-Disturbance-Action Control (DAC) combines a stabilizing state-feedback term with a
+DAC combines a stabilizing state-feedback term with a
 finite linear filter of past disturbances. Under standard conditions, this
 parameterization yields convex surrogate losses and efficient online updates. In
 our scalar storage model, specializing the baseline feedback term to zero gives the
@@ -1016,7 +1020,7 @@ the allocation class also permits nongeometric decreasing release profiles.
 \label{sec:online-algorithm}
 
 We now present our online algorithm, which updates SDAC parameters by
-online mirror descent (OMD) with unnormalized negentropy (equivalently, the
+OMD with unnormalized negentropy (equivalently, the
 exponentiated gradient method) and a fixed step size $\eta>0$ over the
 subprobability simplex $\mathcal{M}_H\subset\mathbb{R}^H$
 \cite{hazan2016introduction}. Let
