@@ -43,13 +43,13 @@ by entropic online mirror descent while preserving feasibility along the
 time-varying trajectory. We prove regret
 $O\!\left(\sqrt{T\log(H+1)}\right)$ relative to the best fixed SDAC policy. As the
 retention coefficient $\alpha$ approaches one, the leading factor scales as
-$\Theta((1-\alpha)^{-3/2})$. We also derive a minimax lower bound which, for
-sufficiently large $T$, scales as
-$\Omega((1-\alpha)^{-1}\sqrt{T})$ near $\alpha=1$, leaving a square-root gap in
-the stability-margin dependence. We also show that SDAC geometrically approximates
-all feasible proportional state-feedback policies and a broader family of
-decreasing allocation-sequence policies. With $H=\Theta(\log T)$, the resulting
-regret against either family is
+$\Theta((1-\alpha)^{-3/2})$. We also derive a minimax lower bound which, when $T$
+is at least on the order of $(1-\alpha)^{-1}$, scales as
+$\Omega((1-\alpha)^{-1}\sqrt{T})$ near $\alpha=1$, leaving a factor
+$(1-\alpha)^{-1/2}$ between the upper and lower bounds. We also show that SDAC
+geometrically approximates all feasible proportional state-feedback policies and a
+broader family of decreasing allocation-sequence policies. With
+$H=\Theta(\log T)$, the resulting regret against either family is
 $O\!\left(\sqrt{T\log\log T}\right)$. The framework applies to energy-harvesting
 batteries and other storage-constrained resource systems.
 \end{abstract}
@@ -138,13 +138,15 @@ Our contributions are as follows:
         allocation-sequence policy and, as a special case, the best proportional
         state-feedback policy; see Corollaries~\ref{cor:regret-vs-linear}
         and~\ref{cor:regret-vs-allocation}.
-    \item \textbf{Minimax lower bound.} We show that every causal feasible controller
-        admits an oblivious sequence of arrivals and convex costs for which its
-        expected SDAC regret is $\Omega(G_\alpha\sqrt{T})$ after the mixing scale,
-        where $G_\alpha=\alpha(L_x/(1-\alpha)+L_u)$. As $\alpha\uparrow1$, this gives
-        $\Omega((1-\alpha)^{-1}\sqrt{T})$ once
-        $T=\Omega((1-\alpha)^{-1})$, leaving a factor
-        $(1-\alpha)^{-1/2}$ (apart from the memory logarithm) to be closed.
+    \item \textbf{Minimax lower bound.} We prove that $\sqrt{T}$-order regret is
+        unavoidable for every causal feasible controller, even when the adversarial
+        sequence is deterministic and oblivious; see
+        Theorem~\ref{thm:sdac-lower-bound}. For sufficiently long horizons and
+        $\alpha\uparrow1$, Corollary~\ref{cor:sdac-lower-mixing} gives the lower
+        dependence $\Omega((1-\alpha)^{-1})$, whereas
+        Theorem~\ref{thm:regret-bound} gives the upper dependence
+        $O((1-\alpha)^{-3/2})$. Closing the remaining factor
+        $(1-\alpha)^{-1/2}$ between these dependences is left for future work.
 \end{itemize}
 
 \subsection{Related Work}
@@ -1284,8 +1286,8 @@ and
 \end{theorem}
 
 The next result shows that the $\sqrt{T}$ dependence is unavoidable and
-quantifies the stability-margin dependence that any causal feasible controller
-must incur. Its proof is deferred to Appendix~\ref{sec:appendix-proofs}.
+quantifies the dependence on $1-\alpha$ that any causal feasible controller must
+incur. Its proof is deferred to Appendix~\ref{sec:appendix-proofs}.
 
 \begin{theorem}[Minimax SDAC regret lower bound]
 \label{thm:sdac-lower-bound}
@@ -1316,9 +1318,9 @@ adversarial sequence whose existence is asserted is deterministic and fixed befo
 the interaction.
 \end{theorem}
 
-\begin{corollary}[Lower bound beyond the mixing scale]
+\begin{corollary}[Lower bound for sufficiently long horizons]
 \label{cor:sdac-lower-mixing}
-Define
+Define the geometric memory half-life
 \begin{equation}
 \label{eq:def-q-alpha}
 q_\alpha
@@ -1339,7 +1341,7 @@ where $G_\alpha=\alpha(L_x/(1-\alpha)+L_u)$.
 \end{corollary}
 
 The near-lossless regime $\alpha\uparrow1$ is the more challenging one because
-stored arrivals persist longer and the mixing scale grows. In this regime,
+stored arrivals persist longer. In this regime, the geometric memory half-life
 $q_\alpha=\Theta((1-\alpha)^{-1})$, and
 Corollary~\ref{cor:sdac-lower-mixing} gives
 \begin{equation}
@@ -1348,10 +1350,10 @@ Corollary~\ref{cor:sdac-lower-mixing} gives
 =
 \Omega\!\left(\frac{\sqrt{T}}{1-\alpha}\right)
 \end{equation}
-whenever $T$ is at least the mixing scale. The upper bound in
+whenever $T\ge2q_\alpha+2$. The upper bound in
 Theorem~\ref{thm:regret-bound} is
 $O((1-\alpha)^{-3/2}\sqrt{T\log(H+1)})$, so a factor
-$(1-\alpha)^{-1/2}$ in the stability margin remains open, apart from the
+$(1-\alpha)^{-1/2}$ between the two bounds remains open, apart from the
 memory-dependent logarithm. The lower-bound scaling in
 \eqref{eq:sdac-lower-large-alpha} agrees with the discounted-memory obstruction in
 online convex optimization with unbounded memory \cite{kumar2023unbounded}. This is
@@ -1359,7 +1361,7 @@ a comparison of rates rather than a reduction: Theorem~\ref{thm:sdac-lower-bound
 is proved directly under the scalar state--action loss and storage-feasibility
 structure of our model.
 
-The mixing-scale qualification is essential for interpreting the large-$\alpha$
+The condition $T\ge2q_\alpha+2$ is essential for interpreting the large-$\alpha$
 asymptotic. If $T$ is fixed while $\alpha\uparrow1$, then
 \[
 \frac{1-\alpha^{t-2}}{1-\alpha}\longrightarrow t-2,
@@ -1622,11 +1624,11 @@ projection need not be computed. Exact feature decay and the contraction of the
 clipped state update yield
 $O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy,
 with upper-bound dependence $\Theta((1-\alpha)^{-3/2})$ as
-$\alpha\uparrow1$. Once the horizon is at least the mixing scale
-$\Theta((1-\alpha)^{-1})$, the minimax lower bound gives
-$\Omega((1-\alpha)^{-1}\sqrt{T})$ regret as $\alpha\uparrow1$; hence a
-square-root stability-margin gap remains open. For fixed $T$ and
-$\alpha\uparrow1$, the exact finite-horizon lower bound must be used instead,
+$\alpha\uparrow1$. Once $T$ is at least on the order of $(1-\alpha)^{-1}$, the
+minimax lower bound gives
+$\Omega((1-\alpha)^{-1}\sqrt{T})$ regret as $\alpha\uparrow1$; hence a factor
+$(1-\alpha)^{-1/2}$ between the upper and lower bounds remains open. For fixed
+$T$ and $\alpha\uparrow1$, the exact finite-horizon lower bound must be used instead,
 because the steady-state scale has not yet been reached. The
 SDAC approximation results further give
 $O\!\left(\sqrt{T\log\log T}\right)$ regret against the best decreasing
