@@ -48,7 +48,9 @@ is at least on the order of $(1-\alpha)^{-1}$, scales as
 $\Omega((1-\alpha)^{-1}\sqrt{T})$ near $\alpha=1$, leaving a factor
 $(1-\alpha)^{-1/2}$ between the upper and lower bounds. We also show that SDAC
 geometrically approximates all feasible proportional state-feedback policies and a
-broader family of decreasing allocation-sequence policies. With
+broader policy class that allocates each arrival over time according to the same
+decreasing sequence, a structure that arises in stochastic energy-harvesting
+control. With
 $H=\Theta(\log T)$, the resulting regret against either family is
 $O\!\left(\sqrt{T\log\log T}\right)$. The framework applies to energy-harvesting
 batteries and other storage-constrained resource systems.
@@ -125,7 +127,7 @@ Our contributions are as follows:
         We prove that every fixed SDAC policy is feasible,
         its induced loss is convex and Lipschitz in the policy parameter, and the
         class geometrically approximates feasible proportional state-feedback
-        policies and a broader class of decreasing allocation-sequence policies.
+        policies and a broader decreasing-allocation policy class.
     \item \textbf{Online control and regret.} We develop an entropic online mirror
         descent (OMD) controller
         that updates SDAC parameters over the subprobability simplex while maintaining
@@ -135,8 +137,8 @@ Our contributions are as follows:
         $\alpha\uparrow1$, where stored resources persist longer and the leading
         factor scales as $\Theta((1-\alpha)^{-3/2})$. The SDAC approximation
         guarantees extend the regret result: choosing $H=\Theta(\log T)$ gives
-        $O\!\left(\sqrt{T\log\log T}\right)$ regret against the best decreasing
-        allocation-sequence policy and, as a special case, the best proportional
+        $O\!\left(\sqrt{T\log\log T}\right)$ regret against the best
+        decreasing-allocation policy and, as a special case, the best proportional
         state-feedback policy; see Corollaries~\ref{cor:regret-vs-linear}
         and~\ref{cor:regret-vs-allocation}.
     \item \textbf{Minimax lower bound.} We prove that $\sqrt{T}$-order regret is
@@ -202,12 +204,13 @@ random arrivals from a fixed model, and optimize a fixed reward that depends onl
 on the allocated power, rather than adversarially varying costs that depend jointly
 on storage state and action.
 
-To demonstrate the expressive power of SDAC, we introduce a benchmark policy
-class inspired by this literature. Each policy releases every arrival according to
-the same decreasing schedule, beginning one period later to respect our information
-pattern. Section~\ref{subsec:allocation-sequences} shows that finite-memory SDAC
-policies approximate every policy in this class with error that decreases
-geometrically in the memory length.
+To demonstrate the expressive power of SDAC, we introduce a decreasing-allocation
+policy class as a benchmark inspired by this literature. Each policy allocates
+every arrival over future periods according to the same decreasing sequence,
+beginning one period later to respect our information pattern.
+Section~\ref{subsec:allocation-sequences} shows that finite-memory SDAC policies
+approximate every policy in this class with error that decreases geometrically in
+the memory length.
 
 Lin et al. \cite{lin2025optimal} study online age-of-information optimization in an
 energy-harvesting system with related battery dynamics. They compare with an
@@ -273,7 +276,7 @@ under state constraints.
 Section~\ref{sec:model-setup} formalizes the storage-control model,
 assumptions, and regret benchmark. Section~\ref{sec:sdac} introduces the SDAC policy
 class, its structural properties, and its approximation of proportional and
-allocation-sequence policies. Section~\ref{sec:online-algorithm}
+decreasing-allocation policies. Section~\ref{sec:online-algorithm}
 presents the online controller, Section~\ref{sec:regret-analysis} develops regret
 upper and lower bounds, Section~\ref{sec:extensions} discusses possible extensions, and
 Section~\ref{sec:conclusion} concludes. Deferred proofs appear in the
@@ -902,12 +905,12 @@ makes this statement precise.
 
 Energy-harvesting policies for Bernoulli recharges can be described by the
 sequence of expenditures following each recharge
-\cite{arafa2018online,zibaeenejad2019lookahead}. This suggests an age-based
-benchmark for the present additive-arrival model: each unit arriving at time $s$
-is assigned the same release sequence over times $s+1,s+2,\ldots$. Unlike
+\cite{arafa2018online,zibaeenejad2019lookahead}. This motivates the
+decreasing-allocation policy class used here: each unit arriving at time $s$ is
+assigned the same allocation sequence over times $s+1,s+2,\ldots$. Unlike
 proportional feedback, this sequence need not be geometric.
 
-Define the set of decreasing feasible allocation sequences
+Define the set of feasible decreasing allocation sequences
 \begin{equation}
 \label{eq:def-allocation-sequences}
 \mathcal Q_\alpha^\downarrow
@@ -931,17 +934,17 @@ x_{t+1}(\mathbf q)
 \alpha x_t(\mathbf q)-u_t(\mathbf q)+w_t,
 \quad x_1(\mathbf q)=0.
 \end{equation}
-Here $q_iw_s$ is the release at age $i$ assigned to the arrival cohort $w_s$.
+Here $q_iw_s$ is the allocation at age $i$ assigned to the arrival cohort $w_s$.
 The weighted budget in \eqref{eq:def-allocation-sequences} accounts for leakage:
-reserving $q_i$ units for release at age $i$ consumes $q_i/\alpha^i$ of the
-cohort's normalized release budget. Let
+reserving $q_i$ units for allocation at age $i$ consumes $q_i/\alpha^i$ of the
+cohort's normalized allocation budget. Let
 \[
 \Pi_\alpha^{\mathrm{alloc}}
 \triangleq
 \{\pi_{\mathbf q}:\mathbf q\in\mathcal Q_\alpha^\downarrow\}.
 \]
 
-\begin{lemma}[SDAC approximation of decreasing allocation sequences]
+\begin{lemma}[SDAC approximation of decreasing-allocation policies]
 \label{lem:sdac-allocation-approx}
 Every policy in $\Pi_\alpha^{\mathrm{alloc}}$ is feasible. Fix
 $\mathbf q\in\mathcal Q_\alpha^\downarrow$ and $H\ge1$, and define
@@ -1009,8 +1012,8 @@ Equations \eqref{eq:lin-closed-form} and \eqref{eq:def-allocation-policy}
 then induce the same action and state trajectories. The zero-gain policy
 corresponds to $\mathbf q=\mathbf0$. Thus
 the proportional policy family is contained in
-$\Pi_\alpha^{\mathrm{alloc}}$, generally strictly:
-the allocation class also permits nongeometric decreasing release profiles.
+$\Pi_\alpha^{\mathrm{alloc}}$, generally strictly: the decreasing-allocation policy
+class also permits nongeometric allocation profiles.
 
 
 
@@ -1502,10 +1505,10 @@ stated asymptotic rate.
 \end{proof}
 
 
-The same memory choice yields a stronger guarantee for the allocation-sequence
-class, which contains all proportional policies.
+The same memory choice yields a stronger guarantee for the decreasing-allocation
+policy class, which contains all proportional policies.
 
-\begin{corollary}[No-regret against decreasing allocation sequences]
+\begin{corollary}[No-regret against decreasing-allocation policies]
 \label{cor:regret-vs-allocation}
 Run the OMD controller with the horizon $H_T$ and step size specified in
 Corollary~\ref{cor:regret-vs-linear}. For
@@ -1635,10 +1638,10 @@ $(1-\alpha)^{-1/2}$ between the upper and lower bounds remains open. For fixed
 $T$ and $\alpha\uparrow1$, the exact finite-horizon lower bound must be used instead,
 because the steady-state scale has not yet been reached. The
 SDAC approximation results further give
-$O\!\left(\sqrt{T\log\log T}\right)$ regret against the best decreasing
-allocation-sequence policy when $H=\Theta(\log T)$. This class contains all
-feasible proportional state-feedback policies and also permits nongeometric
-release profiles. The model applies directly to
+$O\!\left(\sqrt{T\log\log T}\right)$ regret against the best decreasing-allocation
+policy when $H=\Theta(\log T)$. This class contains all feasible proportional
+state-feedback policies and also permits nongeometric allocation profiles. The
+model applies directly to
 energy-harvesting battery management and related settings in which storage limits
 must be respected in real time. Section~\ref{sec:extensions} discusses possible
 extensions to $\alpha\ge1$, vector allocation, and diagonal multi-storage systems.
@@ -1651,8 +1654,8 @@ extensions to $\alpha\ge1$, vector allocation, and diagonal multi-storage system
 
 This appendix proves the minimax lower bound from
 Section~\ref{sec:regret-analysis} and collects the deferred proofs of the
-proportional-state-feedback and allocation-sequence approximation guarantees from
-Section~\ref{sec:sdac},
+proportional-state-feedback and decreasing-allocation policy approximation
+guarantees from Section~\ref{sec:sdac},
 together with the OMD and stability lemmas leading up to the upper regret bound.
 
 Recall that we set $w_\tau\equiv 0$ for $\tau\le 0$, which is used in several
@@ -2163,7 +2166,7 @@ Consequently,
 \sum_{j=1}^{t-1}\alpha^jb_jw_{t-j}
 =\alpha x_t(\mathbf q),
 \end{align*}
-which proves \eqref{eq:model-feasibility} for the allocation-sequence policy.
+which proves \eqref{eq:model-feasibility} for the decreasing-allocation policy.
 
 For the truncated vector in \eqref{eq:allocation-truncation},
 \[
