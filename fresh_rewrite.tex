@@ -187,27 +187,27 @@ while our lower bound is established directly for state--action costs under the
 storage-feasibility constraint.
 
 \paragraph{Energy harvesting}
-Online energy-harvesting control commonly uses simple battery-responsive rules.
-Shaviv and \"Ozg\"ur \cite{shaviv2016universally} introduced a fixed-fraction
-power policy and established distribution-uniform additive and multiplicative
-performance guarantees for independent and identically distributed (i.i.d.) energy
-arrivals. Arafa et al.
-\cite{arafa2018online} extended this viewpoint to general concave utilities and,
-for Bernoulli recharges, characterized optimal post-recharge expenditure through
-a generally nongeometric allocation sequence. Allocation-sequence structure also
-appears in look-ahead power control: Zibaeenejad and Chen
-\cite{zibaeenejad2019lookahead} characterize an optimal positive decreasing
-sequence between recharge epochs. These models reveal the current harvested
-energy before transmission and use stochastic arrivals and a finite battery that
-may saturate.
+Prior work on online energy harvesting often studies simple rules that adjust
+power use to the available battery level. Shaviv and \"Ozg\"ur
+\cite{shaviv2016universally} proposed using a fixed fraction of the available
+energy at each time and proved performance guarantees that hold for any
+independent and identically distributed (i.i.d.) energy-arrival model. Arafa et al.
+\cite{arafa2018online} allowed more general rewards and characterized how energy
+should be spent after an occasional full recharge; the optimal amounts need not
+decrease by the same proportion each period. Zibaeenejad and Chen
+\cite{zibaeenejad2019lookahead} derive a related decreasing spending rule when
+upcoming arrivals are known in advance. Unlike our setting,
+these models reveal the current harvested energy before transmission, assume
+random arrivals from a fixed model, and optimize a fixed reward that depends only
+on the allocated power, rather than adversarially varying costs that depend jointly
+on storage state and action.
 
-Motivated by this literature, we introduce a comparator that assigns every arrival
-cohort the same decreasing release sequence, shifted by one slot to respect our
-information pattern. The resulting policy permits nongeometric expenditure profiles
-while remaining feasible under leakage. Unlike the renewal models above, different
-arrival cohorts may overlap, arrivals are adversarial, and performance is measured
-by regret for general convex state--action costs. Section~\ref{subsec:allocation-sequences}
-shows that finite-memory SDAC policies geometrically approximate this entire class.
+To demonstrate the expressive power of SDAC, we introduce a benchmark policy
+class inspired by this literature. Each policy releases every arrival according to
+the same decreasing schedule, beginning one period later to respect our information
+pattern. Section~\ref{subsec:allocation-sequences} shows that finite-memory SDAC
+policies approximate every policy in this class with error that decreases
+geometrically in the memory length.
 
 Lin et al. \cite{lin2025optimal} study online age-of-information optimization in an
 energy-harvesting system with related battery dynamics. They compare with an
