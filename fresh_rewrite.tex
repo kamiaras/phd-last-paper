@@ -319,7 +319,9 @@ Appendix~\ref{sec:appendix-proofs} contains the deferred proofs.
 
 For every positive integer $n$, we write
 $[n]\triangleq\{1,\ldots,n\}$ and $[z]_+\triangleq\max\{z,0\}$. For
-$\mathbf v\in\mathbb R^n$, the $i$-th coordinate is denoted by $v_i$. We write
+$\mathbf v\in\mathbb R^n$, the $i$-th coordinate is denoted by $v_i$. If the
+vector already carries a subscript, the coordinate is appended after a comma: the
+$i$-th coordinate of $\mathbf v_t$ is $v_{t,i}$. We write
 $\mathbf 1$ for the all-ones vector, with its dimension clear from context, and
 $\langle\cdot,\cdot\rangle$ for the Euclidean inner product. We use $\log$ for the
 natural logarithm and set $w_\tau\equiv0$ for $\tau\le0$.
@@ -764,7 +766,7 @@ For every $i\in\{1,\ldots,H\}$, the definitions of $r_{t,i}$ and $r_t$ give
 \begin{equation}
 \label{eq:phi-x-exact-tail}
 \begin{aligned}
-(\boldsymbol{\phi}_t^x)_i
+\phi_{t,i}^x
 &=
 r_{t,i}-r_t \\
 &=
@@ -775,12 +777,12 @@ where the sum is empty when $i\ge t-1$. Hence
 \begin{equation}
 \label{eq:surr-coordinate-decay}
 \begin{aligned}
-\bigl|(\boldsymbol{\phi}_t^x)_i\bigr|
+\bigl|\phi_{t,i}^x\bigr|
 &\le
 \sum_{j=i+1}^{\infty}\alpha^{j-1}
 =
 \frac{\alpha^i}{1-\alpha}, \\
-0\le(\boldsymbol{\phi}_t^u)_i
+0\le\phi_{t,i}^u
 &=
 \alpha^i w_{t-i}
 \le
@@ -844,8 +846,8 @@ $i\in\{1,\ldots,H\}$, the exact coordinate decay in
 \begin{aligned}
 |g_{t,i}|
 &\le
-|\zeta_t^x|\bigl|(\boldsymbol{\phi}_t^x)_i\bigr|
-+|\zeta_t^u|(\boldsymbol{\phi}_t^u)_i \\
+|\zeta_t^x|\bigl|\phi_{t,i}^x\bigr|
++|\zeta_t^u|\phi_{t,i}^u \\
 &\le
 \alpha^i\left(\frac{L_x}{1-\alpha}+L_u\right) \\
 &\le
@@ -968,8 +970,12 @@ where $\lambda_k^0\triangleq1$. Then $\mathbf q(k)\in\mathcal Q_\alpha^\downarro
 and $\pi_{\mathbf q(k)}$ is exactly the feasible proportional state-feedback policy
 $u_t(k)=k x_t(k)$. Its SDAC truncation is
 \[
-\bigl[\mathbf m_H^{\mathrm{prop}}(k)\bigr]_i
+\mathbf m_H^{\mathrm{prop}}(k)
 \triangleq
+\mathbf m_H\bigl(\mathbf q(k)\bigr),
+\]
+with coordinates
+\[
 m_{H,i}\bigl(\mathbf q(k)\bigr)
 =
 \frac{k\lambda_k^{i-1}}{\alpha^i},
