@@ -1034,22 +1034,15 @@ and clips it to the admissible interval in \eqref{eq:model-feasibility}:
 \label{eq:alg-feasible-action}
 u_t \triangleq \min\{\widehat{u}_t,\,\alpha x_t\}.
 \end{equation}
-The state update is
-\begin{equation}
-\label{eq:alg-state-update}
-x_{t+1} = \alpha x_t - u_t + w_t,
-\qquad x_1=0.
-\end{equation}
+The state then evolves according to \eqref{eq:model-dynamics}.
 Because $\widehat{u}_t\ge 0$, the clipping rule and induction on
-\eqref{eq:alg-state-update}, starting from $x_1=0$ with $w_t\in[0,1]$, yield
+\eqref{eq:model-dynamics}, starting from \eqref{eq:model-init} with $w_t\in[0,1]$, yield
 $x_t\ge0$ for all $t\in[T+1]$ and show that the online trajectory satisfies
 \eqref{eq:model-feasibility}.
 
 The scalar correction in \eqref{eq:alg-feasible-action} also has an exact
-Bregman-projection interpretation. This interpretation is useful conceptually, but
-it does not add a projection to the implementation. The positive initialization
-and multiplicative OMD update keep $\mathbf m_t$ strictly positive for every $t$;
-see Lemma~\ref{lem:omd-closed-form}.
+Bregman-projection equivalent. This interpretation is useful conceptually, but
+but is not used in the implementation. See the closed-form update in Lemma~\ref{lem:omd-closed-form}. 
 
 \begin{lemma}[Availability clipping as a Bregman projection]
 \label{lem:availability-projection}
