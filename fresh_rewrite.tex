@@ -480,7 +480,6 @@ where
 \big(\alpha w_{t-1},\alpha^2 w_{t-2},\ldots,\alpha^H w_{t-H}\big)^\top
 \in \mathbb{R}^H,
 \end{equation}
-with the same convention $w_\tau\equiv 0$ for $\tau\le 0$.
 
 The induced state trajectory satisfies
 \begin{equation}
@@ -495,8 +494,6 @@ The SDAC policy class is
 \triangleq
 \{\pi_{\mathbf{m}}:\mathbf{m}\in\mathcal{M}_H\}.
 \end{equation}
-Whenever the policy itself is not needed as an abstract object, we minimize
-directly over $\mathbf{m}\in\mathcal{M}_H$.
 The weights $\alpha^i$ align the arrival filter with the retention coefficient
 $\alpha$ in \eqref{eq:model-dynamics}.
 
@@ -543,11 +540,7 @@ Then
 \[
 x_t(\mathbf{m})
 =
-r_t+\langle\boldsymbol{\phi}_t^x,\mathbf{m}\rangle,
-\qquad
-u_t(\mathbf{m})
-=
-\langle\boldsymbol{\phi}_t^u,\mathbf{m}\rangle.
+r_t+\langle\boldsymbol{\phi}_t^x,\mathbf{m}\rangle.
 \]
 Moreover,
 \[
@@ -676,7 +669,8 @@ For every $i\in\{1,\ldots,H\}$,
 \ge
 \alpha^i w_{t-i}.
 \end{equation}
-By Lemma~\ref{lem:sdac-state-decomp}, $1-\mathbf{1}^\top\mathbf{m}\ge0$ and $r_t\ge0$. Therefore,
+Because $\mathbf{m}\in\mathcal{M}_H$ and $r_t\ge0$ by
+Lemma~\ref{lem:sdac-state-decomp},
 \begin{equation}
 \label{eq:feas-upper-direct}
 \begin{aligned}
@@ -1344,10 +1338,8 @@ Thus the exact finite-horizon formula, rather than the steady-state scaling in
 The large-$\alpha$ dependence improves the coarser analysis that ignores the exact
 coordinate decay in \eqref{eq:surr-coordinate-decay} and the positive-part
 contraction in \eqref{eq:transition-contraction}. That analysis gives a leading
-factor of order $(1-\alpha)^{-2}$ as $\alpha\uparrow1$. The projection
-interpretation in Lemma~\ref{lem:availability-projection} does not cause this
-improvement; it only reexpresses the same scalar clipping rule. The sharper rate
-follows from the gradient and stability estimates.
+factor of order $(1-\alpha)^{-2}$ as $\alpha\uparrow1$. The sharper rate follows
+from the gradient and stability estimates.
 
 
 Theorem~\ref{thm:regret-bound} and
@@ -1527,10 +1519,8 @@ feasibility and regret analyses require separate treatment.
 
 We studied adversarial online control of a storage system under a state-dependent
 action constraint. Every fixed SDAC policy is feasible by construction. For the
-time-varying online controller, a Bregman projection maintains the SDAC parameter
-constraint, while the implemented action rule maintains feasibility of the actual
-trajectory. This rule is equivalent to projecting the current parameter onto the
-state-dependent availability set, although that projection need not be computed.
+time-varying online controller, the OMD update maintains the SDAC parameter
+constraint, while the clipping rule maintains feasibility of the actual trajectory.
 Exact feature decay and the contraction of the online state dynamics yield
 $O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy,
 with upper-bound dependence $\Theta((1-\alpha)^{-3/2})$ as
@@ -1559,9 +1549,6 @@ This appendix proves the minimax lower bound from
 Section~\ref{sec:regret-analysis} and the expressiveness lemma from
 Section~\ref{sec:sdac},
 together with the OMD and stability lemmas leading up to the upper regret bound.
-
-Recall that we set $w_\tau\equiv 0$ for $\tau\le 0$, which is used in several
-base-case arguments below.
 
 We first prove the lower bound. Following the standard random-sign mechanism for
 online linear-optimization lower bounds \cite{hazan2016introduction}, the
@@ -1655,8 +1642,7 @@ Consequently,
 \label{eq:lower-endpoint-one-trajectory}
 x_t(\mathbf m^{(1)})=1,
 \qquad
-u_t(\mathbf m^{(1)})=\alpha,
-\quad t\ge2.
+t\ge2.
 \end{equation}
 For $t\ge2$, the state difference between the endpoints is
 \begin{equation}
@@ -1713,8 +1699,9 @@ Likewise, the two fixed endpoint trajectories do not depend on the signs, so
 \end{equation}
 
 Since the two endpoints agree at $t=1$, equations
-\eqref{eq:lower-endpoint-one-trajectory}--\eqref{eq:lower-endpoint-state-gap}
-give
+\eqref{eq:lower-endpoint-zero-trajectory},
+\eqref{eq:lower-endpoint-one-action}, and
+\eqref{eq:lower-endpoint-state-gap} give
 \begin{equation}
 \label{eq:lower-endpoint-cost-gap}
 \begin{aligned}
@@ -2482,7 +2469,7 @@ By \eqref{eq:surr-coefficient-norms},
 \end{aligned}
 \end{equation}
 Lemma~\ref{lem:omd-move} and
-$\|\mathbf q_t\|_\infty\le G_\alpha$ therefore reduce
+$\|\mathbf g_t\|_\infty\le G_\alpha$ therefore reduce
 \eqref{eq:contractive-deviation-recursion-raw} to
 \begin{equation}
 \label{eq:contractive-deviation-recursion}
@@ -2687,7 +2674,6 @@ Substituting \eqref{eq:omd-term} and \eqref{eq:stab-term} into
 \end{aligned}
 \end{equation}
 
-The right-hand side of \eqref{eq:regret-eta} is positive for every $\eta>0$.
 Differentiating with respect to $\eta$ yields
 \[
 -\frac{\log(H+1)}{\eta^2}
