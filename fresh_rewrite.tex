@@ -1189,7 +1189,7 @@ Appendix~\ref{sec:appendix-proofs}.
 Suppose the cost functions satisfy the regularity and bounded-subgradient
 assumptions of Section~\ref{sec:model-setup}. Then the OMD controller with
 action clipping from Section~\ref{sec:online-algorithm}, initialized as in
-\eqref{eq:alg-init} and using step size $\eta>0$, satisfies
+\eqref{eq:alg-init} and using step size $\eta>0$, satisfies, for the regret defined in \eqref{eq:def-regret},
 \begin{equation}
 \label{eq:regret-theorem-bound}
 \RegSDAC{T}
@@ -1246,23 +1246,23 @@ of arrivals and costs satisfying the assumptions of
 Section~\ref{sec:model-setup} such that
 \begin{equation}
 \label{eq:sdac-lower-exact}
-\begin{aligned}
 \mathbb E_{\mathcal A}\!\left[\RegSDAC{T}\right]
-&\ge
+\ge
 \frac{1}{2\sqrt{2}}
-\Biggl[
-\sum_{t=2}^T
-\alpha^2 \\
-&\qquad\quad {}
-\times
-\left(
-L_u+
-\frac{L_x(1-\alpha^{t-2})}{1-\alpha}
-\right)^2
-\Biggr]^{1/2}.
-\end{aligned}
+\sqrt{\sum_{t=2}^T a_t^2},
 \end{equation}
-The expectation is only over the internal randomization of $\mathcal A$; the
+where
+\begin{equation}
+\label{eq:sdac-lower-coeff}
+a_t
+\triangleq
+\alpha\left(
+L_u
++
+\frac{L_x(1-\alpha^{t-2})}{1-\alpha}
+\right).
+\end{equation}
+The expectation is only over the possible internal randomization of $\mathcal A$; the
 adversarial sequence whose existence is asserted is deterministic and fixed before
 the interaction.
 \end{theorem}
@@ -1319,9 +1319,7 @@ and the right-hand side of \eqref{eq:sdac-lower-exact} converges to the finite
 quantity
 \[
 \frac{1}{2\sqrt{2}}
-\left[
-\sum_{t=2}^T\bigl(L_u+L_x(t-2)\bigr)^2
-\right]^{1/2}.
+\sqrt{\sum_{t=2}^T\bigl(L_u+L_x(t-2)\bigr)^2}.
 \]
 Thus the exact finite-horizon formula, rather than the steady-state scaling in
 \eqref{eq:sdac-lower-large-alpha}, applies in this regime.
@@ -1703,17 +1701,7 @@ Since the two endpoints agree at $t=1$, equations
 \sum_{t=2}^T\xi_t a_t,
 \end{aligned}
 \end{equation}
-where
-\begin{equation}
-\label{eq:lower-a-t}
-a_t
-\triangleq
-\alpha
-\left(
-L_u+
-\frac{L_x(1-\alpha^{t-2})}{1-\alpha}
-\right).
-\end{equation}
+with $a_t$ as in \eqref{eq:sdac-lower-coeff}.
 
 Minimizing over all of $\mathcal M_H$ can only decrease the comparator cost.
 After canceling the common term $TC_\alpha$, the regret therefore satisfies
@@ -1767,7 +1755,7 @@ Khintchine's inequality for Rademacher sums implies
 \sum_{t=2}^Ta_t^2
 \right)^{1/2}.
 \end{equation}
-Substitution of \eqref{eq:lower-a-t} into
+Substitution of \eqref{eq:sdac-lower-coeff} into
 \eqref{eq:lower-absolute-rademacher}--\eqref{eq:lower-khintchine} proves
 \eqref{eq:sdac-lower-exact} under the joint randomization of the signs and the
 controller.
