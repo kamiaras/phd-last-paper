@@ -49,9 +49,10 @@ $\Omega((1-\alpha)^{-1}\sqrt{T})$ near $\alpha=1$, leaving a factor
 $(1-\alpha)^{-1/2}$ between the upper and lower bounds. We also show that SDAC
 geometrically approximates a decreasing-allocation policy class that spreads each
 arrival over time according to a common decreasing allocation sequence, a structure
-that arises in stochastic energy-harvesting control. Feasible proportional
-state-feedback policies form its geometric subfamily. With
-$H=\Theta(\log T)$, the resulting regret against either family is
+that arises in stochastic energy-harvesting control. Geometric allocation sequences
+induce all feasible proportional state-feedback policies. With
+$H=\Theta(\log T)$, the resulting regret against the decreasing-allocation class,
+and hence against feasible proportional state-feedback policies, is
 $O\!\left(\sqrt{T\log\log T}\right)$. The framework applies to energy-harvesting
 batteries and other storage-constrained resource systems.
 \end{abstract}
@@ -127,8 +128,8 @@ Our contributions are as follows:
         We prove that every fixed SDAC policy is feasible,
         its induced loss is convex and Lipschitz in the policy parameter, and the
         class geometrically approximates a \emph{decreasing-allocation policy
-        class}, defined in Section~\ref{subsec:allocation-sequences}; feasible
-        proportional state-feedback policies form its geometric subfamily.
+        class}, defined in Section~\ref{subsec:allocation-sequences}. Its geometric
+        sequences induce all feasible proportional state-feedback policies.
     \item \textbf{Online control and regret.} We develop an entropic online mirror
         descent (OMD) controller
         that updates SDAC parameters over the subprobability simplex while maintaining
@@ -276,9 +277,8 @@ under state constraints.
 \subsection{Paper Organization}
 Section~\ref{sec:model-setup} formalizes the storage-control model,
 assumptions, and regret benchmark. Section~\ref{sec:sdac} introduces the SDAC policy
-class, its structural properties, and its approximation of the
-decreasing-allocation policy class, including proportional state-feedback policies
-as its geometric subfamily.
+class, its structural properties, and its finite-memory approximation of
+decreasing-allocation policies.
 Section~\ref{sec:online-algorithm}
 presents the online controller, Section~\ref{sec:regret-analysis} develops regret
 upper and lower bounds, Section~\ref{sec:extensions} discusses possible extensions, and
@@ -843,12 +843,11 @@ optimization over the simplex.
 
 Energy-harvesting policies for Bernoulli recharges can be described by the
 sequence of expenditures following each recharge
-\cite{arafa2018online,zibaeenejad2019lookahead}. We use this allocation view to
-define the main benchmark class for SDAC expressiveness. Each unit arriving at
-time $s$ is assigned the same decreasing allocation sequence, beginning at time
-$s+1$ to respect the information pattern. The sequence may have an arbitrary
-decreasing shape; proportional state-feedback policies correspond exactly to
-geometric allocation sequences.
+\cite{arafa2018online,zibaeenejad2019lookahead}. In the corresponding
+decreasing-allocation policy class, each unit arriving at time $s$ is assigned the
+same decreasing allocation sequence, beginning at time $s+1$ to respect the
+information pattern. The sequence may have an arbitrary decreasing shape;
+geometric sequences induce proportional state-feedback policies.
 
 Define the set of feasible decreasing allocation sequences
 \begin{equation}
@@ -916,7 +915,7 @@ x_t\bigl(\mathbf m_H(\mathbf q)\bigr)-x_t(\mathbf q)
 \le \frac{R_H(\mathbf q)}{1-\alpha}.
 \label{eq:allocation-state-gap}
 \end{align}
-If each $c_t$ satisfies \eqref{eq:model-lipschitz}, then consequently
+If each $c_t$ satisfies \eqref{eq:model-lipschitz}, then
 \begin{equation}
 \label{eq:allocation-cost-gap}
 \begin{aligned}
@@ -973,15 +972,12 @@ Therefore, \eqref{eq:allocation-cost-gap} specializes exactly to
 The proof is deferred to Appendix~\ref{sec:appendix-proofs}.
 \end{lemma}
 
-Thus proportional state-feedback policies are not a separate expressiveness
-benchmark in this model: they form the geometric subfamily of
-$\Pi_\alpha^{\mathrm{alloc}}$.
-The containment is generally strict because decreasing-allocation policies also
-permit nongeometric allocation sequences. Together with
-Theorem~\ref{thm:regret-bound}, the tail truncation in
-\eqref{eq:allocation-cost-gap} yields no regret against the full
-decreasing-allocation policy class and therefore, as a specialization, against
-proportional state-feedback policies.
+$\Pi_\alpha^{\mathrm{alloc}}$ contains every feasible proportional state-feedback
+policy and also permits nongeometric allocation sequences. Together with
+Theorem~\ref{thm:regret-bound}, the tail bound in
+\eqref{eq:allocation-cost-gap} yields no regret against
+$\Pi_\alpha^{\mathrm{alloc}}$ and, consequently, against feasible proportional
+state-feedback policies.
 
 
 
@@ -1361,8 +1357,8 @@ improvement; it only reexpresses the same scalar clipping rule. The sharper rate
 follows from the gradient and stability estimates.
 
 
-Combining Theorem~\ref{thm:regret-bound} with
-Lemma~\ref{lem:sdac-allocation-approx} yields the main comparator guarantee.
+Theorem~\ref{thm:regret-bound} and
+Lemma~\ref{lem:sdac-allocation-approx} give the following comparator guarantee.
 
 \begin{corollary}[No-regret against decreasing-allocation policies]
 \label{cor:regret-vs-allocation}
@@ -1436,9 +1432,8 @@ $H_T\ge\log T/\log(1/\alpha)$ implies $\alpha^{H_T}\le1/T$, while
 $H_T=\Theta(\log T)$ implies $\log(H_T+1)=O(\log\log T)$.
 \end{proof}
 
-The proportional state-feedback guarantee follows by restricting the comparator
-class to policies induced by geometric allocation sequences. Retaining the exact
-geometric tail also gives a gain-dependent approximation bound.
+Because geometric allocation sequences induce proportional state feedback, the
+same controller also satisfies a gain-dependent bound for that policy family.
 
 \begin{corollary}[No-regret against proportional state-feedback policies]
 \label{cor:regret-vs-linear}
@@ -1488,8 +1483,6 @@ $\mathbf q(k)$ belongs to $\mathcal Q_\alpha^\downarrow$, so
 $R_{H_T}(\mathbf q(k))\le\alpha^{H_T+1}$ by
 Lemma~\ref{lem:sdac-allocation-approx}. This makes the bound uniform in $k$;
 minimizing over $k$ proves the stated finite-time and asymptotic guarantees.
-Equivalently, the uniform conclusion follows directly from
-$\RegProp{T}\le\RegAlloc{T}$.
 \end{proof}
 
 \section{Extensions}
