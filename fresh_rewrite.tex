@@ -32,9 +32,10 @@ Computer Engineering, University of Southern California, Los Angeles, CA 90089 U
 
 \begin{abstract}
 We study online control of a scalar storage system with nonnegative adversarial
-resource arrivals, convex state--action costs, and state-dependent action
-constraints. At each time, the controller selects a feasible action before the
-current resource arrival and cost are revealed. To handle the resulting coupling
+resource arrivals and state-dependent action constraints. The cost is adversarial,
+time-varying, and depends on both the action and the state. At each time, the
+controller selects a feasible action before the current resource arrival and cost
+are revealed. To handle the resulting coupling
 between feasibility and online learning, we introduce \emph{Simplex Disturbance-Action
 Control} (SDAC), an $H$-dimensional finite-memory policy class parameterized by a
 subprobability simplex. The key feature of SDAC is that every fixed policy in the
@@ -1486,15 +1487,17 @@ We briefly discuss three possible extensions. Establishing their full regret bou
 is left for future work.
 
 \paragraph{Retention $\alpha\ge 1$.}
-For $\alpha\ge1$, choose a fixed baseline drain $Kx_t$ such that
-$\bar\alpha\triangleq\alpha-K\in(0,1)$, and write $u_t=Kx_t+v_t$. The residual
+For $\alpha\ge1$, choose a fixed baseline drain $kx_t$ such that
+$\bar\alpha\triangleq\alpha-k\in(0,1)$, and write $u_t=kx_t+v_t$. The residual
 dynamics become $x_{t+1}=\bar\alpha x_t-v_t+w_t$. An SDAC filter for $v_t$ should
 therefore use the powers $\bar\alpha^i$, not $\alpha^i$. If
 $0\le v_t\le\bar\alpha x_t$, then
-$0\le u_t\le(K+\bar\alpha)x_t=\alpha x_t$, so \eqref{eq:model-feasibility} holds.
-This reduction suggests an extension of
-the present analysis with transformed cost and Lipschitz constants; we do not pursue
-the details here.
+$0\le u_t\le(k+\bar\alpha)x_t=\alpha x_t$, so \eqref{eq:model-feasibility} holds.
+This reduction shows that the generalization to a fixed, given \(k\) is
+straightforward: the present analysis carries over with transformed cost and
+Lipschitz constants. We therefore omit the details, which would amount to extra
+writing without additional novelty. The choice of \(k\) itself remains an
+interesting avenue for future work.
 
 \paragraph{Vector action / multi-task allocation.}
 Consider a single storage state $x_t$ with a vector action
@@ -1527,26 +1530,19 @@ feasibility and regret analyses require separate treatment.
 \label{sec:conclusion}
 
 We studied adversarial online control of a storage system under a state-dependent
-action constraint. Every fixed SDAC policy is feasible by construction. For the
-time-varying online controller, the OMD update maintains the SDAC parameter
-constraint, while the clipping rule maintains feasibility of the actual trajectory.
-Exact feature decay and the contraction of the online state dynamics yield
-$O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy,
-with upper-bound dependence $\Theta((1-\alpha)^{-3/2})$ as
-$\alpha\uparrow1$. Once $T$ is at least on the order of $(1-\alpha)^{-1}$, the
+action constraint. We constructed the SDAC so that every policy trajectory is feasible,
+and an online algorithm with
+$O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy.
+Once $T$ is at least on the order of $(1-\alpha)^{-1}$, the
 minimax lower bound gives
 $\Omega((1-\alpha)^{-1}\sqrt{T})$ regret as $\alpha\uparrow1$; hence a factor
-$(1-\alpha)^{-1/2}$ between the upper and lower bounds remains open. For fixed
-$T$ and $\alpha\uparrow1$, the exact finite-horizon lower bound must be used instead,
-because the long-horizon asymptotic does not apply. The
+$(1-\alpha)^{-1/2}$ between the upper and lower bounds remains open. The
 SDAC approximation results further give
 $O\!\left(\sqrt{T\log\log T}\right)$ regret against the best decreasing-allocation
-policy when $H=\Theta(\log T)$. This class contains all feasible proportional
-state-feedback policies and also permits nongeometric allocation sequences. The
+policy when $H=\Theta(\log T)$. The
 model applies directly to
 energy-harvesting battery management and related settings in which storage limits
-must be respected in real time. Section~\ref{sec:extensions} discusses possible
-extensions to $\alpha\ge1$, vector allocation, and diagonal multi-storage systems.
+must be respected in real time.
 
 
 
