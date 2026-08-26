@@ -505,9 +505,6 @@ that regret minimization against the best fixed SDAC policy is an instance of on
 convex optimization over the simplex. Both properties follow from an explicit
 decomposition of the state trajectory that isolates its dependence on $\mathbf{m}$.
 
-Recall that we set $w_\tau\equiv 0$ for $\tau\le 0$, which is used in the base-case
-arguments below.
-
 \begin{lemma}[State decomposition under SDAC]
 \label{lem:sdac-state-decomp}
 Fix a positive integer $H$ and $\mathbf{m}\in\mathcal{M}_H$.
@@ -1035,8 +1032,7 @@ $x_t\ge0$ for all $t\in[T+1]$ and show that the online trajectory satisfies
 \eqref{eq:model-feasibility}.
 
 The scalar correction in \eqref{eq:alg-feasible-action} also has an exact
-Bregman-projection equivalent. This interpretation is useful conceptually, but
-but is not used in the implementation. See the closed-form update in Lemma~\ref{lem:omd-closed-form}. 
+Bregman-projection equivalent.
 
 \begin{lemma}[Availability clipping as a Bregman projection]
 \label{lem:availability-projection}
@@ -1120,8 +1116,7 @@ contradicting \eqref{eq:def-exec-projection}. Hence
 in the infeasible case, which completes the proof.
 \end{proof}
 
-Lemma~\ref{lem:availability-projection} does not define a different physical
-controller. The implemented rule remains the scalar minimum
+The implemented rule remains the scalar minimum
 \eqref{eq:alg-feasible-action}; the full $H$-dimensional vector
 $\mathbf m_t^{\mathrm{exec}}$ is never calculated because only its scalar induced
 action is executed. Forming the feature vectors and their inner products, followed
@@ -1143,17 +1138,13 @@ $\mathbf{g}_t\in\partial\ell_t(\mathbf{m}_t)$ satisfying
 $\|\mathbf{g}_t\|_\infty\le G_\alpha$ as in
 \eqref{eq:def-surrogate-G}, whose existence and
 construction are given in that lemma. This step uses the revealed cost function and
-the full-information subgradient oracle from Section~\ref{sec:model-setup}; it is
-not a bandit-feedback update.
+the full-information subgradient oracle from Section~\ref{sec:model-setup}.
 We define the OMD update
 \begin{equation}
 \label{eq:alg-omd-argmin}
 \mathbf{m}_{t+1} \triangleq \operatorname*{arg\,min}_{\mathbf{m}\in\mathcal{M}_H}
 \Bigl\{\eta\langle \mathbf{g}_t,\mathbf{m}\rangle + D_\Psi(\mathbf{m}\|\mathbf{m}_t)\Bigr\}.
 \end{equation}
-The regret analysis in Section~\ref{sec:regret-analysis} works directly with
-this optimization-based definition.
-
 \paragraph{Closed-form solution}
 Although \eqref{eq:alg-omd-argmin} is a constrained optimization problem, it is easy
 to solve analytically because $\Psi$ is separable and the objective is linear in
@@ -1180,7 +1171,7 @@ where
 \operatorname*{arg\,min}_{\mathbf{m}\in\mathcal{M}_H}
 D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}})
 \]
-(the scaling is nontrivial only when $\|\widetilde{\mathbf{m}}_{t+1}\|_1>1$). This is the form we implement in practice.
+(the scaling is nontrivial only when $\|\widetilde{\mathbf{m}}_{t+1}\|_1>1$).
 
 
 \section{Regret Analysis}
