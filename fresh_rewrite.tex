@@ -559,7 +559,7 @@ $t\in[T]$,
 x_t(\mathbf{m})
 =
 \sum_{i=1}^H m_i r_{t,i}
-+\bigl(1-\mathbf{1}^\top\mathbf{m}\bigr)r_t.
++\bigl(1-\sum_{i=1}^H m_i\bigr)r_t.
 \end{equation}
 Define the quantity
 \[
@@ -619,7 +619,7 @@ x_{t+1}(\mathbf{m})
 &=
 \alpha\left(
 \sum_{i=1}^H m_i r_{t,i}
-+\bigl(1-\mathbf{1}^\top\mathbf{m}\bigr)r_t
++\bigl(1-\sum_{i=1}^H m_i\bigr)r_t
 \right) \\
 &\quad
 -\sum_{i=1}^H m_i\alpha^i w_{t-i}
@@ -628,7 +628,7 @@ x_{t+1}(\mathbf{m})
 \sum_{i=1}^H m_i
 \bigl(\alpha r_{t,i}-\alpha^i w_{t-i}\bigr) \\
 &\quad
-+\alpha\bigl(1-\mathbf{1}^\top\mathbf{m}\bigr)r_t+w_t.
++\alpha\bigl(1-\sum_{i=1}^H m_i\bigr)r_t+w_t.
 \end{aligned}
 \end{equation}
 Substituting \eqref{eq:r-recursion} and \eqref{eq:r-coord-recursion} into
@@ -641,14 +641,14 @@ x_{t+1}(\mathbf{m})
 \sum_{i=1}^H m_i
 \bigl(r_{t+1,i}-w_t\bigr) \\
 &\quad
-+\bigl(1-\mathbf{1}^\top\mathbf{m}\bigr)(r_{t+1}-w_t)+w_t \\
++\bigl(1-\sum_{i=1}^H m_i\bigr)(r_{t+1}-w_t)+w_t \\
 &=
 \sum_{i=1}^H m_i r_{t+1,i}
-+\bigl(1-\mathbf{1}^\top\mathbf{m}\bigr)r_{t+1},
++\bigl(1-\sum_{i=1}^H m_i\bigr)r_{t+1},
 \end{aligned}
 \end{equation}
 because the total coefficient of $w_t$ in the first line is
-$-\mathbf{1}^\top\mathbf{m}-\bigl(1-\mathbf{1}^\top\mathbf{m}\bigr)+1=0$. This proves \eqref{eq:sdac-state-decomp} by induction.
+$-\sum_{i=1}^H m_i-\bigl(1-\sum_{i=1}^H m_i\bigr)+1=0$. This proves \eqref{eq:sdac-state-decomp} by induction.
 
 All summands defining $r_{t,i}$ and $r_t$ are nonnegative. Since
 $w_\tau=0$ for $\tau\le0$, $r_{t,i}$ is a truncation of $r_t$; hence
@@ -708,7 +708,7 @@ Lemma~\ref{lem:sdac-state-decomp},
 \alpha x_t(\mathbf{m})
 &=
 \sum_{i=1}^H m_i\alpha r_{t,i}
-+\alpha\bigl(1-\mathbf{1}^\top\mathbf{m}\bigr)r_t \\
++\alpha\bigl(1-\sum_{i=1}^H m_i\bigr)r_t \\
 &\ge
 \sum_{i=1}^H m_i\alpha r_{t,i} \\
 &\ge
@@ -1502,16 +1502,16 @@ interesting avenue for future work.
 \paragraph{Vector action / multi-task allocation.}
 Consider a single storage state $x_t$ with a vector action
 $\mathbf{u}_t\in\mathbb{R}_{\ge 0}^n$ that allocates resources across $n$ tasks, subject to
-$\mathbf{1}^\top \mathbf{u}_t\le\alpha x_t$, so that the total drain from storage is the sum of
+$\sum_{a=1}^n u_{t,a}\le\alpha x_t$, so that the total drain from storage is the sum of
 the task allocations. The dynamics remain
-$x_{t+1}=\alpha x_t-\mathbf{1}^\top \mathbf{u}_t+w_t$, and the cost $c_t(x_t,\mathbf{u}_t)$ is convex in
+$x_{t+1}=\alpha x_t-\sum_{a=1}^n u_{t,a}+w_t$, and the cost $c_t(x_t,\mathbf{u}_t)$ is convex in
 $(x,\mathbf{u})$. The fixed-policy SDAC construction lifts by replacing the filter vector
 $\mathbf{m}\in\mathcal{M}_H$ with a matrix
 $\mathbf{M}\in\mathbb{R}_{\ge 0}^{n\times H}$ whose entries $M_{a,i}$ sum to at most
 one, with each row $a$ corresponding to a task and each column $i$ to a memory lag.
 OMD can then run over this set. If the nominal total allocation
 exceeds $\alpha x_t$, the action vector is scaled by a nonnegative factor so that
-$\mathbf{1}^\top \mathbf{u}_t=\alpha x_t$.
+$\sum_{a=1}^n u_{t,a}=\alpha x_t$.
 
 \paragraph{Multiple storages with diagonal dynamics.}
 Suppose the state is $\mathbf{x}_t\in\mathbb{R}_{\ge 0}^d$ and evolves as
