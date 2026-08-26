@@ -47,10 +47,10 @@ $\Theta((1-\alpha)^{-3/2})$. We also derive a minimax lower bound which, when $T
 is at least on the order of $(1-\alpha)^{-1}$, scales as
 $\Omega((1-\alpha)^{-1}\sqrt{T})$ near $\alpha=1$, leaving a factor
 $(1-\alpha)^{-1/2}$ between the upper and lower bounds. We also show that SDAC
-geometrically approximates all feasible proportional state-feedback policies and a
-broader policy class that allocates each arrival over time according to the same
-decreasing sequence, a structure that arises in stochastic energy-harvesting
-control. With
+geometrically approximates a decreasing-allocation policy class that spreads each
+arrival over time according to a common decreasing allocation sequence, a structure
+that arises in stochastic energy-harvesting control. Feasible proportional
+state-feedback policies form its geometric subfamily. With
 $H=\Theta(\log T)$, the resulting regret against either family is
 $O\!\left(\sqrt{T\log\log T}\right)$. The framework applies to energy-harvesting
 batteries and other storage-constrained resource systems.
@@ -72,7 +72,7 @@ This creates a constrained discrete-time control problem with state--action
 coupling: aggressive early actions can harm later performance, while overly
 conservative actions can increase the stage cost. Our objective is to remain
 feasible at every time while competing with the best fixed policy in a tractable
-class that approximates feasible proportional state-feedback policies.
+class that approximates a broad family of state-responsive allocation rules.
 
 \subsection{Model and Information Structure}
 We study a discrete-time storage system with state $x_t \geq 0$, where $x_t$ models
@@ -126,9 +126,9 @@ Our contributions are as follows:
     \item \textbf{Policy class.} We introduce SDAC, a DAC-inspired policy class.
         We prove that every fixed SDAC policy is feasible,
         its induced loss is convex and Lipschitz in the policy parameter, and the
-        class geometrically approximates feasible proportional state-feedback
-        policies and a broader \emph{decreasing-allocation policy class}, defined
-        in Section~\ref{subsec:allocation-sequences}.
+        class geometrically approximates a \emph{decreasing-allocation policy
+        class}, defined in Section~\ref{subsec:allocation-sequences}; feasible
+        proportional state-feedback policies form its geometric subfamily.
     \item \textbf{Online control and regret.} We develop an entropic online mirror
         descent (OMD) controller
         that updates SDAC parameters over the subprobability simplex while maintaining
@@ -140,8 +140,8 @@ Our contributions are as follows:
         guarantees extend the regret result: choosing $H=\Theta(\log T)$ gives
         $O\!\left(\sqrt{T\log\log T}\right)$ regret against the best
         decreasing-allocation policy and, as a special case, the best proportional
-        state-feedback policy; see Corollaries~\ref{cor:regret-vs-linear}
-        and~\ref{cor:regret-vs-allocation}.
+        state-feedback policy; see Corollaries~\ref{cor:regret-vs-allocation}
+        and~\ref{cor:regret-vs-linear}.
     \item \textbf{Minimax lower bound.} We prove that $\sqrt{T}$-order regret is
         unavoidable for every causal feasible controller, even when the adversarial
         sequence is deterministic and oblivious; see
@@ -211,7 +211,7 @@ every arrival over future periods according to the same decreasing sequence,
 beginning one period later to respect our information pattern.
 Section~\ref{subsec:allocation-sequences} shows that finite-memory SDAC policies
 approximate every policy in this class with error that decreases geometrically in
-the memory length.
+the memory horizon.
 
 Lin et al. \cite{lin2025optimal} study online age-of-information optimization in an
 energy-harvesting system with related battery dynamics. They compare with an
@@ -276,8 +276,10 @@ under state constraints.
 \subsection{Paper Organization}
 Section~\ref{sec:model-setup} formalizes the storage-control model,
 assumptions, and regret benchmark. Section~\ref{sec:sdac} introduces the SDAC policy
-class, its structural properties, and its approximation of proportional and
-decreasing-allocation policies. Section~\ref{sec:online-algorithm}
+class, its structural properties, and its approximation of the
+decreasing-allocation policy class, including proportional state-feedback policies
+as its geometric subfamily.
+Section~\ref{sec:online-algorithm}
 presents the online controller, Section~\ref{sec:regret-analysis} develops regret
 upper and lower bounds, Section~\ref{sec:extensions} discusses possible extensions, and
 Section~\ref{sec:conclusion} concludes. Deferred proofs appear in the
@@ -295,7 +297,7 @@ is clear from context). The Euclidean inner product is denoted by
 $\langle\cdot,\cdot\rangle$. We write $\log$ for the natural logarithm. We set
 $w_\tau\equiv0$ for $\tau\le0$. A fixed SDAC policy with parameter
 $\mathbf{m}$ is written $\pi_{\mathbf{m}}$, with induced trajectories
-$x_t(\mathbf{m})$ and $u_t(\mathbf{m})$. A feasible proportional policy with
+$x_t(\mathbf{m})$ and $u_t(\mathbf{m})$. A feasible proportional state-feedback policy with
 gain $k$ induces $x_t(k)$ and $u_t(k)$. A decreasing allocation sequence
 $\mathbf q$ induces $x_t(\mathbf q)$ and $u_t(\mathbf q)$. After the online algorithm is
 introduced, unadorned $x_t$ and $u_t$ denote the realized online trajectory.
@@ -836,80 +838,17 @@ Taking the maximum over $i$ proves
 Regret minimization against the best fixed SDAC policy thus becomes online convex
 optimization over the simplex.
 
-\subsection{Expressiveness: Proportional State-Feedback Approximation}
-\label{subsec:sdac-expressiveness}
-
-A standard policy class in online control is the family of linear state-feedback
-policies $u_t=-Kx_t$, and a foundational property of Disturbance-Action Control is
-that the DAC class \emph{approximates} any strongly stable linear policy, with
-approximation error decaying geometrically in the memory horizon $H$
-\cite{agarwal2019online,hazan2026introduction}.
-
-Under our sign convention, positive $u_t$ drains storage, so proportional feedback
-is written $u_t=k x_t$. In our scalar model, the feasible proportional
-state-feedback policies are exactly those with gain
-$k\in[0,\alpha]$: for $x_t\ge 0$, substituting $u_t=kx_t$ into
-\eqref{eq:model-feasibility} gives this condition. The next
-lemma gives an explicit approximation within the feasible class $\Pi_H^{\mathrm{SDAC}}$.
-
-\begin{lemma}[SDAC approximation of proportional state feedback]
-\label{lem:sdac-linear-approx}
-Fix $k\in[0,\alpha]$ and set $\lambda_k\triangleq\alpha-k$. Let
-$\bigl(x_t(k),u_t(k)\bigr)$ denote the trajectory of the feasible
-proportional policy $u_t(k)=k\,x_t(k)$, so that
-\[
-\begin{aligned}
-x_{t+1}(k)&=\lambda_k\,x_t(k)+w_t, \\
-t&\in[T],
-\qquad
-x_1(k)=0.
-\end{aligned}
-\]
-Define $\mathbf{m}_H^\star(k)\in\mathbb{R}^H$ by
-\[
-\begin{aligned}
-\bigl[\mathbf{m}_H^\star(k)\bigr]_1
-&\triangleq
-\frac{k}{\alpha},
-\\
-\bigl[\mathbf{m}_H^\star(k)\bigr]_i
-&\triangleq
-\frac{k\,\lambda_k^{i-1}}{\alpha^i},
-\qquad i=2,\ldots,H.
-\end{aligned}
-\]
-This definition satisfies $\bigl[\mathbf{m}_H^\star(k)\bigr]_i\alpha^i=k\lambda_k^{i-1}$ for every
-$i\in\{1,\ldots,H\}$.
-Then $\mathbf{m}_H^\star(k)\in\mathcal{M}_H$, and if each $c_t$ satisfies
-\eqref{eq:model-lipschitz}, then for every $\{w_t\}\subset[0,1]$,
-\begin{equation}
-\label{eq:sdac-lin-approx-cost}
-\begin{aligned}
-&\Bigl|\sum_{t=1}^T c_t\bigl(x_t(\mathbf{m}_H^\star(k)),u_t(\mathbf{m}_H^\star(k))\bigr)
--\sum_{t=1}^T c_t\bigl(x_t(k),u_t(k)\bigr)\Bigr| \\
-&\qquad\le
-\Bigl(L_u+\frac{L_x}{1-\alpha}\Bigr)\frac{k\,\lambda_k^H}{1-\lambda_k}\,T.
-\end{aligned}
-\end{equation}
-The proof is deferred to Appendix~\ref{sec:appendix-proofs}.
-\end{lemma}
-
-Theorem~\ref{thm:regret-bound} depends on the memory horizon only through
-$\sqrt{\log(H+1)}$. Combining that bound with
-Lemma~\ref{lem:sdac-linear-approx} therefore yields a no-regret guarantee against the best
-feasible proportional state-feedback policy; Corollary~\ref{cor:regret-vs-linear}
-makes this statement precise.
-
-
-\subsection{Expressiveness: Decreasing Allocation Sequences}
+\subsection{Expressiveness: Decreasing-Allocation Policies}
 \label{subsec:allocation-sequences}
 
 Energy-harvesting policies for Bernoulli recharges can be described by the
 sequence of expenditures following each recharge
-\cite{arafa2018online,zibaeenejad2019lookahead}. This motivates the
-decreasing-allocation policy class used here: each unit arriving at time $s$ is
-assigned the same allocation sequence over times $s+1,s+2,\ldots$. Unlike
-proportional feedback, this sequence need not be geometric.
+\cite{arafa2018online,zibaeenejad2019lookahead}. We use this allocation view to
+define the main benchmark class for SDAC expressiveness. Each unit arriving at
+time $s$ is assigned the same decreasing allocation sequence, beginning at time
+$s+1$ to respect the information pattern. The sequence may have an arbitrary
+decreasing shape; proportional state-feedback policies correspond exactly to
+geometric allocation sequences.
 
 Define the set of feasible decreasing allocation sequences
 \begin{equation}
@@ -926,26 +865,28 @@ q_1\ge q_2\ge\cdots\ge0,
 For $\mathbf q\in\mathcal Q_\alpha^\downarrow$, define
 \begin{equation}
 \label{eq:def-allocation-policy}
+\begin{aligned}
 u_t(\mathbf q)
-\triangleq
+&\triangleq
 \sum_{i=1}^{t-1}q_iw_{t-i},
-\qquad
+\\
 x_{t+1}(\mathbf q)
-=
+&=
 \alpha x_t(\mathbf q)-u_t(\mathbf q)+w_t,
-\quad x_1(\mathbf q)=0.
+\qquad x_1(\mathbf q)=0.
+\end{aligned}
 \end{equation}
 Here $q_iw_s$ is the allocation at age $i$ assigned to the arrival cohort $w_s$.
 The weighted budget in \eqref{eq:def-allocation-sequences} accounts for leakage:
-reserving $q_i$ units for allocation at age $i$ consumes $q_i/\alpha^i$ of the
-cohort's normalized allocation budget. Let
+reserving $q_i$ units for expenditure at age $i$ consumes $q_i/\alpha^i$ of the
+cohort's budget at its arrival time. Let
 \[
 \Pi_\alpha^{\mathrm{alloc}}
 \triangleq
 \{\pi_{\mathbf q}:\mathbf q\in\mathcal Q_\alpha^\downarrow\}.
 \]
 
-\begin{lemma}[SDAC approximation of decreasing-allocation policies]
+\begin{lemma}[Finite-memory approximation of decreasing-allocation policies]
 \label{lem:sdac-allocation-approx}
 Every policy in $\Pi_\alpha^{\mathrm{alloc}}$ is feasible. Fix
 $\mathbf q\in\mathcal Q_\alpha^\downarrow$ and $H\ge1$, and define
@@ -975,7 +916,7 @@ x_t\bigl(\mathbf m_H(\mathbf q)\bigr)-x_t(\mathbf q)
 \le \frac{R_H(\mathbf q)}{1-\alpha}.
 \label{eq:allocation-state-gap}
 \end{align}
-Consequently,
+If each $c_t$ satisfies \eqref{eq:model-lipschitz}, then consequently
 \begin{equation}
 \label{eq:allocation-cost-gap}
 \begin{aligned}
@@ -991,30 +932,56 @@ u_t(\mathbf m_H(\mathbf q))\bigr)
 \left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H+1}T.
 \end{aligned}
 \end{equation}
-The proof is deferred to Appendix~\ref{sec:appendix-proofs}.
-\end{lemma}
 
-This class contains every feasible proportional policy. Indeed, for
-$k\in(0,\alpha]$ and $\lambda_k=\alpha-k$, the sequence
+In particular, fix $k\in[0,\alpha]$, set $\lambda_k\triangleq\alpha-k$, and define
 \begin{equation}
 \label{eq:proportional-as-allocation}
 q_i(k)=k\lambda_k^{i-1},
 \qquad i\ge1,
 \end{equation}
-is decreasing and satisfies
+where $\lambda_k^0\triangleq1$. Then $\mathbf q(k)\in\mathcal Q_\alpha^\downarrow$
+and $\pi_{\mathbf q(k)}$ is exactly the feasible proportional state-feedback policy
+$u_t(k)=k x_t(k)$. Its SDAC truncation is
 \[
-\sum_{i=1}^{\infty}\frac{q_i(k)}{\alpha^i}
+\bigl[\mathbf m_H^\star(k)\bigr]_i
+\triangleq
+m_{H,i}\bigl(\mathbf q(k)\bigr)
 =
-\frac{k}{\alpha}
-\sum_{j=0}^{\infty}\left(\frac{\lambda_k}{\alpha}\right)^j
-=1.
+\frac{k\lambda_k^{i-1}}{\alpha^i},
+\qquad i\in[H],
 \]
-Equations \eqref{eq:lin-closed-form} and \eqref{eq:def-allocation-policy}
-then induce the same action and state trajectories. The zero-gain policy
-corresponds to $\mathbf q=\mathbf0$. Thus
-the proportional policy family is contained in
-$\Pi_\alpha^{\mathrm{alloc}}$, generally strictly: the decreasing-allocation policy
-class also permits nongeometric allocation profiles.
+and its tail is
+\[
+R_H\bigl(\mathbf q(k)\bigr)
+=
+\frac{k\lambda_k^H}{1-\lambda_k}.
+\]
+Therefore, \eqref{eq:allocation-cost-gap} specializes exactly to
+\begin{equation}
+\label{eq:sdac-lin-approx-cost}
+\begin{aligned}
+&\left|
+\sum_{t=1}^T c_t\bigl(x_t(\mathbf m_H^\star(k)),u_t(\mathbf m_H^\star(k))\bigr)
+-
+\sum_{t=1}^T c_t\bigl(x_t(k),u_t(k)\bigr)
+\right| \\
+&\qquad\le
+\left(L_u+\frac{L_x}{1-\alpha}\right)
+\frac{k\lambda_k^H}{1-\lambda_k}\,T.
+\end{aligned}
+\end{equation}
+The proof is deferred to Appendix~\ref{sec:appendix-proofs}.
+\end{lemma}
+
+Thus proportional state-feedback policies are not a separate expressiveness
+benchmark in this model: they form the geometric subfamily of
+$\Pi_\alpha^{\mathrm{alloc}}$.
+The containment is generally strict because decreasing-allocation policies also
+permit nongeometric allocation sequences. Together with
+Theorem~\ref{thm:regret-bound}, the tail truncation in
+\eqref{eq:allocation-cost-gap} yields no regret against the full
+decreasing-allocation policy class and therefore, as a specialization, against
+proportional state-feedback policies.
 
 
 
@@ -1395,125 +1362,18 @@ follows from the gradient and stability estimates.
 
 
 Combining Theorem~\ref{thm:regret-bound} with
-Lemma~\ref{lem:sdac-linear-approx} yields a uniform guarantee against the best
-feasible proportional state-feedback policy.
-
-\begin{corollary}[No-regret against proportional state feedback]
-\label{cor:regret-vs-linear}
-Set
-\[
-H_T\triangleq
-\max\!\left\{1,\left\lceil\frac{\log T}{\log(1/\alpha)}\right\rceil\right\}.
-\]
-Run the OMD controller with action clipping using memory horizon $H=H_T$ and the
-step size $\eta^*$ of Theorem~\ref{thm:regret-bound}. For each
-$k\in[0,\alpha]$, let
-$\bigl(x_t(k),u_t(k)\bigr)$ denote the trajectory of the proportional policy
-$u_t(k)=k x_t(k)$. Define
-\[
-\RegProp{T}
-\triangleq
-J_T^{\mathrm{on}}
--\min_{k\in[0,\alpha]}
-J_T(k),
-\]
-where
-$J_T(k)\triangleq\sum_{t=1}^T c_t\bigl(x_t(k),u_t(k)\bigr)$.
-Then
-\[
-\begin{aligned}
-\RegProp{T}
-&\le
-2\sqrt{\Gamma_\alpha T\log(H_T+1)} \\
-&\quad +\Bigl(L_u+\frac{L_x}{1-\alpha}\Bigr)
-\frac{\alpha^{H_T+1}}{1-\alpha}\,T,
-\end{aligned}
-\]
-where $\Gamma_\alpha$ is defined in \eqref{eq:def-Gamma-alpha}. Since
-$\alpha^{H_T}\le1/T$, the second term is $O(1)$, while
-$\log(H_T+1)=O(\log\log T)$ as $T\to\infty$. Consequently,
-\[
-\RegProp{T}
-=
-O\!\left(\sqrt{T\log\log T}\right).
-\]
-Thus $\RegProp{T}=o(T)$ against the best proportional state-feedback policy with
-$k\in[0,\alpha]$.
-\end{corollary}
-
-\begin{proof}
-For $\mathbf{m}\in\mathcal{M}_{H_T}$ and $k\in[0,\alpha]$, write
-\[
-\begin{aligned}
-J_T(\mathbf{m})
-&\triangleq
-\sum_{t=1}^T c_t\bigl(x_t(\mathbf{m}),u_t(\mathbf{m})\bigr), \\
-J_T(k)
-&\triangleq
-\sum_{t=1}^T c_t\bigl(x_t(k),u_t(k)\bigr).
-\end{aligned}
-\]
-Fix $k\in[0,\alpha]$, set $\lambda_k=\alpha-k$, and use the comparator
-$\mathbf{m}_{H_T}^\star(k)$ from Lemma~\ref{lem:sdac-linear-approx}. Then
-\begin{equation}
-\label{eq:linear-regret-decomposition}
-\begin{aligned}
-J_T^{\mathrm{on}}-J_T(k)
-&=
-\left(
-J_T^{\mathrm{on}}-\min_{\mathbf{m}\in\mathcal{M}_{H_T}}J_T(\mathbf{m})
-\right) \\
-&\quad+
-\left(
-\min_{\mathbf{m}\in\mathcal{M}_{H_T}}J_T(\mathbf{m})-J_T(k)
-\right) \\
-&\le
-2\sqrt{\Gamma_\alpha T\log(H_T+1)} \\
-&\qquad
-+J_T\bigl(\mathbf{m}_{H_T}^\star(k)\bigr)-J_T(k) \\
-&\le
-2\sqrt{\Gamma_\alpha T\log(H_T+1)} \\
-&\qquad
-+
-\left(L_u+\frac{L_x}{1-\alpha}\right)
-\frac{k\lambda_k^{H_T}}{1-\lambda_k}\,T.
-\end{aligned}
-\end{equation}
-The first inequality uses Theorem~\ref{thm:regret-bound}; the second uses
-Lemma~\ref{lem:sdac-linear-approx}. Since
-$k\le\alpha$, $\lambda_k\le\alpha$, and $1-\lambda_k\ge1-\alpha$,
-\begin{equation}
-\label{eq:linear-uniform-tail}
-\frac{k\lambda_k^{H_T}}{1-\lambda_k}
-\le
-\frac{\alpha^{H_T+1}}{1-\alpha}.
-\end{equation}
-The right-hand side is independent of $k$. Taking the minimum comparator cost
-over $k\in[0,\alpha]$ in \eqref{eq:linear-regret-decomposition} and applying
-\eqref{eq:linear-uniform-tail} proves the finite-time bound.
-
-Finally,
-\[
-H_T
-\ge
-\frac{\log T}{\log(1/\alpha)}
-\quad\Longrightarrow\quad
-\alpha^{H_T}\le\frac{1}{T}.
-\]
-Also $H_T=\Theta(\log T)$, so
-$\log(H_T+1)=O(\log\log T)$ as $T\to\infty$. These two estimates give the
-stated asymptotic rate.
-\end{proof}
-
-
-The same memory choice yields a stronger guarantee for the decreasing-allocation
-policy class, which contains all proportional policies.
+Lemma~\ref{lem:sdac-allocation-approx} yields the main comparator guarantee.
 
 \begin{corollary}[No-regret against decreasing-allocation policies]
 \label{cor:regret-vs-allocation}
-Run the OMD controller with the horizon $H_T$ and step size specified in
-Corollary~\ref{cor:regret-vs-linear}. For
-$\mathbf q\in\mathcal Q_\alpha^\downarrow$, define
+Set
+\[
+H_T\triangleq
+\max\!\left\{1,\left\lceil\frac{\log T}{\log(1/\alpha)}\right\rceil\right\},
+\]
+and run the OMD controller with action clipping, memory horizon $H=H_T$, and the
+step size $\eta^*$ of Theorem~\ref{thm:regret-bound}. For
+$\mathbf q\in\mathcal Q_\alpha^\downarrow$, let
 \[
 J_T(\mathbf q)
 \triangleq
@@ -1538,16 +1398,16 @@ Then
 \left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H_T+1}T.
 \end{aligned}
 \end{equation}
-Consequently,
+Here $\Gamma_\alpha$ is defined in \eqref{eq:def-Gamma-alpha}. Since
+$\alpha^{H_T}\le1/T$ and
+$\log(H_T+1)=O(\log\log T)$ as $T\to\infty$,
+the approximation term is $O(1)$. Consequently,
 \[
 \RegAlloc{T}
 =
 O\!\left(\sqrt{T\log\log T}\right)
 =o(T).
 \]
-Since every feasible proportional policy belongs to
-$\Pi_\alpha^{\mathrm{alloc}}$, this is a stronger comparator guarantee than
-Corollary~\ref{cor:regret-vs-linear}.
 \end{corollary}
 
 \begin{proof}
@@ -1572,7 +1432,64 @@ R_{H_T}(\mathbf q)T\\
 \]
 The bound is uniform in $\mathbf q$, so taking the infimum comparator cost proves
 \eqref{eq:allocation-regret-bound}. Finally,
-$\alpha^{H_T}\le1/T$ and $\log(H_T+1)=O(\log\log T)$.
+$H_T\ge\log T/\log(1/\alpha)$ implies $\alpha^{H_T}\le1/T$, while
+$H_T=\Theta(\log T)$ implies $\log(H_T+1)=O(\log\log T)$.
+\end{proof}
+
+The proportional state-feedback guarantee follows by restricting the comparator
+class to policies induced by geometric allocation sequences. Retaining the exact
+geometric tail also gives a gain-dependent approximation bound.
+
+\begin{corollary}[No-regret against proportional state-feedback policies]
+\label{cor:regret-vs-linear}
+Run the controller of Corollary~\ref{cor:regret-vs-allocation}. For
+$k\in[0,\alpha]$, let
+$J_T(k)\triangleq\sum_{t=1}^T c_t\bigl(x_t(k),u_t(k)\bigr)$, where
+$u_t(k)=k x_t(k)$, and define
+\[
+\RegProp{T}
+\triangleq
+J_T^{\mathrm{on}}-\min_{k\in[0,\alpha]}J_T(k).
+\]
+For every $k\in[0,\alpha]$, with $\lambda_k=\alpha-k$,
+\begin{equation}
+\label{eq:linear-regret-decomposition}
+\begin{aligned}
+J_T^{\mathrm{on}}-J_T(k)
+&\le
+2\sqrt{\Gamma_\alpha T\log(H_T+1)} \\
+&\quad+
+\left(L_u+\frac{L_x}{1-\alpha}\right)
+\frac{k\lambda_k^{H_T}}{1-\lambda_k}\,T.
+\end{aligned}
+\end{equation}
+Moreover,
+\[
+\begin{aligned}
+\RegProp{T}
+&\le
+2\sqrt{\Gamma_\alpha T\log(H_T+1)}
+\\
+&\quad+
+\left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H_T+1}T
+\\
+&=
+O\!\left(\sqrt{T\log\log T}\right)
+=o(T).
+\end{aligned}
+\]
+\end{corollary}
+
+\begin{proof}
+For fixed $k$, Theorem~\ref{thm:regret-bound} applied to
+$\mathbf m_{H_T}^\star(k)$, followed by \eqref{eq:sdac-lin-approx-cost}, gives
+\eqref{eq:linear-regret-decomposition}. The geometric allocation sequence
+$\mathbf q(k)$ belongs to $\mathcal Q_\alpha^\downarrow$, so
+$R_{H_T}(\mathbf q(k))\le\alpha^{H_T+1}$ by
+Lemma~\ref{lem:sdac-allocation-approx}. This makes the bound uniform in $k$;
+minimizing over $k$ proves the stated finite-time and asymptotic guarantees.
+Equivalently, the uniform conclusion follows directly from
+$\RegProp{T}\le\RegAlloc{T}$.
 \end{proof}
 
 \section{Extensions}
@@ -1640,7 +1557,7 @@ because the steady-state scale has not yet been reached. The
 SDAC approximation results further give
 $O\!\left(\sqrt{T\log\log T}\right)$ regret against the best decreasing-allocation
 policy when $H=\Theta(\log T)$. This class contains all feasible proportional
-state-feedback policies and also permits nongeometric allocation profiles. The
+state-feedback policies and also permits nongeometric allocation sequences. The
 model applies directly to
 energy-harvesting battery management and related settings in which storage limits
 must be respected in real time. Section~\ref{sec:extensions} discusses possible
@@ -1653,9 +1570,8 @@ extensions to $\alpha\ge1$, vector allocation, and diagonal multi-storage system
 \label{sec:appendix-proofs}
 
 This appendix proves the minimax lower bound from
-Section~\ref{sec:regret-analysis} and collects the deferred proofs of the
-proportional-state-feedback and decreasing-allocation policy approximation
-guarantees from Section~\ref{sec:sdac},
+Section~\ref{sec:regret-analysis} and the expressiveness lemma from
+Section~\ref{sec:sdac},
 together with the OMD and stability lemmas leading up to the upper regret bound.
 
 Recall that we set $w_\tau\equiv 0$ for $\tau\le 0$, which is used in several
@@ -1961,165 +1877,8 @@ Applying Theorem~\ref{thm:sdac-lower-bound} and retaining only these indices,
 This is \eqref{eq:sdac-lower-mixing}.
 \end{proof}
 
-We next prove the proportional-policy approximation guarantee stated in
-Section~\ref{subsec:sdac-expressiveness}.
-
-\begin{proof}[Proof of Lemma~\ref{lem:sdac-linear-approx}]
-Fix $k\in[0,\alpha]$ and set $\lambda_k\triangleq\alpha-k\in[0,\alpha]$.
-
-\emph{Proportional-policy trajectory.}
-Substituting $u_t(k)=k x_t(k)$ into the dynamics gives
-\begin{equation}
-\label{eq:model-closed-loop}
-x_{t+1}(k)
-=
-\lambda_k x_t(k)+w_t,
-\qquad
-x_1(k)=0.
-\end{equation}
-Unrolling \eqref{eq:model-closed-loop},
-\begin{equation}
-\label{eq:lin-closed-form}
-\begin{aligned}
-x_t(k)
-&=
-\sum_{j=1}^{t-1}\lambda_k^{j-1}w_{t-j}, \\
-u_t(k)
-&=
-k\sum_{j=1}^{t-1}\lambda_k^{j-1}w_{t-j}.
-\end{aligned}
-\end{equation}
-Thus $x_t(k)\ge0$, and $k\in[0,\alpha]$ implies
-\[
-0\le u_t(k)
-=
-k x_t(k)
-\le
-\alpha x_t(k).
-\]
-Thus, the proportional policy satisfies \eqref{eq:model-feasibility}.
-
-\emph{Simplex membership.}
-Each coordinate of $\mathbf{m}_H^\star(k)$ is nonnegative. If $k=0$, then
-$\mathbf{m}_H^\star(0)=\mathbf{0}\in\mathcal{M}_H$. If $k=\alpha$, then
-$\lambda_k=0$, so $\bigl[\mathbf{m}_H^\star(\alpha)\bigr]_1=1$ and $\bigl[\mathbf{m}_H^\star(\alpha)\bigr]_i=0$ for
-$i=2,\ldots,H$, hence $\mathbf{m}_H^\star(\alpha)\in\mathcal{M}_H$. Now suppose
-$0<k<\alpha$. Since $k=\alpha-\lambda_k$, one has $k/\alpha=1-\lambda_k/\alpha$,
-and $\lambda_k/\alpha\in(0,1)$. Consequently,
-\begin{equation}
-\label{eq:lin-simplex-sum}
-\begin{aligned}
-\sum_{i=1}^H \bigl[\mathbf{m}_H^\star(k)\bigr]_i
-&=
-\frac{k}{\alpha}
-+\sum_{i=2}^H \frac{k\,\lambda_k^{i-1}}{\alpha^i} \\
-&=
-\frac{k}{\alpha}\sum_{j=0}^{H-1}\left(\frac{\lambda_k}{\alpha}\right)^{j} \\
-&=
-\left(1-\frac{\lambda_k}{\alpha}\right)
-\sum_{j=0}^{H-1}\left(\frac{\lambda_k}{\alpha}\right)^{j} \\
-&=
-1-\left(\frac{\lambda_k}{\alpha}\right)^{H}
-\le1.
-\end{aligned}
-\end{equation}
-Hence $\mathbf{m}_H^\star(k)\in\mathcal{M}_H$.
-
-\emph{Action approximation.}
-The identity $\bigl[\mathbf{m}_H^\star(k)\bigr]_i\alpha^i=k\lambda_k^{i-1}$ (with $\lambda_k^0\triangleq 1$)
-gives
-\begin{equation}
-\label{eq:lin-sdac-u}
-u_t\bigl(\mathbf{m}_H^\star(k)\bigr)
-=
-k\sum_{i=1}^H\lambda_k^{i-1}w_{t-i}.
-\end{equation}
-Define
-\[
-e_t^u
-\triangleq
-u_t(k)-u_t\bigl(\mathbf{m}_H^\star(k)\bigr).
-\]
-Using $w_\tau=0$ for $\tau\le0$ in \eqref{eq:lin-closed-form} and
-\eqref{eq:lin-sdac-u},
-\begin{equation}
-\label{eq:lin-u-gap}
-e_t^u
-=
-k\sum_{j=H+1}^{t-1}\lambda_k^{j-1}w_{t-j},
-\end{equation}
-where the sum is empty when $t\le H+1$. Therefore,
-\begin{equation}
-\label{eq:lin-e-range}
-\begin{aligned}
-0\le e_t^u
-&\le
-k\sum_{j=H+1}^{\infty}\lambda_k^{j-1} \\
-&=
-\frac{k\lambda_k^H}{1-\lambda_k}.
-\end{aligned}
-\end{equation}
-
-\emph{State approximation.}
-Let
-\[
-e_t^x
-\triangleq
-x_t\bigl(\mathbf{m}_H^\star(k)\bigr)-x_t(k).
-\]
-Subtracting the two state recursions yields
-\begin{equation}
-\label{eq:lin-ex-dyn}
-e_{t+1}^x
-=
-\alpha e_t^x+e_t^u,
-\qquad
-e_1^x=0.
-\end{equation}
-Hence
-\begin{equation}
-\label{eq:lin-ex-unroll}
-e_t^x
-=
-\sum_{s=1}^{t-1}\alpha^{t-1-s}e_s^u.
-\end{equation}
-Combining \eqref{eq:lin-e-range} and \eqref{eq:lin-ex-unroll},
-\begin{equation}
-\label{eq:lin-ex-bound}
-\begin{aligned}
-0\le e_t^x
-&\le
-\frac{k\lambda_k^H}{1-\lambda_k}
-\sum_{s=1}^{t-1}\alpha^{t-1-s} \\
-&\le
-\frac{k\lambda_k^H}{(1-\lambda_k)(1-\alpha)}.
-\end{aligned}
-\end{equation}
-
-\emph{Cost approximation.}
-By \eqref{eq:model-lipschitz}, \eqref{eq:lin-e-range}, and
-\eqref{eq:lin-ex-bound},
-\begin{equation}
-\label{eq:lin-cost-step}
-\begin{aligned}
-&\left|
-c_t\bigl(x_t(\mathbf{m}_H^\star(k)),u_t(\mathbf{m}_H^\star(k))\bigr)
--c_t\bigl(x_t(k),u_t(k)\bigr)
-\right| \\
-&\qquad\le
-L_x e_t^x+L_u e_t^u \\
-&\qquad\le
-\frac{L_x k\lambda_k^H}{(1-\lambda_k)(1-\alpha)}
-+
-\frac{L_u k\lambda_k^H}{1-\lambda_k} \\
-&\qquad=
-\left(L_u+\frac{L_x}{1-\alpha}\right)
-\frac{k\lambda_k^H}{1-\lambda_k}.
-\end{aligned}
-\end{equation}
-Summing \eqref{eq:lin-cost-step} over $t=1,\ldots,T$ and applying the triangle
-inequality proves \eqref{eq:sdac-lin-approx-cost}.
-\end{proof}
+We next prove the expressiveness result stated in
+Section~\ref{subsec:allocation-sequences}.
 
 \begin{proof}[Proof of Lemma~\ref{lem:sdac-allocation-approx}]
 Fix $\mathbf q\in\mathcal Q_\alpha^\downarrow$ and set
@@ -2219,12 +1978,16 @@ Since $0\le e_t^u\le R_H(\mathbf q)$,
 \]
 which proves \eqref{eq:allocation-state-gap}. The Lipschitz property now yields
 \[
-\left|
+\begin{aligned}
+&\bigl|
 c_t\bigl(x_t(\mathbf m_H(\mathbf q)),u_t(\mathbf m_H(\mathbf q))\bigr)
+\\
+&\qquad
 -c_t\bigl(x_t(\mathbf q),u_t(\mathbf q)\bigr)
-\right|
-\le
+\bigr| \\
+&\qquad\le
 \left(L_u+\frac{L_x}{1-\alpha}\right)R_H(\mathbf q).
+\end{aligned}
 \]
 Finally,
 \begin{align*}
@@ -2236,6 +1999,44 @@ R_H(\mathbf q)
 \le\alpha^{H+1}.
 \end{align*}
 Summing the per-period cost bound proves \eqref{eq:allocation-cost-gap}.
+
+It remains to identify proportional state-feedback policies within the
+decreasing-allocation policy class. For
+$k\in[0,\alpha]$, let $\lambda_k=\alpha-k$ and let $\mathbf q(k)$ be defined by
+\eqref{eq:proportional-as-allocation}. The sequence is nonnegative and decreasing.
+If $k=0$, then $\mathbf q(k)=\mathbf0\in\mathcal Q_\alpha^\downarrow$. If $k>0$,
+then $\lambda_k/\alpha<1$ and
+\[
+\sum_{i=1}^{\infty}\frac{q_i(k)}{\alpha^i}
+=
+\frac{k}{\alpha}
+\sum_{j=0}^{\infty}
+\left(\frac{\lambda_k}{\alpha}\right)^j
+=
+\frac{k}{\alpha-\lambda_k}
+=1,
+\]
+so again $\mathbf q(k)\in\mathcal Q_\alpha^\downarrow$. Substituting
+$u_t(k)=k x_t(k)$ into the dynamics and unrolling gives
+\[
+u_t(k)
+=
+k\sum_{i=1}^{t-1}\lambda_k^{i-1}w_{t-i}
+=
+\sum_{i=1}^{t-1}q_i(k)w_{t-i}
+=u_t\bigl(\mathbf q(k)\bigr).
+\]
+The two policies therefore have identical action and state trajectories. Their
+SDAC truncations also coincide coordinatewise, and the omitted geometric tail is
+\[
+R_H\bigl(\mathbf q(k)\bigr)
+=
+k\sum_{i=H+1}^{\infty}\lambda_k^{i-1}
+=
+\frac{k\lambda_k^H}{1-\lambda_k}.
+\]
+Substitution in \eqref{eq:allocation-cost-gap} proves
+\eqref{eq:sdac-lin-approx-cost}.
 \end{proof}
 
 The remaining lemmas establish the OMD and stability estimates used in the proof of
