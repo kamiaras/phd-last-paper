@@ -66,308 +66,350 @@ regret minimization, state-dependent action constraints.
 \label{sec:introduction}
 
 \subsection{Motivation and Problem Setting}
-\IEEEPARstart{M}{any} dynamic resource systems can be modeled by a storage state that
-evolves over time and constrains the control action at every time.
+\IEEEPARstart{M}{any} resource-allocation systems have a storage state that changes
+over time and limits the control action at each time. An action that lowers the
+current cost may leave less resource for future decisions, while conserving the
+resource may increase the current cost. The controller must balance these effects
+while satisfying the action constraint at every time.
 
-This creates a constrained discrete-time control problem with state--action
-coupling: aggressive early actions can harm later performance, while overly
-conservative actions can increase the stage cost. Our objective is to remain
-feasible at every time while competing with the best fixed policy in a tractable
-class that approximates a broad family of state-responsive allocation rules.
+We study this problem for a scalar storage system that loses a fixed fraction of
+its stored resource each period. At each time, the controller observes the current
+state and all past arrivals and cost functions, chooses a control action, and then
+observes the current arrival and cost function. The arrival and cost sequences may
+be chosen adversarially based on past observations; we do not assume a known
+probability model. Our goal is to construct a feasible online controller whose
+cumulative cost is close to that of the best fixed policy, chosen in hindsight,
+from a specified benchmark class.
 
-\subsection{Model and Information Structure}
-We study a discrete-time storage system with state $x_t \geq 0$, where $x_t$ models
-the storage level at the beginning of time $t$. At each time $t$, the controller
-chooses a control action $u_t$ under the state-dependent action constraint
-\begin{equation}
-\label{eq:model-feasibility}
-0 \leq u_t \leq \alpha x_t,
-\end{equation}
-where $\alpha\in(0,1)$ is a fixed known retention coefficient (so a fraction
-$1-\alpha$ of the state is lost each period). After the action is chosen, a
-nonnegative resource arrival $w_t$ is revealed, and the state
-evolves according to
+The main difficulty is that the current action affects both the next state and the
+actions that will be feasible later. Therefore, the controller cannot update its
+decisions independently at each time. \emph{Disturbance-Action Control} (DAC)
+policies address this dependence by combining a stabilizing state-feedback term
+with a linear function of past disturbances. In our storage model, however,
+unrestricted filter weights can produce a negative action or an action larger than
+the available resource.
+
+We address this issue by introducing \emph{Simplex Disturbance-Action Control}
+(SDAC). SDAC restricts the filter weights to a subprobability simplex and includes
+powers of the retention coefficient in the filter. These choices ensure that
+every fixed SDAC policy satisfies the action constraint. The induced state and
+action are also affine in the policy parameter, so a convex state--action cost is
+convex as a function of that parameter. The parameter can therefore be updated
+using online convex optimization.
+
+\subsection{Model and Information Pattern}
+
+The storage state $x_t\ge0$ evolves according to
 \[
-x_{t+1} = \alpha x_t - u_t + w_t.
+x_{t+1}=\alpha x_t-u_t+w_t,
 \]
-Although this quantity is commonly called a disturbance in the online-control
-literature, we call $w_t\in[0,1]$ an \emph{arrival} to emphasize its nonnegativity;
-we retain the standard names Disturbance-Action Control (DAC) and Simplex
-Disturbance-Action Control (SDAC). Nonnegativity is essential to the storage
-interpretation and to the feasibility properties of SDAC.
+where $\alpha\in(0,1)$ is a fixed retention coefficient, $u_t$ is the control
+action, and $w_t\in[0,1]$ is a nonnegative resource arrival. The action must satisfy
+\[
+0\le u_t\le\alpha x_t.
+\]
+Thus, the controller cannot use more than the amount that remains after the storage
+loss.
 
-Unlike stochastic models, our formulation is adversarial and non-anticipatory. At
-time $t$, the environment may select $w_t$ and $c_t$ using the history through time
-$t-1$, but not the current action; the controller then chooses $u_t$, after which
-$w_t$ and the entire function $c_t$ are revealed. Both the online and benchmark
-trajectories must remain feasible.
+At time $t$, the controller chooses $u_t$ using the current state and the
+information available through time $t-1$. The arrival $w_t$ and the convex cost
+function $c_t$ are revealed after the action is selected, and the controller incurs
+the cost $c_t(x_t,u_t)$. The pair $(w_t,c_t)$ may depend on the observations through
+time $t-1$, but not on the current action. Both the online trajectory and every
+benchmark trajectory must satisfy the same dynamics and action constraint. The
+formal model and assumptions are given in Section~\ref{sec:model-setup}.
 
-\subsection{Application Domains}
-This abstraction captures a broad set of domains; in each case, the action is
-limited by \eqref{eq:model-feasibility}:
-\begin{itemize}
-    \item \textbf{Energy harvesting and battery management:} $x_t$ is battery state
-        of charge (retention coefficient $\alpha$ after self-discharge), $w_t$ is
-        harvested energy, and $u_t$ is discharge or consumption.
-    \item \textbf{Queueing networks and buffer management:} $x_t$ is queue/buffer
-        occupancy, $w_t$ is
-        packet arrivals, and $u_t$ is service.
-    \item \textbf{Inventory control:} $x_t$ is on-hand inventory (retention coefficient
-        $\alpha$ after spoilage/deterioration), $w_t$ is supply or replenishment, and
-        $u_t$ is sales.
-    \item \textbf{Water-reservoir management:} $x_t$ is stored water
-        (retention coefficient $\alpha$ after evaporation/seepage), $w_t$ is inflow, and
-        $u_t$ is controlled release.
-\end{itemize}
-We take energy harvesting as the running interpretation.
+Energy-harvesting battery management is our main application. In this case, $x_t$
+is the battery state of charge, $w_t$ is the harvested energy, $u_t$ is the energy
+used, and $1-\alpha$ is the fraction of stored energy lost during one period.
+Similar dynamics arise in perishable inventory systems, water reservoirs with
+storage loss, and queues with abandonment. In many standard queueing models,
+$\alpha=1$; that case is outside our main results and is discussed in
+Section~\ref{sec:extensions}.
+
 
 \subsection{Contributions}
+
 Our contributions are as follows:
 \begin{itemize}
-    \item \textbf{Policy class.} We introduce SDAC, a DAC-inspired policy class.
-        We prove that every fixed SDAC policy is feasible,
-        its induced loss is convex and Lipschitz in the policy parameter, and the
-        class geometrically approximates a \emph{decreasing-allocation policy
-        class}, defined in Section~\ref{subsec:allocation-sequences}. Its geometric
-        sequences induce all feasible proportional state-feedback policies.
-    \item \textbf{Online control and regret.} We develop an entropic online mirror
-        descent (OMD) controller
-        that updates SDAC parameters over the subprobability simplex while maintaining
-        feasibility of the online trajectory. Our analysis yields
-        $O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy,
-        as stated in Theorem~\ref{thm:regret-bound}. The challenging regime is
-        $\alpha\uparrow1$, where stored resources persist longer and the leading
-        factor scales as $\Theta((1-\alpha)^{-3/2})$. The SDAC approximation
-        guarantees extend the regret result: choosing $H=\Theta(\log T)$ gives
-        $O\!\left(\sqrt{T\log\log T}\right)$ regret against the best
-        decreasing-allocation policy and, as a special case, the best proportional
-        state-feedback policy; see Corollaries~\ref{cor:regret-vs-allocation}
-        and~\ref{cor:regret-vs-linear}.
-    \item \textbf{Minimax lower bound.} We prove that $\sqrt{T}$-order regret is
-        unavoidable for every causal feasible controller, even when the adversarial
-        sequence is deterministic and oblivious; see
-        Theorem~\ref{thm:sdac-lower-bound}. For sufficiently long horizons and
-        $\alpha\uparrow1$, Corollary~\ref{cor:sdac-lower-mixing} gives the lower
-        dependence $\Omega((1-\alpha)^{-1})$, whereas
-        Theorem~\ref{thm:regret-bound} gives the upper dependence
-        $O((1-\alpha)^{-3/2})$. Closing the remaining factor
-        $(1-\alpha)^{-1/2}$ between these dependences is left for future work.
+\item \textbf{Policy class.}
+We introduce SDAC, a finite-memory policy class parameterized by a
+subprobability simplex. We prove that every fixed SDAC policy is feasible
+for every arrival sequence with entries in $[0,1]$. We also show that the state
+and action generated by a fixed SDAC policy are affine in its parameter. Under our
+convexity and Lipschitz assumptions on the state--action costs, the induced cost is
+convex and Lipschitz as a function of the policy parameter.
+
+    We further show that SDAC approximates the decreasing-allocation policy
+    class defined in
+    Section~\ref{subsec:allocation-sequences}. This class allocates each arrival
+    over future periods according to the same decreasing sequence. It contains
+    every feasible proportional state-feedback policy
+    $u_t=kx_t$, with $k\in[0,\alpha]$, and the approximation error decreases
+    geometrically with the memory horizon $H$.
+
+\item \textbf{Online control and regret.}
+    We develop an online controller that updates its SDAC parameter using
+    entropic online mirror descent (OMD) over the subprobability simplex. Because the
+    parameter changes over time, the nominal SDAC action is clipped when needed
+    to satisfy the current action constraint. We prove that this controller
+    remains feasible and achieves
+    \[
+    O\!\left(\sqrt{T\log(H+1)}\right)
+    \]
+    regret against the best fixed SDAC policy; see
+    Theorem~\ref{thm:regret-bound}. For fixed $L_x$ and $L_u$, the leading
+    factor scales as
+    $\Theta((1-\alpha)^{-3/2})$ as $\alpha\uparrow1$.
+
+    For fixed $\alpha$, take the memory horizon $H$ to grow as $\log T$. The
+    resulting regret is
+    $O(\sqrt{T\log\log T})$ against the decreasing-allocation class. The same bound
+    holds against the best feasible proportional state-feedback policy; see
+    Corollaries~\ref{cor:regret-vs-allocation}
+    and~\ref{cor:regret-vs-linear}.
+
+\item \textbf{Minimax lower bound.}
+    We prove a lower bound of order $\sqrt{T}$ on the expected regret of every
+    causal feasible controller, including randomized controllers, even when the
+    arrival and cost sequences are deterministic and fixed in advance; see
+    Theorem~\ref{thm:sdac-lower-bound}. When $T$ is at least on the order of
+    $(1-\alpha)^{-1}$, the lower bound scales as
+    $\Omega((1-\alpha)^{-1}\sqrt{T})$ near $\alpha=1$; see
+    Corollary~\ref{cor:sdac-lower-mixing}. The dependence of the upper and lower
+    bounds on $1-\alpha$ therefore differs by a factor
+    $(1-\alpha)^{-1/2}$. Closing this gap is left for future work.
 \end{itemize}
+
 
 \subsection{Related Work}
 
 \paragraph{Online nonstochastic control}
-A recent line of work studies online control of linear dynamical systems under
-adversarial disturbances and costs. Its performance criterion is cumulative regret
-relative to a benchmark policy class chosen in hindsight, under suitable stability
-conditions \cite{agarwal2019online,agarwal2019logarithmic}; see
-\cite{hazan2026introduction} for an overview. For
-known systems in the fully adversarial setting, Simchowitz et al. establish the
-optimal $\sqrt{T}$ horizon dependence without resolving all stability-parameter
-dependence \cite{simchowitz2020improper}.
-
-A central idea in this literature is DAC,
-a policy parameterization that combines a stabilizing state-feedback term with a
-finite linear filter of past disturbances. Under standard assumptions, this
-representation yields tractable surrogate losses in the policy parameters and
-supports efficient no-regret updates. Extensions include partial observability
+Online nonstochastic control studies dynamical systems with adversarial disturbances
+and costs. Performance is measured by regret against a policy chosen in hindsight,
+under suitable stability conditions
+\cite{agarwal2019online,agarwal2019logarithmic}; see
+\cite{hazan2026introduction} for an overview. For known linear systems,
+Simchowitz et al.\ establish the optimal $\sqrt{T}$ dependence on the horizon while
+leaving some dependence on the system's stability unresolved
+\cite{simchowitz2020improper}. Related work also considers partial observability
 \cite{lale2020logarithmic} and bandit feedback
 \cite{hazan2020nonstochasticBandit}.
 
-Constrained online-control methods have also been developed for affine and general
-static state--input constraints \cite{li2021onlineConstrained,
-liu2023constrainedControl}. Our focus is the storage-specific constraint
-\eqref{eq:model-feasibility}, whose feasible set depends on the current state; SDAC
-handles this dependence with a simplex parameterization.
+A central idea in this literature is DAC. A DAC policy combines a stabilizing
+state-feedback action with a finite linear filter of past disturbances. The action
+is therefore described by finitely many policy parameters that can be updated using
+online methods. SDAC uses the same basic idea but restricts the parameters in a way
+suited to storage systems with nonnegative arrivals.
 
-Beyond algorithm design, our lower-bound analysis studies the joint dependence of
-regret on the horizon $T$ and the coefficient $\alpha$. Kumar et al.
-establish matching memory-dependent upper and lower bounds for online convex
-optimization with unbounded memory \cite{kumar2023unbounded}. For discounted
-memory, their lower bound is of order $\sqrt{T}/(1-\rho)$, paralleling the
-$\Omega(\sqrt{T}/(1-\alpha))$ rate when the horizon is sufficiently long; see
-Corollary~\ref{cor:sdac-lower-mixing}. This agreement is at the level of scaling,
-while our lower bound is established directly for state--action costs under the
-state-dependent storage constraint.
+Online control with affine or more general constraints on states and actions has
+been studied in \cite{li2021onlineConstrained,liu2023constrainedControl}. The
+constraint $u_t\le\alpha x_t$ is affine in the state and action, but the range of
+allowed actions depends on the current storage state. Our approach uses the
+structure of the storage dynamics to ensure that every fixed SDAC policy is
+feasible and that the online controller remains feasible while its parameter
+changes.
+
+Our analysis also considers how regret depends on the retention coefficient
+$\alpha$. Kumar et al.\ study online convex optimization in which past decisions can
+affect all later costs, and derive bounds that depend on how quickly those effects
+decay \cite{kumar2023unbounded}. In their model with geometrically decaying memory,
+the lower bound scales as $\sqrt{T}$ divided by one minus the decay factor,
+paralleling our $\Omega(\sqrt{T}/(1-\alpha))$ lower bound for sufficiently long
+horizons. Our lower bound is proved directly for state--action costs under the
+state-dependent action constraint.
 
 \paragraph{Energy harvesting}
-Prior work on online energy harvesting often studies simple rules that adjust
-power use to the available battery level. Shaviv and \"Ozg\"ur
-\cite{shaviv2016universally} proposed using a fixed fraction of the available
-energy at each time and proved performance guarantees that hold for any
-independent and identically distributed (i.i.d.) energy-arrival model. Arafa et al.
-\cite{arafa2018online} allowed more general rewards and characterized how energy
-should be spent after an occasional full recharge; the optimal amounts need not
-decrease by the same proportion each period. Zibaeenejad and Chen
+Several energy-harvesting policies adjust energy use according to the available
+battery level. Shaviv and \"Ozg\"ur \cite{shaviv2016universally} study a policy that
+uses a fixed fraction of the available energy and prove guarantees under
+independent and identically distributed (i.i.d.) energy arrivals. Arafa
+et al.\ \cite{arafa2018online} consider more general sequences for spending energy
+after a recharge. Zibaeenejad and Chen
 \cite{zibaeenejad2019lookahead} derive a related decreasing spending rule when
-upcoming arrivals are known in advance. Unlike our setting,
-these models reveal the current harvested energy before transmission, assume
-random arrivals from a fixed model, and optimize a fixed reward that depends only
-on the allocated power, rather than adversarially varying costs that depend jointly
-on storage state and action.
+future arrivals are known in advance.
 
-To demonstrate the expressive power of SDAC, we introduce a decreasing-allocation
-policy class as a benchmark inspired by this literature. Each policy allocates
-every arrival over future periods according to the same decreasing sequence,
-beginning one period later to respect our information pattern.
-Section~\ref{subsec:allocation-sequences} shows that finite-memory SDAC policies
-approximate every policy in this class with error that decreases geometrically in
-the memory horizon.
+These works motivate the \emph{decreasing-allocation policy class} defined in this
+paper. Under such a policy, each arrival is allocated over future periods according
+to the same decreasing sequence. In our model, this allocation begins one period
+after the arrival because the controller does not observe the current arrival before
+choosing the action.
 
-Lin et al. \cite{lin2025optimal} study online age-of-information optimization in an
-energy-harvesting system with related battery dynamics. They compare with an
-unrestricted offline optimum through competitive ratio; their objective depends on
-the energy allocation but not directly on the battery state, and the current input
-is revealed before allocation. In our model, the controller acts before observing
-the current arrival and cost, the cost may depend jointly on state and action, and
-performance is measured by regret against a fixed policy class.
+The models in \cite{shaviv2016universally,arafa2018online,
+zibaeenejad2019lookahead} use random arrivals from a fixed model, reveal the current
+harvested energy before allocation, and optimize a fixed reward that depends on the
+allocated power. In our setting, the arrival and cost sequences may be chosen
+adversarially, the controller acts before observing the current arrival and cost,
+the cost can depend on both the storage state and the action, and performance is
+measured by regret against a fixed policy.
 
-Yu and Neely \cite{Yu2019} study expected utility maximization under i.i.d. system
-states. Asgari and Neely \cite{10.1145/3428337} express the guarantee as an
-$O(\sqrt{T})$ regret--battery-capacity tradeoff and improve its dependence on the
-decision dimension, allowing arbitrary loss sequences while retaining i.i.d.
-energy arrivals. Both works use action-only objectives and fixed-decision
-comparators. Here, arrivals are adversarial, costs depend on both state and action,
-and the comparator is a fixed state-responsive policy.
+Yu and Neely \cite{Yu2019} study expected utility maximization under i.i.d.\ system
+states. Asgari and Neely \cite{10.1145/3428337} obtain an
+$O(\sqrt{T})$ regret--battery-capacity tradeoff for arbitrary loss sequences while
+retaining i.i.d.\ energy arrivals. Both works use objectives that depend only on the
+action and compare against a fixed action. Here, the arrivals may be chosen
+adversarially, the cost depends on the state and action, and the comparator is a
+fixed policy rather than a fixed action.
+
+Lin et al.\ \cite{lin2025optimal} study online age-of-information optimization in
+an energy-harvesting system with related battery dynamics. They compare their
+controller with an unrestricted offline optimum using a competitive ratio. Their
+objective depends on the energy allocation but not directly on the battery state,
+and the current arrival is observed before the allocation. Our controller acts
+before observing the current arrival, and our benchmark is a fixed policy chosen in
+hindsight.
 
 \paragraph{Queueing and network optimization}
-Queueing control provides a mathematically related perspective based on stochastic
-arrivals and real-time service decisions. Foundational work emphasizes throughput
-and queue stability \cite{tassiulas1990stability,tassiulas1993dynamic,
-mckeown1999achieving}, while stochastic network optimization also studies tradeoffs
-between time-average objectives and backlog \cite{neely2010stochastic}. Our setting
-differs in its adversarial arrivals, convex state--action costs, and regret benchmark
-against a policy chosen in hindsight.
+Queueing control also involves states that change through arrivals and service
+decisions. Classical work studies throughput and queue stability
+\cite{tassiulas1990stability,tassiulas1993dynamic,mckeown1999achieving}, while
+stochastic network optimization studies tradeoffs between time-average objectives
+and queue backlog \cite{neely2010stochastic}. Our setting instead allows adversarial
+arrival sequences and convex state--action costs, and measures regret against a
+policy chosen in hindsight.
 
-In many queueing applications, the natural retention coefficient is $\alpha=1$
-(no abandonment or leakage), so those systems are not direct instances of the
-$\alpha\in(0,1)$ model analyzed here. Section~\ref{sec:extensions} discusses the
-additional issues that arise when $\alpha\ge1$.
+In many queueing models, $\alpha=1$ because stored packets do not disappear over
+time. Such models are not direct examples of the $\alpha\in(0,1)$ system studied
+here. A queue with abandonment or expiration can have $\alpha<1$ and is more closely
+related to our model. Section~\ref{sec:extensions} discusses the case when $\alpha\ge1$.
 
-Among other results, Khojastepour and Sabharwal \cite{khojastepour2004delay} study a
-time-invariant robust scheduler representable as a linear filter of past arrivals.
-It is designed to minimize average transmit power subject to a maximum packet-delay
-guarantee, rather than updated online to minimize revealed general costs.
+Khojastepour and Sabharwal \cite{khojastepour2004delay} study a fixed scheduler
+that can be written as a linear filter of past arrivals. Their scheduler minimizes
+average transmit power subject to a maximum-delay guarantee. In contrast, our
+controller updates its filter weights online in response to convex state--action
+costs revealed after each decision.
 
-\paragraph{Inventory management}
-Yang et al. \cite{yang2020online} study online procurement under inventory
-constraints. The controller observes the current demand and price, then procures
-supply while ensuring that demand is met; performance is measured by competitive
-ratio for aggregate procurement cost. Our controller instead chooses an outflow
-before observing the current resource arrival and cost, and permits convex
-state--action costs.
+\paragraph{Inventory and reservoir management}
+Yang et al.\ \cite{yang2020online} study online procurement under inventory
+constraints. Their controller observes the current demand and price and then chooses
+how much supply to purchase. Performance is measured by a competitive ratio for the
+total procurement cost. Our controller instead chooses how much stored resource to
+use before observing the current arrival and cost.
 
-Hihat and Fermanian \cite{hihat2024online} consider an
-inventory-control formulation with potentially nonlinear and nondifferentiable
-state-transition functions and study base-stock policies. While that model is more
-general in scope, its decision structure differs from ours: as in
-\cite{yang2020online}, the controller chooses supply and then observes demand through
-the transition, whereas our controller chooses an outflow and then observes the
-resource arrival. Our scalar linear recursion and simplex policy class yield
-explicit feasibility and regret guarantees; the two frameworks target different
-dynamics, decisions, and policy classes.
+Hihat and Fermanian \cite{hihat2024online} consider inventory systems with more
+general state-transition functions and study policies that replenish inventory up
+to a target level. Their model is broader in its transition dynamics, but it has a
+different decision order and a different policy class. Our scalar linear dynamics
+allow explicit feasibility, approximation, and regret guarantees.
 
-\paragraph{Water-reservoir management}
-Classical dam theory studies storage dynamics with random inflows and controlled
-releases (see, for example, \cite{moran1954dams,prabhu1998stochastic}). Relative to
-our setting, this literature assumes stochastic inputs and emphasizes stationary or
-long-run performance quantities. It provides historical context for storage control
-under state constraints.
+Classical reservoir models also use storage dynamics with random inflows and
+controlled releases \cite{moran1954dams,prabhu1998stochastic}. That literature
+mainly studies long-run performance under stochastic inflows. It provides another
+example of control under storage constraints, although physical reservoir models
+may also include capacity and overflow effects that are not part of our main model.
 
 \subsection{Paper Organization}
-Section~\ref{sec:model-setup} formalizes the storage dynamics, information pattern,
-cost assumptions, feasible domain, and regret benchmark. Section~\ref{sec:sdac}
-then introduces the SDAC policy class. It derives an affine representation of the
-induced state--action trajectory, uses this representation to establish feasibility
-and convexity of the surrogate losses, and studies the finite-memory approximation
-of decreasing-allocation policies, including proportional state feedback as a
-special case. Section~\ref{sec:online-algorithm} presents the feasible online
-controller: a clipped SDAC action coupled with entropic OMD over the
-subprobability simplex. Section~\ref{sec:regret-analysis} proves the regret upper
-bound, establishes a minimax lower bound, compares their dependence on the
-retention coefficient, and extends the guarantee to the larger benchmark classes.
-Section~\ref{sec:extensions} outlines extensions to noncontractive retention,
-vector allocations, and multiple storage states, and
-Section~\ref{sec:conclusion} summarizes the main conclusions. The Appendix contains
-the deferred approximation, lower-bound, OMD, and stability proofs.
+
+Section~\ref{sec:model-setup} states the storage dynamics, information pattern, cost
+assumptions, feasible domain, and regret benchmark. Section~\ref{sec:sdac}
+introduces the SDAC policy class and proves its feasibility and convexity
+properties. It also shows how SDAC approximates decreasing-allocation policies and
+proportional state-feedback policies. Section~\ref{sec:online-algorithm} presents
+the feasible online controller based on action clipping and entropic OMD.
+Section~\ref{sec:regret-analysis} proves the regret upper and lower bounds and
+extends the upper bound to the larger policy classes.
+Section~\ref{sec:extensions} discusses extensions to $\alpha\ge1$, vector actions,
+and multiple storage states. Section~\ref{sec:conclusion} concludes the paper, and
+Appendix~\ref{sec:appendix-proofs} contains the deferred proofs.
 
 
 \section{Notation}
 \label{sec:notation}
 
 For every positive integer $n$, we write
-$[n]\triangleq\{1,\ldots,n\}$ and $[z]_+ \triangleq \max\{z,0\}$.
-For $\mathbf{v}\in\mathbb{R}^n$, the $i$-th
-coordinate is $v_i$; in particular, the coordinates of $\mathbf{m}_t$ and
-$\mathbf{g}_t$ are $m_{t,i}$ and $g_{t,i}$. We write $\mathbf{1}$ for the all-ones vector (dimension
-is clear from context). The Euclidean inner product is denoted by
-$\langle\cdot,\cdot\rangle$. We write $\log$ for the natural logarithm. We set
-$w_\tau\equiv0$ for $\tau\le0$. A fixed SDAC policy with parameter
-$\mathbf{m}$ is written $\pi_{\mathbf{m}}$, with induced trajectories
-$x_t(\mathbf{m})$ and $u_t(\mathbf{m})$. A feasible proportional state-feedback policy with
-gain $k$ induces $x_t(k)$ and $u_t(k)$. A decreasing allocation sequence
-$\mathbf q$ induces $x_t(\mathbf q)$ and $u_t(\mathbf q)$. After the online algorithm is
-introduced, unadorned $x_t$ and $u_t$ denote the realized online trajectory.
+$[n]\triangleq\{1,\ldots,n\}$ and $[z]_+\triangleq\max\{z,0\}$. For
+$\mathbf v\in\mathbb R^n$, the $i$-th coordinate is denoted by $v_i$. We write
+$\mathbf 1$ for the all-ones vector, with its dimension clear from context, and
+$\langle\cdot,\cdot\rangle$ for the Euclidean inner product. We use $\log$ for the
+natural logarithm and set $w_\tau\equiv0$ for $\tau\le0$.
 
+A fixed SDAC policy with parameter $\mathbf m$ is denoted by
+$\pi_{\mathbf m}$, with induced state and action trajectories
+$x_t(\mathbf m)$ and $u_t(\mathbf m)$. A feasible proportional state-feedback
+policy with gain $k\in[0,\alpha]$ induces $x_t(k)$ and $u_t(k)$, while a decreasing
+allocation sequence $\mathbf q$ induces $x_t(\mathbf q)$ and $u_t(\mathbf q)$.
+After the online algorithm is introduced, $x_t$ and $u_t$ without arguments denote
+the realized online trajectory.
 
 \section{Model and Problem Setup}
 \label{sec:model-setup}
 
-Let $T$ be a positive integer. The system state $x_t\in\mathbb{R}_{\ge 0}$
-denotes the resource level at the beginning of time $t$. The initial state
-is given as
+Fix a positive integer $T$ and a known retention coefficient
+$\alpha\in(0,1)$. The state $x_t\in\mathbb R_{\ge0}$ is the resource level at the
+beginning of time $t$. The system starts empty:
 \begin{equation}
 \label{eq:model-init}
-x_1 = 0.
+x_1=0.
 \end{equation}
-Fix a retention coefficient $\alpha\in(0,1)$. At each time $t\in[T]$,
-the controller chooses a control action $u_t\in\mathbb{R}_{\ge 0}$ subject to the
-state-dependent action constraint \eqref{eq:model-feasibility}.
+At each time $t\in[T]$, the controller chooses an action
+$u_t\in\mathbb R_{\ge0}$ satisfying
+\begin{equation}
+\label{eq:model-feasibility}
+0\le u_t\le\alpha x_t.
+\end{equation}
 The system then receives an arrival $w_t\in[0,1]$ and evolves according to
 \begin{equation}
 \label{eq:model-dynamics}
-x_{t+1} = \alpha x_t - u_t + w_t.
+x_{t+1}=\alpha x_t-u_t+w_t.
 \end{equation}
+Here, $1-\alpha$ is the fraction of the stored resource lost during one period.
+The constraint \eqref{eq:model-feasibility} ensures that the action does not exceed
+the amount remaining after this loss.
+
+Although $w_t$ is commonly called a disturbance in the online-control literature,
+we call it an \emph{arrival} because it is nonnegative. We retain the standard names
+Disturbance-Action Control and Simplex Disturbance-Action Control. The
+nonnegativity of $w_t$ is important both for the storage interpretation and for the
+feasibility properties of SDAC.
+
+At time $t$, the pair $(w_t,c_t)$ may depend on the observations through time
+$t-1$, but not on the current action or any random choice made by the controller at
+time $t$. The controller chooses $u_t$ before observing $w_t$ or $c_t$. After the
+action is selected, the arrival and the entire cost function are revealed, the
+controller incurs $c_t(x_t,u_t)$, and the state is updated according to
+\eqref{eq:model-dynamics}.
+
 For every feasible trajectory,
 \[
-0\le x_{t+1}\le \alpha x_t+1.
+0\le x_{t+1}\le\alpha x_t+1.
 \]
 Since $x_1=0$, induction gives
 \[
 0\le x_t
-\le \frac{1-\alpha^{t-1}}{1-\alpha}
-\le \frac{1}{1-\alpha},
+\le\frac{1-\alpha^{t-1}}{1-\alpha}
+\le\frac{1}{1-\alpha},
 \qquad t\in[T+1].
 \]
-Thus, the storage level is uniformly bounded over time. In particular, a
-storage device with capacity \(1/(1-\alpha)\) suffices to realize every feasible
-trajectory, including the trajectory generated by our online controller, without
-overflow.
-Together with the state bound above, \eqref{eq:model-feasibility} implies that every
-feasible state--action pair belongs to the compact set
+Thus, the storage state is uniformly bounded. In particular, a storage device with
+capacity $1/(1-\alpha)$ is sufficient to realize every feasible trajectory without
+overflow. The state and action constraints imply that every feasible state--action
+pair belongs to the compact set
 \begin{equation}
 \label{eq:model-domain}
-\mathcal{D}_\alpha
+\mathcal D_\alpha
 \triangleq
-\left\{(x,u):
-0\le x\le\frac{1}{1-\alpha},\
+\left\{
+(x,u):
+0\le x\le\frac{1}{1-\alpha},
 0\le u\le\alpha x
 \right\}.
 \end{equation}
 
-After the control action is selected, a convex cost function
+Each revealed cost function has the form
 \[
-c_t: \mathbb{R}_{\ge 0}^2 \to \mathbb{R}
+c_t:\mathbb R_{\ge0}^2\to\mathbb R
 \]
-is revealed, and the incurred cost is $c_t(x_t,u_t)$. We assume each $c_t$ is convex
-in $(x,u)$ and satisfies the following Lipschitz condition on
-$\mathcal{D}_\alpha$: there exist constants $L_x,L_u>0$, independent of $t$, such
-that for all $(x,u),(x',u')\in\mathcal{D}_\alpha$,
+and is convex in $(x,u)$. We assume that it satisfies the following Lipschitz
+condition on $\mathcal D_\alpha$: there are constants $L_x,L_u>0$, independent of
+$t$, such that
 \begin{equation}
 \label{eq:model-lipschitz}
-|c_t(x,u)-c_t(x',u')| \le L_x|x-x'| + L_u|u-u'|.
+|c_t(x,u)-c_t(x',u')|
+\le
+L_x|x-x'|+L_u|u-u'|
 \end{equation}
-We also assume access, at every $(x,u)\in\mathcal{D}_\alpha$, to a cost subgradient
+for all $(x,u),(x',u')\in\mathcal D_\alpha$.
+We also assume access, at every $(x,u)\in\mathcal D_\alpha$, to a cost subgradient
 \[
 \boldsymbol{\zeta}_t(x,u)
 =
@@ -380,62 +422,48 @@ satisfying
 \qquad
 |\zeta_t^u(x,u)|\le L_u.
 \]
-The stated subgradient bounds hold, for example, when
+These subgradient bounds hold, for example, when
 \eqref{eq:model-lipschitz} extends to an open neighborhood of
-$\mathcal{D}_\alpha$; see \cite[Thm.~9.13]{rockafellar1998variational}.
+$\mathcal D_\alpha$; see
+\cite[Thm.~9.13]{rockafellar1998variational}.
 
-
-\paragraph{Assumptions}
-
-\begin{enumerate}
-    \item \textbf{Retention coefficient:} $\alpha\in(0,1)$ is fixed and known (a fraction
-        $1-\alpha$ of the state is lost each period).\footnote{We focus on
-        $\alpha\in(0,1)$; the case $\alpha\ge 1$ is discussed in
-        Section~\ref{sec:extensions}.}
-    \item \textbf{Arrival bounds:} $w_t\in[0,1]$ for all $t\in[T]$.
-        In particular, resource arrivals are nonnegative, in contrast to
-        signed process-noise disturbances common in classical control.
-    \item \textbf{Information pattern:} $(w_t,c_t)$ may depend on the history
-        through time $t-1$, but not on the current action or randomization, and is
-        revealed only after $u_t$ is chosen.
-    \item \textbf{Cost regularity:} each $c_t$ is convex in $(x,u)$, obeys
-        \eqref{eq:model-lipschitz} on $\mathcal{D}_\alpha$, and admits the bounded
-        subgradient oracle described above.
-    \item \textbf{Feasible policy class:} both the online policy and the benchmark
-        policies are required to satisfy \eqref{eq:model-feasibility} under
-        \eqref{eq:model-dynamics}.
-\end{enumerate}
-
-Let $\{(x_t,u_t)\}_{t=1}^T$ denote the realized trajectory of the online
-controller. Define its cumulative cost by
+Let $\{(x_t,u_t)\}_{t=1}^T$ denote the trajectory generated by the online
+controller. Its cumulative cost is
 \begin{equation}
 \label{eq:def-cumulative-cost}
-J_T^{\mathrm{on}} \triangleq \sum_{t=1}^T c_t(x_t,u_t).
-\end{equation}
-For a fixed positive integer $H$, let $\mathbf{m}$ range over the SDAC
-parameter set $\mathcal{M}_H$ (defined in Section~\ref{sec:sdac}). For each
-$\mathbf{m}\in\mathcal{M}_H$, write
-\[
-J_T(\mathbf{m})
+J_T^{\mathrm{on}}
 \triangleq
-\sum_{t=1}^T c_t\bigl(x_t(\mathbf{m}),u_t(\mathbf{m})\bigr)
+\sum_{t=1}^T c_t(x_t,u_t).
+\end{equation}
+
+Fix a positive integer $H$, and let $\mathbf m$ range over the SDAC parameter set
+$\mathcal M_H$, defined in Section~\ref{sec:sdac}. For each
+$\mathbf m\in\mathcal M_H$, let $x_t(\mathbf m)$ and $u_t(\mathbf m)$ denote the
+trajectory generated by the fixed policy $\pi_{\mathbf m}$ under the same arrival
+sequence. Define its cumulative cost by
+\[
+J_T(\mathbf m)
+\triangleq
+\sum_{t=1}^T
+c_t\bigl(x_t(\mathbf m),u_t(\mathbf m)\bigr).
 \]
-for the cumulative cost of the induced feasible trajectory under the same
-arrival sequence. The regret against the best fixed SDAC policy is defined by
+Both the online trajectory and every benchmark trajectory are required to satisfy
+\eqref{eq:model-feasibility} under \eqref{eq:model-dynamics}.
+The regret against the best fixed SDAC policy is defined by
 \begin{equation}
 \label{eq:def-regret}
 \RegSDAC{T}
 \triangleq
 J_T^{\mathrm{on}}
 -
-\min_{\mathbf{m}\in\mathcal{M}_H}
-J_T(\mathbf{m}).
+\min_{\mathbf m\in\mathcal M_H}J_T(\mathbf m).
 \end{equation}
-While the online controller may update its SDAC parameters over time, the benchmark
+The online controller may update its SDAC parameter over time, while the benchmark
 in \eqref{eq:def-regret} is the best single fixed SDAC policy chosen in hindsight.
-The objective is to design an online policy that satisfies
-\eqref{eq:model-feasibility} for all $t\in[T]$ and achieves sublinear regret as defined in
-\eqref{eq:def-regret}.
+Here, fixed means that $\mathbf m$ is held constant; the policy's actions still
+respond to past arrivals.
+Our objective is to satisfy \eqref{eq:model-feasibility} at every time and achieve
+sublinear regret.
 
 \section{Simplex Disturbance-Action Control (SDAC)}
 \label{sec:sdac}
