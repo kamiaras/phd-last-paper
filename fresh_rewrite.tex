@@ -867,8 +867,8 @@ optimization over the simplex.
 Energy-harvesting policies for Bernoulli recharges can be described by the
 sequence of expenditures following each recharge
 \cite{arafa2018online,zibaeenejad2019lookahead}. In the corresponding
-decreasing-allocation policy class, each unit arriving at time $s$ is assigned the
-same decreasing allocation sequence, beginning at time $s+1$ to respect the
+decreasing-allocation policy class, each unit arriving at time $\tau$ is assigned the
+same decreasing allocation sequence, beginning at time $\tau+1$ to respect the
 information pattern. The sequence may have an arbitrary decreasing shape;
 geometric sequences induce proportional state-feedback policies.
 
@@ -1518,11 +1518,11 @@ $\sum_{a=1}^n u_{t,a}=\alpha x_t$.
 \paragraph{Multiple storages with diagonal dynamics.}
 Suppose the state is $\mathbf{x}_t\in\mathbb{R}_{\ge 0}^d$ and evolves as
 $\mathbf{x}_{t+1}=\mathbf{A} \mathbf{x}_t-\mathbf{u}_t+\mathbf{w}_t$ with $\mathbf{A}=\mathrm{diag}(\alpha_1,\ldots,\alpha_d)$,
-$\alpha_i\in(0,1)$, arrivals $\mathbf{w}_t\in[0,1]^d$, and per-coordinate constraints
-$0\le u_{t,i}\le\alpha_i x_{t,i}$. The dynamics and feasible set then decouple
-by coordinate, and the natural SDAC class is a product of simplices. For a jointly
+$\alpha_s\in(0,1)$ for $s\in[d]$, arrivals $\mathbf{w}_t\in[0,1]^d$, and per-storage constraints
+$0\le u_{t,s}\le\alpha_s x_{t,s}$. The dynamics and feasible set then decouple
+by storage, and the natural SDAC class is a product of simplices. For a jointly
 convex cost, OMD operates jointly on this product set; the optimization separates by
-coordinate only when the cost is coordinate-separable. Cross-coupled storage systems
+storage only when the cost is coordinate-separable. Cross-coupled storage systems
 (non-diagonal $\mathbf{A}$) require additional analysis.
 
 These constructions retain the basic simplex/OMD structure, but their complete
@@ -1944,7 +1944,7 @@ Since $0\le e_t^u\le \operatorname{Tail}_H(\mathbf q)$,
 \[
 0\le e_t^x
 =
-\sum_{s=1}^{t-1}\alpha^{t-1-s}e_s^u
+\sum_{\tau=1}^{t-1}\alpha^{t-1-\tau}e_\tau^u
 \le
 \frac{\operatorname{Tail}_H(\mathbf q)}{1-\alpha},
 \]
@@ -2053,11 +2053,11 @@ If $\|\widetilde{\mathbf{m}}\|_1\le1$, this minimizer belongs to $\mathcal{M}_H$
 \]
 Suppose $\|\widetilde{\mathbf{m}}\|_1>1$. The constraint
 $\|\mathbf{m}\|_1\le1$ is then active. Moreover, the minimizer has no zero
-coordinate: if $m_{i_0}=0$, transferring an arbitrarily small amount of mass
-from a positive coordinate to coordinate $i_0$ has directional derivative
+coordinate: if $m_i=0$, transferring an arbitrarily small amount of mass
+from a positive coordinate to coordinate $i$ has directional derivative
 $-\infty$, because
 \[
-\lim_{z\downarrow0}\log\frac{z}{\widetilde{m}_{i_0}}=-\infty.
+\lim_{z\downarrow0}\log\frac{z}{\widetilde{m}_i}=-\infty.
 \]
 Thus the nonnegativity constraints are inactive. With $\nu\ge0$ denoting
 the multiplier of $\|\mathbf{m}\|_1\le1$, stationarity and complementary
