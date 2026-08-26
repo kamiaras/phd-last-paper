@@ -546,28 +546,24 @@ decomposition of the state trajectory that isolates its dependence on $\mathbf{m
 Fix a positive integer $H$ and $\mathbf{m}\in\mathcal{M}_H$.
 For $i\in\{1,\ldots,H\}$, define
 \[
-r_{t,i}
+r_t(i)
 \triangleq
 \sum_{j=1}^{i}\alpha^{j-1}w_{t-j},
-\qquad
-r_t
-\triangleq
-\sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j},
 \]
-where the second sum is empty when $t=1$. Then, for every
+where the sum is empty when $i=0$, and write $r_t\triangleq r_t(t-1)$. Then, for every
 $t\in[T]$,
 \begin{equation}
 \label{eq:sdac-state-decomp}
 x_t(\mathbf{m})
 =
-\sum_{i=1}^H m_i r_{t,i}
+\sum_{i=1}^H m_i r_t(i)
 +\bigl(1-\sum_{i=1}^H m_i\bigr)r_t.
 \end{equation}
 Define the quantity
 \[
 \boldsymbol{\phi}_t^x
 \triangleq
-\bigl(r_{t,1}-r_t,\ldots,r_{t,H}-r_t\bigr)^\top.
+\bigl(r_t(1)-r_t,\ldots,r_t(H)-r_t\bigr)^\top.
 \]
 Then
 \[
@@ -575,9 +571,9 @@ x_t(\mathbf{m})
 =
 r_t+\langle\boldsymbol{\phi}_t^x,\mathbf{m}\rangle.
 \]
-Moreover,
+Moreover, for all $i\in\{1,\ldots,H\}$,
 \[
-0\le r_{t,i}\le r_t\le\frac{1}{1-\alpha},
+0\le r_t(i)\le r_t\le\frac{1}{1-\alpha},
 \]
 and $\mathbf{m}\mapsto x_t(\mathbf{m})$ is affine.
 \end{lemma}
@@ -592,18 +588,18 @@ r_1=0,
 \end{equation}
 and, for every $i\in\{1,\ldots,H\}$,
 \begin{equation}
-\label{eq:r-coord-recursion}
+\label{eq:r-trunc-recursion}
 \begin{aligned}
-\alpha r_{t,i}-\alpha^i w_{t-i}
+\alpha r_t(i)-\alpha^i w_{t-i}
 &=\sum_{j=1}^{i-1}\alpha^j w_{t-j} \\
-&=r_{t+1,i}-w_t.
+&=r_{t+1}(i)-w_t.
 \end{aligned}
 \end{equation}
 For $i=1$, the sum in the first line is empty.
 
 At $t=1$, since $w_{\tau}\equiv 0$ for $\tau\le 0$,
 \begin{align*}
-r_{1,i}
+r_1(i)
 &=
 \sum_{j=1}^{i}\alpha^{j-1}w_{1-j}
 =0,\\
@@ -620,7 +616,7 @@ so \eqref{eq:sdac-state-decomp} holds. Suppose it holds at time $t$. Using
 x_{t+1}(\mathbf{m})
 &=
 \alpha\left(
-\sum_{i=1}^H m_i r_{t,i}
+\sum_{i=1}^H m_i r_t(i)
 +\bigl(1-\sum_{i=1}^H m_i\bigr)r_t
 \right) \\
 &\quad
@@ -628,12 +624,12 @@ x_{t+1}(\mathbf{m})
 +w_t \\
 &=
 \sum_{i=1}^H m_i
-\bigl(\alpha r_{t,i}-\alpha^i w_{t-i}\bigr) \\
+\bigl(\alpha r_t(i)-\alpha^i w_{t-i}\bigr) \\
 &\quad
 +\alpha\bigl(1-\sum_{i=1}^H m_i\bigr)r_t+w_t.
 \end{aligned}
 \end{equation}
-Substituting \eqref{eq:r-recursion} and \eqref{eq:r-coord-recursion} into
+Substituting \eqref{eq:r-recursion} and \eqref{eq:r-trunc-recursion} into
 \eqref{eq:decomp-induction-1},
 \begin{equation}
 \label{eq:decomp-induction-2}
@@ -641,21 +637,21 @@ Substituting \eqref{eq:r-recursion} and \eqref{eq:r-coord-recursion} into
 x_{t+1}(\mathbf{m})
 &=
 \sum_{i=1}^H m_i
-\bigl(r_{t+1,i}-w_t\bigr) \\
+\bigl(r_{t+1}(i)-w_t\bigr) \\
 &\quad
 +\bigl(1-\sum_{i=1}^H m_i\bigr)(r_{t+1}-w_t)+w_t \\
 &=
-\sum_{i=1}^H m_i r_{t+1,i}
+\sum_{i=1}^H m_i r_{t+1}(i)
 +\bigl(1-\sum_{i=1}^H m_i\bigr)r_{t+1},
 \end{aligned}
 \end{equation}
 because the total coefficient of $w_t$ in the first line is
 $-\sum_{i=1}^H m_i-\bigl(1-\sum_{i=1}^H m_i\bigr)+1=0$. This proves \eqref{eq:sdac-state-decomp} by induction.
 
-All summands defining $r_{t,i}$ and $r_t$ are nonnegative. Since
-$w_\tau=0$ for $\tau\le0$, $r_{t,i}$ is a truncation of $r_t$; hence
+All summands defining $r_t(i)$ and $r_t$ are nonnegative. Since
+$w_\tau=0$ for $\tau\le0$, $r_t(i)$ is a truncation of $r_t$; hence
 \[
-0\le r_{t,i}\le r_t
+0\le r_t(i)\le r_t
 \le\sum_{j=1}^{\infty}\alpha^{j-1}
 =\frac{1}{1-\alpha}.
 \]
@@ -663,7 +659,7 @@ Finally,
 \[
 x_t(\mathbf{m})
 =
-r_t+\sum_{i=1}^H m_i\bigl(r_{t,i}-r_t\bigr)
+r_t+\sum_{i=1}^H m_i\bigl(r_t(i)-r_t\bigr)
 =
 r_t+\langle\boldsymbol{\phi}_t^x,\mathbf{m}\rangle,
 \]
@@ -696,7 +692,7 @@ u_t(\mathbf{m})
 For every $i\in\{1,\ldots,H\}$,
 \begin{equation}
 \label{eq:feas-r-term}
-\alpha r_{t,i}
+\alpha r_t(i)
 =
 \sum_{j=1}^{i}\alpha^j w_{t-j}
 \ge
@@ -709,10 +705,10 @@ Lemma~\ref{lem:sdac-state-decomp},
 \begin{aligned}
 \alpha x_t(\mathbf{m})
 &=
-\sum_{i=1}^H m_i\alpha r_{t,i}
+\sum_{i=1}^H m_i\alpha r_t(i)
 +\alpha\bigl(1-\sum_{i=1}^H m_i\bigr)r_t \\
 &\ge
-\sum_{i=1}^H m_i\alpha r_{t,i} \\
+\sum_{i=1}^H m_i\alpha r_t(i) \\
 &\ge
 \sum_{i=1}^H m_i\alpha^i w_{t-i}
 =
@@ -762,13 +758,13 @@ x_t(\mathbf{m})=r_t+\langle \boldsymbol{\phi}_t^x,\mathbf{m}\rangle,
 \qquad
 u_t(\mathbf{m})=\langle \boldsymbol{\phi}_t^u,\mathbf{m}\rangle.
 \end{equation}
-For every $i\in\{1,\ldots,H\}$, the definitions of $r_{t,i}$ and $r_t$ give
+For every $i\in\{1,\ldots,H\}$, the definitions of $r_t(i)$ and $r_t$ give
 \begin{equation}
 \label{eq:phi-x-exact-tail}
 \begin{aligned}
 \phi_{t,i}^x
 &=
-r_{t,i}-r_t \\
+r_t(i)-r_t \\
 &=
 -\sum_{j=i+1}^{t-1}\alpha^{j-1}w_{t-j},
 \end{aligned}
