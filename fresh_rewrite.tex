@@ -1482,24 +1482,45 @@ Lemma~\ref{lem:sdac-allocation-approx}. This makes the bound uniform in $k$;
 minimizing over $k$ proves the stated finite-time and asymptotic guarantees.
 \end{proof}
 
-\section{Extensions}
+\section{Discussion and Extensions}
 \label{sec:extensions}
 
-We briefly discuss three possible extensions. Establishing their full regret bounds
-is left for future work.
+We briefly discuss three extensions. In each case, the feasibility, convexity, and
+stability arguments used above continue to apply after the corresponding changes
+to the policy domain and the Lipschitz constants. We state these changes but omit
+the resulting regret bounds, whose form is unchanged up to the modified constants
+and, in the vector settings, the chosen product norm.
 
 \paragraph{Retention $\alpha\ge 1$.}
-For $\alpha\ge1$, choose a fixed baseline drain $kx_t$ such that
-$\bar\alpha\triangleq\alpha-k\in(0,1)$, and write $u_t=kx_t+v_t$. The residual
-dynamics become $x_{t+1}=\bar\alpha x_t-v_t+w_t$. An SDAC filter for $v_t$ should
-therefore use the powers $\bar\alpha^i$, not $\alpha^i$. If
+For $\alpha\ge1$, fix $k$ such that
+$\bar\alpha\triangleq\alpha-k\in(0,1)$ and write $u_t=kx_t+v_t$. Then
+\[
+x_{t+1}=\bar\alpha x_t-v_t+w_t.
+\]
+An SDAC filter for $v_t$ uses the powers $\bar\alpha^i$. If
 $0\le v_t\le\bar\alpha x_t$, then
-$0\le u_t\le(k+\bar\alpha)x_t=\alpha x_t$, so \eqref{eq:model-feasibility} holds.
-This reduction shows that the generalization to a fixed, given \(k\) is
-straightforward: the present analysis carries over with transformed cost and
-Lipschitz constants. We therefore omit the details, which would amount to extra
-writing without additional novelty. The choice of \(k\) itself remains an
-interesting avenue for future work.
+\[
+kx_t\le u_t=kx_t+v_t
+\le(k+\bar\alpha)x_t
+=\alpha x_t,
+\]
+so the original feasibility constraint \eqref{eq:model-feasibility} is satisfied. Since
+\[
+x_{t+1}\le\bar\alpha x_t+1,
+\qquad x_1=0,
+\]
+induction gives $x_t\le1/(1-\bar\alpha)$. The transformed cost
+$c_t(x,kx+v)$ remains convex in $(x,v)$. Thus the analysis applies when the costs
+satisfy the corresponding Lipschitz and bounded-subgradient assumptions on the
+bounded domain
+\[
+0\le x\le\frac{1}{1-\bar\alpha},
+\qquad
+kx\le u\le\alpha x.
+\]
+A remark is that for a fixed $k$, the comparator class is correspondingly restricted to policies
+whose actions satisfy $u_t\ge kx_t$. Selecting $k$ (fixed or even in an online fashion)
+remains an interesting direction for future work.
 
 \paragraph{Vector action / multi-task allocation.}
 Consider a single storage state $x_t$ with a vector action
@@ -1507,26 +1528,56 @@ $\mathbf{u}_t\in\mathbb{R}_{\ge 0}^n$ that allocates resources across $n$ tasks,
 $\sum_{a=1}^n u_{t,a}\le\alpha x_t$, so that the total drain from storage is the sum of
 the task allocations. The dynamics remain
 $x_{t+1}=\alpha x_t-\sum_{a=1}^n u_{t,a}+w_t$, and the cost $c_t(x_t,\mathbf{u}_t)$ is convex in
-$(x,\mathbf{u})$. The fixed-policy SDAC construction lifts by replacing the filter vector
-$\mathbf{m}\in\mathcal{M}_H$ with a matrix
-$\mathbf{M}\in\mathbb{R}_{\ge 0}^{n\times H}$ whose entries $M_{a,i}$ sum to at most
-one, with each row $a$ corresponding to a task and each column $i$ to a memory lag.
-OMD can then run over this set. If the nominal total allocation
-exceeds $\alpha x_t$, the action vector is scaled by a nonnegative factor so that
-$\sum_{a=1}^n u_{t,a}=\alpha x_t$.
+$(x,\mathbf{u})$. Replace $\mathbf{m}\in\mathcal{M}_H$ with a matrix
+$\mathbf{M}\in\mathbb{R}_{\ge 0}^{n\times H}$ satisfying
+\[
+\sum_{a=1}^n\sum_{i=1}^H M_{a,i}\le1,
+\qquad
+u_{t,a}(\mathbf M)
+=\sum_{i=1}^H M_{a,i}\alpha^i w_{t-i}.
+\]
+Set $m_i=\sum_{a=1}^n M_{a,i}$. Then
+\[
+m_i\ge0,
+\qquad
+\sum_{i=1}^H m_i
+=\sum_{a=1}^n\sum_{i=1}^H M_{a,i}
+\le1,
+\]
+so $\mathbf{m}\in\mathcal{M}_H$. Moreover,
+\[
+\sum_{a=1}^n u_{t,a}(\mathbf{M})
+=\sum_{i=1}^H m_i\alpha^i w_{t-i}
+\le\alpha x_t(\mathbf{M}),
+\]
+where the inequality is the scalar SDAC feasibility bound.
+The state and vector action remain affine in $\mathbf M$, so
+$c_t(x_t(\mathbf{M}),\mathbf{u}_t(\mathbf{M}))$ is convex in $\mathbf{M}$. For the
+online controller, a nominal vector that exceeds the available total resource can
+be scaled proportionally so that its entries remain nonnegative and sum to
+$\alpha x_t$. Under an $\ell_1$ Lipschitz bound in the action, the size of this
+correction equals the excess total action, and the stability proof proceeds with
+the corresponding matrix norm. OMD then runs over the matrix subprobability
+simplex above.
 
 \paragraph{Multiple storages with diagonal dynamics.}
 Suppose the state is $\mathbf{x}_t\in\mathbb{R}_{\ge 0}^d$ and evolves as
 $\mathbf{x}_{t+1}=\mathbf{A} \mathbf{x}_t-\mathbf{u}_t+\mathbf{w}_t$ with $\mathbf{A}=\mathrm{diag}(\alpha_1,\ldots,\alpha_d)$,
 $\alpha_s\in(0,1)$ for $s\in[d]$, arrivals $\mathbf{w}_t\in[0,1]^d$, and per-storage constraints
-$0\le u_{t,s}\le\alpha_s x_{t,s}$. The dynamics and feasible set then decouple
-by storage, and the natural SDAC class is a product of simplices. For a jointly
-convex cost, OMD operates jointly on this product set; the optimization separates by
-storage only when the cost is coordinate-separable. Cross-coupled storage systems
-(non-diagonal $\mathbf{A}$) require additional analysis.
+$0\le u_{t,s}\le\alpha_s x_{t,s}$. Assign one SDAC parameter in $\mathcal{M}_H$
+to each storage and use the powers $\alpha_s^i$ in coordinate $s$. The dynamics
+and feasibility constraints then decouple by storage, and the fixed-policy domain
+is a product of subprobability simplices, with
+$x_{t,s}\le1/(1-\alpha_s)$ for every $s\in[d]$. The online controller clips each nominal
+action to $\alpha_s x_{t,s}$. If the cost is jointly convex and satisfies compatible
+Lipschitz and bounded-subgradient assumptions on the resulting bounded product
+domain, the surrogate cost is jointly convex in all SDAC parameters and OMD applies
+on the product set. The update separates by storage only when the cost is
+coordinate-separable; otherwise it is a joint update.
+Cross-coupled storage systems (non-diagonal \(\mathbf{A}\)) require additional
+analysis and remain an interesting direction for future work.
 
-These constructions retain the basic simplex/OMD structure, but their complete
-feasibility and regret analyses require separate treatment.
+
 
 \section{Conclusion}
 \label{sec:conclusion}
