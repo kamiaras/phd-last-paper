@@ -185,10 +185,10 @@ regret on the horizon $T$ and the coefficient $\alpha$. Kumar et al.
 establish matching memory-dependent upper and lower bounds for online convex
 optimization with unbounded memory \cite{kumar2023unbounded}. For discounted
 memory, their lower bound is of order $\sqrt{T}/(1-\rho)$, paralleling the
-$\Omega(\sqrt{T}/(1-\alpha))$ rate in our sufficiently-long-horizon regime; see
+$\Omega(\sqrt{T}/(1-\alpha))$ rate when the horizon is sufficiently long; see
 Corollary~\ref{cor:sdac-lower-mixing}. This agreement is at the level of scaling,
 while our lower bound is established directly for state--action costs under the
-storage-feasibility constraint.
+state-dependent storage constraint.
 
 \paragraph{Energy harvesting}
 Prior work on online energy harvesting often studies simple rules that adjust
@@ -450,9 +450,9 @@ linear filter. We allow nonpositive indices in such sums, with the convention $w
 For our constrained model, an unrestricted filter is insufficient: its action can
 violate \eqref{eq:model-feasibility} by exceeding $\alpha x_t$ or becoming negative.
 We therefore introduce \emph{Simplex Disturbance-Action Control} (SDAC), which uses a
-simplex-constrained filter tailored to the storage dynamics. This restriction yields
-fixed-policy feasibility while preserving convex surrogate losses and tractable
-online updates.
+simplex-constrained filter tailored to the storage dynamics. This restriction ensures
+that every fixed policy is feasible while preserving convex surrogate losses and
+tractable online updates.
 
 
 \subsection{SDAC Definition}
@@ -634,7 +634,7 @@ r_t+\langle\boldsymbol{\phi}_t^x,\mathbf{m}\rangle,
 which is affine in $\mathbf{m}$.
 \end{proof}
 
-The first consequence of this decomposition is fixed-policy feasibility.
+The first consequence of this decomposition is that every fixed policy is feasible.
 
 \begin{lemma}[Feasibility of SDAC policies]
 \label{lem:sdac-feasibility}
@@ -866,10 +866,10 @@ x_{t+1}(\mathbf q)
 \qquad x_1(\mathbf q)=0.
 \end{aligned}
 \end{equation}
-Here $q_iw_s$ is the allocation at age $i$ assigned to the arrival cohort $w_s$.
+Here $q_iw_s$ is the amount from arrival $w_s$ allocated $i$ periods later.
 The weighted budget in \eqref{eq:def-allocation-sequences} accounts for leakage:
-reserving $q_i$ units for expenditure at age $i$ consumes $q_i/\alpha^i$ of the
-cohort's budget at its arrival time. Let
+reserving $q_i$ units for expenditure $i$ periods after an arrival requires
+$q_i/\alpha^i$ units at the arrival time. Let
 \[
 \Pi_\alpha^{\mathrm{alloc}}
 \triangleq
@@ -1034,7 +1034,7 @@ $x_t\ge0$ for all $t\in[T+1]$ and show that the online trajectory satisfies
 The scalar correction in \eqref{eq:alg-feasible-action} also has an exact
 Bregman-projection equivalent.
 
-\begin{lemma}[Availability clipping as a Bregman projection]
+\begin{lemma}[Action clipping as a Bregman projection]
 \label{lem:availability-projection}
 At time $t$, define the parameter set compatible with the available state by
 \begin{equation}
@@ -1085,7 +1085,7 @@ Consequently, if
 then $\mathbf m_t^{\mathrm{exec}}=\mathbf m_t$, which proves
 \eqref{eq:availability-projection-action} in the feasible case.
 
-Suppose instead that $\mathbf m_t$ is infeasible. We claim that the availability
+Suppose instead that $\mathbf m_t$ is infeasible. We claim that the action
 constraint is active at $\mathbf m_t^{\mathrm{exec}}$. If it were slack, then
 \begin{equation}
 \label{eq:availability-projection-slack}
@@ -1289,8 +1289,8 @@ admits a deterministic oblivious sequence for which
 where $G_\alpha=\alpha(L_x/(1-\alpha)+L_u)$.
 \end{corollary}
 
-The near-lossless regime $\alpha\uparrow1$ is the more challenging one because
-stored arrivals persist longer. In this regime,
+The limit $\alpha\uparrow1$ is more challenging because stored arrivals persist
+longer. In this limit,
 $q_\alpha=\Theta((1-\alpha)^{-1})$, and
 Corollary~\ref{cor:sdac-lower-mixing} gives
 \begin{equation}
@@ -1304,11 +1304,11 @@ Theorem~\ref{thm:regret-bound} is
 $O((1-\alpha)^{-3/2}\sqrt{T\log(H+1)})$, so a factor
 $(1-\alpha)^{-1/2}$ between the two bounds remains open, apart from the
 memory-dependent logarithm. The lower-bound scaling in
-\eqref{eq:sdac-lower-large-alpha} agrees with the discounted-memory obstruction in
+\eqref{eq:sdac-lower-large-alpha} agrees with the lower bound for discounted memory in
 online convex optimization with unbounded memory \cite{kumar2023unbounded}. This is
 a comparison of rates rather than a reduction: Theorem~\ref{thm:sdac-lower-bound}
-is proved directly under the scalar state--action loss and storage-feasibility
-structure of our model.
+is proved directly under the scalar state--action loss and feasibility constraints
+of our storage model.
 
 The condition $T\ge2q_\alpha+2$ is essential for interpreting the large-$\alpha$
 asymptotic. If $T$ is fixed while $\alpha\uparrow1$, then
@@ -1321,12 +1321,12 @@ quantity
 \frac{1}{2\sqrt{2}}
 \sqrt{\sum_{t=2}^T\bigl(L_u+L_x(t-2)\bigr)^2}.
 \]
-Thus the exact finite-horizon formula, rather than the steady-state scaling in
+Thus the exact finite-horizon formula, rather than the long-horizon scaling in
 \eqref{eq:sdac-lower-large-alpha}, applies in this regime.
 
 The large-$\alpha$ dependence improves the coarser analysis that ignores the exact
-coordinate decay in \eqref{eq:surr-coordinate-decay} and the positive-part
-contraction in \eqref{eq:transition-contraction}. That analysis gives a leading
+coordinate decay in \eqref{eq:surr-coordinate-decay} and the nonexpansiveness of
+$z\mapsto[z]_+$ used in \eqref{eq:transition-contraction}. That analysis gives a leading
 factor of order $(1-\alpha)^{-2}$ as $\alpha\uparrow1$. The sharper rate follows
 from the gradient and stability estimates.
 
@@ -1484,9 +1484,9 @@ the task allocations. The dynamics remain
 $x_{t+1}=\alpha x_t-\mathbf{1}^\top \mathbf{u}_t+w_t$, and the cost $c_t(x_t,\mathbf{u}_t)$ is convex in
 $(x,\mathbf{u})$. The fixed-policy SDAC construction lifts by replacing the filter vector
 $\mathbf{m}\in\mathcal{M}_H$ with a matrix
-$\mathbf{M}\in\mathbb{R}_{\ge 0}^{n\times H}$ whose entries $M_{a,i}$ sum to at most one (a matrix
-simplex), with each row $a$ corresponding to a task and each column $i$ to a memory lag.
-OMD can then run over this matrix simplex. If the nominal total allocation
+$\mathbf{M}\in\mathbb{R}_{\ge 0}^{n\times H}$ whose entries $M_{a,i}$ sum to at most
+one, with each row $a$ corresponding to a task and each column $i$ to a memory lag.
+OMD can then run over this set. If the nominal total allocation
 exceeds $\alpha x_t$, the action vector is scaled by a nonnegative factor so that
 $\mathbf{1}^\top \mathbf{u}_t=\alpha x_t$.
 
@@ -1518,7 +1518,7 @@ minimax lower bound gives
 $\Omega((1-\alpha)^{-1}\sqrt{T})$ regret as $\alpha\uparrow1$; hence a factor
 $(1-\alpha)^{-1/2}$ between the upper and lower bounds remains open. For fixed
 $T$ and $\alpha\uparrow1$, the exact finite-horizon lower bound must be used instead,
-because the steady-state scale has not yet been reached. The
+because the long-horizon asymptotic does not apply. The
 SDAC approximation results further give
 $O\!\left(\sqrt{T\log\log T}\right)$ regret against the best decreasing-allocation
 policy when $H=\Theta(\log T)$. This class contains all feasible proportional
@@ -2472,7 +2472,7 @@ d_t
 with an empty sum when $t=1$. This proves
 \eqref{eq:contractive-state-bound}.
 
-Finally, $\widehat u_t=u_t(\mathbf m_t)$ and fixed-policy feasibility imply
+Finally, $\widehat u_t=u_t(\mathbf m_t)$ and the feasibility of fixed SDAC policies imply
 \begin{equation}
 \label{eq:contractive-action-start}
 \begin{aligned}
