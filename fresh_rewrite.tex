@@ -289,7 +289,8 @@ Appendix.
 \section{Notation}
 \label{sec:notation}
 
-We write $[T]\triangleq\{1,\ldots,T\}$ and $[z]_+ \triangleq \max\{z,0\}$.
+For every positive integer $n$, we write
+$[n]\triangleq\{1,\ldots,n\}$ and $[z]_+ \triangleq \max\{z,0\}$.
 For $\mathbf{v}\in\mathbb{R}^n$, the $i$-th
 coordinate is $v_i$; in particular, the coordinates of $\mathbf{m}_t$ and
 $\mathbf{g}_t$ are $m_{t,i}$ and $g_{t,i}$. We write $\mathbf{1}$ for the all-ones vector (dimension
@@ -889,7 +890,7 @@ m_{H,i}(\mathbf q)
 \end{equation}
 Then $\mathbf m_H(\mathbf q)\in\mathcal M_H$. With
 \[
-R_H(\mathbf q)
+\operatorname{Tail}_H(\mathbf q)
 \triangleq
 \sum_{i=H+1}^{\infty}q_i,
 \]
@@ -898,12 +899,12 @@ the corresponding trajectories satisfy, for every arrival sequence in $[0,1]$,
 0
 &\le
 u_t(\mathbf q)-u_t\bigl(\mathbf m_H(\mathbf q)\bigr)
-\le R_H(\mathbf q),
+\le \operatorname{Tail}_H(\mathbf q),
 \label{eq:allocation-action-gap}\\
 0
 &\le
 x_t\bigl(\mathbf m_H(\mathbf q)\bigr)-x_t(\mathbf q)
-\le \frac{R_H(\mathbf q)}{1-\alpha}.
+\le \frac{\operatorname{Tail}_H(\mathbf q)}{1-\alpha}.
 \label{eq:allocation-state-gap}
 \end{align}
 If each $c_t$ satisfies \eqref{eq:model-lipschitz}, then
@@ -917,8 +918,9 @@ u_t(\mathbf m_H(\mathbf q))\bigr)
 \sum_{t=1}^T c_t\bigl(x_t(\mathbf q),u_t(\mathbf q)\bigr)
 \right|\\
 &\qquad\le
-\left(L_u+\frac{L_x}{1-\alpha}\right)R_H(\mathbf q)T
-\le
+\left(L_u+\frac{L_x}{1-\alpha}\right)
+\operatorname{Tail}_H(\mathbf q)T \\
+&\qquad\le
 \left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H+1}T.
 \end{aligned}
 \end{equation}
@@ -933,7 +935,7 @@ where $\lambda_k^0\triangleq1$. Then $\mathbf q(k)\in\mathcal Q_\alpha^\downarro
 and $\pi_{\mathbf q(k)}$ is exactly the feasible proportional state-feedback policy
 $u_t(k)=k x_t(k)$. Its SDAC truncation is
 \[
-\bigl[\mathbf m_H^\star(k)\bigr]_i
+\bigl[\mathbf m_H^{\mathrm{prop}}(k)\bigr]_i
 \triangleq
 m_{H,i}\bigl(\mathbf q(k)\bigr)
 =
@@ -942,7 +944,7 @@ m_{H,i}\bigl(\mathbf q(k)\bigr)
 \]
 and its tail is
 \[
-R_H\bigl(\mathbf q(k)\bigr)
+\operatorname{Tail}_H\bigl(\mathbf q(k)\bigr)
 =
 \frac{k\lambda_k^H}{1-\lambda_k}.
 \]
@@ -951,7 +953,7 @@ Therefore, \eqref{eq:allocation-cost-gap} specializes exactly to
 \label{eq:sdac-lin-approx-cost}
 \begin{aligned}
 &\left|
-\sum_{t=1}^T c_t\bigl(x_t(\mathbf m_H^\star(k)),u_t(\mathbf m_H^\star(k))\bigr)
+\sum_{t=1}^T c_t\!\bigl(x_t(\mathbf m_H^{\mathrm{prop}}(k)),u_t(\mathbf m_H^{\mathrm{prop}}(k))\bigr)
 -
 \sum_{t=1}^T c_t\bigl(x_t(k),u_t(k)\bigr)
 \right| \\
@@ -1073,7 +1075,7 @@ same executed action.
 \end{lemma}
 
 \begin{proof}
-The set $\mathcal F_t(x_t)$ is nonempty because it contains $\mathbf0$, and it is
+The set $\mathcal F_t(x_t)$ is nonempty because it contains $\mathbf 0$, and it is
 compact and convex. Since $\mathbf m_t$ is strictly positive coordinatewise,
 $D_\Psi(\cdot\|\mathbf m_t)$ is strictly convex on $\mathcal M_H$ and is minimized
 uniquely at $\mathbf m_t$ over any feasible set containing $\mathbf m_t$.
@@ -1128,12 +1130,13 @@ time-varying comparator set. The direct implementation and its projection
 interpretation produce the same actions, states, and internal OMD iterates.
 
 \paragraph{Surrogate cost and OMD update}
-After $(w_t,c_t)$ is revealed, define the surrogate cost by
-\begin{equation}
-\label{eq:alg-surrogate-cost}
-\ell_t(\mathbf{m}) \triangleq c_t\bigl(x_t(\mathbf{m}),u_t(\mathbf{m})\bigr), \qquad \mathbf{m}\in\mathcal{M}_H,
-\end{equation}
-which is convex and Lipschitz by Lemma~\ref{lem:sdac-surrogate}. Select a subgradient
+After $(w_t,c_t)$ is revealed, recall from
+Lemma~\ref{lem:sdac-surrogate} the surrogate cost
+\[
+\ell_t(\mathbf{m}) = c_t\bigl(x_t(\mathbf{m}),u_t(\mathbf{m})\bigr),
+\qquad \mathbf{m}\in\mathcal{M}_H,
+\]
+which is convex and Lipschitz. Select a subgradient
 $\mathbf{g}_t\in\partial\ell_t(\mathbf{m}_t)$ satisfying
 $\|\mathbf{g}_t\|_\infty\le G_\alpha$ as in
 \eqref{eq:def-surrogate-G}, whose existence and
@@ -1249,12 +1252,12 @@ Section~\ref{sec:model-setup} such that
 \mathbb E_{\mathcal A}\!\left[\RegSDAC{T}\right]
 \ge
 \frac{1}{2\sqrt{2}}
-\sqrt{\sum_{t=2}^T a_t^2},
+\sqrt{\sum_{t=2}^T \beta_t^2},
 \end{equation}
 where
 \begin{equation}
-\label{eq:sdac-lower-coeff}
-a_t
+\label{eq:sdac-lower-beta}
+\beta_t
 \triangleq
 \alpha\left(
 L_u
@@ -1271,14 +1274,14 @@ the interaction.
 \label{cor:sdac-lower-mixing}
 Define
 \begin{equation}
-\label{eq:def-q-alpha}
-q_\alpha
+\label{eq:def-mixing-time}
+t_{\mathrm{mix}}(\alpha)
 \triangleq
 \left\lceil
 \frac{\log 2}{\log(1/\alpha)}
 \right\rceil.
 \end{equation}
-If $T\ge2q_\alpha+2$, then every causal feasible controller $\mathcal A$
+If $T\ge2t_{\mathrm{mix}}(\alpha)+2$, then every causal feasible controller $\mathcal A$
 admits a deterministic oblivious sequence for which
 \begin{equation}
 \label{eq:sdac-lower-mixing}
@@ -1286,12 +1289,13 @@ admits a deterministic oblivious sequence for which
 \ge
 \frac{G_\alpha}{8}\sqrt{T},
 \end{equation}
-where $G_\alpha=\alpha(L_x/(1-\alpha)+L_u)$.
+where $G_\alpha=\alpha(L_x/(1-\alpha)+L_u)$ as in
+\eqref{eq:def-surrogate-G}.
 \end{corollary}
 
 The limit $\alpha\uparrow1$ is more challenging because stored arrivals persist
 longer. In this limit,
-$q_\alpha=\Theta((1-\alpha)^{-1})$, and
+$t_{\mathrm{mix}}(\alpha)=\Theta((1-\alpha)^{-1})$, and
 Corollary~\ref{cor:sdac-lower-mixing} gives
 \begin{equation}
 \label{eq:sdac-lower-large-alpha}
@@ -1299,13 +1303,13 @@ Corollary~\ref{cor:sdac-lower-mixing} gives
 =
 \Omega\!\left(\frac{\sqrt{T}}{1-\alpha}\right)
 \end{equation}
-whenever $T\ge2q_\alpha+2$. The upper bound in
+whenever $T\ge2t_{\mathrm{mix}}(\alpha)+2$. The upper bound in
 Theorem~\ref{thm:regret-bound} is
 $O((1-\alpha)^{-3/2}\sqrt{T\log(H+1)})$, so a factor
 $(1-\alpha)^{-1/2}$ between the two bounds remains open, apart from the
 memory-dependent logarithm.
 
-The condition $T\ge2q_\alpha+2$ is essential for interpreting the large-$\alpha$
+The condition $T\ge2t_{\mathrm{mix}}(\alpha)+2$ is essential for interpreting the large-$\alpha$
 asymptotic. If $T$ is fixed while $\alpha\uparrow1$, then
 \[
 \frac{1-\alpha^{t-2}}{1-\alpha}\longrightarrow t-2,
@@ -1387,7 +1391,7 @@ J_T^{\mathrm{on}}-J_T(\mathbf q)
 2\sqrt{\Gamma_\alpha T\log(H_T+1)}\\
 &\quad+
 \left(L_u+\frac{L_x}{1-\alpha}\right)
-R_{H_T}(\mathbf q)T\\
+\operatorname{Tail}_{H_T}(\mathbf q)T\\
 &\le
 2\sqrt{\Gamma_\alpha T\log(H_T+1)}\\
 &\quad+
@@ -1446,10 +1450,10 @@ O\!\left(\sqrt{T\log\log T}\right)
 
 \begin{proof}
 For fixed $k$, Theorem~\ref{thm:regret-bound} applied to
-$\mathbf m_{H_T}^\star(k)$, followed by \eqref{eq:sdac-lin-approx-cost}, gives
+$\mathbf m_{H_T}^{\mathrm{prop}}(k)$, followed by \eqref{eq:sdac-lin-approx-cost}, gives
 \eqref{eq:linear-regret-decomposition}. The geometric allocation sequence
 $\mathbf q(k)$ belongs to $\mathcal Q_\alpha^\downarrow$, so
-$R_{H_T}(\mathbf q(k))\le\alpha^{H_T+1}$ by
+$\operatorname{Tail}_{H_T}(\mathbf q(k))\le\alpha^{H_T+1}$ by
 Lemma~\ref{lem:sdac-allocation-approx}. This makes the bound uniform in $k$;
 minimizing over $k$ proves the stated finite-time and asymptotic guarantees.
 \end{proof}
@@ -1593,7 +1597,8 @@ Because $H\ge1$, both
 \qquad
 \mathbf m^{(1)}\triangleq\mathbf e_1
 \end{equation}
-belong to $\mathcal M_H$. Under the arrivals in
+belong to $\mathcal M_H$, where $\mathbf e_1$ is the first standard basis vector
+in $\mathbb R^H$. Under the arrivals in
 \eqref{eq:lower-hard-instance}, the first endpoint has
 \begin{equation}
 \label{eq:lower-endpoint-zero-trajectory}
@@ -1632,7 +1637,7 @@ For $t\ge2$, the state difference between the endpoints is
 \begin{equation}
 \label{eq:lower-endpoint-state-gap}
 \begin{aligned}
-d_t
+\Delta_t^{\mathrm{end}}
 &\triangleq
 x_t(\mathbf m^{(0)})-x_t(\mathbf m^{(1)}) \\
 &=\rho_t-1 \\
@@ -1644,10 +1649,10 @@ Remove the common offset by defining the centered online and endpoint costs
 \begin{equation}
 \label{eq:lower-centered-costs}
 \begin{aligned}
-\widehat J_T^{\mathrm{on}}
+J_{T,\mathrm{ctr}}^{\mathrm{on}}
 &\triangleq
 \sum_{t=1}^T\xi_t(L_xx_t-L_uu_t), \\
-\widehat J_T^{(j)}
+J_{T,\mathrm{ctr}}^{(j)}
 &\triangleq
 \sum_{t=1}^T\xi_t
 \left(
@@ -1663,22 +1668,22 @@ independent of the fresh sign $\xi_t$. Conditional mean zero gives
 \begin{equation}
 \label{eq:lower-online-mean-zero}
 \begin{aligned}
-\mathbb E\!\left[
+\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[
 \xi_t(L_xx_t-L_uu_t)
 \,\middle|\,
 x_t,u_t
 \right]
 &=0, \\
-\mathbb E\!\left[\widehat J_T^{\mathrm{on}}\right]
+\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[J_{T,\mathrm{ctr}}^{\mathrm{on}}\right]
 &=0.
 \end{aligned}
 \end{equation}
 Likewise, the two fixed endpoint trajectories do not depend on the signs, so
 \begin{equation}
 \label{eq:lower-endpoint-means-zero}
-\mathbb E\!\left[\widehat J_T^{(0)}\right]
+\mathbb E_{\boldsymbol\xi}\!\left[J_{T,\mathrm{ctr}}^{(0)}\right]
 =
-\mathbb E\!\left[\widehat J_T^{(1)}\right]
+\mathbb E_{\boldsymbol\xi}\!\left[J_{T,\mathrm{ctr}}^{(1)}\right]
 =0.
 \end{equation}
 
@@ -1689,14 +1694,14 @@ Since the two endpoints agree at $t=1$, equations
 \begin{equation}
 \label{eq:lower-endpoint-cost-gap}
 \begin{aligned}
-\widehat J_T^{(0)}-\widehat J_T^{(1)}
+J_{T,\mathrm{ctr}}^{(0)}-J_{T,\mathrm{ctr}}^{(1)}
 &=
-\sum_{t=2}^T\xi_t(L_xd_t+\alpha L_u) \\
+\sum_{t=2}^T\xi_t(L_x\Delta_t^{\mathrm{end}}+\alpha L_u) \\
 &=
-\sum_{t=2}^T\xi_t a_t,
+\sum_{t=2}^T\xi_t \beta_t,
 \end{aligned}
 \end{equation}
-with $a_t$ as in \eqref{eq:sdac-lower-coeff}.
+with $\beta_t$ as in \eqref{eq:sdac-lower-beta}.
 
 Minimizing over all of $\mathcal M_H$ can only decrease the comparator cost.
 After canceling the common term $TC_\alpha$, the regret therefore satisfies
@@ -1705,11 +1710,11 @@ pointwise
 \label{eq:lower-two-comparator-reduction}
 \RegSDAC{T}
 \ge
-\widehat J_T^{\mathrm{on}}
+J_{T,\mathrm{ctr}}^{\mathrm{on}}
 -
 \min\!\left\{
-\widehat J_T^{(0)},
-\widehat J_T^{(1)}
+J_{T,\mathrm{ctr}}^{(0)},
+J_{T,\mathrm{ctr}}^{(1)}
 \right\}.
 \end{equation}
 Using
@@ -1719,19 +1724,19 @@ $\min\{a,b\}=(a+b-|a-b|)/2$ together with
 \begin{equation}
 \label{eq:lower-absolute-rademacher}
 \begin{aligned}
-\mathbb E\!\left[\RegSDAC{T}\right]
+\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[\RegSDAC{T}\right]
 &\ge
 \frac12
-\mathbb E\!\left[
+\mathbb E_{\boldsymbol\xi}\!\left[
 \left|
-\widehat J_T^{(0)}-\widehat J_T^{(1)}
+J_{T,\mathrm{ctr}}^{(0)}-J_{T,\mathrm{ctr}}^{(1)}
 \right|
 \right] \\
 &=
 \frac12
-\mathbb E\!\left[
+\mathbb E_{\boldsymbol\xi}\!\left[
 \left|
-\sum_{t=2}^T\xi_ta_t
+\sum_{t=2}^T\xi_t\beta_t
 \right|
 \right].
 \end{aligned}
@@ -1739,18 +1744,18 @@ $\min\{a,b\}=(a+b-|a-b|)/2$ together with
 Khintchine's inequality for Rademacher sums implies
 \begin{equation}
 \label{eq:lower-khintchine}
-\mathbb E\!\left[
+\mathbb E_{\boldsymbol\xi}\!\left[
 \left|
-\sum_{t=2}^T\xi_ta_t
+\sum_{t=2}^T\xi_t\beta_t
 \right|
 \right]
 \ge
 \frac{1}{\sqrt{2}}
 \left(
-\sum_{t=2}^Ta_t^2
+\sum_{t=2}^T\beta_t^2
 \right)^{1/2}.
 \end{equation}
-Substitution of \eqref{eq:sdac-lower-coeff} into
+Substitution of \eqref{eq:sdac-lower-beta} into
 \eqref{eq:lower-absolute-rademacher}--\eqref{eq:lower-khintchine} proves
 \eqref{eq:sdac-lower-exact} under the joint randomization of the signs and the
 controller.
@@ -1774,19 +1779,19 @@ internal randomization of $\mathcal A$.
 \end{proof}
 
 \begin{proof}[Proof of Corollary~\ref{cor:sdac-lower-mixing}]
-The definition of $q_\alpha$ gives
+The definition of $t_{\mathrm{mix}}(\alpha)$ gives
 \begin{equation}
 \label{eq:lower-mixing-geometric}
-\alpha^{q_\alpha}
+\alpha^{t_{\mathrm{mix}}(\alpha)}
 \le
 \alpha^{\log 2/\log(1/\alpha)}
 =\frac12.
 \end{equation}
-Therefore, for every $t\ge q_\alpha+2$,
+Therefore, for every $t\ge t_{\mathrm{mix}}(\alpha)+2$,
 \begin{equation}
-\label{eq:lower-a-post-mixing}
+\label{eq:lower-beta-post-mixing}
 \begin{aligned}
-a_t
+\beta_t
 &\ge
 \alpha\left(
 L_u+\frac{L_x}{2(1-\alpha)}
@@ -1799,11 +1804,12 @@ L_u+\frac{L_x}{1-\alpha}
 =\frac{G_\alpha}{2}.
 \end{aligned}
 \end{equation}
-There are $T-q_\alpha-1$ indices in
-$\{q_\alpha+2,\ldots,T\}$. If $T\ge2q_\alpha+2$, then
+There are $T-t_{\mathrm{mix}}(\alpha)-1$ indices in
+$\{t_{\mathrm{mix}}(\alpha)+2,\ldots,T\}$. If
+$T\ge2t_{\mathrm{mix}}(\alpha)+2$, then
 \begin{equation}
 \label{eq:lower-post-mixing-count}
-T-q_\alpha-1
+T-t_{\mathrm{mix}}(\alpha)-1
 \ge
 \frac{T}{2}.
 \end{equation}
@@ -1895,7 +1901,7 @@ It follows that
 u_t(\mathbf q)-u_t\bigl(\mathbf m_H(\mathbf q)\bigr)
 =
 \sum_{i=H+1}^{t-1}q_iw_{t-i}
-\le R_H(\mathbf q),
+\le \operatorname{Tail}_H(\mathbf q),
 \]
 where the middle sum is empty when $t\le H+1$. This proves
 \eqref{eq:allocation-action-gap}.
@@ -1915,13 +1921,13 @@ The two state recursions give
 e_{t+1}^x=\alpha e_t^x+e_t^u,
 \qquad e_1^x=0.
 \]
-Since $0\le e_t^u\le R_H(\mathbf q)$,
+Since $0\le e_t^u\le \operatorname{Tail}_H(\mathbf q)$,
 \[
 0\le e_t^x
 =
 \sum_{s=1}^{t-1}\alpha^{t-1-s}e_s^u
 \le
-\frac{R_H(\mathbf q)}{1-\alpha},
+\frac{\operatorname{Tail}_H(\mathbf q)}{1-\alpha},
 \]
 which proves \eqref{eq:allocation-state-gap}. The Lipschitz property now yields
 \[
@@ -1933,12 +1939,12 @@ c_t\bigl(x_t(\mathbf m_H(\mathbf q)),u_t(\mathbf m_H(\mathbf q))\bigr)
 -c_t\bigl(x_t(\mathbf q),u_t(\mathbf q)\bigr)
 \bigr| \\
 &\qquad\le
-\left(L_u+\frac{L_x}{1-\alpha}\right)R_H(\mathbf q).
+\left(L_u+\frac{L_x}{1-\alpha}\right)\operatorname{Tail}_H(\mathbf q).
 \end{aligned}
 \]
 Finally,
 \begin{align*}
-R_H(\mathbf q)
+\operatorname{Tail}_H(\mathbf q)
 &=
 \sum_{i=H+1}^{\infty}\alpha^ia_i\\
 &\le
@@ -1951,7 +1957,7 @@ It remains to identify proportional state-feedback policies within the
 decreasing-allocation policy class. For
 $k\in[0,\alpha]$, let $\lambda_k=\alpha-k$ and let $\mathbf q(k)$ be defined by
 \eqref{eq:proportional-as-allocation}. The sequence is nonnegative and decreasing.
-If $k=0$, then $\mathbf q(k)=\mathbf0\in\mathcal Q_\alpha^\downarrow$. If $k>0$,
+If $k=0$, then $\mathbf q(k)=\mathbf 0\in\mathcal Q_\alpha^\downarrow$. If $k>0$,
 then $\lambda_k/\alpha<1$ and
 \[
 \sum_{i=1}^{\infty}\frac{q_i(k)}{\alpha^i}
@@ -1976,7 +1982,7 @@ k\sum_{i=1}^{t-1}\lambda_k^{i-1}w_{t-i}
 The two policies therefore have identical action and state trajectories. Their
 SDAC truncations also coincide coordinatewise, and the omitted geometric tail is
 \[
-R_H\bigl(\mathbf q(k)\bigr)
+\operatorname{Tail}_H\bigl(\mathbf q(k)\bigr)
 =
 k\sum_{i=H+1}^{\infty}\lambda_k^{i-1}
 =
@@ -2021,14 +2027,18 @@ The projection objective $\mathbf{m}\mapsto D_\Psi(\mathbf{m}\|\widetilde{\mathb
 \end{equation}
 Its unconstrained minimizer is therefore $\mathbf{m}=\widetilde{\mathbf{m}}$.
 
-If $\|\widetilde{\mathbf{m}}\|_1\le1$, this minimizer belongs to $\mathcal{M}_H$, so
-$\operatorname{Proj}_{\mathcal{M}_H}^{\Psi}(\widetilde{\mathbf{m}})=\widetilde{\mathbf{m}}$. Suppose $\|\widetilde{\mathbf{m}}\|_1>1$. The constraint
+If $\|\widetilde{\mathbf{m}}\|_1\le1$, this minimizer belongs to $\mathcal{M}_H$, and hence
+\[
+\operatorname{Proj}_{\mathcal{M}_H}^{\Psi}(\widetilde{\mathbf{m}})
+=\widetilde{\mathbf{m}}.
+\]
+Suppose $\|\widetilde{\mathbf{m}}\|_1>1$. The constraint
 $\|\mathbf{m}\|_1\le1$ is then active. Moreover, the minimizer has no zero
-coordinate: if $m_\ell=0$, transferring an arbitrarily small amount of mass
-from a positive coordinate to coordinate $\ell$ has directional derivative
+coordinate: if $m_{i_0}=0$, transferring an arbitrarily small amount of mass
+from a positive coordinate to coordinate $i_0$ has directional derivative
 $-\infty$, because
 \[
-\lim_{z\downarrow0}\log\frac{z}{\widetilde{m}_\ell}=-\infty.
+\lim_{z\downarrow0}\log\frac{z}{\widetilde{m}_{i_0}}=-\infty.
 \]
 Thus the nonnegativity constraints are inactive. With $\nu\ge0$ denoting
 the multiplier of $\|\mathbf{m}\|_1\le1$, stationarity and complementary
@@ -2043,15 +2053,15 @@ The first relation in \eqref{eq:breg-kkt} implies
 \[
 m_i
 =
-\widetilde{m}_i e^{-\nu}.
+\widetilde{m}_i \exp(-\nu).
 \]
 Summing over $i$ and using the second relation in \eqref{eq:breg-kkt},
 \[
 1
 =
-\|\widetilde{\mathbf{m}}\|_1 e^{-\nu},
+\|\widetilde{\mathbf{m}}\|_1 \exp(-\nu),
 \qquad
-e^{-\nu}
+\exp(-\nu)
 =
 \frac{1}{\|\widetilde{\mathbf{m}}\|_1}.
 \]
@@ -2069,7 +2079,7 @@ Combining the cases $\|\widetilde{\mathbf{m}}\|_1\le1$ and $\|\widetilde{\mathbf
 Fix $\mathbf{m}_t\in\mathcal{M}_H\cap\mathbb{R}_{>0}^H$, $\eta>0$, and
 $\mathbf{g}_t\in\mathbb{R}^H$, and let
 $\widetilde{\mathbf{m}}_{t+1}$ be defined coordinatewise by \eqref{eq:alg-omd-mult},
-i.e.\ $\widetilde{m}_{t+1,i}=m_{t,i}e^{-\eta g_{t,i}}$. Then
+i.e.\ $\widetilde{m}_{t+1,i}=m_{t,i}\exp(-\eta g_{t,i})$. Then
 \[
 \begin{aligned}
 &\operatorname*{arg\,min}_{\mathbf{m}\in\mathcal{M}_H}\Bigl\{\eta\langle \mathbf{g}_t,\mathbf{m}\rangle+D_\Psi(\mathbf{m}\|\mathbf{m}_t)\Bigr\} \\
