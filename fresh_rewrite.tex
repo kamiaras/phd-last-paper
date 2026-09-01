@@ -1608,24 +1608,28 @@ Section~\ref{sec:regret-analysis} and the expressiveness lemma from
 Section~\ref{sec:sdac},
 together with the OMD and stability lemmas leading up to the upper regret bound.
 
-We first prove the lower bound. Following the standard random-sign mechanism for
-online linear-optimization lower bounds \cite{hazan2016introduction}, the
-construction embeds a two-comparator online linear problem into the two endpoint
-SDAC policies $\mathbf 0$ and $\mathbf e_1$.
+We first prove the lower bound. The proof uses the probabilistic method: we analyze
+a random family of oblivious cost sequences and then fix one realization whose
+expected regret is at least the average. Only two SDAC comparators are needed.
 
 \begin{proof}[Proof of Theorem~\ref{thm:sdac-lower-bound}]
 Fix a causal feasible controller $\mathcal A$. Let
-$\xi_1,\ldots,\xi_T$ be independent Rademacher random variables, sampled before
-the interaction and independently of the internal randomization of $\mathcal A$.
-Consider the following oblivious construction. The arrival sequence is fixed in
-advance as
+$\xi_1,\ldots,\xi_T$ be independent random signs, also independent of the internal
+randomization of $\mathcal A$, with
+\[
+\mathbb P(\xi_t=1)
+=
+\mathbb P(\xi_t=-1)
+=\frac12.
+\]
+For the moment, regard the signs as sampled before the interaction. Set
 \begin{equation}
 \label{eq:lower-hard-arrival}
 w_t=1
 \qquad
 \text{for all }t\in[T],
 \end{equation}
-while only the costs are random:
+and define the costs by
 \begin{equation}
 \label{eq:lower-hard-cost}
 c_t(x,u)
@@ -1636,12 +1640,13 @@ C_\alpha+\xi_t(L_xx-L_uu)
 \end{equation}
 where
 \begin{equation}
-\label{eq:lower-cost-offset}
+\label{eq:lower-cost-constant}
 C_\alpha
 \triangleq
 \frac{L_x+\alpha L_u}{1-\alpha}.
 \end{equation}
-Each $c_t$ is affine and hence convex. For any two points in
+The offset $C_\alpha$ ensures that the costs are nonnegative without affecting
+regret. Indeed, each $c_t$ is affine and hence convex, and, for any two points in
 $\mathcal D_\alpha$,
 \begin{equation}
 \label{eq:lower-lipschitz-check}
@@ -1653,9 +1658,16 @@ $\mathcal D_\alpha$,
 L_x|x-x'|+L_u|u-u'|.
 \end{aligned}
 \end{equation}
-The constant gradient
-$\xi_t(L_x,-L_u)$ also obeys the bounded-subgradient assumption. Moreover, for
-$(x,u)\in\mathcal D_\alpha$,
+Moreover,
+\[
+\nabla c_t=\xi_t(L_x,-L_u),
+\qquad
+|\partial_xc_t|=L_x,
+\qquad
+|\partial_uc_t|=L_u,
+\]
+so the required subgradient bounds hold. Finally, if
+$(x,u)\in\mathcal D_\alpha$, then
 \begin{equation}
 \label{eq:lower-cost-nonnegative}
 \begin{aligned}
@@ -1665,20 +1677,33 @@ $(x,u)\in\mathcal D_\alpha$,
 =C_\alpha.
 \end{aligned}
 \end{equation}
-Thus, the offset is large enough to raise the minimum cost over the feasible domain to zero, making all feasible costs nonnegative.
+Therefore,
+\[
+\begin{aligned}
+c_t(x,u)
+&=C_\alpha+\xi_t(L_xx-L_uu) \\
+&\ge C_\alpha-|L_xx-L_uu| \\
+&\ge0.
+\end{aligned}
+\]
 
-Because $H\ge1$, both
+We now select two benchmark policies. The parameter
+$\mathbf m^{(0)}$ leaves all mass in the subprobability simplex unused, so its
+SDAC action is always zero. The parameter $\mathbf m^{(1)}$ places all mass on the
+first lag, so its action is $\alpha w_{t-1}$. Formally, because $H\ge1$,
 \begin{equation}
-\label{eq:lower-endpoint-parameters}
+\label{eq:lower-two-policy-parameters}
 \mathbf m^{(0)}\triangleq\mathbf 0,
 \qquad
 \mathbf m^{(1)}\triangleq\mathbf e_1
 \end{equation}
-belong to $\mathcal M_H$, where $\mathbf e_1$ is the first standard basis vector
-in $\mathbb R^H$. Under the arrivals in
-\eqref{eq:lower-hard-arrival}, the first endpoint has
+belong to $\mathcal M_H$, where
+$\mathbf e_1=(1,0,\ldots,0)\in\mathbb R^H$. Thus, under
+\eqref{eq:lower-hard-arrival}, $\mathbf m^{(0)}$ is the no-release policy, whereas
+$\mathbf m^{(1)}$ releases the retained portion of the preceding arrival. For the
+no-release policy,
 \begin{equation}
-\label{eq:lower-endpoint-zero-trajectory}
+\label{eq:lower-policy-zero-trajectory}
 u_t(\mathbf m^{(0)})=0,
 \qquad
 x_t(\mathbf m^{(0)})
@@ -1687,34 +1712,49 @@ x_t(\mathbf m^{(0)})
 \triangleq
 \frac{1-\alpha^{t-1}}{1-\alpha}.
 \end{equation}
-Indeed, this follows by unrolling
-$x_{t+1}=\alpha x_t+1$ from $x_1=0$. At the second endpoint,
+This follows by unrolling $x_{t+1}=\alpha x_t+1$:
+\[
+x_t(\mathbf m^{(0)})
+=\sum_{s=0}^{t-2}\alpha^s
+=\frac{1-\alpha^{t-1}}{1-\alpha},
+\qquad t\ge2,
+\]
+and the closed form also gives $x_1(\mathbf m^{(0)})=0$. For the one-lag policy,
+\eqref{eq:def-sdac-policy} gives
 \begin{equation}
-\label{eq:lower-endpoint-one-action}
+\label{eq:lower-policy-one-action}
 u_1(\mathbf m^{(1)})=0,
 \qquad
 u_t(\mathbf m^{(1)})=\alpha,
 \quad t\ge2.
 \end{equation}
-The state satisfies $x_2(\mathbf m^{(1)})=1$. If it equals one at a time
-$t\ge2$, then
+Its state at $t=2$ is
 \[
-x_{t+1}(\mathbf m^{(1)})
-=\alpha-\alpha+1
+x_2(\mathbf m^{(1)})
+=\alpha x_1(\mathbf m^{(1)})-u_1(\mathbf m^{(1)})+w_1
 =1.
 \]
-Consequently,
+If $x_t(\mathbf m^{(1)})=1$ for some $t\ge2$, then
+\[
+\begin{aligned}
+x_{t+1}(\mathbf m^{(1)})
+&=\alpha x_t(\mathbf m^{(1)})-u_t(\mathbf m^{(1)})+w_t \\
+&=\alpha-\alpha+1
+=1.
+\end{aligned}
+\]
+Induction therefore gives
 \begin{equation}
-\label{eq:lower-endpoint-one-trajectory}
+\label{eq:lower-policy-one-trajectory}
 x_t(\mathbf m^{(1)})=1,
 \qquad
 t\ge2.
 \end{equation}
-For $t\ge2$, the state difference between the endpoints is
+For $t\ge2$, the difference between the two states is
 \begin{equation}
-\label{eq:lower-endpoint-state-gap}
+\label{eq:lower-two-policy-state-difference}
 \begin{aligned}
-\Delta_t^{\mathrm{end}}
+\Delta_t
 &\triangleq
 x_t(\mathbf m^{(0)})-x_t(\mathbf m^{(1)}) \\
 &=\rho_t-1 \\
@@ -1722,91 +1762,114 @@ x_t(\mathbf m^{(0)})-x_t(\mathbf m^{(1)}) \\
 \end{aligned}
 \end{equation}
 
-Remove the common offset by defining the centered online and endpoint costs
+The offset $C_\alpha$ appears once at each time in every total cost. Hence, for
+$j\in\{0,1\}$,
 \begin{equation}
-\label{eq:lower-centered-costs}
+\label{eq:lower-costs-minus-common-term}
 \begin{aligned}
-J_{T,\mathrm{ctr}}^{\mathrm{on}}
-&\triangleq
+J_T^{\mathrm{on}}-TC_\alpha
+&=
 \sum_{t=1}^T\xi_t(L_xx_t-L_uu_t), \\
-J_{T,\mathrm{ctr}}^{(j)}
-&\triangleq
-\sum_{t=1}^T\xi_t
-\left(
-L_xx_t(\mathbf m^{(j)})
--L_uu_t(\mathbf m^{(j)})
-\right),
-\quad j\in\{0,1\}.
+J_T(\mathbf m^{(j)})-TC_\alpha
+&=
+\sum_{t=1}^T\xi_t L_xx_t(\mathbf m^{(j)}) \\
+&\quad-
+\sum_{t=1}^T\xi_t L_uu_t(\mathbf m^{(j)}).
 \end{aligned}
 \end{equation}
-At time $t$, the pair $(x_t,u_t)$ is determined by the past observations and the
-controller randomization used before $c_t$ is revealed. It is therefore
-independent of the fresh sign $\xi_t$. Conditional mean zero gives
+Let $\mathcal F_t^-$ denote the information available immediately before $c_t$ is
+revealed, including the controller randomization used to select $u_t$. Causality
+implies that $(x_t,u_t)$ is $\mathcal F_t^-$-measurable, while the fresh sign
+$\xi_t$ is independent of $\mathcal F_t^-$. Consequently,
 \begin{equation}
 \label{eq:lower-online-mean-zero}
 \begin{aligned}
+\mathbb E[\xi_t\mid\mathcal F_t^-]
+&=0, \\
 \mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[
 \xi_t(L_xx_t-L_uu_t)
-\,\middle|\,
-x_t,u_t
 \right]
+&=
+\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[
+(L_xx_t-L_uu_t)
+\mathbb E[\xi_t\mid\mathcal F_t^-]
+\right] \\
 &=0, \\
-\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[J_{T,\mathrm{ctr}}^{\mathrm{on}}\right]
+\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[
+J_T^{\mathrm{on}}-TC_\alpha
+\right]
 &=0.
 \end{aligned}
 \end{equation}
-Likewise, the two fixed endpoint trajectories do not depend on the signs, so
+The two fixed-policy trajectories depend only on the arrival sequence and hence
+are also independent of the signs. Thus, for $j\in\{0,1\}$,
 \begin{equation}
-\label{eq:lower-endpoint-means-zero}
-\mathbb E_{\boldsymbol\xi}\!\left[J_{T,\mathrm{ctr}}^{(0)}\right]
-=
-\mathbb E_{\boldsymbol\xi}\!\left[J_{T,\mathrm{ctr}}^{(1)}\right]
-=0.
+\label{eq:lower-two-policy-means-zero}
+\begin{aligned}
+\mathbb E_{\boldsymbol\xi}\!\left[
+J_T(\mathbf m^{(j)})-TC_\alpha
+\right]
+&=
+\sum_{t=1}^T
+\mathbb E[\xi_t]
+L_xx_t(\mathbf m^{(j)}) \\
+&\quad-
+\sum_{t=1}^T
+\mathbb E[\xi_t]
+L_uu_t(\mathbf m^{(j)}) \\
+&=0.
+\end{aligned}
 \end{equation}
 
-Since the two endpoints agree at $t=1$, equations
-\eqref{eq:lower-endpoint-zero-trajectory},
-\eqref{eq:lower-endpoint-one-action}, and
-\eqref{eq:lower-endpoint-state-gap} give
+The two policies have the same state and action at $t=1$. For $t\ge2$,
+\eqref{eq:lower-policy-one-action} and
+\eqref{eq:lower-two-policy-state-difference} give
 \begin{equation}
-\label{eq:lower-endpoint-cost-gap}
+\label{eq:lower-two-policy-cost-difference}
 \begin{aligned}
-J_{T,\mathrm{ctr}}^{(0)}-J_{T,\mathrm{ctr}}^{(1)}
+J_T(\mathbf m^{(0)})-J_T(\mathbf m^{(1)})
 &=
-\sum_{t=2}^T\xi_t(L_x\Delta_t^{\mathrm{end}}+\alpha L_u) \\
+\sum_{t=2}^T\xi_t(L_x\Delta_t+\alpha L_u) \\
 &=
 \sum_{t=2}^T\xi_t \beta_t,
 \end{aligned}
 \end{equation}
 with $\beta_t$ as in \eqref{eq:sdac-lower-beta}.
 
-Minimizing over all of $\mathcal M_H$ can only decrease the comparator cost.
-After canceling the common term $TC_\alpha$, the regret therefore satisfies
-pointwise
+Because $\mathbf m^{(0)},\mathbf m^{(1)}\in\mathcal M_H$, for every choice of the
+signs and every choice made by the controller,
 \begin{equation}
-\label{eq:lower-two-comparator-reduction}
+\label{eq:lower-two-policy-regret}
+\begin{aligned}
 \RegSDAC{T}
-\ge
-J_{T,\mathrm{ctr}}^{\mathrm{on}}
--
-\min\!\left\{
-J_{T,\mathrm{ctr}}^{(0)},
-J_{T,\mathrm{ctr}}^{(1)}
-\right\}.
+&=
+J_T^{\mathrm{on}}
+-\min_{\mathbf m\in\mathcal M_H}J_T(\mathbf m) \\
+&\ge
+J_T^{\mathrm{on}}
+-\min\!\left\{
+J_T(\mathbf m^{(0)}),
+J_T(\mathbf m^{(1)})
+\right\} \\
+&=
+\left(J_T^{\mathrm{on}}-TC_\alpha\right)
+-\min_{j\in\{0,1\}}
+\left\{J_T(\mathbf m^{(j)})-TC_\alpha\right\}.
+\end{aligned}
 \end{equation}
-Using
-$\min\{a,b\}=(a+b-|a-b|)/2$ together with
+Using $\min\{a,b\}=(a+b-|a-b|)/2$ together with
 \eqref{eq:lower-online-mean-zero} and
-\eqref{eq:lower-endpoint-means-zero}, we obtain
+\eqref{eq:lower-two-policy-means-zero}, and then taking expectations in
+\eqref{eq:lower-two-policy-regret}, gives
 \begin{equation}
-\label{eq:lower-absolute-rademacher}
+\label{eq:lower-absolute-random-sign}
 \begin{aligned}
 \mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[\RegSDAC{T}\right]
 &\ge
 \frac12
 \mathbb E_{\boldsymbol\xi}\!\left[
 \left|
-J_{T,\mathrm{ctr}}^{(0)}-J_{T,\mathrm{ctr}}^{(1)}
+J_T(\mathbf m^{(0)})-J_T(\mathbf m^{(1)})
 \right|
 \right] \\
 &=
@@ -1818,9 +1881,9 @@ J_{T,\mathrm{ctr}}^{(0)}-J_{T,\mathrm{ctr}}^{(1)}
 \right].
 \end{aligned}
 \end{equation}
-Khintchine's inequality for Rademacher sums implies
+Khintchine's inequality for independent random signs yields
 \begin{equation}
-\label{eq:lower-khintchine}
+\label{eq:lower-random-sign-bound}
 \mathbb E_{\boldsymbol\xi}\!\left[
 \left|
 \sum_{t=2}^T\xi_t\beta_t
@@ -1832,28 +1895,34 @@ Khintchine's inequality for Rademacher sums implies
 \sum_{t=2}^T\beta_t^2
 \right)^{1/2}.
 \end{equation}
-Substitution of \eqref{eq:sdac-lower-beta} into
-\eqref{eq:lower-absolute-rademacher}--\eqref{eq:lower-khintchine} proves
-\eqref{eq:sdac-lower-exact} under the joint randomization of the signs and the
-controller.
+Combining \eqref{eq:lower-absolute-random-sign} and
+\eqref{eq:lower-random-sign-bound} gives
+\begin{equation}
+\label{eq:lower-randomized-sequence-bound}
+\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[\RegSDAC{T}\right]
+\ge
+\frac{1}{2\sqrt2}
+\left(\sum_{t=2}^T\beta_t^2\right)^{1/2}.
+\end{equation}
 
-It remains to make the adversarial sequence deterministic. For a fixed sign vector
-$\boldsymbol\xi\in\{-1,1\}^T$, let
+It remains to remove the randomization from the adversarial construction. The
+left-hand side of \eqref{eq:lower-randomized-sequence-bound} is the average over
+all $2^T$ fixed sign vectors:
 \[
-R_{\mathcal A}(\boldsymbol\xi)
-\triangleq
+\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[\RegSDAC{T}\right]
+=
+\frac{1}{2^T}
+\sum_{\boldsymbol\xi\in\{-1,1\}^T}
 \mathbb E_{\mathcal A}\!\left[
 \RegSDAC{T}\,\middle|\,\boldsymbol\xi
 \right].
 \]
-The bound just proved states that the average of
-$R_{\mathcal A}(\boldsymbol\xi)$ over the $2^T$ sign vectors is at least the
-right-hand side of \eqref{eq:sdac-lower-exact}. Hence at least one deterministic
-vector $\boldsymbol\xi^\star$ attains that value. Fixing
+Hence at least one vector $\boldsymbol\xi^\star$ makes the conditional expectation
+at least the right-hand side of \eqref{eq:lower-randomized-sequence-bound}. Fixing
 $\boldsymbol\xi^\star$ in \eqref{eq:lower-hard-cost}, together with the arrivals
-in \eqref{eq:lower-hard-arrival}, produces a deterministic oblivious admissible
-sequence, and the only remaining expectation is over the internal randomization
-of $\mathcal A$.
+in \eqref{eq:lower-hard-arrival}, produces a deterministic admissible sequence
+fixed before the interaction. The remaining expectation is only over the internal
+randomization of $\mathcal A$, and \eqref{eq:sdac-lower-exact} follows.
 \end{proof}
 
 \begin{proof}[Proof of Corollary~\ref{cor:sdac-lower-mixing}]
