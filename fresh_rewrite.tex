@@ -1617,14 +1617,22 @@ SDAC policies $\mathbf 0$ and $\mathbf e_1$.
 Fix a causal feasible controller $\mathcal A$. Let
 $\xi_1,\ldots,\xi_T$ be independent Rademacher random variables, sampled before
 the interaction and independently of the internal randomization of $\mathcal A$.
-Consider the oblivious random construction
+Consider the following oblivious construction. The arrival sequence is fixed in
+advance as
 \begin{equation}
-\label{eq:lower-hard-instance}
-w_t=1,
+\label{eq:lower-hard-arrival}
+w_t=1
 \qquad
+\text{for all }t\in[T],
+\end{equation}
+while only the costs are random:
+\begin{equation}
+\label{eq:lower-hard-cost}
 c_t(x,u)
 =
-C_\alpha+\xi_t(L_xx-L_uu),
+C_\alpha+\xi_t(L_xx-L_uu)
+\qquad
+\text{for all }t\in[T],
 \end{equation}
 where
 \begin{equation}
@@ -1657,8 +1665,7 @@ $(x,u)\in\mathcal D_\alpha$,
 =C_\alpha.
 \end{aligned}
 \end{equation}
-Thus the offset even makes the costs nonnegative on the feasible domain, although
-it will cancel from regret.
+Thus, the offset is large enough to raise the minimum cost over the feasible domain to zero, making all feasible costs nonnegative.
 
 Because $H\ge1$, both
 \begin{equation}
@@ -1669,7 +1676,7 @@ Because $H\ge1$, both
 \end{equation}
 belong to $\mathcal M_H$, where $\mathbf e_1$ is the first standard basis vector
 in $\mathbb R^H$. Under the arrivals in
-\eqref{eq:lower-hard-instance}, the first endpoint has
+\eqref{eq:lower-hard-arrival}, the first endpoint has
 \begin{equation}
 \label{eq:lower-endpoint-zero-trajectory}
 u_t(\mathbf m^{(0)})=0,
@@ -1843,9 +1850,10 @@ The bound just proved states that the average of
 $R_{\mathcal A}(\boldsymbol\xi)$ over the $2^T$ sign vectors is at least the
 right-hand side of \eqref{eq:sdac-lower-exact}. Hence at least one deterministic
 vector $\boldsymbol\xi^\star$ attains that value. Fixing
-$\boldsymbol\xi^\star$ in \eqref{eq:lower-hard-instance} produces a deterministic
-oblivious admissible sequence, and the only remaining expectation is over the
-internal randomization of $\mathcal A$.
+$\boldsymbol\xi^\star$ in \eqref{eq:lower-hard-cost}, together with the arrivals
+in \eqref{eq:lower-hard-arrival}, produces a deterministic oblivious admissible
+sequence, and the only remaining expectation is over the internal randomization
+of $\mathcal A$.
 \end{proof}
 
 \begin{proof}[Proof of Corollary~\ref{cor:sdac-lower-mixing}]
