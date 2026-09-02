@@ -781,8 +781,11 @@ u_t(\mathbf m_H(\mathbf q))\bigr)
 \left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H+1}T.
 \end{aligned}
 \end{equation}
+\end{lemma}
 
-In particular, fix $k\in[0,\alpha]$, set $\lambda_k\triangleq\alpha-k$, and define
+\begin{corollary}[Proportional state feedback as a geometric allocation]
+\label{cor:proportional-as-allocation}
+Fix $k\in[0,\alpha]$, set $\lambda_k\triangleq\alpha-k$, and define
 \begin{equation}
 \label{eq:proportional-as-allocation}
 q_i(k)=k\lambda_k^{i-1},
@@ -823,11 +826,14 @@ Therefore, \eqref{eq:allocation-cost-gap} specializes exactly to
 \frac{k\lambda_k^H}{1-\lambda_k}\,T.
 \end{aligned}
 \end{equation}
-The proof is deferred to Appendix~\ref{sec:appendix-sdac-proofs}.
-\end{lemma}
+\end{corollary}
 
-$\Pi_\alpha^{\mathrm{alloc}}$ contains every feasible proportional state-feedback
-policy and also permits nongeometric allocation sequences. Together with
+The proofs of Lemma~\ref{lem:sdac-allocation-approx} and
+Corollary~\ref{cor:proportional-as-allocation} are given in
+Appendix~\ref{sec:appendix-sdac-proofs}.
+
+Thus, $\Pi_\alpha^{\mathrm{alloc}}$ contains every feasible proportional
+state-feedback policy and also permits nongeometric allocation sequences. Together with
 Theorem~\ref{thm:regret-bound}, the tail bound in
 \eqref{eq:allocation-cost-gap} yields no regret against
 $\Pi_\alpha^{\mathrm{alloc}}$ and, consequently, against feasible proportional
@@ -1167,10 +1173,11 @@ O\!\left(\sqrt{T\log\log T}\right)
 \begin{proof}
 For fixed $k$, Theorem~\ref{thm:regret-bound} applied to
 $\mathbf m_{H_T}^{\mathrm{prop}}(k)$, followed by \eqref{eq:sdac-lin-approx-cost}, gives
-\eqref{eq:linear-regret-decomposition}. The geometric allocation sequence
-$\mathbf q(k)$ belongs to $\mathcal Q_\alpha^\downarrow$, so
-$\operatorname{Tail}_{H_T}(\mathbf q(k))\le\alpha^{H_T+1}$ by
-Lemma~\ref{lem:sdac-allocation-approx}. This makes the bound uniform in $k$;
+\eqref{eq:linear-regret-decomposition}.
+Corollary~\ref{cor:proportional-as-allocation} shows that the geometric allocation
+sequence $\mathbf q(k)$ belongs to $\mathcal Q_\alpha^\downarrow$, so
+Lemma~\ref{lem:sdac-allocation-approx} gives
+$\operatorname{Tail}_{H_T}(\mathbf q(k))\le\alpha^{H_T+1}$. This makes the bound uniform in $k$;
 minimizing over $k$ proves the stated finite-time and asymptotic guarantees.
 \end{proof}
 
@@ -1990,10 +1997,10 @@ Finally,
 \le\alpha^{H+1}.
 \end{align*}
 Summing the per-period cost bound proves \eqref{eq:allocation-cost-gap}.
+\end{proof}
 
-It remains to identify proportional state-feedback policies within the
-decreasing-allocation policy class. For
-$k\in[0,\alpha]$, let $\lambda_k=\alpha-k$ and let $\mathbf q(k)$ be defined by
+\begin{proof}[Proof of Corollary~\ref{cor:proportional-as-allocation}]
+Fix $k\in[0,\alpha]$, let $\lambda_k=\alpha-k$, and let $\mathbf q(k)$ be defined by
 \eqref{eq:proportional-as-allocation}. The sequence is nonnegative and decreasing.
 If $k=0$, then $\mathbf q(k)=\mathbf 0\in\mathcal Q_\alpha^\downarrow$. If $k>0$,
 then $\lambda_k/\alpha<1$ and
