@@ -49,10 +49,8 @@ also derive a minimax lower bound showing that the dependence on $T$ is tight. W
 then show that SDAC
 geometrically approximates a decreasing-allocation policy class that spreads each
 arrival over time according to a common decreasing allocation sequence, a structure
-that arises in stochastic energy-harvesting control. Geometric allocation sequences
-induce all feasible proportional state-feedback policies. With
-$H=\Theta(\log T)$, the resulting regret against the decreasing-allocation class,
-and hence against feasible proportional state-feedback policies, is
+that arises in stochastic energy-harvesting control. With
+$H=\Theta(\log T)$, the resulting regret against the decreasing-allocation class is
 $O\!\left(\sqrt{T\log\log T}\right)$. The framework applies to energy-harvesting
 batteries and other storage-constrained resource systems.
 \end{abstract}
@@ -70,27 +68,25 @@ regret minimization, state-dependent action constraints.
 over time and limits the control action at each time. An action that lowers the
 current cost may leave less resource for future decisions, while conserving the
 resource may increase the current cost. The controller must balance these effects
-while satisfying the action constraint at every time.
+while satisfying this constraint at every step.
 
 We study this problem for a scalar storage system that loses a fixed fraction of
 its stored resource each period. At each time, the controller observes the current
 state and all past arrivals and cost functions, chooses a control action, and then
 observes the current arrival and cost function. The arrival and cost sequences may
-be chosen adversarially based on past observations; we do not assume a known
+be chosen adversarially which means we do not assume a known
 probability model. Our goal is to construct a feasible online controller whose
 cumulative cost is close to that of the best fixed policy, chosen in hindsight,
 from a specified benchmark class.
 
-The main difficulty is that the current action affects both the next state and the
-actions that will be feasible later. Therefore, the controller cannot update its
-decisions independently at each time. \emph{Disturbance-Action Control} (DAC)
-policies address this dependence by combining a stabilizing state-feedback term
-with a linear function of past disturbances. In our storage model, however,
-unrestricted filter weights can produce a negative action or an action larger than
+One difficulty is that the current action affects the next state. In online control,
+the \emph{Disturbance-Action Control} (DAC) policy class which is prametrized by a linear filter of past disturbances
+is used to achieve a tractable algorithm with bounded regret. In our storage model, however,
+some DAC policies can produce a negative action or an action larger than
 the available resource.
 
 We address this issue by introducing \emph{Simplex Disturbance-Action Control}
-(SDAC). SDAC restricts the filter weights to a subprobability simplex and includes
+(SDAC). SDAC restricts the filter parameters to a subprobability simplex and includes
 powers of the retention coefficient in the filter. These choices ensure that
 every fixed SDAC policy satisfies the action constraint. The state and action
 components of each fixed-policy trajectory are also affine in the policy parameter,
@@ -115,8 +111,7 @@ loss.
 At time $t$, the controller chooses $u_t$ using the current state and the
 information available through time $t-1$. The arrival $w_t$ and the convex cost
 function $c_t$ are revealed after the action is selected, and the controller incurs
-the cost $c_t(x_t,u_t)$. The pair $(w_t,c_t)$ may depend on the observations through
-time $t-1$, but not on the current action. Both the online trajectory and every
+the cost $c_t(x_t,u_t)$. Both the online trajectory and every
 fixed-policy trajectory used as a benchmark must satisfy the same dynamics and
 action constraint. The
 formal model and assumptions are given in Section~\ref{sec:model-setup}.
@@ -135,12 +130,9 @@ Section~\ref{sec:extensions}.
 Our contributions are as follows:
 \begin{itemize}
 \item \textbf{Policy class.}
-We introduce SDAC, a finite-memory policy class parameterized by a
-subprobability simplex. We prove that every fixed SDAC policy is feasible
-for every arrival sequence with entries in $[0,1]$. We also show that the state and
-action components of each fixed-policy trajectory are affine in its parameter. Under our
-convexity and Lipschitz assumptions on the state--action costs, the induced cost is
-convex and Lipschitz as a function of the policy parameter.
+    We introduce SDAC, a finite-memory policy class parameterized by a
+    subprobability simplex. We prove that every fixed SDAC policy is feasible
+    for every arrival sequence with entries in $[0,1]$.
 
     We further show that SDAC approximates the decreasing-allocation policy
     class defined in
@@ -152,35 +144,26 @@ convex and Lipschitz as a function of the policy parameter.
 
 \item \textbf{Online control and regret.}
     We develop an online controller that updates its SDAC parameter using
-    entropic online mirror descent (OMD) over the subprobability simplex. Because the
-    parameter changes over time, the nominal SDAC action is clipped when needed
-    to satisfy the current action constraint. We prove that this controller
+    entropic online mirror descent (OMD) over the subprobability simplex.
+    We prove that this controller
     remains feasible and achieves
     \[
     O\!\left(\sqrt{T\log(H+1)}\right)
     \]
-    regret against the best fixed SDAC policy; see
-    Theorem~\ref{thm:regret-bound}. For fixed $L_x$ and $L_u$, the leading
-    factor scales as
-    $\Theta((1-\alpha)^{-3/2})$ as $\alpha\uparrow1$.
-
-    For fixed $\alpha$, take the memory horizon $H$ to grow as $\log T$. The
-    resulting regret is
-    $O(\sqrt{T\log\log T})$ against the decreasing-allocation class. The same bound
-    holds against the best feasible proportional state-feedback policy; see
-    Corollaries~\ref{cor:regret-vs-allocation}
-    and~\ref{cor:regret-vs-linear}.
+    regret against the best fixed SDAC policy.
+    Also for $H=\Theta(\log T)$, the
+     regret against the decreasing-allocation class is
+    $O(\sqrt{T\log\log T})$. The same bound
+    holds against the best proportional state-feedback policy.
 
 \item \textbf{Minimax lower bound.}
     We prove a lower bound of order $\sqrt{T}$ on the expected regret of every
-    causal feasible controller, including randomized controllers, even when the
-    arrival and cost sequences are deterministic and fixed in advance; see
+    causal feasible controller, including randomized controllers; see
     Theorem~\ref{thm:sdac-lower-bound}. When $T$ is at least on the order of
     $(1-\alpha)^{-1}$, the lower bound scales as
-    $\Omega((1-\alpha)^{-1}\sqrt{T})$ near $\alpha=1$; see
-    Corollary~\ref{cor:sdac-lower-mixing} and
-    Remark~\ref{rem:large-alpha-regime}. The dependence of the upper and lower
-    bounds on $1-\alpha$ therefore differs by a factor
+    $\Omega((1-\alpha)^{-1}\sqrt{T})$ near $\alpha=1$.
+    The dependence of the upper and lower
+    bounds on $1-\alpha$ differs by a factor
     $(1-\alpha)^{-1/2}$. Closing this gap is left for future work.
 \end{itemize}
 
@@ -279,7 +262,7 @@ related to our model. Section~\ref{sec:extensions} discusses the case when $\alp
 Khojastepour and Sabharwal \cite{khojastepour2004delay} study a fixed scheduler
 that can be written as a linear filter of past arrivals. Their scheduler minimizes
 average transmit power subject to a maximum-delay guarantee. In contrast, our
-controller updates its filter weights online in response to convex state--action
+controller updates its filter parameters online in response to convex state--action
 costs revealed after each decision.
 
 \paragraph{Inventory and reservoir management}
