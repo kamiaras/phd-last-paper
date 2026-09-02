@@ -945,7 +945,7 @@ Appendix~\ref{sec:appendix-algorithm-proofs}.
 \section{Regret Analysis}
 \label{sec:regret-analysis}
 The following theorem states that the online controller achieves sublinear regret
-against every fixed SDAC policy $\pi_{\mathbf{m}}\in\Pi_\alpha^{\mathrm{sdac}}$.
+against every fixed SDAC policy $\pi_{\mathbf{m}}\in\Pi_H^{\mathrm{sdac}}$.
 The proof combines a standard online convex optimization bound for the surrogate
 costs $\ell_t$ with the trajectory-stability result stated below. The complete
 proofs are deferred to Appendix~\ref{sec:appendix-regret-proofs}.
@@ -953,8 +953,7 @@ proofs are deferred to Appendix~\ref{sec:appendix-regret-proofs}.
 \begin{theorem}[Regret bound]
 \label{thm:regret-bound}
 Suppose the cost functions satisfy the regularity and bounded-subgradient
-assumptions of Section~\ref{sec:model-setup}. Then the OMD controller with
-action clipping from Section~\ref{sec:online-algorithm}, initialized as in
+assumptions of Section~\ref{sec:model-setup}. Then the online controller from Section~\ref{sec:online-algorithm}, initialized as in
 \eqref{eq:alg-init} and using step size $\eta>0$, satisfies, for the regret defined in \eqref{eq:def-regret},
 \begin{equation}
 \label{eq:regret-theorem-bound}
