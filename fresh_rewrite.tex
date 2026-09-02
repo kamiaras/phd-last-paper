@@ -1101,32 +1101,6 @@ O\!\left(\sqrt{T\log\log T}\right)
 \]
 \end{corollary}
 
-\begin{proof}
-Fix $\mathbf q\in\mathcal Q_\alpha^\downarrow$ and use the SDAC comparator
-$\mathbf m_{H_T}(\mathbf q)$ from
-Lemma~\ref{lem:sdac-allocation-approx}. Theorem~\ref{thm:regret-bound} and
-\eqref{eq:allocation-cost-gap} give
-\[
-\begin{aligned}
-J_T^{\mathrm{on}}-J_T(\mathbf q)
-&\le
-2\sqrt{\Gamma_\alpha T\log(H_T+1)}\\
-&\quad+
-\left(L_u+\frac{L_x}{1-\alpha}\right)
-\operatorname{Tail}_{H_T}(\mathbf q)T\\
-&\le
-2\sqrt{\Gamma_\alpha T\log(H_T+1)}\\
-&\quad+
-\left(L_u+\frac{L_x}{1-\alpha}\right)
-\alpha^{H_T+1}T.
-\end{aligned}
-\]
-The bound is uniform in $\mathbf q$, so taking the infimum comparator cost proves
-\eqref{eq:allocation-regret-bound}. Finally,
-$H_T\ge\log T/\log(1/\alpha)$ implies $\alpha^{H_T}\le1/T$, while
-$H_T=\Theta(\log T)$ implies $\log(H_T+1)=O(\log\log T)$.
-\end{proof}
-
 Because geometric allocation sequences induce proportional state feedback, the
 same controller also satisfies a gain-dependent bound for that policy family.
 
@@ -1170,16 +1144,9 @@ O\!\left(\sqrt{T\log\log T}\right)
 \]
 \end{corollary}
 
-\begin{proof}
-For fixed $k$, Theorem~\ref{thm:regret-bound} applied to
-$\mathbf m_{H_T}^{\mathrm{prop}}(k)$, followed by \eqref{eq:sdac-lin-approx-cost}, gives
-\eqref{eq:linear-regret-decomposition}.
-Corollary~\ref{cor:proportional-as-allocation} shows that the geometric allocation
-sequence $\mathbf q(k)$ belongs to $\mathcal Q_\alpha^\downarrow$, so
-Lemma~\ref{lem:sdac-allocation-approx} gives
-$\operatorname{Tail}_{H_T}(\mathbf q(k))\le\alpha^{H_T+1}$. This makes the bound uniform in $k$;
-minimizing over $k$ proves the stated finite-time and asymptotic guarantees.
-\end{proof}
+The proofs of Corollaries~\ref{cor:regret-vs-allocation}
+and~\ref{cor:regret-vs-linear} are given in
+Appendix~\ref{sec:appendix-regret-proofs}.
 
 \section{Minimax Lower Bound}
 \label{sec:minimax-lower-bound}
@@ -2822,6 +2789,44 @@ L_x(L_x+L_u)>0.
 Thus
 $\sqrt{\Gamma_\alpha}=\Theta((1-\alpha)^{-3/2})$ as
 $\alpha\uparrow1$.
+\end{proof}
+
+\begin{proof}[Proof of Corollary~\ref{cor:regret-vs-allocation}]
+Fix $\mathbf q\in\mathcal Q_\alpha^\downarrow$ and use the SDAC comparator
+$\mathbf m_{H_T}(\mathbf q)$ from
+Lemma~\ref{lem:sdac-allocation-approx}. Theorem~\ref{thm:regret-bound} and
+\eqref{eq:allocation-cost-gap} give
+\[
+\begin{aligned}
+J_T^{\mathrm{on}}-J_T(\mathbf q)
+&\le
+2\sqrt{\Gamma_\alpha T\log(H_T+1)}\\
+&\quad+
+\left(L_u+\frac{L_x}{1-\alpha}\right)
+\operatorname{Tail}_{H_T}(\mathbf q)T\\
+&\le
+2\sqrt{\Gamma_\alpha T\log(H_T+1)}\\
+&\quad+
+\left(L_u+\frac{L_x}{1-\alpha}\right)
+\alpha^{H_T+1}T.
+\end{aligned}
+\]
+The bound is uniform in $\mathbf q$, so taking the infimum comparator cost proves
+\eqref{eq:allocation-regret-bound}. Finally,
+$H_T\ge\log T/\log(1/\alpha)$ implies $\alpha^{H_T}\le1/T$, while
+$H_T=\Theta(\log T)$ implies $\log(H_T+1)=O(\log\log T)$.
+\end{proof}
+
+\begin{proof}[Proof of Corollary~\ref{cor:regret-vs-linear}]
+For fixed $k$, Theorem~\ref{thm:regret-bound} applied to
+$\mathbf m_{H_T}^{\mathrm{prop}}(k)$, followed by \eqref{eq:sdac-lin-approx-cost}, gives
+\eqref{eq:linear-regret-decomposition}.
+Corollary~\ref{cor:proportional-as-allocation} shows that the geometric allocation
+sequence $\mathbf q(k)$ belongs to $\mathcal Q_\alpha^\downarrow$, so
+Lemma~\ref{lem:sdac-allocation-approx} gives
+$\operatorname{Tail}_{H_T}(\mathbf q(k))\le\alpha^{H_T+1}$. This makes the bound
+uniform in $k$; minimizing over $k$ proves the stated finite-time and asymptotic
+guarantees.
 \end{proof}
 
 
