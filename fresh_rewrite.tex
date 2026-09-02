@@ -40,16 +40,13 @@ controller selects a feasible action before the current resource arrival and cos
 are revealed. To handle the resulting coupling
 between feasibility and online learning, we introduce \emph{Simplex Disturbance-Action
 Control} (SDAC), a policy class specified by $H$ nonnegative parameters
-whose sum is at most one. The key feature of SDAC is that every fixed SDAC policy in the
+whose sum is at most one. The key feature of SDAC is that every fixed policy in the
 class is feasible by construction. Our adaptive controller updates these parameters
 by entropic online mirror descent while preserving feasibility along the
 time-varying trajectory. We prove regret
-$O\!\left(\sqrt{T\log(H+1)}\right)$ relative to the best fixed SDAC policy. As the
-retention coefficient $\alpha$ approaches one, the leading factor scales as
-$\Theta((1-\alpha)^{-3/2})$. We also derive a minimax lower bound which, when $T$
-is at least on the order of $(1-\alpha)^{-1}$, scales as
-$\Omega((1-\alpha)^{-1}\sqrt{T})$ near $\alpha=1$, leaving a factor
-$(1-\alpha)^{-1/2}$ between the upper and lower bounds. We also show that SDAC
+$O\!\left(\sqrt{T\log(H+1)}\right)$ relative to the best fixed SDAC policy. We
+also derive a minimax lower bound showing that the dependence on $T$ is tight. We
+then show that SDAC
 geometrically approximates a decreasing-allocation policy class that spreads each
 arrival over time according to a common decreasing allocation sequence, a structure
 that arises in stochastic energy-harvesting control. Geometric allocation sequences
