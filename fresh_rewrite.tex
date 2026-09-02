@@ -314,8 +314,10 @@ Section~\ref{sec:regret-analysis} proves the regret upper bound and extends it t
 the larger policy classes. Section~\ref{sec:minimax-lower-bound} gives the minimax
 lower bound.
 Section~\ref{sec:extensions} discusses extensions to $\alpha\ge1$, vector actions,
-and multiple storage states. Section~\ref{sec:conclusion} concludes the paper, and
-Appendix~\ref{sec:appendix-proofs} contains the deferred proofs.
+and multiple storage states. Section~\ref{sec:conclusion} concludes the paper.
+Appendices~\ref{sec:appendix-minimax-proofs}--\ref{sec:appendix-regret-proofs}
+contain the deferred proofs, grouped by the section in which the corresponding
+results are stated or used.
 
 
 \section{Notation}
@@ -1001,7 +1003,7 @@ Therefore, \eqref{eq:allocation-cost-gap} specializes exactly to
 \frac{k\lambda_k^H}{1-\lambda_k}\,T.
 \end{aligned}
 \end{equation}
-The proof is deferred to Appendix~\ref{sec:appendix-proofs}.
+The proof is deferred to Appendix~\ref{sec:appendix-sdac-proofs}.
 \end{lemma}
 
 $\Pi_\alpha^{\mathrm{alloc}}$ contains every feasible proportional state-feedback
@@ -1201,7 +1203,8 @@ where $g_{t,i}$ is the $i$-th coordinate of $\mathbf{g}_t$. This is followed by 
 \frac{\widetilde{\mathbf{m}}_{t+1}}{\max\{1,\|\widetilde{\mathbf{m}}_{t+1}\|_1\}},
 \end{equation}
 where the projection operator is defined and derived in
-Lemma~\ref{lem:bregman-projection}; the scaling is nontrivial only when
+Lemma~\ref{lem:bregman-projection} of
+Appendix~\ref{sec:appendix-algorithm-proofs}; the scaling is nontrivial only when
 $\|\widetilde{\mathbf{m}}_{t+1}\|_1>1$.
 
 
@@ -1213,7 +1216,7 @@ The regret proof has two parts: a standard online convex optimization bound for 
 surrogate costs $\ell_t$, and a stability bound showing that the
 online trajectory stays close to the SDAC policy trajectory
 driven by the same parameters. Some technical lemmas required for the proof are deferred to
-Appendix~\ref{sec:appendix-proofs}.
+Appendix~\ref{sec:appendix-regret-proofs}.
 
 \begin{theorem}[Regret bound]
 \label{thm:regret-bound}
@@ -1398,7 +1401,7 @@ minimizing over $k$ proves the stated finite-time and asymptotic guarantees.
 
 The next result shows that the $\sqrt{T}$ dependence is unavoidable and
 quantifies the dependence on $1-\alpha$ that any causal feasible controller must
-incur. Its proof is deferred to Appendix~\ref{sec:appendix-proofs}.
+incur. Its proof is deferred to Appendix~\ref{sec:appendix-minimax-proofs}.
 
 \begin{theorem}[Minimax SDAC regret lower bound]
 \label{thm:sdac-lower-bound}
@@ -1602,8 +1605,8 @@ must be respected in real time.
 
 
 \appendices
-\section{Deferred Proofs}
-\label{sec:appendix-proofs}
+\section{Proofs for the Minimax Lower Bound}
+\label{sec:appendix-minimax-proofs}
 
 
 \begin{proof}[Proof of Theorem~\ref{thm:sdac-lower-bound}]
@@ -1886,7 +1889,10 @@ Applying Theorem~\ref{thm:sdac-lower-bound} and retaining only these indices,
 This is \eqref{eq:sdac-lower-mixing}.
 \end{proof}
 
-We next prove the expressiveness result stated in
+\section{Proofs for Simplex Disturbance-Action Control}
+\label{sec:appendix-sdac-proofs}
+
+We prove the expressiveness result stated in
 Section~\ref{subsec:allocation-sequences}.
 
 \begin{proof}[Proof of Lemma~\ref{lem:sdac-allocation-approx}]
@@ -2048,11 +2054,11 @@ Substitution in \eqref{eq:allocation-cost-gap} proves
 \eqref{eq:sdac-lin-approx-cost}.
 \end{proof}
 
-The remaining lemmas establish the OMD and stability estimates used in the proof of
-Theorem~\ref{thm:regret-bound}; they rely on the state-decomposition, feasibility,
-and surrogate-cost lemmas already established in Section~\ref{sec:sdac}
-(Lemmas~\ref{lem:sdac-state-decomp}, \ref{lem:sdac-feasibility}, and
-\ref{lem:sdac-surrogate}).
+\section{Proofs for the Online Algorithm}
+\label{sec:appendix-algorithm-proofs}
+
+The following lemmas establish the Bregman-projection formula and the equivalent
+closed-form OMD update used in Section~\ref{sec:online-algorithm}.
 
 \begin{lemma}[Bregman projection onto $\mathcal{M}_H$]
 \label{lem:bregman-projection}
@@ -2191,6 +2197,15 @@ the same minimizer, and Lemma~\ref{lem:bregman-projection} gives
 multiplicative step and the subsequent positive rescaling preserve strict
 positivity.
 \end{proof}
+
+\section{Proofs for the Regret Analysis}
+\label{sec:appendix-regret-proofs}
+
+The following lemmas establish the OMD and stability estimates used in the proof of
+Theorem~\ref{thm:regret-bound}. They rely on the state-decomposition, feasibility,
+and surrogate-cost lemmas established in Section~\ref{sec:sdac}
+(Lemmas~\ref{lem:sdac-state-decomp}, \ref{lem:sdac-feasibility}, and
+\ref{lem:sdac-surrogate}).
 
 \begin{lemma}[One-step movement of OMD]
 \label{lem:omd-move}
