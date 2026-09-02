@@ -179,7 +179,8 @@ convex and Lipschitz as a function of the policy parameter.
     Theorem~\ref{thm:sdac-lower-bound}. When $T$ is at least on the order of
     $(1-\alpha)^{-1}$, the lower bound scales as
     $\Omega((1-\alpha)^{-1}\sqrt{T})$ near $\alpha=1$; see
-    Corollary~\ref{cor:sdac-lower-mixing}. The dependence of the upper and lower
+    Corollary~\ref{cor:sdac-lower-mixing} and
+    Remark~\ref{rem:large-alpha-regime}. The dependence of the upper and lower
     bounds on $1-\alpha$ therefore differs by a factor
     $(1-\alpha)^{-1/2}$. Closing this gap is left for future work.
 \end{itemize}
@@ -219,8 +220,8 @@ affect all later costs, and derive bounds that depend on how quickly those effec
 decay \cite{kumar2023unbounded}. In their model with geometrically decaying memory,
 the lower bound scales as $\sqrt{T}$ divided by one minus the decay factor,
 paralleling our $\Omega(\sqrt{T}/(1-\alpha))$ lower bound for sufficiently long
-horizons. Our lower bound is proved directly for state--action costs under the
-state-dependent action constraint.
+horizons; see Remark~\ref{rem:large-alpha-regime}. Our lower bound is proved
+directly for state--action costs under the state-dependent action constraint.
 
 \paragraph{Energy harvesting}
 Several energy-harvesting policies adjust energy use according to the available
@@ -1452,6 +1453,7 @@ where $G_\alpha=\alpha(L_x/(1-\alpha)+L_u)$ as in
 \end{corollary}
 
 \begin{remark}[Large-$\alpha$ regime]
+\label{rem:large-alpha-regime}
 As $\alpha\uparrow1$, stored arrivals persist longer and
 $t_{\mathrm{mix}}(\alpha)=\Theta((1-\alpha)^{-1})$. Hence,
 Corollary~\ref{cor:sdac-lower-mixing} yields
