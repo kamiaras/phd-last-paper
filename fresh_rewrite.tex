@@ -885,7 +885,11 @@ $\sup_{\mathbf{m}\in\mathcal{M}_H}D_\Psi(\mathbf{m}\|\mathbf{m}_1)\le\log(H+1)$
 (see the proof of Theorem~\ref{thm:regret-bound}).
 
 \paragraph{Control-action selection}
-The controller first forms the nominal SDAC action
+At the start of round $t$, the controller has the current online parameter
+$\mathbf{m}_t$: for $t=1$, it is given by the initialization
+\eqref{eq:alg-init}, and for $t\ge2$, it is the output of the OMD update
+\eqref{eq:alg-omd-argmin} from round $t-1$. The controller then forms the
+nominal SDAC action
 \begin{equation}
 \label{eq:alg-unconstrained-action}
 \widehat{u}_t \triangleq \langle \boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle,
@@ -901,10 +905,12 @@ Because $\widehat{u}_t\ge 0$, the clipping rule and induction on
 $x_t\ge0$ for all $t\in[T+1]$ and show that the online trajectory satisfies
 \eqref{eq:model-feasibility}.
 
-The scalar correction in \eqref{eq:alg-feasible-action} also has an exact
-Bregman-projection interpretation. Lemma~\ref{lem:availability-projection} shows
-that the negentropy projection of $\mathbf m_t$ onto the parameters compatible
-with the available state induces exactly the clipped action $u_t$.
+The clipping step also has a geometric interpretation. We use
+$\mathbf m_t^{\mathrm{exec}}$ to denote the execution vector obtained by
+projecting $\mathbf m_t$, using the negentropy Bregman divergence, onto the
+parameters compatible with the current state $x_t$.
+Lemma~\ref{lem:availability-projection} formalizes this projection and shows
+that $\mathbf m_t^{\mathrm{exec}}$ induces exactly the clipped action $u_t$.
 
 This interpretation does not change the implementation. The full
 $H$-dimensional execution vector $\mathbf m_t^{\mathrm{exec}}$ is never calculated
