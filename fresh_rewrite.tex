@@ -39,8 +39,8 @@ time-varying, and depends on both the action and the state. At each time, the
 controller selects a feasible action before the current resource arrival and cost
 are revealed. To handle the resulting coupling
 between feasibility and online learning, we introduce \emph{Simplex Disturbance-Action
-Control} (SDAC), an $H$-dimensional finite-memory policy class parameterized by a
-subprobability simplex. The key feature of SDAC is that every fixed SDAC policy in the
+Control} (SDAC), a policy class specified by $H$ nonnegative parameters
+whose sum is at most one. The key feature of SDAC is that every fixed SDAC policy in the
 class is feasible by construction. Our adaptive controller updates these parameters
 by entropic online mirror descent while preserving feasibility along the
 time-varying trajectory. We prove regret
