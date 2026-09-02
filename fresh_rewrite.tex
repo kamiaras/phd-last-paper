@@ -1074,100 +1074,18 @@ $x_t\ge0$ for all $t\in[T+1]$ and show that the online trajectory satisfies
 \eqref{eq:model-feasibility}.
 
 The scalar correction in \eqref{eq:alg-feasible-action} also has an exact
-Bregman-projection equivalent.
+Bregman-projection interpretation. Lemma~\ref{lem:availability-projection} shows
+that the negentropy projection of $\mathbf m_t$ onto the parameters compatible
+with the available state induces exactly the clipped action $u_t$.
 
-\begin{lemma}[Action clipping as a Bregman projection]
-\label{lem:availability-projection}
-At time $t$, define the parameter set compatible with the available state by
-\begin{equation}
-\label{eq:def-availability-set}
-\mathcal F_t(x_t)
-\triangleq
-\left\{
-\mathbf m\in\mathcal M_H:
-\langle\boldsymbol\phi_t^u,\mathbf m\rangle
-\le \alpha x_t
-\right\}.
-\end{equation}
-For the negentropy $\Psi$ in \eqref{eq:def-negentropy}, let
-\begin{equation}
-\label{eq:def-exec-projection}
-\mathbf m_t^{\mathrm{exec}}
-\in
-\operatorname*{arg\,min}_{\mathbf m\in\mathcal F_t(x_t)}
-D_\Psi(\mathbf m\|\mathbf m_t).
-\end{equation}
-Then
-\begin{equation}
-\label{eq:availability-projection-action}
-\left\langle
-\boldsymbol\phi_t^u,\mathbf m_t^{\mathrm{exec}}
-\right\rangle
-=
-\min\!\left\{
-\left\langle\boldsymbol\phi_t^u,\mathbf m_t\right\rangle,
-\alpha x_t
-\right\}
-=u_t.
-\end{equation}
-Thus the projection formulation and the scalar clipping rule induce exactly the
-same executed action.
-\end{lemma}
-
-\begin{proof}
-The set $\mathcal F_t(x_t)$ is nonempty because it contains $\mathbf 0$, and it is
-compact and convex. Since $\mathbf m_t$ is strictly positive coordinatewise,
-$D_\Psi(\cdot\|\mathbf m_t)$ is strictly convex on $\mathcal M_H$ and is minimized
-uniquely at $\mathbf m_t$ over any feasible set containing $\mathbf m_t$.
-Consequently, if
-\[
-\langle\boldsymbol\phi_t^u,\mathbf m_t\rangle
-\le \alpha x_t,
-\]
-then $\mathbf m_t^{\mathrm{exec}}=\mathbf m_t$, which proves
-\eqref{eq:availability-projection-action} in the feasible case.
-
-Suppose instead that $\mathbf m_t$ is infeasible. We claim that the action
-constraint is active at $\mathbf m_t^{\mathrm{exec}}$. If it were slack, then
-\begin{equation}
-\label{eq:availability-projection-slack}
-\langle\boldsymbol\phi_t^u,\mathbf m_t^{\mathrm{exec}}\rangle
-<\alpha x_t
-<\langle\boldsymbol\phi_t^u,\mathbf m_t\rangle.
-\end{equation}
-For sufficiently small $\lambda\in(0,1)$, the point
-\[
-\mathbf m_\lambda
-\triangleq
-(1-\lambda)\mathbf m_t^{\mathrm{exec}}+\lambda\mathbf m_t
-\]
-would still belong to $\mathcal F_t(x_t)$. Strict convexity and
-$D_\Psi(\mathbf m_t\|\mathbf m_t)=0$ would then give
-\begin{align*}
-D_\Psi(\mathbf m_\lambda\|\mathbf m_t)
-&<
-(1-\lambda)D_\Psi(\mathbf m_t^{\mathrm{exec}}\|\mathbf m_t) \\
-&<
-D_\Psi(\mathbf m_t^{\mathrm{exec}}\|\mathbf m_t),
-\end{align*}
-contradicting \eqref{eq:def-exec-projection}. Hence
-\[
-\langle\boldsymbol\phi_t^u,\mathbf m_t^{\mathrm{exec}}\rangle
-=\alpha x_t
-\]
-in the infeasible case, which completes the proof.
-\end{proof}
-
-The implemented rule remains the scalar minimum
-\eqref{eq:alg-feasible-action}; the full $H$-dimensional vector
-$\mathbf m_t^{\mathrm{exec}}$ is never calculated because only its scalar induced
-action is executed. Forming the feature vectors and their inner products, followed
-by the OMD update below, takes $O(H)$ time and $O(H)$ memory per round. In
-particular, the next unconstrained OMD update uses the internal iterate
-$\mathbf m_t$, not $\mathbf m_t^{\mathrm{exec}}$. Therefore the internal iterates
-remain on the fixed domain $\mathcal M_H$, and the analysis does not acquire a
-time-varying comparator set. The direct implementation and its projection
-interpretation produce the same actions, states, and internal OMD iterates.
+This interpretation does not change the implementation. The full
+$H$-dimensional execution vector $\mathbf m_t^{\mathrm{exec}}$ is never calculated
+because only its scalar induced action is executed. In particular, the OMD update
+below uses the internal iterate $\mathbf m_t$, not
+$\mathbf m_t^{\mathrm{exec}}$. Therefore the internal iterates remain on the fixed
+domain $\mathcal M_H$, and the analysis does not acquire a time-varying comparator
+set. Forming the feature vectors and their inner products, followed by the OMD
+update, takes $O(H)$ time and $O(H)$ memory per round.
 
 \paragraph{Surrogate cost and OMD update}
 After $(w_t,c_t)$ is revealed, select a subgradient of the convex surrogate loss
@@ -2057,8 +1975,92 @@ Substitution in \eqref{eq:allocation-cost-gap} proves
 \section{Proofs for the Online Algorithm}
 \label{sec:appendix-algorithm-proofs}
 
-The following lemmas establish the Bregman-projection formula and the equivalent
-closed-form OMD update used in Section~\ref{sec:online-algorithm}.
+The following lemmas establish the Bregman-projection interpretation of scalar
+action clipping, the Bregman-projection formula, and the equivalent closed-form
+OMD update used in Section~\ref{sec:online-algorithm}.
+
+\begin{lemma}[Action clipping as a Bregman projection]
+\label{lem:availability-projection}
+At time $t$, define the parameter set compatible with the available state by
+\begin{equation}
+\label{eq:def-availability-set}
+\mathcal F_t(x_t)
+\triangleq
+\left\{
+\mathbf m\in\mathcal M_H:
+\langle\boldsymbol\phi_t^u,\mathbf m\rangle
+\le \alpha x_t
+\right\}.
+\end{equation}
+For the negentropy $\Psi$ in \eqref{eq:def-negentropy}, let
+\begin{equation}
+\label{eq:def-exec-projection}
+\mathbf m_t^{\mathrm{exec}}
+\in
+\operatorname*{arg\,min}_{\mathbf m\in\mathcal F_t(x_t)}
+D_\Psi(\mathbf m\|\mathbf m_t).
+\end{equation}
+Then
+\begin{equation}
+\label{eq:availability-projection-action}
+\left\langle
+\boldsymbol\phi_t^u,\mathbf m_t^{\mathrm{exec}}
+\right\rangle
+=
+\min\!\left\{
+\left\langle\boldsymbol\phi_t^u,\mathbf m_t\right\rangle,
+\alpha x_t
+\right\}
+=u_t.
+\end{equation}
+Thus the projection formulation and the scalar clipping rule induce exactly the
+same executed action.
+\end{lemma}
+
+\begin{proof}
+The set $\mathcal F_t(x_t)$ is nonempty because it contains $\mathbf 0$, and it is
+compact and convex. By Lemma~\ref{lem:omd-closed-form}, $\mathbf m_t$ is strictly
+positive coordinatewise. Hence
+$D_\Psi(\cdot\|\mathbf m_t)$ is strictly convex on $\mathcal M_H$ and is minimized
+uniquely at $\mathbf m_t$ over any feasible set containing $\mathbf m_t$.
+Consequently, if
+\[
+\langle\boldsymbol\phi_t^u,\mathbf m_t\rangle
+\le \alpha x_t,
+\]
+then $\mathbf m_t^{\mathrm{exec}}=\mathbf m_t$, which proves
+\eqref{eq:availability-projection-action} in the feasible case.
+
+Suppose instead that $\mathbf m_t$ is infeasible. We claim that the action
+constraint is active at $\mathbf m_t^{\mathrm{exec}}$. If it were slack, then
+\begin{equation}
+\label{eq:availability-projection-slack}
+\langle\boldsymbol\phi_t^u,\mathbf m_t^{\mathrm{exec}}\rangle
+<\alpha x_t
+<\langle\boldsymbol\phi_t^u,\mathbf m_t\rangle.
+\end{equation}
+For sufficiently small $\lambda\in(0,1)$, the point
+\[
+\mathbf m_\lambda
+\triangleq
+(1-\lambda)\mathbf m_t^{\mathrm{exec}}+\lambda\mathbf m_t
+\]
+would still belong to $\mathcal F_t(x_t)$. Strict convexity and
+$D_\Psi(\mathbf m_t\|\mathbf m_t)=0$ would then give
+\begin{align*}
+D_\Psi(\mathbf m_\lambda\|\mathbf m_t)
+&<
+(1-\lambda)D_\Psi(\mathbf m_t^{\mathrm{exec}}\|\mathbf m_t) \\
+&<
+D_\Psi(\mathbf m_t^{\mathrm{exec}}\|\mathbf m_t),
+\end{align*}
+contradicting \eqref{eq:def-exec-projection}. Hence
+\[
+\langle\boldsymbol\phi_t^u,\mathbf m_t^{\mathrm{exec}}\rangle
+=\alpha x_t
+\]
+in the infeasible case, which completes the proof.
+\end{proof}
 
 \begin{lemma}[Bregman projection onto $\mathcal{M}_H$]
 \label{lem:bregman-projection}
