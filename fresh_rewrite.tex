@@ -1330,8 +1330,7 @@ Corollary~\ref{cor:sdac-lower-mixing} gives
 whenever $T\ge2t_{\mathrm{mix}}(\alpha)+2$. The upper bound in
 Theorem~\ref{thm:regret-bound} is
 $O((1-\alpha)^{-3/2}\sqrt{T\log(H+1)})$, so a factor
-$(1-\alpha)^{-1/2}$ between the two bounds remains open, apart from the
-memory-dependent logarithm.
+$(1-\alpha)^{-1/2}$ between the two bounds remains open.
 
 The condition $T\ge2t_{\mathrm{mix}}(\alpha)+2$ is essential for interpreting the large-$\alpha$
 asymptotic. If $T$ is fixed while $\alpha\uparrow1$, then
@@ -1797,48 +1796,20 @@ Using $\min\{a,b\}=(a+b-|a-b|)/2$ together with
 \eqref{eq:lower-two-policy-means-zero}, and then taking expectations in
 \eqref{eq:lower-two-policy-regret}, gives
 \begin{equation}
-\label{eq:lower-absolute-random-sign}
+\label{eq:lower-randomized-sequence-bound}
 \begin{aligned}
 \mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[\RegSDAC{T}\right]
-&\ge
-\frac12
-\mathbb E_{\boldsymbol\xi}\!\left[
-\left|
-J_T(\mathbf m^{(0)})-J_T(\mathbf m^{(1)})
-\right|
+&\ge \frac12\mathbb E_{\boldsymbol\xi}\!\left[
+\left|J_T(\mathbf m^{(0)})-J_T(\mathbf m^{(1)})\right|
 \right] \\
-&=
-\frac12
-\mathbb E_{\boldsymbol\xi}\!\left[
-\left|
-\sum_{t=2}^T\xi_t\beta_t
-\right|
-\right].
+&= \frac12\mathbb E_{\boldsymbol\xi}\!\left[
+\left|\sum_{t=2}^T\xi_t\beta_t\right|
+\right] \\
+&\ge \frac{1}{2\sqrt2}
+\left(\sum_{t=2}^T\beta_t^2\right)^{1/2}.
 \end{aligned}
 \end{equation}
-Khintchine's inequality for Rademacher sums yields
-\begin{equation}
-\label{eq:lower-random-sign-bound}
-\mathbb E_{\boldsymbol\xi}\!\left[
-\left|
-\sum_{t=2}^T\xi_t\beta_t
-\right|
-\right]
-\ge
-\frac{1}{\sqrt{2}}
-\left(
-\sum_{t=2}^T\beta_t^2
-\right)^{1/2}.
-\end{equation}
-Combining \eqref{eq:lower-absolute-random-sign} and
-\eqref{eq:lower-random-sign-bound} gives
-\begin{equation}
-\label{eq:lower-randomized-sequence-bound}
-\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[\RegSDAC{T}\right]
-\ge
-\frac{1}{2\sqrt2}
-\left(\sum_{t=2}^T\beta_t^2\right)^{1/2}.
-\end{equation}
+The last step follows from Khintchine's inequality for Rademacher sums.
 
 It remains to remove the randomization from the adversarial construction. The
 left-hand side of \eqref{eq:lower-randomized-sequence-bound} is the average over
