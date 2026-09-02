@@ -340,7 +340,7 @@ allocation sequence $\mathbf q$ induces $x_t(\mathbf q)$ and $u_t(\mathbf q)$.
 After the online algorithm is introduced, $x_t$ and $u_t$ without arguments denote
 the realized online trajectory.
 
-\section{Model and Problem Setup}
+\section{Model and Regret Benchmark}
 \label{sec:model-setup}
 
 Fix a positive integer $T$ and a known retention coefficient
@@ -498,7 +498,7 @@ that every fixed policy is feasible while preserving convex surrogate losses and
 tractable online updates.
 
 
-\subsection{SDAC Definition}
+\subsection{Policy Definition and Structural Properties}
 Fix a memory horizon $H\in\mathbb{N}_{>0}$. Let
 \begin{equation}
 \label{eq:def-simplex}
@@ -689,7 +689,7 @@ $\|\mathbf{g}_t\|_\infty\le G_\alpha$, as stated in
 Lemma~\ref{lem:sdac-surrogate}. The proof is given in
 Appendix~\ref{sec:appendix-sdac-proofs}.
 
-\subsection{Expressiveness: Decreasing-Allocation Policies}
+\subsection{Approximation of Decreasing-Allocation Policies}
 \label{subsec:allocation-sequences}
 
 We next show that finite-memory SDAC policies approximate a class of policies
@@ -845,7 +845,7 @@ state-feedback policies.
 
 
 
-\section{Online Algorithm}
+\section{Online SDAC Algorithm}
 \label{sec:online-algorithm}
 
 We now present our online algorithm, which updates SDAC parameters by
@@ -942,15 +942,15 @@ Lemma~\ref{lem:bregman-projection} of
 Appendix~\ref{sec:appendix-algorithm-proofs}.
 
 
-\section{Regret Analysis}
+\section{Regret Upper Bounds}
 \label{sec:regret-analysis}
 The following theorem states that the online controller achieves sublinear regret
-against every fixed SDAC policy $\pi_{\mathbf{m}}\in\Pi_H^{\mathrm{sdac}}$.
+against every fixed SDAC policy $\pi_{\mathbf{m}}\in\Pi_H^{\mathrm{SDAC}}$.
 The proof combines a standard online convex optimization bound for the surrogate
 costs $\ell_t$ with the trajectory-stability result stated below. The complete
 proofs are deferred to Appendix~\ref{sec:appendix-regret-proofs}.
 
-\begin{theorem}[Regret bound]
+\begin{theorem}[Regret against fixed SDAC policies]
 \label{thm:regret-bound}
 Suppose the cost functions satisfy the regularity and bounded-subgradient
 assumptions of Section~\ref{sec:model-setup}. Then the online controller from Section~\ref{sec:online-algorithm}, initialized as in
@@ -1003,7 +1003,7 @@ The nonstandard step is to control the difference between the realized online
 trajectory and the fixed-policy trajectory associated with the current internal
 iterate.
 
-\begin{lemma}[Trajectory stability]
+\begin{lemma}[Stability under online parameter updates]
 \label{lem:contractive-deviation}
 For the online trajectory and the counterfactual fixed-policy trajectory associated
 with the current internal iterate, one has, for every $t\in[T]$,
@@ -1138,7 +1138,7 @@ The proofs of Corollaries~\ref{cor:regret-vs-allocation}
 and~\ref{cor:regret-vs-linear} are given in
 Appendix~\ref{sec:appendix-regret-proofs}.
 
-\section{Minimax Lower Bound}
+\section{Minimax Regret Lower Bound}
 \label{sec:minimax-lower-bound}
 
 The next result shows that the $\sqrt{T}$ dependence is unavoidable and
@@ -1174,7 +1174,7 @@ adversarial sequence whose existence is asserted is deterministic and fixed befo
 the interaction.
 \end{theorem}
 
-\begin{corollary}[Lower bound for sufficiently long horizons]
+\begin{corollary}[Lower bound beyond the mixing time]
 \label{cor:sdac-lower-mixing}
 Define
 \begin{equation}
@@ -1238,7 +1238,7 @@ to the policy domain and the Lipschitz constants. We state these changes but omi
 the resulting regret bounds, whose form is unchanged up to the modified constants
 and, in the vector settings, the chosen product norm.
 
-\paragraph{Retention $\alpha\ge 1$.}
+\paragraph{Retention $\alpha\ge 1$}
 For $\alpha\ge1$, fix $k$ such that
 $\bar\alpha\triangleq\alpha-k\in(0,1)$ and write $u_t=kx_t+v_t$. Then
 \[
@@ -1269,7 +1269,7 @@ A remark is that for a fixed $k$, the comparator class is correspondingly restri
 whose actions satisfy $u_t\ge kx_t$. Selecting $k$ (fixed or even in an online fashion)
 remains an interesting direction for future work.
 
-\paragraph{Vector action / multi-task allocation.}
+\paragraph{Vector actions and multi-task allocation}
 Consider a single storage state $x_t$ with a vector action
 $\mathbf{u}_t\in\mathbb{R}_{\ge 0}^n$ that allocates resources across $n$ tasks, subject to
 $\sum_{a=1}^n u_{t,a}\le\alpha x_t$, so that the total drain from storage is the sum of
@@ -1307,7 +1307,7 @@ correction equals the excess total action, and the stability proof proceeds with
 the corresponding matrix norm. OMD then runs over the matrix subprobability
 simplex above.
 
-\paragraph{Multiple storages with diagonal dynamics.}
+\paragraph{Multiple storage states with diagonal dynamics}
 Suppose the state is $\mathbf{x}_t\in\mathbb{R}_{\ge 0}^d$ and evolves as
 $\mathbf{x}_{t+1}=\mathbf{A} \mathbf{x}_t-\mathbf{u}_t+\mathbf{w}_t$ with $\mathbf{A}=\mathrm{diag}(\alpha_1,\ldots,\alpha_d)$,
 $\alpha_s\in(0,1)$ for $s\in[d]$, arrivals $\mathbf{w}_t\in[0,1]^d$, and per-storage constraints
@@ -1710,7 +1710,7 @@ Substitution in \eqref{eq:allocation-cost-gap} proves
 \eqref{eq:sdac-lin-approx-cost}.
 \end{proof}
 
-\section{Proofs for the Online Algorithm}
+\section{Proofs for the Online SDAC Algorithm}
 \label{sec:appendix-algorithm-proofs}
 
 The following lemmas establish the Bregman-projection interpretation of scalar
@@ -1938,7 +1938,7 @@ multiplicative step and the subsequent positive rescaling preserve strict
 positivity.
 \end{proof}
 
-\section{Proofs for the Regret Analysis}
+\section{Proofs for the Regret Upper Bounds}
 \label{sec:appendix-regret-proofs}
 
 The following lemmas establish the OMD and stability estimates used in the proof of
@@ -1947,7 +1947,7 @@ and surrogate-cost lemmas established in Section~\ref{sec:sdac}
 (Lemmas~\ref{lem:sdac-state-decomp}, \ref{lem:sdac-feasibility}, and
 \ref{lem:sdac-surrogate}).
 
-\begin{lemma}[One-step movement of OMD]
+\begin{lemma}[One-step OMD movement bound]
 \label{lem:omd-move}
 For the OMD update with step size $\eta>0$ and subgradient
 $\mathbf{g}_t\in\partial \ell_t(\mathbf{m}_t)$,
@@ -2015,7 +2015,7 @@ The claim is immediate if $\mathbf{m}_{t+1}=\mathbf{m}_t$; otherwise divide by
 $\|\mathbf{m}_{t+1}-\mathbf{m}_t\|_1$.
 \end{proof}
 
-\begin{lemma}[OMD regret for the surrogate losses]
+\begin{lemma}[OMD regret for the surrogate costs]
 \label{lem:omd-surrogate-regret}
 For every $\mathbf{m}\in\mathcal{M}_H$, the update \eqref{eq:alg-omd-argmin} satisfies
 \begin{equation}
@@ -2537,7 +2537,7 @@ guarantees.
 
 
 
-\section{Proofs for the Minimax Lower Bound}
+\section{Proofs for the Minimax Regret Lower Bound}
 \label{sec:appendix-minimax-proofs}
 
 
