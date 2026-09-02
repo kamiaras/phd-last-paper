@@ -912,15 +912,6 @@ parameters compatible with the current state $x_t$.
 Lemma~\ref{lem:availability-projection} formalizes this projection and shows
 that $\mathbf m_t^{\mathrm{exec}}$ induces exactly the clipped action $u_t$.
 
-This interpretation does not change the implementation. The full
-$H$-dimensional execution vector $\mathbf m_t^{\mathrm{exec}}$ is never calculated
-because only its scalar induced action is executed. In particular, the OMD update
-below uses the internal iterate $\mathbf m_t$, not
-$\mathbf m_t^{\mathrm{exec}}$. Therefore the internal iterates remain on the fixed
-domain $\mathcal M_H$, and the analysis does not acquire a time-varying comparator
-set. Forming the feature vectors and their inner products, followed by the OMD
-update, takes $O(H)$ time and $O(H)$ memory per round.
-
 \paragraph{Surrogate cost and OMD update}
 After $(w_t,c_t)$ is revealed, form the surrogate subgradient displayed after
 Lemma~\ref{lem:sdac-surrogate},
