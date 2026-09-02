@@ -1606,8 +1606,8 @@ must be respected in real time.
 
 \begin{proof}[Proof of Theorem~\ref{thm:sdac-lower-bound}]
 Fix a causal feasible controller $\mathcal A$. Let
-$\xi_1,\ldots,\xi_T$ be independent random signs, also independent of the internal
-randomization of $\mathcal A$, with
+$\xi_1,\ldots,\xi_T$ be independent Rademacher random variables, also independent
+of the internal randomization of $\mathcal A$, with
 \[
 \mathbb P(\xi_t=1)
 =
@@ -1656,7 +1656,7 @@ so the required subgradient bounds hold.
 We now select two benchmark policies. The parameter
 $\mathbf m^{(0)}$ leaves all mass in the subprobability simplex unused, so its
 SDAC action is always zero. The parameter $\mathbf m^{(1)}$ places all mass on the
-first lag, so its action is $\alpha w_{t-1}$. Formally, because $H\ge1$,
+first lag, so its action is $\alpha w_{t-1}$. Let
 \begin{equation}
 \label{eq:lower-two-policy-parameters}
 \mathbf m^{(0)}\triangleq\mathbf 0,
@@ -1728,60 +1728,7 @@ x_t(\mathbf m^{(0)})-x_t(\mathbf m^{(1)}) \\
 \end{aligned}
 \end{equation}
 
-For $j\in\{0,1\}$, the resulting cumulative costs satisfy
-\begin{align*}
-J_T^{\mathrm{on}}
-&=
-\sum_{t=1}^T\xi_t(L_xx_t-L_uu_t), \\
-J_T(\mathbf m^{(j)})
-&=
-\sum_{t=1}^T\xi_t L_xx_t(\mathbf m^{(j)}) \\
-&\quad-
-\sum_{t=1}^T\xi_t L_uu_t(\mathbf m^{(j)}).
-\end{align*}
-Let $\mathcal F_t^-$ denote the information available immediately before $c_t$ is
-revealed, including the controller randomization used to select $u_t$. Causality
-implies that $(x_t,u_t)$ is $\mathcal F_t^-$-measurable, while the fresh sign
-$\xi_t$ is independent of $\mathcal F_t^-$. Consequently,
-\begin{equation}
-\label{eq:lower-online-mean-zero}
-\begin{aligned}
-\mathbb E[\xi_t\mid\mathcal F_t^-]
-&=0, \\
-\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[
-\xi_t(L_xx_t-L_uu_t)
-\right]
-&=
-\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[
-(L_xx_t-L_uu_t)
-\mathbb E[\xi_t\mid\mathcal F_t^-]
-\right] \\
-&=0, \\
-\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[
-J_T^{\mathrm{on}}
-\right]
-&=0.
-\end{aligned}
-\end{equation}
-The two fixed-policy trajectories depend only on the arrival sequence and hence
-are also independent of the signs. Thus, for $j\in\{0,1\}$,
-\begin{equation}
-\label{eq:lower-two-policy-means-zero}
-\begin{aligned}
-\mathbb E_{\boldsymbol\xi}\!\left[
-J_T(\mathbf m^{(j)})
-\right]
-&=
-\sum_{t=1}^T
-\mathbb E[\xi_t]
-L_xx_t(\mathbf m^{(j)}) \\
-&\quad-
-\sum_{t=1}^T
-\mathbb E[\xi_t]
-L_uu_t(\mathbf m^{(j)}) \\
-&=0.
-\end{aligned}
-\end{equation}
+
 
 The two policies have the same state and action at $t=1$. For $t\ge2$,
 \eqref{eq:lower-policy-one-action} and
@@ -1790,16 +1737,46 @@ The two policies have the same state and action at $t=1$. For $t\ge2$,
 \label{eq:lower-two-policy-cost-difference}
 \begin{aligned}
 J_T(\mathbf m^{(0)})-J_T(\mathbf m^{(1)})
-&=
-\sum_{t=2}^T\xi_t(L_x\Delta_t+\alpha L_u) \\
-&=
+=
+\sum_{t=2}^T\xi_t(L_x\Delta_t+\alpha L_u)
+=
 \sum_{t=2}^T\xi_t \beta_t,
 \end{aligned}
 \end{equation}
 with $\beta_t$ as in \eqref{eq:sdac-lower-beta}.
 
-Because $\mathbf m^{(0)},\mathbf m^{(1)}\in\mathcal M_H$, for every choice of the
-signs and every choice made by the controller,
+
+
+Let $\mathcal F_t^-$ be the information available immediately before $c_t$ is
+revealed, including the randomization used to select $u_t$. By causality,
+$(x_t,u_t)$ is $\mathcal F_t^-$-measurable, whereas $\xi_t$ is independent of
+$\mathcal F_t^-$ and has mean zero. Hence, by the tower property,
+\begin{equation}
+\label{eq:lower-online-mean-zero}
+\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[
+J_T^{\mathrm{on}}
+\right]
+=\sum_{t=1}^T
+\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[
+(L_xx_t-L_uu_t)\mathbb E[\xi_t\mid\mathcal F_t^-]
+\right]
+=0.
+\end{equation}
+The fixed-policy trajectories depend only on the arrival sequence and are
+therefore independent of the Rademacher variables. Thus, for $j\in\{0,1\}$,
+\begin{equation}
+\label{eq:lower-two-policy-means-zero}
+\mathbb E_{\boldsymbol\xi}\!\left[
+J_T(\mathbf m^{(j)})
+\right]
+=\sum_{t=1}^T\mathbb E[\xi_t]
+\bigl(L_xx_t(\mathbf m^{(j)})-L_uu_t(\mathbf m^{(j)})\bigr)
+=0.
+\end{equation}
+
+
+Because $\mathbf m^{(0)},\mathbf m^{(1)}\in\mathcal M_H$, for every realization of
+the Rademacher variables and every choice made by the controller,
 \begin{equation}
 \label{eq:lower-two-policy-regret}
 \begin{aligned}
@@ -1839,7 +1816,7 @@ J_T(\mathbf m^{(0)})-J_T(\mathbf m^{(1)})
 \right].
 \end{aligned}
 \end{equation}
-Khintchine's inequality for independent random signs yields
+Khintchine's inequality for Rademacher sums yields
 \begin{equation}
 \label{eq:lower-random-sign-bound}
 \mathbb E_{\boldsymbol\xi}\!\left[
@@ -1865,7 +1842,7 @@ Combining \eqref{eq:lower-absolute-random-sign} and
 
 It remains to remove the randomization from the adversarial construction. The
 left-hand side of \eqref{eq:lower-randomized-sequence-bound} is the average over
-all $2^T$ fixed sign vectors:
+all $2^T$ realizations of the Rademacher vector $\boldsymbol\xi$:
 \[
 \mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[\RegSDAC{T}\right]
 =
