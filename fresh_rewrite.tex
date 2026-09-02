@@ -550,14 +550,18 @@ decomposition of the state trajectory that isolates its dependence on $\mathbf{m
 \begin{lemma}[State decomposition under SDAC]
 \label{lem:sdac-state-decomp}
 Fix a positive integer $H$ and $\mathbf{m}\in\mathcal{M}_H$.
-For $i\in\{1,\ldots,H\}$, define
+For each $t\in[T]$, define
 \[
 r_t(i)
 \triangleq
 \sum_{j=1}^{i}\alpha^{j-1}w_{t-j},
+\quad i\in[H],
+\qquad
+r_t
+\triangleq
+\sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j}.
 \]
-where the sum is empty when $i=0$, and write $r_t\triangleq r_t(t-1)$. Then, for every
-$t\in[T]$,
+Then the induced state satisfies, for every $t\in[T]$,
 \begin{equation}
 \label{eq:sdac-state-decomp}
 x_t(\mathbf{m})
@@ -565,7 +569,7 @@ x_t(\mathbf{m})
 \sum_{i=1}^H m_i r_t(i)
 +\bigl(1-\sum_{i=1}^H m_i\bigr)r_t.
 \end{equation}
-Define the quantity
+Equivalently, define
 \[
 \boldsymbol{\phi}_t^x
 \triangleq
@@ -577,11 +581,12 @@ x_t(\mathbf{m})
 =
 r_t+\langle\boldsymbol{\phi}_t^x,\mathbf{m}\rangle.
 \]
-Moreover, for all $i\in\{1,\ldots,H\}$,
+Moreover,
 \[
 0\le r_t(i)\le r_t\le\frac{1}{1-\alpha},
 \]
-and $\mathbf{m}\mapsto x_t(\mathbf{m})$ is affine.
+for every $t\in[T]$ and $i\in[H]$. Consequently,
+$\mathbf{m}\mapsto x_t(\mathbf{m})$ is affine for every $t\in[T]$.
 \end{lemma}
 
 The proof is given in Appendix~\ref{sec:appendix-sdac-proofs}.
