@@ -913,23 +913,16 @@ Lemma~\ref{lem:availability-projection} formalizes this projection and shows
 that $\mathbf m_t^{\mathrm{exec}}$ induces exactly the clipped action $u_t$.
 
 \paragraph{Surrogate cost and OMD update}
-After $(w_t,c_t)$ is revealed, form the surrogate subgradient displayed after
-Lemma~\ref{lem:sdac-surrogate},
-$\mathbf{g}_t\in\partial\ell_t(\mathbf{m}_t)$, which satisfies
-$\|\mathbf{g}_t\|_\infty\le G_\alpha$ with $G_\alpha$ defined in
-\eqref{eq:def-surrogate-G}. This step uses the revealed cost function and the
-full-information subgradient oracle from Section~\ref{sec:model-setup}.
+After observing $(w_t,c_t)$, choose
+$\mathbf{g}_t\in\partial\ell_t(\mathbf{m}_t)$.
 We define the OMD update
 \begin{equation}
 \label{eq:alg-omd-argmin}
 \mathbf{m}_{t+1} \triangleq \operatorname*{arg\,min}_{\mathbf{m}\in\mathcal{M}_H}
 \Bigl\{\eta\langle \mathbf{g}_t,\mathbf{m}\rangle + D_\Psi(\mathbf{m}\|\mathbf{m}_t)\Bigr\}.
 \end{equation}
-\paragraph{Closed-form solution}
-Although \eqref{eq:alg-omd-argmin} is a constrained optimization problem, it is easy
-to solve analytically because $\Psi$ is separable and the objective is linear in
-$\mathbf{g}_t$. As shown in Lemma~\ref{lem:omd-closed-form}, the minimizer in
-\eqref{eq:alg-omd-argmin} is exactly the result of two elementary steps. First a
+By Lemma~\ref{lem:omd-closed-form}, the minimizer in
+\eqref{eq:alg-omd-argmin} is obtained in two steps. First, apply the
 multiplicative step,
 \begin{equation}
 \label{eq:alg-omd-mult}
@@ -946,14 +939,13 @@ where $g_{t,i}$ is the $i$-th coordinate of $\mathbf{g}_t$. This is followed by 
 \end{equation}
 where the projection operator is defined and derived in
 Lemma~\ref{lem:bregman-projection} of
-Appendix~\ref{sec:appendix-algorithm-proofs}; the scaling is nontrivial only when
-$\|\widetilde{\mathbf{m}}_{t+1}\|_1>1$.
+Appendix~\ref{sec:appendix-algorithm-proofs}.
 
 
 \section{Regret Analysis}
 \label{sec:regret-analysis}
 The following theorem states that the online controller achieves sublinear regret
-against every fixed SDAC policy $\pi_{\mathbf{m}}$, where $\mathbf{m}$ is any parameter in $\mathcal{M}_H$.
+against every fixed SDAC policy $\pi_{\mathbf{m}}\in\Pi_\alpha^{\mathrm{sdac}}$.
 The proof combines a standard online convex optimization bound for the surrogate
 costs $\ell_t$ with the trajectory-stability result stated below. The complete
 proofs are deferred to Appendix~\ref{sec:appendix-regret-proofs}.
