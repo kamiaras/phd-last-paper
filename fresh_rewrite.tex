@@ -41,7 +41,7 @@ are revealed. To handle the resulting coupling
 between feasibility and online learning, we introduce \emph{Simplex Disturbance-Action
 Control} (SDAC), a policy class specified by $H$ nonnegative parameters
 whose sum is at most one. The key feature of SDAC is that every fixed policy in the
-class is feasible by construction. Our adaptive controller updates these parameters
+class is feasible by construction. Our online SDAC controller updates these parameters
 by entropic online mirror descent while preserving feasibility along the
 time-varying trajectory. We prove regret
 $O\!\left(\sqrt{T\log(H+1)}\right)$ relative to the best fixed SDAC policy. We
@@ -75,7 +75,7 @@ its stored resource each period. At each time, the controller observes the curre
 state and all past arrivals and cost functions, chooses a control action, and then
 observes the current arrival and cost function. The arrival and cost sequences may
 be chosen adversarially which means we do not assume a known
-probability model. Our goal is to construct a feasible online controller whose
+probability model. Our goal is to construct an online SDAC controller whose
 cumulative cost is close to that of the best fixed policy, chosen in hindsight,
 from a specified benchmark class.
 
@@ -143,9 +143,9 @@ Our contributions are as follows:
     geometrically with the memory horizon $H$.
 
 \item \textbf{Online control and regret.}
-    We develop an online controller that updates its SDAC parameter using
+    We develop an online SDAC controller that updates its parameter using
     entropic online mirror descent (OMD) over the subprobability simplex.
-    We prove that this controller
+    We prove that the controller
     remains feasible and achieves
     \[
     O\!\left(\sqrt{T\log(H+1)}\right)
@@ -193,7 +193,7 @@ been studied in \cite{li2021onlineConstrained,liu2023constrainedControl}. The
 constraint $u_t\le\alpha x_t$ is affine in the state and action, but the range of
 allowed actions depends on the current storage state. Our approach uses the
 structure of the storage dynamics to ensure that every fixed SDAC policy is
-feasible and that the online controller remains feasible while its parameter
+feasible and that the online SDAC controller remains feasible while its parameter
 changes.
 
 Our analysis also considers how regret depends on the retention coefficient
@@ -241,9 +241,9 @@ Lin et al.\ \cite{lin2025optimal} study online age-of-information optimization i
 an energy-harvesting system with related battery dynamics. They compare their
 controller with an unrestricted offline optimum using a competitive ratio. Their
 objective depends on the energy allocation but not directly on the battery state,
-and the current arrival is observed before the allocation. Our controller acts
-before observing the current arrival, and our benchmark is a fixed SDAC policy
-chosen in hindsight.
+and the current arrival is observed before the allocation. Our online SDAC
+controller acts before observing the current arrival, and our benchmark is a fixed
+SDAC policy chosen in hindsight.
 
 \paragraph{Queueing and network optimization}
 Queueing control also involves states that change through arrivals and service
@@ -269,8 +269,8 @@ costs revealed after each decision.
 Yang et al.\ \cite{yang2020online} study online procurement under inventory
 constraints. Their controller observes the current demand and price and then chooses
 how much supply to purchase. Performance is measured by a competitive ratio for the
-total procurement cost. Our controller instead chooses how much stored resource to
-use before observing the current arrival and cost.
+total procurement cost. Our online SDAC controller instead chooses how much stored
+resource to use before observing the current arrival and cost.
 
 Hihat and Fermanian \cite{hihat2024online} consider inventory systems with more
 general state-transition functions and study policies that replenish inventory up
@@ -291,7 +291,7 @@ assumptions, feasible domain, and regret benchmark. Section~\ref{sec:sdac}
 introduces the SDAC policy class and proves its feasibility and convexity
 properties. It also shows how SDAC approximates decreasing-allocation policies and
 proportional state-feedback policies. Section~\ref{sec:online-algorithm} presents
-the feasible online controller based on action clipping and entropic OMD.
+the online SDAC controller based on action clipping and entropic OMD.
 Section~\ref{sec:regret-analysis} proves the regret upper bounds and extends them to
 the larger policy classes. Section~\ref{sec:minimax-lower-bound} gives the minimax
 regret lower bound.
@@ -319,8 +319,8 @@ $\pi_{\mathbf m}$. The associated fixed-policy trajectory has state and action
 components $x_t(\mathbf m)$ and $u_t(\mathbf m)$. A feasible proportional state-feedback
 policy with gain $k\in[0,\alpha]$ induces $x_t(k)$ and $u_t(k)$, while a decreasing
 allocation sequence $\mathbf q$ induces $x_t(\mathbf q)$ and $u_t(\mathbf q)$.
-After the online SDAC algorithm is introduced, $x_t$ and $u_t$ without arguments
-denote the realized online trajectory.
+After the online SDAC controller is introduced, $x_t$ and $u_t$ without arguments
+denote the online trajectory.
 
 \section{Model and Regret Benchmark}
 \label{sec:model-setup}
@@ -462,7 +462,7 @@ J_T^{\mathrm{on}}
 -
 \min_{\mathbf m\in\mathcal M_H}J_T(\mathbf m).
 \end{equation}
-The online controller may update its SDAC parameter over time, while the benchmark
+The online SDAC controller may update its parameter over time, while the benchmark
 in \eqref{eq:def-regret} is the best fixed SDAC policy chosen in hindsight.
 Here, fixed means that $\mathbf m$ is held constant; the policy's actions still
 respond to past arrivals.
@@ -842,10 +842,10 @@ state-feedback policies.
 
 
 
-\section{Online SDAC Algorithm}
+\section{Online SDAC Controller}
 \label{sec:online-algorithm}
 
-We now present our online SDAC algorithm, which updates SDAC parameters by
+We now present our online SDAC controller, which updates its parameter by
 OMD with unnormalized negentropy (equivalently, the
 exponentiated gradient method) and a fixed step size $\eta>0$ over the
 subprobability simplex $\mathcal{M}_H\subset\mathbb{R}^H$
@@ -941,8 +941,9 @@ Appendix~\ref{sec:appendix-algorithm-proofs}.
 
 \section{Regret Upper Bounds}
 \label{sec:regret-analysis}
-The following theorem states that the online controller achieves sublinear regret
-against every fixed SDAC policy $\pi_{\mathbf{m}}\in\Pi_H^{\mathrm{SDAC}}$.
+The following theorem states that the online SDAC controller achieves sublinear
+regret against every fixed SDAC policy
+$\pi_{\mathbf{m}}\in\Pi_H^{\mathrm{SDAC}}$.
 The proof combines a standard online convex optimization bound for the surrogate
 costs $\ell_t$ with the stability bound under online parameter updates stated
 below. The complete proofs are deferred to
@@ -951,8 +952,9 @@ Appendix~\ref{sec:appendix-regret-proofs}.
 \begin{theorem}[Regret against fixed SDAC policies]
 \label{thm:regret-bound}
 Suppose the cost functions satisfy the regularity and bounded-subgradient
-assumptions of Section~\ref{sec:model-setup}. Then the online controller from Section~\ref{sec:online-algorithm}, initialized as in
-\eqref{eq:alg-init} and using step size $\eta>0$, satisfies, for the regret defined in \eqref{eq:def-regret},
+assumptions of Section~\ref{sec:model-setup}. Then the controller from
+Section~\ref{sec:online-algorithm}, initialized as in \eqref{eq:alg-init} and using
+step size $\eta>0$, satisfies, for the regret defined in \eqref{eq:def-regret},
 \begin{equation}
 \label{eq:regret-theorem-bound}
 \RegSDAC{T}
@@ -1050,7 +1052,7 @@ Set
 H_T\triangleq
 \max\!\left\{1,\left\lceil\frac{\log T}{\log(1/\alpha)}\right\rceil\right\},
 \]
-and run the OMD controller with action clipping, memory horizon $H=H_T$, and the
+and run the online SDAC controller with action clipping, memory horizon $H=H_T$, and the
 step size $\eta^*$ of Theorem~\ref{thm:regret-bound}. For
 $\mathbf q\in\mathcal Q_\alpha$, let
 \[
@@ -1090,11 +1092,11 @@ O\!\left(\sqrt{T\log\log T}\right)
 \end{corollary}
 
 Because geometric allocation sequences induce proportional state feedback, the
-same controller also satisfies a gain-dependent bound for that policy family.
+controller also satisfies a gain-dependent bound for that policy family.
 
 \begin{corollary}[No-regret against proportional state-feedback policies]
 \label{cor:regret-vs-linear}
-Run the controller of Corollary~\ref{cor:regret-vs-allocation}. For
+Run the online SDAC controller in Corollary~\ref{cor:regret-vs-allocation}. For
 $k\in[0,\alpha]$, let
 $J_T(k)\triangleq\sum_{t=1}^T c_t\bigl(x_t(k),u_t(k)\bigr)$, where
 $u_t(k)=k x_t(k)$, and define
@@ -1298,7 +1300,7 @@ so $\mathbf{m}\in\mathcal{M}_H$. Moreover,
 where the inequality is the scalar SDAC feasibility bound.
 The state and vector action remain affine in $\mathbf M$, so
 $c_t(x_t(\mathbf{M}),\mathbf{u}_t(\mathbf{M}))$ is convex in $\mathbf{M}$. For the
-online controller, a nominal vector that exceeds the available total resource can
+online SDAC controller, a nominal vector that exceeds the available total resource can
 be scaled proportionally so that its entries remain nonnegative and sum to
 $\alpha x_t$. Under an $\ell_1$ Lipschitz bound in the action, the size of this
 correction equals the excess total action, and the stability proof proceeds with
@@ -1313,7 +1315,7 @@ $0\le u_{t,s}\le\alpha_s x_{t,s}$. Assign one SDAC parameter in $\mathcal{M}_H$
 to each storage and use the powers $\alpha_s^i$ in coordinate $s$. The dynamics
 and feasibility constraints then decouple by storage, and the SDAC parameter domain
 is a product of subprobability simplices, with
-$x_{t,s}\le1/(1-\alpha_s)$ for every $s\in[d]$. The online controller clips each nominal
+$x_{t,s}\le1/(1-\alpha_s)$ for every $s\in[d]$. The online SDAC controller clips each nominal
 action to $\alpha_s x_{t,s}$. If the cost is jointly convex and satisfies compatible
 Lipschitz and bounded-subgradient assumptions on the resulting bounded product
 domain, the surrogate cost is jointly convex in all SDAC parameters and OMD applies
@@ -1329,7 +1331,7 @@ analysis and remain an interesting direction for future work.
 
 We studied adversarial online control of a storage system under a state-dependent
 action constraint. We constructed the SDAC so that every fixed-policy trajectory is feasible
-and developed an online SDAC algorithm with
+and developed an online SDAC controller with
 $O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy.
 Once $T$ is at least on the order of $(1-\alpha)^{-1}$, the
 minimax lower bound gives
@@ -1708,7 +1710,7 @@ Substitution in \eqref{eq:allocation-cost-gap} proves
 \eqref{eq:sdac-lin-approx-cost}.
 \end{proof}
 
-\section{Proofs for the Online SDAC Algorithm}
+\section{Proofs for the Online SDAC Controller}
 \label{sec:appendix-algorithm-proofs}
 
 The following lemmas establish the Bregman-projection interpretation of scalar
@@ -1893,7 +1895,7 @@ where $\operatorname{Proj}_{\mathcal{M}_H}^{\Psi}$ is the Bregman projection of 
 Consequently, the OMD update \eqref{eq:alg-omd-argmin} coincides exactly with
 the closed-form OMD update \eqref{eq:alg-omd-mult}--\eqref{eq:alg-omd-proj},
 and in particular $\mathbf{m}_{t+1}\in\mathcal{M}_H\cap\mathbb{R}_{>0}^H$. Thus the positive
-initialization \eqref{eq:alg-init} keeps every algorithm iterate strictly positive.
+initialization \eqref{eq:alg-init} keeps every OMD iterate strictly positive.
 \end{lemma}
 
 \begin{proof}
