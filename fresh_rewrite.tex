@@ -307,8 +307,9 @@ introduces the SDAC policy class and proves its feasibility and convexity
 properties. It also shows how SDAC approximates decreasing-allocation policies and
 proportional state-feedback policies. Section~\ref{sec:online-algorithm} presents
 the feasible online controller based on action clipping and entropic OMD.
-Section~\ref{sec:regret-analysis} proves the regret upper and lower bounds and
-extends the upper bound to the larger policy classes.
+Section~\ref{sec:regret-analysis} proves the regret upper bound and extends it to
+the larger policy classes. Section~\ref{sec:minimax-lower-bound} gives the minimax
+lower bound.
 Section~\ref{sec:extensions} discusses extensions to $\alpha\ge1$, vector actions,
 and multiple storage states. Section~\ref{sec:conclusion} concludes the paper, and
 Appendix~\ref{sec:appendix-proofs} contains the deferred proofs.
@@ -1261,98 +1262,6 @@ and
 \]
 \end{theorem}
 
-The next result shows that the $\sqrt{T}$ dependence is unavoidable and
-quantifies the dependence on $1-\alpha$ that any causal feasible controller must
-incur. Its proof is deferred to Appendix~\ref{sec:appendix-proofs}.
-
-\begin{theorem}[Minimax SDAC regret lower bound]
-\label{thm:sdac-lower-bound}
-Fix $H\ge1$ and $T\ge2$. For every causal feasible online controller
-$\mathcal A$, possibly randomized, there exists a deterministic oblivious sequence
-of arrivals and costs satisfying the assumptions of
-Section~\ref{sec:model-setup} such that
-\begin{equation}
-\label{eq:sdac-lower-exact}
-\mathbb E_{\mathcal A}\!\left[\RegSDAC{T}\right]
-\ge
-\frac{1}{2\sqrt{2}}
-\sqrt{\sum_{t=2}^T \beta_t^2},
-\end{equation}
-where
-\begin{equation}
-\label{eq:sdac-lower-beta}
-\beta_t
-\triangleq
-\alpha\left(
-L_u
-+
-\frac{L_x(1-\alpha^{t-2})}{1-\alpha}
-\right).
-\end{equation}
-The expectation is only over the possible internal randomization of $\mathcal A$; the
-adversarial sequence whose existence is asserted is deterministic and fixed before
-the interaction.
-\end{theorem}
-
-\begin{corollary}[Lower bound for sufficiently long horizons]
-\label{cor:sdac-lower-mixing}
-Define
-\begin{equation}
-\label{eq:def-mixing-time}
-t_{\mathrm{mix}}(\alpha)
-\triangleq
-\left\lceil
-\frac{\log 2}{\log(1/\alpha)}
-\right\rceil.
-\end{equation}
-If $T\ge2t_{\mathrm{mix}}(\alpha)+2$, then every causal feasible controller $\mathcal A$
-admits a deterministic oblivious sequence for which
-\begin{equation}
-\label{eq:sdac-lower-mixing}
-\mathbb E_{\mathcal A}\!\left[\RegSDAC{T}\right]
-\ge
-\frac{G_\alpha}{8}\sqrt{T},
-\end{equation}
-where $G_\alpha=\alpha(L_x/(1-\alpha)+L_u)$ as in
-\eqref{eq:def-surrogate-G}.
-\end{corollary}
-
-The limit $\alpha\uparrow1$ is more challenging because stored arrivals persist
-longer. In this limit,
-$t_{\mathrm{mix}}(\alpha)=\Theta((1-\alpha)^{-1})$, and
-Corollary~\ref{cor:sdac-lower-mixing} gives
-\begin{equation}
-\label{eq:sdac-lower-large-alpha}
-\mathbb E_{\mathcal A}\!\left[\RegSDAC{T}\right]
-=
-\Omega\!\left(\frac{\sqrt{T}}{1-\alpha}\right)
-\end{equation}
-whenever $T\ge2t_{\mathrm{mix}}(\alpha)+2$. The upper bound in
-Theorem~\ref{thm:regret-bound} is
-$O((1-\alpha)^{-3/2}\sqrt{T\log(H+1)})$, so a factor
-$(1-\alpha)^{-1/2}$ between the two bounds remains open.
-
-The condition $T\ge2t_{\mathrm{mix}}(\alpha)+2$ is essential for interpreting the large-$\alpha$
-asymptotic. If $T$ is fixed while $\alpha\uparrow1$, then
-\[
-\frac{1-\alpha^{t-2}}{1-\alpha}\longrightarrow t-2,
-\]
-and the right-hand side of \eqref{eq:sdac-lower-exact} converges to the finite
-quantity
-\[
-\frac{1}{2\sqrt{2}}
-\sqrt{\sum_{t=2}^T\bigl(L_u+L_x(t-2)\bigr)^2}.
-\]
-Thus the exact finite-horizon formula, rather than the long-horizon scaling in
-\eqref{eq:sdac-lower-large-alpha}, applies in this regime.
-
-The large-$\alpha$ dependence improves the coarser analysis that ignores the exact
-coordinate decay in \eqref{eq:surr-coordinate-decay} and the nonexpansiveness of
-$z\mapsto[z]_+$ used in \eqref{eq:transition-contraction}. That analysis gives a leading
-factor of order $(1-\alpha)^{-2}$ as $\alpha\uparrow1$. The sharper rate follows
-from the gradient and stability estimates.
-
-
 Theorem~\ref{thm:regret-bound} and
 Lemma~\ref{lem:sdac-allocation-approx} give the following comparator guarantee.
 
@@ -1480,6 +1389,100 @@ $\operatorname{Tail}_{H_T}(\mathbf q(k))\le\alpha^{H_T+1}$ by
 Lemma~\ref{lem:sdac-allocation-approx}. This makes the bound uniform in $k$;
 minimizing over $k$ proves the stated finite-time and asymptotic guarantees.
 \end{proof}
+
+\section{Minimax Lower Bound}
+\label{sec:minimax-lower-bound}
+
+The next result shows that the $\sqrt{T}$ dependence is unavoidable and
+quantifies the dependence on $1-\alpha$ that any causal feasible controller must
+incur. Its proof is deferred to Appendix~\ref{sec:appendix-proofs}.
+
+\begin{theorem}[Minimax SDAC regret lower bound]
+\label{thm:sdac-lower-bound}
+Fix $H\ge1$ and $T\ge2$. For every causal feasible online controller
+$\mathcal A$, possibly randomized, there exists a deterministic oblivious sequence
+of arrivals and costs satisfying the assumptions of
+Section~\ref{sec:model-setup} such that
+\begin{equation}
+\label{eq:sdac-lower-exact}
+\mathbb E_{\mathcal A}\!\left[\RegSDAC{T}\right]
+\ge
+\frac{1}{2\sqrt{2}}
+\sqrt{\sum_{t=2}^T \beta_t^2},
+\end{equation}
+where
+\begin{equation}
+\label{eq:sdac-lower-beta}
+\beta_t
+\triangleq
+\alpha\left(
+L_u
++
+\frac{L_x(1-\alpha^{t-2})}{1-\alpha}
+\right).
+\end{equation}
+The expectation is only over the possible internal randomization of $\mathcal A$; the
+adversarial sequence whose existence is asserted is deterministic and fixed before
+the interaction.
+\end{theorem}
+
+\begin{corollary}[Lower bound for sufficiently long horizons]
+\label{cor:sdac-lower-mixing}
+Define
+\begin{equation}
+\label{eq:def-mixing-time}
+t_{\mathrm{mix}}(\alpha)
+\triangleq
+\left\lceil
+\frac{\log 2}{\log(1/\alpha)}
+\right\rceil.
+\end{equation}
+If $T\ge2t_{\mathrm{mix}}(\alpha)+2$, then every causal feasible controller $\mathcal A$
+admits a deterministic oblivious sequence for which
+\begin{equation}
+\label{eq:sdac-lower-mixing}
+\mathbb E_{\mathcal A}\!\left[\RegSDAC{T}\right]
+\ge
+\frac{G_\alpha}{8}\sqrt{T},
+\end{equation}
+where $G_\alpha=\alpha(L_x/(1-\alpha)+L_u)$ as in
+\eqref{eq:def-surrogate-G}.
+\end{corollary}
+
+The limit $\alpha\uparrow1$ is more challenging because stored arrivals persist
+longer. In this limit,
+$t_{\mathrm{mix}}(\alpha)=\Theta((1-\alpha)^{-1})$, and
+Corollary~\ref{cor:sdac-lower-mixing} gives
+\begin{equation}
+\label{eq:sdac-lower-large-alpha}
+\mathbb E_{\mathcal A}\!\left[\RegSDAC{T}\right]
+=
+\Omega\!\left(\frac{\sqrt{T}}{1-\alpha}\right)
+\end{equation}
+whenever $T\ge2t_{\mathrm{mix}}(\alpha)+2$. The upper bound in
+Theorem~\ref{thm:regret-bound} is
+$O((1-\alpha)^{-3/2}\sqrt{T\log(H+1)})$, so a factor
+$(1-\alpha)^{-1/2}$ between the two bounds remains open.
+
+The condition $T\ge2t_{\mathrm{mix}}(\alpha)+2$ is essential for interpreting the large-$\alpha$
+asymptotic. If $T$ is fixed while $\alpha\uparrow1$, then
+\[
+\frac{1-\alpha^{t-2}}{1-\alpha}\longrightarrow t-2,
+\]
+and the right-hand side of \eqref{eq:sdac-lower-exact} converges to the finite
+quantity
+\[
+\frac{1}{2\sqrt{2}}
+\sqrt{\sum_{t=2}^T\bigl(L_u+L_x(t-2)\bigr)^2}.
+\]
+Thus the exact finite-horizon formula, rather than the long-horizon scaling in
+\eqref{eq:sdac-lower-large-alpha}, applies in this regime.
+
+The large-$\alpha$ dependence improves the coarser analysis that ignores the exact
+coordinate decay in \eqref{eq:surr-coordinate-decay} and the nonexpansiveness of
+$z\mapsto[z]_+$ used in \eqref{eq:transition-contraction}. That analysis gives a leading
+factor of order $(1-\alpha)^{-2}$ as $\alpha\uparrow1$. The sharper rate follows
+from the gradient and stability estimates.
 
 \section{Discussion and Extensions}
 \label{sec:extensions}
