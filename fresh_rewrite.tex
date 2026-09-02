@@ -643,7 +643,7 @@ u_t(\mathbf{m}),
 where the second inequality uses \eqref{eq:feas-r-term}.
 \end{proof}
 
-For fixed arrivals, both coordinates of the SDAC state--action pair are affine
+For any realized arrival history, both coordinates of the SDAC state--action pair are affine
 in $\mathbf{m}$. The following lemma records the resulting convexity and the constants
 used by the online update.
 
@@ -689,24 +689,21 @@ $\|\mathbf{g}_t\|_\infty\le G_\alpha$, as stated in
 Lemma~\ref{lem:sdac-surrogate}. The proof is given in
 Appendix~\ref{sec:appendix-sdac-proofs}.
 
-Regret minimization against the best fixed SDAC policy thus becomes online convex
-optimization over the simplex.
-
 \subsection{Expressiveness: Decreasing-Allocation Policies}
 \label{subsec:allocation-sequences}
 
-Energy-harvesting policies for Bernoulli recharges can be described by the
-sequence of expenditures following each recharge
-\cite{arafa2018online,zibaeenejad2019lookahead}. In the corresponding
-decreasing-allocation policy class, each unit arriving at time $\tau$ is assigned the
-same decreasing allocation sequence, beginning at time $\tau+1$ to respect the
-information pattern. The sequence may have an arbitrary decreasing shape;
-geometric sequences induce proportional state-feedback policies.
+We next show that finite-memory SDAC policies approximate a class of policies
+that spread each energy arrival over all subsequent periods. Given a fixed
+decreasing sequence $(q_i)_{i\ge1}$, an arrival $w_\tau$ contributes
+$q_iw_\tau$ to the expenditure at time $\tau+i$. The one-period delay reflects
+that $w_\tau$ is observed only after $u_\tau$ is chosen. Such allocation-sequence
+policies have been studied for Bernoulli recharges
+\cite{arafa2018online,zibaeenejad2019lookahead}.
 
 Define the set of feasible decreasing allocation sequences
 \begin{equation}
 \label{eq:def-allocation-sequences}
-\mathcal Q_\alpha^\downarrow
+\mathcal Q_\alpha
 \triangleq
 \left\{
 \mathbf q=(q_i)_{i\ge1}:
@@ -715,7 +712,7 @@ q_1\ge q_2\ge\cdots\ge0,
 \sum_{i=1}^{\infty}\frac{q_i}{\alpha^i}\le1
 \right\}.
 \end{equation}
-For $\mathbf q\in\mathcal Q_\alpha^\downarrow$, define
+For $\mathbf q\in\mathcal Q_\alpha$, define
 \begin{equation}
 \label{eq:def-allocation-policy}
 \begin{aligned}
@@ -736,13 +733,13 @@ $q_i/\alpha^i$ units at the arrival time. Let
 \[
 \Pi_\alpha^{\mathrm{alloc}}
 \triangleq
-\{\pi_{\mathbf q}:\mathbf q\in\mathcal Q_\alpha^\downarrow\}.
+\{\pi_{\mathbf q}:\mathbf q\in\mathcal Q_\alpha\}.
 \]
 
 \begin{lemma}[Finite-memory approximation of decreasing-allocation policies]
 \label{lem:sdac-allocation-approx}
 Every policy in $\Pi_\alpha^{\mathrm{alloc}}$ is feasible. Fix
-$\mathbf q\in\mathcal Q_\alpha^\downarrow$ and $H\ge1$, and define
+$\mathbf q\in\mathcal Q_\alpha$ and $H\ge1$, and define
 \begin{equation}
 \label{eq:allocation-truncation}
 m_{H,i}(\mathbf q)
@@ -796,7 +793,7 @@ Fix $k\in[0,\alpha]$, set $\lambda_k\triangleq\alpha-k$, and define
 q_i(k)=k\lambda_k^{i-1},
 \qquad i\ge1,
 \end{equation}
-where $\lambda_k^0\triangleq1$. Then $\mathbf q(k)\in\mathcal Q_\alpha^\downarrow$
+where $\lambda_k^0\triangleq1$. Then $\mathbf q(k)\in\mathcal Q_\alpha$
 and $\pi_{\mathbf q(k)}$ is exactly the feasible proportional state-feedback policy
 $u_t(k)=k x_t(k)$. Its SDAC truncation is
 \[
@@ -838,7 +835,7 @@ Corollary~\ref{cor:proportional-as-allocation} are given in
 Appendix~\ref{sec:appendix-sdac-proofs}.
 
 Thus, $\Pi_\alpha^{\mathrm{alloc}}$ contains every feasible proportional
-state-feedback policy and also permits nongeometric allocation sequences. Together with
+state-feedback policy. Together with
 Theorem~\ref{thm:regret-bound}, the tail bound in
 \eqref{eq:allocation-cost-gap} yields no regret against
 $\Pi_\alpha^{\mathrm{alloc}}$ and, consequently, against feasible proportional
@@ -1069,7 +1066,7 @@ H_T\triangleq
 \]
 and run the OMD controller with action clipping, memory horizon $H=H_T$, and the
 step size $\eta^*$ of Theorem~\ref{thm:regret-bound}. For
-$\mathbf q\in\mathcal Q_\alpha^\downarrow$, let
+$\mathbf q\in\mathcal Q_\alpha$, let
 \[
 J_T(\mathbf q)
 \triangleq
@@ -1081,7 +1078,7 @@ and
 \triangleq
 J_T^{\mathrm{on}}
 -
-\inf_{\mathbf q\in\mathcal Q_\alpha^\downarrow}J_T(\mathbf q).
+\inf_{\mathbf q\in\mathcal Q_\alpha}J_T(\mathbf q).
 \]
 Then
 \begin{equation}
@@ -1567,7 +1564,7 @@ Taking the maximum over $i$ proves
 \end{proof}
 
 \begin{proof}[Proof of Lemma~\ref{lem:sdac-allocation-approx}]
-Fix $\mathbf q\in\mathcal Q_\alpha^\downarrow$ and set
+Fix $\mathbf q\in\mathcal Q_\alpha$ and set
 \[
 a_i\triangleq\frac{q_i}{\alpha^i},
 \qquad
@@ -1690,7 +1687,7 @@ Summing the per-period cost bound proves \eqref{eq:allocation-cost-gap}.
 \begin{proof}[Proof of Corollary~\ref{cor:proportional-as-allocation}]
 Fix $k\in[0,\alpha]$, let $\lambda_k=\alpha-k$, and let $\mathbf q(k)$ be defined by
 \eqref{eq:proportional-as-allocation}. The sequence is nonnegative and decreasing.
-If $k=0$, then $\mathbf q(k)=\mathbf 0\in\mathcal Q_\alpha^\downarrow$. If $k>0$,
+If $k=0$, then $\mathbf q(k)=\mathbf 0\in\mathcal Q_\alpha$. If $k>0$,
 then $\lambda_k/\alpha<1$ and
 \[
 \sum_{i=1}^{\infty}\frac{q_i(k)}{\alpha^i}
@@ -1702,7 +1699,7 @@ then $\lambda_k/\alpha<1$ and
 \frac{k}{\alpha-\lambda_k}
 =1,
 \]
-so again $\mathbf q(k)\in\mathcal Q_\alpha^\downarrow$. Substituting
+so again $\mathbf q(k)\in\mathcal Q_\alpha$. Substituting
 $u_t(k)=k x_t(k)$ into the dynamics and unrolling gives
 \[
 u_t(k)
@@ -2513,7 +2510,7 @@ $\alpha\uparrow1$.
 \end{proof}
 
 \begin{proof}[Proof of Corollary~\ref{cor:regret-vs-allocation}]
-Fix $\mathbf q\in\mathcal Q_\alpha^\downarrow$ and use the SDAC comparator
+Fix $\mathbf q\in\mathcal Q_\alpha$ and use the SDAC comparator
 $\mathbf m_{H_T}(\mathbf q)$ from
 Lemma~\ref{lem:sdac-allocation-approx}. Theorem~\ref{thm:regret-bound} and
 \eqref{eq:allocation-cost-gap} give
@@ -2543,7 +2540,7 @@ For fixed $k$, Theorem~\ref{thm:regret-bound} applied to
 $\mathbf m_{H_T}^{\mathrm{prop}}(k)$, followed by \eqref{eq:sdac-lin-approx-cost}, gives
 \eqref{eq:linear-regret-decomposition}.
 Corollary~\ref{cor:proportional-as-allocation} shows that the geometric allocation
-sequence $\mathbf q(k)$ belongs to $\mathcal Q_\alpha^\downarrow$, so
+sequence $\mathbf q(k)$ belongs to $\mathcal Q_\alpha$, so
 Lemma~\ref{lem:sdac-allocation-approx} gives
 $\operatorname{Tail}_{H_T}(\mathbf q(k))\le\alpha^{H_T+1}$. This makes the bound
 uniform in $k$; minimizing over $k$ proves the stated finite-time and asymptotic
