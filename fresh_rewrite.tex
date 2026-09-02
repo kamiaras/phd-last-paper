@@ -9,6 +9,8 @@
 \newtheorem{lemma}{Lemma}
 \newtheorem{theorem}{Theorem}
 \newtheorem{corollary}{Corollary}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
  
 \newcommand{\RegSDAC}[1]{\operatorname{Reg}_{#1}^{\mathrm{SDAC}}}
 \newcommand{\RegProp}[1]{\operatorname{Reg}_{#1}^{\mathrm{prop}}}
@@ -1449,10 +1451,10 @@ where $G_\alpha=\alpha(L_x/(1-\alpha)+L_u)$ as in
 \eqref{eq:def-surrogate-G}.
 \end{corollary}
 
-The limit $\alpha\uparrow1$ is more challenging because stored arrivals persist
-longer. In this limit,
-$t_{\mathrm{mix}}(\alpha)=\Theta((1-\alpha)^{-1})$, and
-Corollary~\ref{cor:sdac-lower-mixing} gives
+\begin{remark}[Large-$\alpha$ regime]
+As $\alpha\uparrow1$, stored arrivals persist longer and
+$t_{\mathrm{mix}}(\alpha)=\Theta((1-\alpha)^{-1})$. Hence,
+Corollary~\ref{cor:sdac-lower-mixing} yields
 \begin{equation}
 \label{eq:sdac-lower-large-alpha}
 \mathbb E_{\mathcal A}\!\left[\RegSDAC{T}\right]
@@ -1475,14 +1477,10 @@ quantity
 \frac{1}{2\sqrt{2}}
 \sqrt{\sum_{t=2}^T\bigl(L_u+L_x(t-2)\bigr)^2}.
 \]
-Thus the exact finite-horizon formula, rather than the long-horizon scaling in
-\eqref{eq:sdac-lower-large-alpha}, applies in this regime.
-
-The large-$\alpha$ dependence improves the coarser analysis that ignores the exact
-coordinate decay in \eqref{eq:surr-coordinate-decay} and the nonexpansiveness of
-$z\mapsto[z]_+$ used in \eqref{eq:transition-contraction}. That analysis gives a leading
-factor of order $(1-\alpha)^{-2}$ as $\alpha\uparrow1$. The sharper rate follows
-from the gradient and stability estimates.
+Thus, for fixed $T$, the exact finite-horizon bound in
+\eqref{eq:sdac-lower-exact} applies instead of the long-horizon scaling in
+\eqref{eq:sdac-lower-large-alpha}.
+\end{remark}
 
 \section{Discussion and Extensions}
 \label{sec:extensions}
