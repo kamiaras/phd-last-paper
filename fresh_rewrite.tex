@@ -1603,14 +1603,6 @@ must be respected in real time.
 \section{Deferred Proofs}
 \label{sec:appendix-proofs}
 
-This appendix proves the minimax lower bound from
-Section~\ref{sec:regret-analysis} and the expressiveness lemma from
-Section~\ref{sec:sdac},
-together with the OMD and stability lemmas leading up to the upper regret bound.
-
-We first prove the lower bound. The proof uses the probabilistic method: we analyze
-a random family of oblivious cost sequences and then fix one realization whose
-expected regret is at least the average. Only two SDAC comparators are needed.
 
 \begin{proof}[Proof of Theorem~\ref{thm:sdac-lower-bound}]
 Fix a causal feasible controller $\mathcal A$. Let
@@ -1622,7 +1614,7 @@ randomization of $\mathcal A$, with
 \mathbb P(\xi_t=-1)
 =\frac12.
 \]
-For the moment, regard the signs as sampled before the interaction. Set
+Set
 \begin{equation}
 \label{eq:lower-hard-arrival}
 w_t=1
@@ -1645,8 +1637,7 @@ C_\alpha
 \triangleq
 \frac{L_x+\alpha L_u}{1-\alpha}.
 \end{equation}
-The offset $C_\alpha$ ensures that the costs are nonnegative without affecting
-regret. Indeed, each $c_t$ is affine and hence convex, and, for any two points in
+Each $c_t$ is affine and hence convex, and, for any two points in
 $\mathcal D_\alpha$,
 \begin{equation}
 \label{eq:lower-lipschitz-check}
@@ -1683,9 +1674,12 @@ Therefore,
 c_t(x,u)
 &=C_\alpha+\xi_t(L_xx-L_uu) \\
 &\ge C_\alpha-|L_xx-L_uu| \\
-&\ge0.
+&\ge0,
 \end{aligned}
 \]
+so the offset $C_\alpha$ ensures that the costs are nonnegative without affecting
+regret.
+
 
 We now select two benchmark policies. The parameter
 $\mathbf m^{(0)}$ leaves all mass in the subprobability simplex unused, so its
