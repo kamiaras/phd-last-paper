@@ -1626,16 +1626,9 @@ and define the costs by
 \label{eq:lower-hard-cost}
 c_t(x,u)
 =
-C_\alpha+\xi_t(L_xx-L_uu)
+\xi_t(L_xx-L_uu)
 \qquad
-\text{for all }t\in[T],
-\end{equation}
-where
-\begin{equation}
-\label{eq:lower-cost-constant}
-C_\alpha
-\triangleq
-\frac{L_x+\alpha L_u}{1-\alpha}.
+\text{for all }t\in[T].
 \end{equation}
 Each $c_t$ is affine and hence convex, and, for any two points in
 $\mathcal D_\alpha$,
@@ -1657,28 +1650,7 @@ Moreover,
 \qquad
 |\partial_uc_t|=L_u,
 \]
-so the required subgradient bounds hold. Finally, if
-$(x,u)\in\mathcal D_\alpha$, then
-\begin{equation}
-\label{eq:lower-cost-nonnegative}
-\begin{aligned}
-|L_xx-L_uu|
-&\le L_xx+L_uu \\
-&\le \frac{L_x+\alpha L_u}{1-\alpha}
-=C_\alpha.
-\end{aligned}
-\end{equation}
-Therefore,
-\[
-\begin{aligned}
-c_t(x,u)
-&=C_\alpha+\xi_t(L_xx-L_uu) \\
-&\ge C_\alpha-|L_xx-L_uu| \\
-&\ge0,
-\end{aligned}
-\]
-so the offset $C_\alpha$ ensures that the costs are nonnegative without affecting
-regret.
+so the required subgradient bounds hold.
 
 
 We now select two benchmark policies. The parameter
@@ -1756,21 +1728,17 @@ x_t(\mathbf m^{(0)})-x_t(\mathbf m^{(1)}) \\
 \end{aligned}
 \end{equation}
 
-The offset $C_\alpha$ appears once at each time in every total cost. Hence, for
-$j\in\{0,1\}$,
-\begin{equation}
-\label{eq:lower-costs-minus-common-term}
-\begin{aligned}
-J_T^{\mathrm{on}}-TC_\alpha
+For $j\in\{0,1\}$, the resulting cumulative costs satisfy
+\begin{align*}
+J_T^{\mathrm{on}}
 &=
 \sum_{t=1}^T\xi_t(L_xx_t-L_uu_t), \\
-J_T(\mathbf m^{(j)})-TC_\alpha
+J_T(\mathbf m^{(j)})
 &=
 \sum_{t=1}^T\xi_t L_xx_t(\mathbf m^{(j)}) \\
 &\quad-
 \sum_{t=1}^T\xi_t L_uu_t(\mathbf m^{(j)}).
-\end{aligned}
-\end{equation}
+\end{align*}
 Let $\mathcal F_t^-$ denote the information available immediately before $c_t$ is
 revealed, including the controller randomization used to select $u_t$. Causality
 implies that $(x_t,u_t)$ is $\mathcal F_t^-$-measurable, while the fresh sign
@@ -1790,7 +1758,7 @@ $\xi_t$ is independent of $\mathcal F_t^-$. Consequently,
 \right] \\
 &=0, \\
 \mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[
-J_T^{\mathrm{on}}-TC_\alpha
+J_T^{\mathrm{on}}
 \right]
 &=0.
 \end{aligned}
@@ -1801,7 +1769,7 @@ are also independent of the signs. Thus, for $j\in\{0,1\}$,
 \label{eq:lower-two-policy-means-zero}
 \begin{aligned}
 \mathbb E_{\boldsymbol\xi}\!\left[
-J_T(\mathbf m^{(j)})-TC_\alpha
+J_T(\mathbf m^{(j)})
 \right]
 &=
 \sum_{t=1}^T
@@ -1844,11 +1812,7 @@ J_T^{\mathrm{on}}
 -\min\!\left\{
 J_T(\mathbf m^{(0)}),
 J_T(\mathbf m^{(1)})
-\right\} \\
-&=
-\left(J_T^{\mathrm{on}}-TC_\alpha\right)
--\min_{j\in\{0,1\}}
-\left\{J_T(\mathbf m^{(j)})-TC_\alpha\right\}.
+\right\}.
 \end{aligned}
 \end{equation}
 Using $\min\{a,b\}=(a+b-|a-b|)/2$ together with
