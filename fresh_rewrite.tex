@@ -310,9 +310,9 @@ introduces the SDAC policy class and proves its feasibility and convexity
 properties. It also shows how SDAC approximates decreasing-allocation policies and
 proportional state-feedback policies. Section~\ref{sec:online-algorithm} presents
 the feasible online controller based on action clipping and entropic OMD.
-Section~\ref{sec:regret-analysis} proves the regret upper bound and extends it to
+Section~\ref{sec:regret-analysis} proves the regret upper bounds and extends them to
 the larger policy classes. Section~\ref{sec:minimax-lower-bound} gives the minimax
-lower bound.
+regret lower bound.
 Section~\ref{sec:extensions} discusses extensions to $\alpha\ge1$, vector actions,
 and multiple storage states. Section~\ref{sec:conclusion} concludes the paper.
 Appendices~\ref{sec:appendix-sdac-proofs}--\ref{sec:appendix-minimax-proofs}
@@ -337,8 +337,8 @@ $\pi_{\mathbf m}$, with induced state and action trajectories
 $x_t(\mathbf m)$ and $u_t(\mathbf m)$. A feasible proportional state-feedback
 policy with gain $k\in[0,\alpha]$ induces $x_t(k)$ and $u_t(k)$, while a decreasing
 allocation sequence $\mathbf q$ induces $x_t(\mathbf q)$ and $u_t(\mathbf q)$.
-After the online algorithm is introduced, $x_t$ and $u_t$ without arguments denote
-the realized online trajectory.
+After the online SDAC algorithm is introduced, $x_t$ and $u_t$ without arguments
+denote the realized online trajectory.
 
 \section{Model and Regret Benchmark}
 \label{sec:model-setup}
@@ -480,7 +480,7 @@ sublinear regret.
 \subsection{From Disturbance-Action Control to SDAC}
 DAC combines a stabilizing state-feedback term with a
 finite linear filter of past disturbances. Under standard conditions, this
-parameterization yields convex surrogate losses and efficient online updates. In
+parameterization yields convex surrogate costs and efficient online updates. In
 our scalar storage model, specializing the baseline feedback term to zero gives the
 representative form
 \begin{equation}
@@ -494,7 +494,7 @@ For our constrained model, an unrestricted filter is insufficient: its action ca
 violate \eqref{eq:model-feasibility} by exceeding $\alpha x_t$ or becoming negative.
 We therefore introduce \emph{Simplex Disturbance-Action Control} (SDAC), which uses a
 simplex-constrained filter tailored to the storage dynamics. This restriction ensures
-that every fixed policy is feasible while preserving convex surrogate losses and
+that every fixed policy is feasible while preserving convex surrogate costs and
 tractable online updates.
 
 
@@ -848,7 +848,7 @@ state-feedback policies.
 \section{Online SDAC Algorithm}
 \label{sec:online-algorithm}
 
-We now present our online algorithm, which updates SDAC parameters by
+We now present our online SDAC algorithm, which updates SDAC parameters by
 OMD with unnormalized negentropy (equivalently, the
 exponentiated gradient method) and a fixed step size $\eta>0$ over the
 subprobability simplex $\mathcal{M}_H\subset\mathbb{R}^H$
@@ -947,8 +947,9 @@ Appendix~\ref{sec:appendix-algorithm-proofs}.
 The following theorem states that the online controller achieves sublinear regret
 against every fixed SDAC policy $\pi_{\mathbf{m}}\in\Pi_H^{\mathrm{SDAC}}$.
 The proof combines a standard online convex optimization bound for the surrogate
-costs $\ell_t$ with the trajectory-stability result stated below. The complete
-proofs are deferred to Appendix~\ref{sec:appendix-regret-proofs}.
+costs $\ell_t$ with the stability bound under online parameter updates stated
+below. The complete proofs are deferred to
+Appendix~\ref{sec:appendix-regret-proofs}.
 
 \begin{theorem}[Regret against fixed SDAC policies]
 \label{thm:regret-bound}
@@ -1330,8 +1331,8 @@ analysis and remain an interesting direction for future work.
 \label{sec:conclusion}
 
 We studied adversarial online control of a storage system under a state-dependent
-action constraint. We constructed the SDAC so that every policy trajectory is feasible,
-and an online algorithm with
+action constraint. We constructed the SDAC so that every policy trajectory is feasible
+and developed an online SDAC algorithm with
 $O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy.
 Once $T$ is at least on the order of $(1-\alpha)^{-1}$, the
 minimax lower bound gives
@@ -1350,7 +1351,7 @@ must be respected in real time.
 \section{Proofs for Simplex Disturbance-Action Control}
 \label{sec:appendix-sdac-proofs}
 
-We collect the deferred proofs of the structural and expressiveness results from
+We collect the deferred proofs of the structural and approximation results from
 Section~\ref{sec:sdac}.
 
 \begin{proof}[Proof of Lemma~\ref{lem:sdac-state-decomp}]
