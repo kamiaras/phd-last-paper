@@ -315,7 +315,7 @@ the larger policy classes. Section~\ref{sec:minimax-lower-bound} gives the minim
 lower bound.
 Section~\ref{sec:extensions} discusses extensions to $\alpha\ge1$, vector actions,
 and multiple storage states. Section~\ref{sec:conclusion} concludes the paper.
-Appendices~\ref{sec:appendix-minimax-proofs}--\ref{sec:appendix-regret-proofs}
+Appendices~\ref{sec:appendix-sdac-proofs}--\ref{sec:appendix-minimax-proofs}
 contain the deferred proofs, grouped by the section in which the corresponding
 results are stated or used.
 
@@ -1357,290 +1357,6 @@ must be respected in real time.
 
 
 \appendices
-\section{Proofs for the Minimax Lower Bound}
-\label{sec:appendix-minimax-proofs}
-
-
-\begin{proof}[Proof of Theorem~\ref{thm:sdac-lower-bound}]
-Fix a causal feasible controller $\mathcal A$. Let
-$\xi_1,\ldots,\xi_T$ be independent Rademacher random variables, also independent
-of the internal randomization of $\mathcal A$, with
-\[
-\mathbb P(\xi_t=1)
-=
-\mathbb P(\xi_t=-1)
-=\frac12.
-\]
-Set
-\begin{equation}
-\label{eq:lower-hard-arrival}
-w_t=1
-\qquad
-\text{for all }t\in[T],
-\end{equation}
-and define the costs by
-\begin{equation}
-\label{eq:lower-hard-cost}
-c_t(x,u)
-=
-\xi_t(L_xx-L_uu)
-\qquad
-\text{for all }t\in[T].
-\end{equation}
-Each $c_t$ is affine and hence convex, and, for any two points in
-$\mathcal D_\alpha$,
-\begin{equation}
-\label{eq:lower-lipschitz-check}
-\begin{aligned}
-|c_t(x,u)-c_t(x',u')|
-&=
-|L_x(x-x')-L_u(u-u')| \\
-&\le
-L_x|x-x'|+L_u|u-u'|.
-\end{aligned}
-\end{equation}
-Moreover,
-\[
-\nabla c_t=\xi_t(L_x,-L_u),
-\qquad
-|\partial_xc_t|=L_x,
-\qquad
-|\partial_uc_t|=L_u,
-\]
-so the required subgradient bounds hold.
-
-
-We now select two benchmark policies. The parameter
-$\mathbf m^{(0)}$ leaves all mass in the subprobability simplex unused, so its
-SDAC action is always zero. The parameter $\mathbf m^{(1)}$ places all mass on the
-first lag, so its action is $\alpha w_{t-1}$. Let
-\begin{equation}
-\label{eq:lower-two-policy-parameters}
-\mathbf m^{(0)}\triangleq\mathbf 0,
-\qquad
-\mathbf m^{(1)}\triangleq\mathbf e_1
-\end{equation}
-belong to $\mathcal M_H$, where
-$\mathbf e_1=(1,0,\ldots,0)\in\mathbb R^H$. Thus, under
-\eqref{eq:lower-hard-arrival}, $\mathbf m^{(0)}$ is the no-release policy, whereas
-$\mathbf m^{(1)}$ releases the retained portion of the preceding arrival. For the
-no-release policy,
-\begin{equation}
-\label{eq:lower-policy-zero-trajectory}
-u_t(\mathbf m^{(0)})=0,
-\qquad
-x_t(\mathbf m^{(0)})
-=
-\rho_t
-\triangleq
-\frac{1-\alpha^{t-1}}{1-\alpha}.
-\end{equation}
-This follows by unrolling $x_{t+1}=\alpha x_t+1$:
-\[
-x_t(\mathbf m^{(0)})
-=\sum_{s=0}^{t-2}\alpha^s
-=\frac{1-\alpha^{t-1}}{1-\alpha},
-\qquad t\ge2,
-\]
-and the closed form also gives $x_1(\mathbf m^{(0)})=0$. For the one-lag policy,
-\eqref{eq:def-sdac-policy} gives
-\begin{equation}
-\label{eq:lower-policy-one-action}
-u_1(\mathbf m^{(1)})=0,
-\qquad
-u_t(\mathbf m^{(1)})=\alpha,
-\quad t\ge2.
-\end{equation}
-Its state at $t=2$ is
-\[
-x_2(\mathbf m^{(1)})
-=\alpha x_1(\mathbf m^{(1)})-u_1(\mathbf m^{(1)})+w_1
-=1.
-\]
-If $x_t(\mathbf m^{(1)})=1$ for some $t\ge2$, then
-\[
-\begin{aligned}
-x_{t+1}(\mathbf m^{(1)})
-&=\alpha x_t(\mathbf m^{(1)})-u_t(\mathbf m^{(1)})+w_t \\
-&=\alpha-\alpha+1
-=1.
-\end{aligned}
-\]
-Induction therefore gives
-\begin{equation}
-\label{eq:lower-policy-one-trajectory}
-x_t(\mathbf m^{(1)})=1,
-\qquad
-t\ge2.
-\end{equation}
-For $t\ge2$, the difference between the two states is
-\begin{equation}
-\label{eq:lower-two-policy-state-difference}
-\begin{aligned}
-\Delta_t
-&\triangleq
-x_t(\mathbf m^{(0)})-x_t(\mathbf m^{(1)}) \\
-&=\rho_t-1 \\
-&=\frac{\alpha(1-\alpha^{t-2})}{1-\alpha}.
-\end{aligned}
-\end{equation}
-
-
-
-The two policies have the same state and action at $t=1$. For $t\ge2$,
-\eqref{eq:lower-policy-one-action} and
-\eqref{eq:lower-two-policy-state-difference} give
-\begin{equation}
-\label{eq:lower-two-policy-cost-difference}
-\begin{aligned}
-J_T(\mathbf m^{(0)})-J_T(\mathbf m^{(1)})
-=
-\sum_{t=2}^T\xi_t(L_x\Delta_t+\alpha L_u)
-=
-\sum_{t=2}^T\xi_t \beta_t,
-\end{aligned}
-\end{equation}
-with $\beta_t$ as in \eqref{eq:sdac-lower-beta}.
-
-
-
-Let $\mathcal F_t^-$ be the information available immediately before $c_t$ is
-revealed, including the randomization used to select $u_t$. By causality,
-$(x_t,u_t)$ is $\mathcal F_t^-$-measurable, whereas $\xi_t$ is independent of
-$\mathcal F_t^-$ and has mean zero. Hence, by the tower property,
-\begin{equation}
-\label{eq:lower-online-mean-zero}
-\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[
-J_T^{\mathrm{on}}
-\right]
-=\sum_{t=1}^T
-\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[
-(L_xx_t-L_uu_t)\mathbb E[\xi_t\mid\mathcal F_t^-]
-\right]
-=0.
-\end{equation}
-The fixed-policy trajectories depend only on the arrival sequence and are
-therefore independent of the Rademacher variables. Thus, for $j\in\{0,1\}$,
-\begin{equation}
-\label{eq:lower-two-policy-means-zero}
-\mathbb E_{\boldsymbol\xi}\!\left[
-J_T(\mathbf m^{(j)})
-\right]
-=\sum_{t=1}^T\mathbb E[\xi_t]
-\bigl(L_xx_t(\mathbf m^{(j)})-L_uu_t(\mathbf m^{(j)})\bigr)
-=0.
-\end{equation}
-
-
-Because $\mathbf m^{(0)},\mathbf m^{(1)}\in\mathcal M_H$, for every realization of
-the Rademacher variables and every choice made by the controller,
-\begin{equation}
-\label{eq:lower-two-policy-regret}
-\begin{aligned}
-\RegSDAC{T}
-&=
-J_T^{\mathrm{on}}
--\min_{\mathbf m\in\mathcal M_H}J_T(\mathbf m) \\
-&\ge
-J_T^{\mathrm{on}}
--\min\!\left\{
-J_T(\mathbf m^{(0)}),
-J_T(\mathbf m^{(1)})
-\right\}.
-\end{aligned}
-\end{equation}
-Using $\min\{a,b\}=(a+b-|a-b|)/2$ together with
-\eqref{eq:lower-online-mean-zero} and
-\eqref{eq:lower-two-policy-means-zero}, and then taking expectations in
-\eqref{eq:lower-two-policy-regret}, gives
-\begin{equation}
-\label{eq:lower-randomized-sequence-bound}
-\begin{aligned}
-\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[\RegSDAC{T}\right]
-&\ge \frac12\mathbb E_{\boldsymbol\xi}\!\left[
-\left|J_T(\mathbf m^{(0)})-J_T(\mathbf m^{(1)})\right|
-\right] \\
-&= \frac12\mathbb E_{\boldsymbol\xi}\!\left[
-\left|\sum_{t=2}^T\xi_t\beta_t\right|
-\right] \\
-&\ge \frac{1}{2\sqrt2}
-\left(\sum_{t=2}^T\beta_t^2\right)^{1/2}.
-\end{aligned}
-\end{equation}
-The last step follows from Khintchine's inequality for Rademacher sums.
-
-It remains to remove the randomization from the adversarial construction. The
-left-hand side of \eqref{eq:lower-randomized-sequence-bound} is the average over
-all $2^T$ realizations of the Rademacher vector $\boldsymbol\xi$:
-\[
-\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[\RegSDAC{T}\right]
-=
-\frac{1}{2^T}
-\sum_{\boldsymbol\xi\in\{-1,1\}^T}
-\mathbb E_{\mathcal A}\!\left[
-\RegSDAC{T}\,\middle|\,\boldsymbol\xi
-\right].
-\]
-Hence at least one vector $\boldsymbol\xi^\star$ makes the conditional expectation
-at least the right-hand side of \eqref{eq:lower-randomized-sequence-bound}. Fixing
-$\boldsymbol\xi^\star$ in \eqref{eq:lower-hard-cost}, together with the arrivals
-in \eqref{eq:lower-hard-arrival}, produces a deterministic admissible sequence
-fixed before the interaction. The remaining expectation is only over the internal
-randomization of $\mathcal A$, and \eqref{eq:sdac-lower-exact} follows.
-\end{proof}
-
-\begin{proof}[Proof of Corollary~\ref{cor:sdac-lower-mixing}]
-The definition of $t_{\mathrm{mix}}(\alpha)$ gives
-\begin{equation}
-\label{eq:lower-mixing-geometric}
-\alpha^{t_{\mathrm{mix}}(\alpha)}
-\le
-\alpha^{\log 2/\log(1/\alpha)}
-=\frac12.
-\end{equation}
-Therefore, for every $t\ge t_{\mathrm{mix}}(\alpha)+2$,
-\begin{equation}
-\label{eq:lower-beta-post-mixing}
-\begin{aligned}
-\beta_t
-&\ge
-\alpha\left(
-L_u+\frac{L_x}{2(1-\alpha)}
-\right) \\
-&\ge
-\frac{\alpha}{2}
-\left(
-L_u+\frac{L_x}{1-\alpha}
-\right)
-=\frac{G_\alpha}{2}.
-\end{aligned}
-\end{equation}
-There are $T-t_{\mathrm{mix}}(\alpha)-1$ indices in
-$\{t_{\mathrm{mix}}(\alpha)+2,\ldots,T\}$. If
-$T\ge2t_{\mathrm{mix}}(\alpha)+2$, then
-\begin{equation}
-\label{eq:lower-post-mixing-count}
-T-t_{\mathrm{mix}}(\alpha)-1
-\ge
-\frac{T}{2}.
-\end{equation}
-Applying Theorem~\ref{thm:sdac-lower-bound} and retaining only these indices,
-\begin{equation}
-\label{eq:lower-mixing-final}
-\begin{aligned}
-\mathbb E_{\mathcal A}\!\left[\RegSDAC{T}\right]
-&\ge
-\frac{1}{2\sqrt{2}}
-\left[
-\frac{T}{2}\left(\frac{G_\alpha}{2}\right)^2
-\right]^{1/2} \\
-&=
-\frac{G_\alpha}{8}\sqrt{T}.
-\end{aligned}
-\end{equation}
-This is \eqref{eq:sdac-lower-mixing}.
-\end{proof}
-
 \section{Proofs for Simplex Disturbance-Action Control}
 \label{sec:appendix-sdac-proofs}
 
@@ -2830,6 +2546,290 @@ guarantees.
 \end{proof}
 
 
+
+\section{Proofs for the Minimax Lower Bound}
+\label{sec:appendix-minimax-proofs}
+
+
+\begin{proof}[Proof of Theorem~\ref{thm:sdac-lower-bound}]
+Fix a causal feasible controller $\mathcal A$. Let
+$\xi_1,\ldots,\xi_T$ be independent Rademacher random variables, also independent
+of the internal randomization of $\mathcal A$, with
+\[
+\mathbb P(\xi_t=1)
+=
+\mathbb P(\xi_t=-1)
+=\frac12.
+\]
+Set
+\begin{equation}
+\label{eq:lower-hard-arrival}
+w_t=1
+\qquad
+\text{for all }t\in[T],
+\end{equation}
+and define the costs by
+\begin{equation}
+\label{eq:lower-hard-cost}
+c_t(x,u)
+=
+\xi_t(L_xx-L_uu)
+\qquad
+\text{for all }t\in[T].
+\end{equation}
+Each $c_t$ is affine and hence convex, and, for any two points in
+$\mathcal D_\alpha$,
+\begin{equation}
+\label{eq:lower-lipschitz-check}
+\begin{aligned}
+|c_t(x,u)-c_t(x',u')|
+&=
+|L_x(x-x')-L_u(u-u')| \\
+&\le
+L_x|x-x'|+L_u|u-u'|.
+\end{aligned}
+\end{equation}
+Moreover,
+\[
+\nabla c_t=\xi_t(L_x,-L_u),
+\qquad
+|\partial_xc_t|=L_x,
+\qquad
+|\partial_uc_t|=L_u,
+\]
+so the required subgradient bounds hold.
+
+
+We now select two benchmark policies. The parameter
+$\mathbf m^{(0)}$ leaves all mass in the subprobability simplex unused, so its
+SDAC action is always zero. The parameter $\mathbf m^{(1)}$ places all mass on the
+first lag, so its action is $\alpha w_{t-1}$. Let
+\begin{equation}
+\label{eq:lower-two-policy-parameters}
+\mathbf m^{(0)}\triangleq\mathbf 0,
+\qquad
+\mathbf m^{(1)}\triangleq\mathbf e_1
+\end{equation}
+belong to $\mathcal M_H$, where
+$\mathbf e_1=(1,0,\ldots,0)\in\mathbb R^H$. Thus, under
+\eqref{eq:lower-hard-arrival}, $\mathbf m^{(0)}$ is the no-release policy, whereas
+$\mathbf m^{(1)}$ releases the retained portion of the preceding arrival. For the
+no-release policy,
+\begin{equation}
+\label{eq:lower-policy-zero-trajectory}
+u_t(\mathbf m^{(0)})=0,
+\qquad
+x_t(\mathbf m^{(0)})
+=
+\rho_t
+\triangleq
+\frac{1-\alpha^{t-1}}{1-\alpha}.
+\end{equation}
+This follows by unrolling $x_{t+1}=\alpha x_t+1$:
+\[
+x_t(\mathbf m^{(0)})
+=\sum_{s=0}^{t-2}\alpha^s
+=\frac{1-\alpha^{t-1}}{1-\alpha},
+\qquad t\ge2,
+\]
+and the closed form also gives $x_1(\mathbf m^{(0)})=0$. For the one-lag policy,
+\eqref{eq:def-sdac-policy} gives
+\begin{equation}
+\label{eq:lower-policy-one-action}
+u_1(\mathbf m^{(1)})=0,
+\qquad
+u_t(\mathbf m^{(1)})=\alpha,
+\quad t\ge2.
+\end{equation}
+Its state at $t=2$ is
+\[
+x_2(\mathbf m^{(1)})
+=\alpha x_1(\mathbf m^{(1)})-u_1(\mathbf m^{(1)})+w_1
+=1.
+\]
+If $x_t(\mathbf m^{(1)})=1$ for some $t\ge2$, then
+\[
+\begin{aligned}
+x_{t+1}(\mathbf m^{(1)})
+&=\alpha x_t(\mathbf m^{(1)})-u_t(\mathbf m^{(1)})+w_t \\
+&=\alpha-\alpha+1
+=1.
+\end{aligned}
+\]
+Induction therefore gives
+\begin{equation}
+\label{eq:lower-policy-one-trajectory}
+x_t(\mathbf m^{(1)})=1,
+\qquad
+t\ge2.
+\end{equation}
+For $t\ge2$, the difference between the two states is
+\begin{equation}
+\label{eq:lower-two-policy-state-difference}
+\begin{aligned}
+\Delta_t
+&\triangleq
+x_t(\mathbf m^{(0)})-x_t(\mathbf m^{(1)}) \\
+&=\rho_t-1 \\
+&=\frac{\alpha(1-\alpha^{t-2})}{1-\alpha}.
+\end{aligned}
+\end{equation}
+
+
+
+The two policies have the same state and action at $t=1$. For $t\ge2$,
+\eqref{eq:lower-policy-one-action} and
+\eqref{eq:lower-two-policy-state-difference} give
+\begin{equation}
+\label{eq:lower-two-policy-cost-difference}
+\begin{aligned}
+J_T(\mathbf m^{(0)})-J_T(\mathbf m^{(1)})
+=
+\sum_{t=2}^T\xi_t(L_x\Delta_t+\alpha L_u)
+=
+\sum_{t=2}^T\xi_t \beta_t,
+\end{aligned}
+\end{equation}
+with $\beta_t$ as in \eqref{eq:sdac-lower-beta}.
+
+
+
+Let $\mathcal F_t^-$ be the information available immediately before $c_t$ is
+revealed, including the randomization used to select $u_t$. By causality,
+$(x_t,u_t)$ is $\mathcal F_t^-$-measurable, whereas $\xi_t$ is independent of
+$\mathcal F_t^-$ and has mean zero. Hence, by the tower property,
+\begin{equation}
+\label{eq:lower-online-mean-zero}
+\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[
+J_T^{\mathrm{on}}
+\right]
+=\sum_{t=1}^T
+\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[
+(L_xx_t-L_uu_t)\mathbb E[\xi_t\mid\mathcal F_t^-]
+\right]
+=0.
+\end{equation}
+The fixed-policy trajectories depend only on the arrival sequence and are
+therefore independent of the Rademacher variables. Thus, for $j\in\{0,1\}$,
+\begin{equation}
+\label{eq:lower-two-policy-means-zero}
+\mathbb E_{\boldsymbol\xi}\!\left[
+J_T(\mathbf m^{(j)})
+\right]
+=\sum_{t=1}^T\mathbb E[\xi_t]
+\bigl(L_xx_t(\mathbf m^{(j)})-L_uu_t(\mathbf m^{(j)})\bigr)
+=0.
+\end{equation}
+
+
+Because $\mathbf m^{(0)},\mathbf m^{(1)}\in\mathcal M_H$, for every realization of
+the Rademacher variables and every choice made by the controller,
+\begin{equation}
+\label{eq:lower-two-policy-regret}
+\begin{aligned}
+\RegSDAC{T}
+&=
+J_T^{\mathrm{on}}
+-\min_{\mathbf m\in\mathcal M_H}J_T(\mathbf m) \\
+&\ge
+J_T^{\mathrm{on}}
+-\min\!\left\{
+J_T(\mathbf m^{(0)}),
+J_T(\mathbf m^{(1)})
+\right\}.
+\end{aligned}
+\end{equation}
+Using $\min\{a,b\}=(a+b-|a-b|)/2$ together with
+\eqref{eq:lower-online-mean-zero} and
+\eqref{eq:lower-two-policy-means-zero}, and then taking expectations in
+\eqref{eq:lower-two-policy-regret}, gives
+\begin{equation}
+\label{eq:lower-randomized-sequence-bound}
+\begin{aligned}
+\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[\RegSDAC{T}\right]
+&\ge \frac12\mathbb E_{\boldsymbol\xi}\!\left[
+\left|J_T(\mathbf m^{(0)})-J_T(\mathbf m^{(1)})\right|
+\right] \\
+&= \frac12\mathbb E_{\boldsymbol\xi}\!\left[
+\left|\sum_{t=2}^T\xi_t\beta_t\right|
+\right] \\
+&\ge \frac{1}{2\sqrt2}
+\left(\sum_{t=2}^T\beta_t^2\right)^{1/2}.
+\end{aligned}
+\end{equation}
+The last step follows from Khintchine's inequality for Rademacher sums.
+
+It remains to remove the randomization from the adversarial construction. The
+left-hand side of \eqref{eq:lower-randomized-sequence-bound} is the average over
+all $2^T$ realizations of the Rademacher vector $\boldsymbol\xi$:
+\[
+\mathbb E_{\boldsymbol\xi,\mathcal A}\!\left[\RegSDAC{T}\right]
+=
+\frac{1}{2^T}
+\sum_{\boldsymbol\xi\in\{-1,1\}^T}
+\mathbb E_{\mathcal A}\!\left[
+\RegSDAC{T}\,\middle|\,\boldsymbol\xi
+\right].
+\]
+Hence at least one vector $\boldsymbol\xi^\star$ makes the conditional expectation
+at least the right-hand side of \eqref{eq:lower-randomized-sequence-bound}. Fixing
+$\boldsymbol\xi^\star$ in \eqref{eq:lower-hard-cost}, together with the arrivals
+in \eqref{eq:lower-hard-arrival}, produces a deterministic admissible sequence
+fixed before the interaction. The remaining expectation is only over the internal
+randomization of $\mathcal A$, and \eqref{eq:sdac-lower-exact} follows.
+\end{proof}
+
+\begin{proof}[Proof of Corollary~\ref{cor:sdac-lower-mixing}]
+The definition of $t_{\mathrm{mix}}(\alpha)$ gives
+\begin{equation}
+\label{eq:lower-mixing-geometric}
+\alpha^{t_{\mathrm{mix}}(\alpha)}
+\le
+\alpha^{\log 2/\log(1/\alpha)}
+=\frac12.
+\end{equation}
+Therefore, for every $t\ge t_{\mathrm{mix}}(\alpha)+2$,
+\begin{equation}
+\label{eq:lower-beta-post-mixing}
+\begin{aligned}
+\beta_t
+&\ge
+\alpha\left(
+L_u+\frac{L_x}{2(1-\alpha)}
+\right) \\
+&\ge
+\frac{\alpha}{2}
+\left(
+L_u+\frac{L_x}{1-\alpha}
+\right)
+=\frac{G_\alpha}{2}.
+\end{aligned}
+\end{equation}
+There are $T-t_{\mathrm{mix}}(\alpha)-1$ indices in
+$\{t_{\mathrm{mix}}(\alpha)+2,\ldots,T\}$. If
+$T\ge2t_{\mathrm{mix}}(\alpha)+2$, then
+\begin{equation}
+\label{eq:lower-post-mixing-count}
+T-t_{\mathrm{mix}}(\alpha)-1
+\ge
+\frac{T}{2}.
+\end{equation}
+Applying Theorem~\ref{thm:sdac-lower-bound} and retaining only these indices,
+\begin{equation}
+\label{eq:lower-mixing-final}
+\begin{aligned}
+\mathbb E_{\mathcal A}\!\left[\RegSDAC{T}\right]
+&\ge
+\frac{1}{2\sqrt{2}}
+\left[
+\frac{T}{2}\left(\frac{G_\alpha}{2}\right)^2
+\right]^{1/2} \\
+&=
+\frac{G_\alpha}{8}\sqrt{T}.
+\end{aligned}
+\end{equation}
+This is \eqref{eq:sdac-lower-mixing}.
+\end{proof}
 
 \bibliographystyle{IEEEtran}
 \bibliography{ref}
