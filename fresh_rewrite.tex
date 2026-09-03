@@ -355,9 +355,8 @@ Since $x_1=0$, induction gives
 \le\frac{1}{1-\alpha},
 \qquad t\in[T+1].
 \]
-Thus, a storage capacity of $1/(1-\alpha)$ suffices to avoid overflow. Together
-with \eqref{eq:model-feasibility}, this bound places every feasible state--action
-pair in the compact set
+Together with \eqref{eq:model-feasibility}, this bound places every feasible
+state--action pair in the compact set
 \begin{equation}
 \label{eq:model-domain}
 \mathcal{D}_\alpha
@@ -369,13 +368,16 @@ pair in the compact set
 \right\}.
 \end{equation}
 
+\begin{remark}[Storage capacity]
+A storage capacity of $1/(1-\alpha)$ suffices to avoid overflow.
+\end{remark}
+
 Each revealed cost function has the form
 \[
 c_t:\mathbb{R}_{\ge0}^2\to\mathbb{R}
 \]
-and is convex in $(x,u)$. We assume that each $c_t$ satisfies the following
-Lipschitz condition on $\mathcal{D}_\alpha$: there are constants $L_x,L_u>0$,
-independent of $t$, such that
+and is convex in $(x,u)$. We also assume that each $c_t$ satisfies the following
+Lipschitz condition on $\mathcal{D}_\alpha$: there are constants $L_x,L_u>0$, such that
 \begin{equation}
 \label{eq:model-lipschitz}
 |c_t(x,u)-c_t(x',u')|
@@ -415,18 +417,9 @@ $\mathcal{M}_H$, defined in Section~\ref{sec:sdac}. For each
 $\mathbf{m}\in\mathcal{M}_H$, let $\pi_{\mathbf{m}}$ denote the fixed SDAC policy.
 The \emph{fixed-policy trajectory associated with $\mathbf{m}$} is the unique
 state--action sequence $\{(x_t(\mathbf{m}),u_t(\mathbf{m}))\}_{t=1}^T$ obtained by
-applying $\pi_{\mathbf{m}}$ under the same arrival sequence, with $\mathbf{m}$ held
-constant at every time. We set $w_\tau\equiv0$ for $\tau\le0$ and define this
-trajectory by
-\begin{equation}
-\label{eq:def-fixed-policy-trajectory}
-\begin{aligned}
-x_1(\mathbf{m})&=0,\\
-u_t(\mathbf{m})&=\sum_{i=1}^H m_i\alpha^i w_{t-i},\\
-x_{t+1}(\mathbf{m})&=\alpha x_t(\mathbf{m})-u_t(\mathbf{m})+w_t,
-\qquad t\in[T].
-\end{aligned}
-\end{equation}
+applying $\pi_{\mathbf{m}}$ with $\mathbf{m}$ held
+constant at every time; its recursion is given in
+\eqref{eq:def-fixed-policy-trajectory}.
 Define the cumulative cost of this fixed-policy trajectory by
 \[
 J_T(\mathbf{m})
@@ -451,10 +444,6 @@ J_T^{\mathrm{on}}
 -
 \min_{\mathbf{m}\in\mathcal{M}_H}J_T(\mathbf{m}).
 \end{equation}
-The online SDAC controller may update its parameter over time, while the benchmark
-in \eqref{eq:def-regret} is the best fixed SDAC policy chosen in hindsight.
-Here, fixed means that $\mathbf{m}$ is held constant; the policy's actions still
-respond to past arrivals.
 Our objective is to satisfy \eqref{eq:model-feasibility} at every time and achieve
 sublinear regret.
 
@@ -513,11 +502,15 @@ where
 \in\mathbb{R}^H.
 \end{equation}
 
-The state component of the fixed-policy trajectory satisfies
+We set $w_\tau\equiv0$ for $\tau\le0$ and define the fixed-policy trajectory by
 \begin{equation}
-\label{eq:sdac-state-update}
-x_{t+1}(\mathbf{m}) = \alpha x_t(\mathbf{m}) - u_t(\mathbf{m}) + w_t,
-\qquad x_1(\mathbf{m})=0.
+\label{eq:def-fixed-policy-trajectory}
+\begin{aligned}
+x_1(\mathbf{m})&=0,\\
+u_t(\mathbf{m})&=\sum_{i=1}^H m_i\alpha^i w_{t-i},\\
+x_{t+1}(\mathbf{m})&=\alpha x_t(\mathbf{m})-u_t(\mathbf{m})+w_t,
+\qquad t\in[T].
+\end{aligned}
 \end{equation}
 The SDAC policy class is
 \begin{equation}
@@ -588,7 +581,7 @@ The first consequence of this decomposition is that every fixed SDAC policy is f
 \begin{lemma}[Feasibility of SDAC policies]
 \label{lem:sdac-feasibility}
 For every $\mathbf{m}\in\mathcal{M}_H$, the fixed-policy trajectory defined by
-\eqref{eq:def-sdac-policy} and \eqref{eq:sdac-state-update} satisfies the action
+\eqref{eq:def-fixed-policy-trajectory} satisfies the action
 constraint \eqref{eq:model-feasibility}. Explicitly,
 \begin{equation}
 \label{eq:sdac-feasibility}
@@ -1403,7 +1396,7 @@ x_1(\mathbf{m})
 &=0,
 \end{align*}
 so \eqref{eq:sdac-state-decomp} holds. Suppose it holds at time $t$. Using
-\eqref{eq:sdac-state-update} and \eqref{eq:def-sdac-policy},
+\eqref{eq:def-fixed-policy-trajectory},
 \begin{equation}
 \label{eq:decomp-induction-1}
 \begin{aligned}
