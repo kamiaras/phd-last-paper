@@ -451,11 +451,10 @@ sublinear regret.
 \label{sec:sdac}
 
 \subsection{From Disturbance-Action Control to SDAC}
-DAC combines a stabilizing state-feedback term with a
+DAC uses a
 finite linear filter of past disturbances. Under standard conditions, this
 parameterization yields convex surrogate costs and efficient online updates. In
-our scalar storage model, specializing the baseline feedback term to zero gives the
-representative form
+our scalar storage model, DAC has the following form:
 \begin{equation}
 \label{eq:dac-param}
 u_t = \sum_{i=1}^{H} \theta_i w_{t-i},
@@ -468,12 +467,12 @@ For our constrained model, an unrestricted filter does not ensure feasibility: i
 action can exceed $\alpha x_t$ or become negative.
 We therefore introduce \emph{Simplex Disturbance-Action Control} (SDAC), which uses a
 simplex-constrained filter tailored to the storage dynamics. This restriction ensures
-that every fixed SDAC policy is feasible while preserving convex surrogate costs and
+that every fixed SDAC policy is feasible while preserving the convexity of the surrogate costs and
 tractable online updates.
 
 
 \subsection{Policy Definition and Structural Properties}
-Fix a memory horizon $H\in\mathbb{N}_{>0}$. Let
+Fix a memory horizon $H\in\mathbb{N}_{>0}$ and define the subprobability simplex
 \begin{equation}
 \label{eq:def-simplex}
 \mathcal{M}_H
@@ -481,10 +480,10 @@ Fix a memory horizon $H\in\mathbb{N}_{>0}$. Let
 \left\{
 \mathbf{m}\in\mathbb{R}_{\ge0}^H:
 \|\mathbf{m}\|_1\le1
-\right\}
+\right\}.
 \end{equation}
-be the subprobability simplex. For any $\mathbf{m}\in\mathcal{M}_H$, define the
-policy $\pi_{\mathbf{m}}$ by
+With the convention $w_\tau\equiv0$ for $\tau\le0$, each
+$\mathbf{m}\in\mathcal{M}_H$ defines an SDAC policy $\pi_{\mathbf{m}}$ through
 \begin{equation}
 \label{eq:def-sdac-policy}
 u_t(\mathbf{m})
@@ -501,8 +500,17 @@ where
 \bigl(\alpha w_{t-1},\alpha^2 w_{t-2},\ldots,\alpha^H w_{t-H}\bigr)^\top
 \in\mathbb{R}^H.
 \end{equation}
+The factor $\alpha^i$ accounts for retention over $i$ periods under
+\eqref{eq:model-dynamics}. The resulting SDAC policy class is
+\begin{equation}
+\label{eq:def-sdac-class}
+\Pi_H^{\mathrm{SDAC}}
+\triangleq
+\{\pi_{\mathbf{m}}:\mathbf{m}\in\mathcal{M}_H\}.
+\end{equation}
 
-We set $w_\tau\equiv0$ for $\tau\le0$ and define the fixed-policy trajectory by
+Applying $\pi_{\mathbf{m}}$ with $\mathbf{m}$ held constant at every time gives the
+fixed-policy trajectory
 \begin{equation}
 \label{eq:def-fixed-policy-trajectory}
 \begin{aligned}
@@ -512,18 +520,8 @@ x_{t+1}(\mathbf{m})&=\alpha x_t(\mathbf{m})-u_t(\mathbf{m})+w_t,
 \qquad t\in[T].
 \end{aligned}
 \end{equation}
-The SDAC policy class is
-\begin{equation}
-\label{eq:def-sdac-class}
-\Pi_H^{\mathrm{SDAC}}
-\triangleq
-\{\pi_{\mathbf{m}}:\mathbf{m}\in\mathcal{M}_H\}.
-\end{equation}
-The weights $\alpha^i$ align the arrival filter with the retention coefficient
-$\alpha$ in \eqref{eq:model-dynamics}.
 
-
-We now establish the two structural properties that make SDAC useful. The induced
+We next establish two structural properties of fixed SDAC policies. The induced
 control action always satisfies the feasibility constraint
 \eqref{eq:model-feasibility}, and the induced cost is convex and Lipschitz in
 $\mathbf{m}$. Thus, regret minimization against the best fixed SDAC policy is an
