@@ -185,14 +185,17 @@ When the parameter changes online, we clip the nominal action to the
 current admissible interval as in \eqref{eq:alg-feasible-action}.
 
 Liu et al.\ consider general convex constraint functions
-\cite{liu2023constrainedControl}. Their guarantees permit constraint
-violations. Such violations are not permitted here, since
+\cite{liu2023constrainedControl}. For their adversarial constraints, the
+guarantees bound cumulative violation and may permit violations at individual
+times. Such violations are not permitted here, since
 \eqref{eq:model-feasibility} must hold at every time.
 
-Kumar et al.\ study online convex optimization with geometrically decaying
-memory \cite{kumar2023unbounded}. Their lower bound has a similar
-structure to the lower bound presented in this paper. Our lower bound applies directly
-to state--action costs under the state-dependent action constraint.
+Kumar et al.\ introduce online convex optimization with unbounded memory
+\cite{kumar2023unbounded}. For their discounted infinite-memory model, the
+lower bound scales as $\sqrt{T}$ divided by one minus the discount factor. This
+parallels our $\Omega((1-\alpha)^{-1}\sqrt{T})$ lower bound beyond the mixing
+time, although ours applies directly to causal feasible
+controllers under the state-dependent action constraint.
 
 
 
