@@ -200,44 +200,31 @@ controllers under the state-dependent action constraint.
 
 
 \paragraph{Energy harvesting}
-Several energy-harvesting policies adjust energy use according to the available
-battery level. Shaviv and \"Ozg\"ur \cite{shaviv2016universally} study a policy that
-uses a fixed fraction of the available energy and prove guarantees under
-independent and identically distributed (i.i.d.) energy arrivals. Arafa
-et al.\ \cite{arafa2018online} consider more general sequences for spending energy
-after a recharge. Zibaeenejad and Chen
-\cite{zibaeenejad2019lookahead} derive a related decreasing spending rule when
-future arrivals are known in advance.
-
-These works motivate the \emph{decreasing-allocation policy class} defined in this
-paper. Under such a policy, each arrival is allocated over future periods according
-to the same decreasing sequence. In our model, this allocation begins one period
-after the arrival because the controller does not observe the current arrival before
-choosing the action.
-
-The models in \cite{shaviv2016universally,arafa2018online,
-zibaeenejad2019lookahead} use random arrivals from a fixed model, reveal the current
-harvested energy before allocation, and optimize a fixed reward that depends on the
-allocated power. In our setting, the arrival and cost sequences may be chosen
-adversarially, the controller acts before observing the current arrival and cost,
-the cost can depend on both the storage state and the action, and performance is
-measured by regret against a fixed SDAC policy.
+Fixed-fraction and related allocation policies for stochastic energy arrivals
+motivate our \emph{decreasing-allocation policy class}. Shaviv and \"Ozg\"ur
+\cite{shaviv2016universally} allocate a fixed fraction of the available energy
+under i.i.d.\ arrivals. Arafa et al.\ \cite{arafa2018online} extend fixed-fraction
+policies to general concave utilities under i.i.d.\ arrivals and, for Bernoulli
+arrivals, characterize a non-increasing allocation sequence following a full
+recharge. Zibaeenejad and Chen \cite{zibaeenejad2019lookahead} derive an optimal
+decreasing allocation sequence under Bernoulli arrivals when the controller
+observes a fixed look-ahead window. Together, these works motivate allocating each
+arrival over future periods according to a decreasing sequence. Our allocation
+begins one period after the arrival because the controller acts before observing
+the current arrival.
 
 Yu and Neely \cite{Yu2019} study expected utility maximization under i.i.d.\ system
-states. Asgari and Neely \cite{10.1145/3428337} obtain an
-$O(\sqrt{T})$ regret--battery-capacity tradeoff for arbitrary loss sequences while
-retaining i.i.d.\ energy arrivals. Both works use objectives that depend only on the
-action and compare against a fixed action. Here, the arrivals may be chosen
-adversarially, the cost depends on the state and action, and the comparator is a
-fixed SDAC policy rather than a fixed action.
-
-Lin et al.\ \cite{lin2025optimal} study online age-of-information optimization in
-an energy-harvesting system with related battery dynamics. They compare their
-controller with an unrestricted offline optimum using a competitive ratio. Their
-objective depends on the energy allocation but not directly on the battery state,
-and the current arrival is observed before the allocation. Our online SDAC
-controller acts before observing the current arrival, and our benchmark is a fixed
-SDAC policy chosen in hindsight.
+states, while Asgari and Neely \cite{10.1145/3428337} obtain an
+$O(\sqrt{T})$ regret--battery-capacity tradeoff for arbitrary loss sequences under
+i.i.d.\ energy arrivals. Neither objective depends directly on the battery state.
+Yu and Neely optimize expected time-average utility, whereas Asgari and Neely
+measure regret against a fixed action. Lin et al.\ \cite{lin2025optimal} allow
+arbitrary energy arrivals and time-varying age-of-information
+objectives. They observe the current arrival before allocation and compare with an
+unrestricted offline optimum through a competitive ratio. In our setting, the
+controller acts before observing the current arrival and cost, the arrival and cost
+sequences may be chosen adversarially, the cost depends on the storage state and
+action, and the benchmark is a fixed SDAC policy chosen in hindsight.
 
 \paragraph{Queueing and network optimization}
 Queueing control also involves states that change through arrivals and service
