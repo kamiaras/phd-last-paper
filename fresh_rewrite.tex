@@ -165,40 +165,36 @@ Our contributions are as follows:
 
 \subsection{Related Work}
 
-\paragraph{Online nonstochastic control}
-Online nonstochastic control studies dynamical systems with adversarial disturbances
-and costs. Performance is measured by regret against a policy chosen in hindsight,
-under suitable stability conditions
-\cite{agarwal2019online,agarwal2019logarithmic}; see
-\cite{hazan2026introduction} for an overview. For known linear systems,
-Simchowitz et al.\ establish the optimal $\sqrt{T}$ dependence on the horizon while
-leaving some dependence on the system's stability parameters unresolved
-\cite{simchowitz2020improper}. Related work also considers partial observability
-\cite{lale2020logarithmic} and bandit feedback
-\cite{hazan2020nonstochasticBandit}.
+\paragraph{Online control}
+Online control is the main basis for this work. Agarwal et al.\ use
+DAC policies to obtain $\widetilde O(\sqrt{T})$ regret against strongly
+stable linear controllers \cite{agarwal2019online}. More closely related to
+our simplex parameterization, Golowich et al.\ adapt DAC to population
+dynamics and search over simplex-structured DAC policy parameters
+\cite{golowich2024population}. Their state lies in a probability simplex,
+and their feasible action set is independent of the current state. Here,
+the constraint $0\le u_t\le\alpha x_t$ couples each action to the available
+resource.
 
-A central idea in this literature is DAC. A DAC policy combines a stabilizing
-state-feedback action with a finite linear filter of past disturbances. The action
-is therefore described by finitely many policy parameters that can be updated using
-online methods. SDAC uses the same basic idea but restricts the parameters in a way
-suited to storage systems with nonnegative arrivals.
+Li et al.\ consider affine constraints on the state and action
+\cite{li2021onlineConstrained}. Their action constraint is independent of
+the current state. They enforce feasibility by restricting and projecting
+their policy updates onto a tightened parameter set. In our work, the
+action produced by every fixed SDAC policy is feasible by construction.
+When the parameter changes online, we clip the nominal action to the
+current admissible interval as in \eqref{eq:alg-feasible-action}.
 
-Online control with affine or more general constraints on states and actions has
-been studied in \cite{li2021onlineConstrained,liu2023constrainedControl}. The
-constraint $u_t\le\alpha x_t$ is affine in the state and action, but the range of
-allowed actions depends on the current storage state. Our approach uses the
-structure of the storage dynamics to ensure that every fixed SDAC policy is
-feasible and that the online SDAC controller remains feasible while its parameter
-changes.
+Liu et al.\ consider general convex constraint functions
+\cite{liu2023constrainedControl}. Their guarantees permit constraint
+violations. Such violations are not permitted here, since
+\eqref{eq:model-feasibility} must hold at every time.
 
-Our analysis also considers how regret depends on the retention coefficient
-$\alpha$. Kumar et al.\ study online convex optimization in which past decisions can
-affect all later costs, and derive bounds that depend on how quickly those effects
-decay \cite{kumar2023unbounded}. In their model with geometrically decaying memory,
-the lower bound scales as $\sqrt{T}$ divided by one minus the decay factor,
-paralleling our $\Omega(\sqrt{T}/(1-\alpha))$ lower bound for sufficiently long
-horizons; see Remark~\ref{rem:large-alpha-regime}. Our lower bound is proved
-directly for state--action costs under the state-dependent action constraint.
+Kumar et al.\ study online convex optimization with geometrically decaying
+memory \cite{kumar2023unbounded}. Their lower bound has a similar
+structure to the lower bound presented in this paper. Our lower bound applies directly
+to state--action costs under the state-dependent action constraint.
+
+
 
 \paragraph{Energy harvesting}
 Several energy-harvesting policies adjust energy use according to the available
