@@ -508,11 +508,7 @@ x_t(\mathbf{m})
 =
 r_t+\langle\boldsymbol{\phi}_t^x,\mathbf{m}\rangle.
 \]
-Thus, $\mathbf{m}\mapsto x_t(\mathbf{m})$ is affine. Moreover,
-\[
-0\le r_t(i)\le r_t\le\frac{1}{1-\alpha},
-\]
-for every $t\in[T]$ and $i\in[H]$.
+Thus, $\mathbf{m}\mapsto x_t(\mathbf{m})$ is affine.
 \end{lemma}
 
 
@@ -534,8 +530,12 @@ Fix $t\in[T]$. For every $i\in[H]$,
 \ge0.
 \]
 Since $\mathbf{m}\in\mathcal{M}_H$, we have $m_i\ge0$ for every $i\in[H]$ and
-$1-\sum_{i=1}^H m_i\ge0$. Also, $w_{t-i}\ge0$ for every $i\in[H]$ and
-$r_t\ge0$. Therefore,
+$1-\sum_{i=1}^H m_i\ge0$. Also, $w_{t-i}\ge0$ for every $i\in[H]$. By the
+definition of $r_t$ and the nonnegativity of the arrivals,
+\[
+r_t=\sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j}\ge0.
+\]
+Therefore,
 \[
 \begin{aligned}
 0\le u_t(\mathbf{m})
@@ -1306,19 +1306,6 @@ x_{t+1}(\mathbf{m})
 +\left(1-\sum_{i=1}^H m_i\right)r_{t+1}.
 \end{align*}
 Thus, \eqref{eq:sdac-state-decomp} follows by induction.
-
-Finally, since $w_\tau\in[0,1]$ and
-$w_\tau=0$ for $\tau\le0$,
-\[
-\begin{aligned}
-0\le r_t(i)
-&=\sum_{j=1}^{\min\{i,t-1\}}\alpha^{j-1}w_{t-j} \\
-&\le r_t
-\le\sum_{j=1}^{t-1}\alpha^{j-1} \\
-&\le\sum_{j=1}^{\infty}\alpha^{j-1}
-=\frac{1}{1-\alpha}.
-\end{aligned}
-\]
 \end{proof}
 
 \begin{proof}[Proof of Lemma~\ref{lem:sdac-surrogate}]
@@ -1333,17 +1320,12 @@ For $i\in[H]$, Lemma~\ref{lem:sdac-state-decomp} and the definitions of
 $r_t(i)$ and $r_t$ give
 \[
 \begin{aligned}
-|\phi_{t,i}^x|
-&=r_t-r_t(i) \\
-&=\sum_{j=i+1}^{t-1}\alpha^{j-1}w_{t-j} \\
-&\le
-\sum_{j=i+1}^{\infty}\alpha^{j-1} \\
-&=\frac{\alpha^i}{1-\alpha} \\
-&\le\frac{\alpha}{1-\alpha}, \\
-0\le\phi_{t,i}^u
-&=\alpha^i w_{t-i} \\
-&\le\alpha^i \\
-&\le\alpha.
+|\phi_{t,i}^x|&=r_t-r_t(i)
+=\sum_{j=i+1}^{t-1}\alpha^{j-1}w_{t-j} \\
+&\le\sum_{j=i+1}^{\infty}\alpha^{j-1}
+=\frac{\alpha^i}{1-\alpha}
+\le\frac{\alpha}{1-\alpha}, \\
+0\le\phi_{t,i}^u&=\alpha^i w_{t-i}\le\alpha^i\le\alpha.
 \end{aligned}
 \]
 The sum is empty when $i\ge t-1$. Taking the maximum over $i\in[H]$ gives
