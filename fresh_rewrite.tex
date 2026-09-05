@@ -227,24 +227,23 @@ sequences may be chosen adversarially, the cost depends on the storage state and
 action, and the benchmark is a fixed SDAC policy chosen in hindsight.
 
 \paragraph{Queueing and network optimization}
-Queueing control also involves states that change through arrivals and service
-decisions. Classical work studies throughput and queue stability
+Classical queueing control studies throughput and queue stability through dynamic
+service and scheduling decisions
 \cite{tassiulas1990stability,tassiulas1993dynamic,mckeown1999achieving}, while
-stochastic network optimization studies tradeoffs between time-average objectives
-and queue backlog \cite{neely2010stochastic}. Our setting instead allows adversarial
-arrival sequences and convex state--action costs, and measures regret against a
-fixed SDAC policy chosen in hindsight.
+stochastic network optimization studies tradeoffs between time-average performance
+and average queue backlog \cite{neely2010stochastic}. Our performance criterion is
+finite-horizon regret against the best fixed SDAC policy in hindsight.
 
-In many queueing models, $\alpha=1$ because stored packets do not disappear over
-time. Such models are not direct examples of the $\alpha\in(0,1)$ system studied
-here. A queue with abandonment or expiration can have $\alpha<1$ and is more closely
-related to our model. Section~\ref{sec:extensions} discusses the case $\alpha\ge1$.
-
-Khojastepour and Sabharwal \cite{khojastepour2004delay} study a fixed scheduler
-that can be written as a linear filter of past arrivals. Their scheduler minimizes
-average transmit power subject to a maximum-delay guarantee. In contrast, our
-controller updates its filter parameters online in response to convex state--action
-costs revealed after each decision.
+For their time-invariant class, Khojastepour and Sabharwal
+\cite{khojastepour2004delay} represent schedulers satisfying a maximum-delay
+constraint as fixed linear filters of the current and past arrivals, with
+nonnegative coefficients summing to one rather than at most one as in SDAC.
+Under i.i.d.\ arrivals, they identify the uniform moving-average filter as the
+minimizer of long-run average transmit power over a Gaussian channel. The
+connection is limited to the simplex-like filter structure: they solve a
+stochastic average-power problem with a fixed cost, whereas our algorithm
+updates the SDAC parameters online under adversarial arrival and cost sequences
+with general convex state--action costs.
 
 \paragraph{Inventory and reservoir management}
 Yang et al.\ \cite{yang2020online} study online procurement under inventory
