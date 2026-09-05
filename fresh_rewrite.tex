@@ -600,14 +600,6 @@ The resulting vector satisfies
 \subsection{Approximation of Decreasing-Allocation Policies}
 \label{subsec:allocation-sequences}
 
-We next show that finite-memory SDAC policies approximate a class of policies
-that spread each resource arrival over all subsequent periods. Given a fixed
-decreasing sequence $(q_i)_{i\ge1}$, an arrival $w_\tau$ contributes
-$q_iw_\tau$ to the expenditure at time $\tau+i$. The one-period delay reflects
-that $w_\tau$ is observed only after $u_\tau$ is chosen. Such allocation-sequence
-policies have been studied for Bernoulli recharges
-\cite{arafa2018online,zibaeenejad2019lookahead}.
-
 Define the set of feasible decreasing allocation sequences
 \begin{equation}
 \label{eq:def-allocation-sequences}
@@ -634,7 +626,10 @@ x_{t+1}(\mathbf{q})
 \end{aligned}
 \end{equation}
 Here, $q_iw_s$ is the amount from arrival $w_s$ allocated $i$ periods later.
-The weighted budget in \eqref{eq:def-allocation-sequences} accounts for leakage:
+The restriction $i\ge1$ gives a one-period delay because $w_s$ is observed only
+after $u_s$ is chosen. Policies of this form have been studied for Bernoulli
+recharges \cite{arafa2018online,zibaeenejad2019lookahead}. The weighted budget in
+\eqref{eq:def-allocation-sequences} accounts for leakage:
 reserving $q_i$ units for expenditure $i$ periods after an arrival requires
 $q_i/\alpha^i$ units at the arrival time. Let
 \[
