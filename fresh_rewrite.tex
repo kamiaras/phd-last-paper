@@ -345,12 +345,13 @@ L_x|x-x'|+L_u|u-u'|
 \end{equation}
 for all $(x,u),(x',u')\in\mathcal{D}_\alpha$.
 We also assume access, at every $(x,u)\in\mathcal{D}_\alpha$, to a cost subgradient
-\[
+\begin{equation}
+\label{eq:model-cost-subgradient}
 \boldsymbol{\zeta}_t(x,u)
 =
 \bigl(\zeta_t^x(x,u),\zeta_t^u(x,u)\bigr)
 \in\partial c_t(x,u)
-\]
+\end{equation}
 satisfying
 \[
 |\zeta_t^x(x,u)|\le L_x,
@@ -552,7 +553,7 @@ where the last equality follows from \eqref{eq:sdac-state-decomp}.
 
 \begin{lemma}[Convexity and Lipschitz continuity of surrogate cost]
 \label{lem:sdac-surrogate}
-Define
+For $t\in[T]$, define
 \[
 \ell_t(\mathbf{m})
 \triangleq
@@ -574,25 +575,27 @@ $\mathbf{m},\mathbf{m}'\in\mathcal{M}_H$,
 \le
 G_\alpha\|\mathbf{m}-\mathbf{m}'\|_1.
 \]
-Moreover, at every $\mathbf{m}\in\mathcal{M}_H$, one can select
-$\mathbf{g}_t\in\partial\ell_t(\mathbf{m})$ such that
-$\|\mathbf{g}_t\|_\infty\le G_\alpha$.
-\end{lemma}
-
-For the online update, let $(\zeta_t^x,\zeta_t^u)$ be the bounded cost subgradient
-at the state--action pair of the fixed-policy trajectory associated with
-$\mathbf{m}$
-and use the explicit choice
-\[
+For each $\mathbf{m}\in\mathcal{M}_H$, use the cost subgradient from
+\eqref{eq:model-cost-subgradient} to write
+\begin{equation}
+\label{eq:surr-subgradient}
+\begin{aligned}
+(\zeta_t^x,\zeta_t^u)
+&=
+\boldsymbol{\zeta}_t\bigl(x_t(\mathbf{m}),u_t(\mathbf{m})\bigr), \\
 \mathbf{g}_t
-=
+&\triangleq
 \zeta_t^x\boldsymbol{\phi}_t^x
-+
-\zeta_t^u\boldsymbol{\phi}_t^u.
++\zeta_t^u\boldsymbol{\phi}_t^u.
+\end{aligned}
+\end{equation}
+The resulting vector satisfies
+\[
+\mathbf{g}_t\in\partial\ell_t(\mathbf{m}),
+\qquad
+\|\mathbf{g}_t\|_\infty\le G_\alpha.
 \]
-This choice belongs to $\partial\ell_t(\mathbf{m})$ and satisfies
-$\|\mathbf{g}_t\|_\infty\le G_\alpha$, as stated in
-Lemma~\ref{lem:sdac-surrogate}.
+\end{lemma}
 
 \subsection{Approximation of Decreasing-Allocation Policies}
 \label{subsec:allocation-sequences}
@@ -818,8 +821,8 @@ Lemma~\ref{lem:availability-projection} formalizes this projection and shows
 that $\mathbf{m}_t^{\mathrm{exec}}$ induces exactly the clipped action $u_t$.
 
 \paragraph{Surrogate cost and OMD update}
-After observing $(w_t,c_t)$, choose
-$\mathbf{g}_t\in\partial\ell_t(\mathbf{m}_t)$.
+After observing $(w_t,c_t)$, set $\mathbf{g}_t$ by
+\eqref{eq:surr-subgradient} with $\mathbf{m}=\mathbf{m}_t$.
 We define the OMD update
 \begin{equation}
 \label{eq:alg-omd-argmin}
@@ -1326,35 +1329,24 @@ x_t(\mathbf{m})=r_t+\langle \boldsymbol{\phi}_t^x,\mathbf{m}\rangle,
 \qquad
 u_t(\mathbf{m})=\langle \boldsymbol{\phi}_t^u,\mathbf{m}\rangle.
 \end{equation}
-For every $i\in\{1,\ldots,H\}$, the definitions of $r_t(i)$ and $r_t$ give
-\begin{equation}
-\label{eq:phi-x-exact-tail}
+For $i\in[H]$, Lemma~\ref{lem:sdac-state-decomp} and the definitions of
+$r_t(i)$ and $r_t$ give
+\[
 \begin{aligned}
-\phi_{t,i}^x
-&=
-r_t(i)-r_t \\
-&=
--\sum_{j=i+1}^{t-1}\alpha^{j-1}w_{t-j},
-\end{aligned}
-\end{equation}
-where the sum is empty when $i\ge t-1$. Hence
-\begin{equation}
-\label{eq:surr-coordinate-decay}
-\begin{aligned}
-\bigl|\phi_{t,i}^x\bigr|
+|\phi_{t,i}^x|
+&=r_t-r_t(i) \\
+&=\sum_{j=i+1}^{t-1}\alpha^{j-1}w_{t-j} \\
 &\le
-\sum_{j=i+1}^{\infty}\alpha^{j-1}
-=
-\frac{\alpha^i}{1-\alpha}, \\
+\sum_{j=i+1}^{\infty}\alpha^{j-1} \\
+&=\frac{\alpha^i}{1-\alpha} \\
+&\le\frac{\alpha}{1-\alpha}, \\
 0\le\phi_{t,i}^u
-&=
-\alpha^i w_{t-i}
-\le
-\alpha^i.
+&=\alpha^i w_{t-i} \\
+&\le\alpha^i \\
+&\le\alpha.
 \end{aligned}
-\end{equation}
-Taking the maximum over the coordinates and noting that both upper bounds are
-largest at $i=1$ yields
+\]
+The sum is empty when $i\ge t-1$. Taking the maximum over $i\in[H]$ gives
 \begin{equation}
 \label{eq:surr-coefficient-norms}
 \|\boldsymbol{\phi}_t^x\|_\infty\le\frac{\alpha}{1-\alpha},
@@ -1364,68 +1356,59 @@ largest at $i=1$ yields
 Since the state--action pair in \eqref{eq:surr-affine-pair} is affine in
 $\mathbf{m}$ and $c_t$ is convex, $\ell_t$ is convex.
 
-By \eqref{eq:model-lipschitz} and
-\eqref{eq:surr-affine-pair},
-\begin{equation}
-\label{eq:surr-lipschitz-short}
+By Lemma~\ref{lem:sdac-feasibility}, the fixed-policy state--action pairs
+associated with $\mathbf{m}$ and $\mathbf{m}'$ belong to $\mathcal{D}_\alpha$.
+Thus, \eqref{eq:model-lipschitz}, \eqref{eq:surr-affine-pair},
+Hölder's inequality, and \eqref{eq:surr-coefficient-norms} give
+\[
 \begin{aligned}
 |\ell_t(\mathbf{m})-\ell_t(\mathbf{m}')|
 &\le
-L_x\bigl|\langle \boldsymbol{\phi}_t^x,\mathbf{m}-\mathbf{m}'\rangle\bigr|
+L_x|x_t(\mathbf{m})-x_t(\mathbf{m}')| \\
+&\quad{}
++L_u|u_t(\mathbf{m})-u_t(\mathbf{m}')| \\
+&=
+L_x\bigl|\langle \boldsymbol{\phi}_t^x,\mathbf{m}-\mathbf{m}'\rangle\bigr| \\
+&\quad{}
 +
 L_u\bigl|\langle \boldsymbol{\phi}_t^u,\mathbf{m}-\mathbf{m}'\rangle\bigr| \\
 &\le
-\bigl(L_x\|\boldsymbol{\phi}_t^x\|_\infty+L_u\|\boldsymbol{\phi}_t^u\|_\infty\bigr)
-\|\mathbf{m}-\mathbf{m}'\|_1 \\
-&\le
-\alpha\left(\frac{L_x}{1-\alpha}+L_u\right)
+\left(\frac{\alpha L_x}{1-\alpha}+\alpha L_u\right)
 \|\mathbf{m}-\mathbf{m}'\|_1 \\
 &=
 G_\alpha\|\mathbf{m}-\mathbf{m}'\|_1.
 \end{aligned}
-\end{equation}
+\]
 
-Let $(\zeta_t^x,\zeta_t^u)$ denote the components of the bounded subgradient
-$\boldsymbol{\zeta}_t\bigl(x_t(\mathbf{m}),u_t(\mathbf{m})\bigr)$ from
-Section~\ref{sec:model-setup}, and set
-\begin{equation}
-\label{eq:surr-subgradient-short}
-\mathbf{g}_t\triangleq
-\zeta_t^x\,\boldsymbol{\phi}_t^x+\zeta_t^u\,\boldsymbol{\phi}_t^u.
-\end{equation}
-For every $\mathbf{m}'\in\mathcal{M}_H$, the subgradient inequality and
-\eqref{eq:surr-affine-pair} yield
+Fix $\mathbf{m}\in\mathcal{M}_H$, and let $(\zeta_t^x,\zeta_t^u)$ and
+$\mathbf{g}_t$ be defined by \eqref{eq:surr-subgradient}. For every
+$\mathbf{m}'\in\mathcal{M}_H$, the subgradient inequality gives
 \begin{align*}
 \ell_t(\mathbf{m}')
-&\ge
-\ell_t(\mathbf{m})
+&=c_t\bigl(x_t(\mathbf{m}'),u_t(\mathbf{m}')\bigr) \\
+&\ge c_t\bigl(x_t(\mathbf{m}),u_t(\mathbf{m})\bigr) \\
+&\quad
++\zeta_t^x\bigl(x_t(\mathbf{m}')-x_t(\mathbf{m})\bigr)
++\zeta_t^u\bigl(u_t(\mathbf{m}')-u_t(\mathbf{m})\bigr) \\
+&=\ell_t(\mathbf{m})
 +\zeta_t^x\langle \boldsymbol{\phi}_t^x,\mathbf{m}'-\mathbf{m}\rangle
 +\zeta_t^u\langle \boldsymbol{\phi}_t^u,\mathbf{m}'-\mathbf{m}\rangle \\
 &=
 \ell_t(\mathbf{m})+\langle \mathbf{g}_t,\mathbf{m}'-\mathbf{m}\rangle.
 \end{align*}
-Thus $\mathbf{g}_t\in\partial\ell_t(\mathbf{m})$. For each
-$i\in\{1,\ldots,H\}$, the exact coordinate decay in
-\eqref{eq:surr-coordinate-decay} gives
-\begin{equation}
-\label{eq:surr-subgradient-coordinate-bound}
+Thus $\mathbf{g}_t\in\partial\ell_t(\mathbf{m})$. The bounded-subgradient
+assumption and \eqref{eq:surr-coefficient-norms} give
+\[
 \begin{aligned}
-|g_{t,i}|
+\|\mathbf{g}_t\|_\infty
 &\le
-|\zeta_t^x|\bigl|\phi_{t,i}^x\bigr|
-+|\zeta_t^u|\phi_{t,i}^u \\
+|\zeta_t^x|\|\boldsymbol{\phi}_t^x\|_\infty
++|\zeta_t^u|\|\boldsymbol{\phi}_t^u\|_\infty \\
 &\le
-\alpha^i\left(\frac{L_x}{1-\alpha}+L_u\right) \\
-&\le
-\alpha\left(\frac{L_x}{1-\alpha}+L_u\right)
-=G_\alpha.
+\frac{\alpha L_x}{1-\alpha}+\alpha L_u \\
+&=G_\alpha.
 \end{aligned}
-\end{equation}
-Taking the maximum over $i$ proves
-\begin{equation}
-\label{eq:surr-subgradient-bound-short}
-\|\mathbf{g}_t\|_\infty\le G_\alpha.
-\end{equation}
+\]
 \end{proof}
 
 \begin{proof}[Proof of Lemma~\ref{lem:sdac-allocation-approx}]
