@@ -733,73 +733,61 @@ u_t(\mathbf{m}_H^{\mathrm{frac}}(k))
 \section{Online SDAC Controller}
 \label{sec:online-algorithm}
 
-We now present our online SDAC controller. It updates its parameter over the
-subprobability simplex $\mathcal{M}_H\subset\mathbb{R}^H$ using OMD with
-unnormalized negentropy (equivalently, the exponentiated-gradient method) and a
-fixed step size $\eta>0$
-\cite{hazan2016introduction}. Let
+The controller maintains a parameter $\mathbf{m}_t\in\mathcal{M}_H$ and updates
+it by OMD with unnormalized negentropy and step size $\eta>0$
+\cite{hazan2016introduction}:
 \begin{equation}
 \label{eq:def-negentropy}
 \Psi(\mathbf{m}) \triangleq \sum_{i=1}^H\bigl(m_i\log m_i-m_i\bigr), \qquad
 \mathbf{m}\in\mathbb{R}_{\ge0}^H,
 \end{equation}
-denote the unnormalized negentropy (with the convention $0\log0\triangleq0$).
-Its Bregman divergence is the generalized Kullback--Leibler divergence
+where $0\log0\triangleq0$. For $\mathbf{m}\in\mathbb{R}_{\ge0}^H$ and
+$\mathbf{v}\in\mathbb{R}_{>0}^H$, its Bregman divergence is
 \begin{equation}
 \label{eq:def-bregman}
 D_\Psi(\mathbf{m}\|\mathbf{v})
 \triangleq
-\sum_{i=1}^H\Bigl(m_i\log\tfrac{m_i}{v_i}-m_i+v_i\Bigr),
+\sum_{i=1}^H\Bigl(m_i\log\tfrac{m_i}{v_i}-m_i+v_i\Bigr).
 \end{equation}
-defined for
-\[
-\mathbf{m}\in\mathbb{R}_{\ge0}^H,
-\qquad
-\mathbf{v}\in\mathbb{R}_{>0}^H.
-\]
-
-
-For each time $t\in[T]$, let $\mathbf{m}_t\in\mathcal{M}_H$ be the online parameter.
-We initialize at
+Initialize the online parameter as
 \begin{equation}
 \label{eq:alg-init}
-\mathbf{m}_1\triangleq\frac{1}{H+1}\mathbf{1}
+\mathbf{m}_1\triangleq\frac{1}{H+1}\mathbf{1}.
 \end{equation}
-so that, by \eqref{eq:breg-init-bound},
-$\sup_{\mathbf{m}\in\mathcal{M}_H}D_\Psi(\mathbf{m}\|\mathbf{m}_1)\le\log(H+1)$.
 
-\paragraph{Control-action selection}
-At the start of round $t$, the controller has the current online parameter
-$\mathbf{m}_t$. For $t=1$, it is given by the initialization
-\eqref{eq:alg-init}, and for $t\ge2$, it is the output of the OMD update
-\eqref{eq:alg-omd-argmin} from round $t-1$. The controller then forms the
-nominal SDAC action
-\begin{equation}
-\label{eq:alg-unconstrained-action}
-\widehat{u}_t \triangleq \langle \boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle,
-\end{equation}
-and clips it to the admissible interval in \eqref{eq:model-feasibility}:
+\paragraph{Action selection}
+At the start of round $t$, the controller has the online parameter
+$\mathbf{m}_t$. For $t=1$, this parameter is initialized according to
+\eqref{eq:alg-init}; for $t\ge2$, it is the output of the OMD update from round
+$t-1$.
+Because $\mathbf{m}_t$ varies with $t$, the nominal action
+$\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle$ may exceed the current upper
+bound $\alpha x_t$. The controller therefore selects
 \begin{equation}
 \label{eq:alg-feasible-action}
-u_t \triangleq \min\{\widehat{u}_t,\,\alpha x_t\}.
+u_t
+\triangleq
+\min\!\left\{
+\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle,
+\alpha x_t
+\right\}.
 \end{equation}
 The state then evolves according to \eqref{eq:model-dynamics}.
-Because $\widehat{u}_t\ge0$, the clipping rule and induction on
-\eqref{eq:model-dynamics}, starting from \eqref{eq:model-init} with $w_t\in[0,1]$,
-give $x_t\ge0$ for all $t\in[T+1]$. Thus, the online trajectory satisfies
-\eqref{eq:model-feasibility}.
+Since $\boldsymbol{\phi}_t^u$ and $\mathbf{m}_t$ are componentwise nonnegative,
+$\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle\ge0$. If $x_t\ge0$, then
+\eqref{eq:alg-feasible-action} gives $0\le u_t\le\alpha x_t$, and
+\eqref{eq:model-dynamics} gives $x_{t+1}\ge w_t\ge0$. Since $x_1=0$, induction
+shows that the online trajectory is feasible.
 
-The clipping step also has a geometric interpretation. We use
+The clipping step also has a Bregman interpretation. We use
 $\mathbf{m}_t^{\mathrm{exec}}$ to denote the execution vector obtained by
-projecting $\mathbf{m}_t$ onto the parameters compatible with the current state
-$x_t$, using the negentropy Bregman divergence.
+projecting $\mathbf{m}_t$ onto the set of parameters compatible with the current
+state $x_t$, using the negentropy Bregman divergence.
 Lemma~\ref{lem:availability-projection} formalizes this projection and shows
 that $\mathbf{m}_t^{\mathrm{exec}}$ induces exactly the clipped action $u_t$.
-
 \paragraph{Surrogate cost and OMD update}
-After observing $(w_t,c_t)$, set $\mathbf{g}_t$ by
-\eqref{eq:surr-subgradient} with $\mathbf{m}=\mathbf{m}_t$.
-We define the OMD update
+After $w_t$ and $c_t$ are revealed, the controller evaluates the subgradient
+$\mathbf{g}_t$ in \eqref{eq:surr-subgradient} at $\mathbf{m}_t$ and sets
 \begin{equation}
 \label{eq:alg-omd-argmin}
 \mathbf{m}_{t+1}
@@ -810,19 +798,17 @@ We define the OMD update
 +D_\Psi(\mathbf{m}\|\mathbf{m}_t)
 \right\}.
 \end{equation}
-By Lemma~\ref{lem:omd-closed-form}, the minimizer in
-\eqref{eq:alg-omd-argmin} is obtained in two steps. First, apply the
-multiplicative step,
+Lemma~\ref{lem:omd-closed-form} gives a two-step implementation. First, take the
+coordinatewise multiplicative step
 \begin{equation}
 \label{eq:alg-omd-mult}
 \widetilde{m}_{t+1,i}
 \triangleq
 m_{t,i}\exp\!\bigl(-\eta g_{t,i}\bigr),
 \qquad
-i\in[H],
+i\in[H].
 \end{equation}
-where $g_{t,i}$ is the $i$-th coordinate of $\mathbf{g}_t$. Next, apply the
-Bregman projection onto $\mathcal{M}_H$:
+Next, project onto $\mathcal{M}_H$, which here amounts to rescaling if needed:
 \begin{equation}
 \label{eq:alg-omd-proj}
 \mathbf{m}_{t+1}
@@ -831,7 +817,7 @@ Bregman projection onto $\mathcal{M}_H$:
 =
 \frac{\widetilde{\mathbf{m}}_{t+1}}{\max\{1,\|\widetilde{\mathbf{m}}_{t+1}\|_1\}},
 \end{equation}
-where Lemma~\ref{lem:bregman-projection} derives the projection formula.
+where the equality follows from Lemma~\ref{lem:bregman-projection}.
 
 
 \section{Regret Upper Bounds}
@@ -1508,16 +1494,13 @@ Substituting the trajectory and tail identities into
 \section{Proofs for the Online SDAC Controller}
 \label{sec:appendix-algorithm-proofs}
 
-The following lemmas establish the Bregman-projection interpretation of scalar
-action clipping, the projection formula, and the equivalent closed-form
-OMD update used in Section~\ref{sec:online-algorithm}.
 
 \begin{lemma}[Action clipping as a Bregman projection]
 \label{lem:availability-projection}
 At time $t$, define the parameter set compatible with the available state by
 \begin{equation}
 \label{eq:def-availability-set}
-\mathcal{F}_t(x_t)
+\mathcal{B}_t(x_t)
 \triangleq
 \left\{
 \mathbf{m}\in\mathcal{M}_H:
@@ -1530,7 +1513,7 @@ For the negentropy $\Psi$ in \eqref{eq:def-negentropy}, let
 \label{eq:def-exec-projection}
 \mathbf{m}_t^{\mathrm{exec}}
 \in
-\operatorname*{arg\,min}_{\mathbf{m}\in\mathcal{F}_t(x_t)}
+\operatorname*{arg\,min}_{\mathbf{m}\in\mathcal{B}_t(x_t)}
 D_\Psi(\mathbf{m}\|\mathbf{m}_t).
 \end{equation}
 Then
@@ -1551,7 +1534,7 @@ same executed action.
 \end{lemma}
 
 \begin{proof}
-The set $\mathcal{F}_t(x_t)$ is nonempty because it contains $\mathbf{0}$, and it
+The set $\mathcal{B}_t(x_t)$ is nonempty because it contains $\mathbf{0}$, and it
 is compact and convex. By Lemma~\ref{lem:omd-closed-form}, every coordinate of
 $\mathbf{m}_t$ is strictly positive. Hence
 $D_\Psi(\cdot\|\mathbf{m}_t)$ is strictly convex on $\mathcal{M}_H$ and is
@@ -1579,7 +1562,7 @@ For sufficiently small $\lambda\in(0,1)$, the point
 \triangleq
 (1-\lambda)\mathbf{m}_t^{\mathrm{exec}}+\lambda\mathbf{m}_t
 \]
-would still belong to $\mathcal{F}_t(x_t)$. Because
+would still belong to $\mathcal{B}_t(x_t)$. Because
 $D_\Psi(\mathbf{m}_t\|\mathbf{m}_t)=0$, strict convexity would then give
 \begin{align*}
 D_\Psi(\mathbf{m}_\lambda\|\mathbf{m}_t)
@@ -2079,8 +2062,9 @@ d_t
 with an empty sum when $t=1$. This proves
 \eqref{eq:contractive-state-bound}.
 
-Finally, $\widehat{u}_t=u_t(\mathbf{m}_t)$ and the feasibility of fixed SDAC
-policies imply
+Finally,
+$\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle=u_t(\mathbf{m}_t)$, and the
+feasibility of fixed SDAC policies implies
 \begin{equation}
 \label{eq:contractive-action-start}
 \begin{aligned}
