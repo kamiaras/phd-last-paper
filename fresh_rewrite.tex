@@ -484,9 +484,9 @@ r_t(i)
 \qquad
 r_t
 \triangleq
-\sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j}.
+\sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j},
 \]
-Then the state of a fixed-policy induced by $\pi_{\mathbf{m}}$ satisfies, for every
+where $r_1 = 0$. Then the state of a fixed-policy induced by $\pi_{\mathbf{m}}$ satisfies, for every
 $t\in[T]$,
 \begin{equation}
 \label{eq:sdac-state-decomp}
@@ -1284,9 +1284,6 @@ must be respected in real time.
 \section{Proofs for Simplex Disturbance-Action Control}
 \label{sec:appendix-sdac-proofs}
 
-We collect the deferred proofs of the structural and approximation results from
-Section~\ref{sec:sdac}.
-
 \begin{proof}[Proof of Lemma~\ref{lem:sdac-state-decomp}]
 The auxiliary quantities satisfy
 \begin{equation}
@@ -1300,33 +1297,28 @@ and, for every $i\in\{1,\ldots,H\}$,
 \label{eq:r-trunc-recursion}
 \begin{aligned}
 \alpha r_t(i)-\alpha^i w_{t-i}
-&=\sum_{j=1}^{i-1}\alpha^j w_{t-j} \\
-&=r_{t+1}(i)-w_t.
+=\sum_{j=1}^{i-1}\alpha^j w_{t-j}
+=r_{t+1}(i)-w_t.
 \end{aligned}
 \end{equation}
-For $i=1$, the sum in the first line is empty.
+For $i=1$, the sum is empty.
 
-At $t=1$, since $w_{\tau}\equiv 0$ for $\tau\le 0$,
+At $t=1$, since $w_{\tau}\equiv 0$ for $\tau\le 0$, we have
 \begin{align*}
 r_1(i)
 &=
-\sum_{j=1}^{i}\alpha^{j-1}w_{1-j}
-=0,\\
-r_1
-&=0,\\
-x_1(\mathbf{m})
-&=0,
+\sum_{j=1}^{i}\alpha^{j-1}w_{1-j} = 0
 \end{align*}
-so \eqref{eq:sdac-state-decomp} holds. Suppose it holds at time $t$. Using
-\eqref{eq:def-sdac-policy} and \eqref{eq:model-dynamics},
+so \eqref{eq:sdac-state-decomp} holds for $t=1$. Suppose \eqref{eq:sdac-state-decomp}  holds at time $t$ and plug it
+and \eqref{eq:def-sdac-policy} into dynamic equation \eqref{eq:model-dynamics} at $t+1$, we get
 \begin{equation}
 \label{eq:decomp-induction-1}
 \begin{aligned}
 x_{t+1}(\mathbf{m})
 &=
-\alpha\left(
-\sum_{i=1}^H m_i r_t(i)
-+\bigl(1-\sum_{i=1}^H m_i\bigr)r_t
+    \alpha\left(
+    \sum_{i=1}^H m_i r_t(i)
+    +\bigl(1-\sum_{i=1}^H m_i\bigr)r_t
 \right) \\
 &\quad
 -\sum_{i=1}^H m_i\alpha^i w_{t-i}
@@ -1370,15 +1362,6 @@ $w_\tau=0$ for $\tau\le0$, $r_t(i)$ is a truncation of $r_t$; hence
 \le\sum_{j=1}^{\infty}\alpha^{j-1}
 =\frac{1}{1-\alpha}.
 \]
-Finally,
-\[
-x_t(\mathbf{m})
-=
-r_t+\sum_{i=1}^H m_i\bigl(r_t(i)-r_t\bigr)
-=
-r_t+\langle\boldsymbol{\phi}_t^x,\mathbf{m}\rangle,
-\]
-which is affine in $\mathbf{m}$.
 \end{proof}
 
 \begin{proof}[Proof of Lemma~\ref{lem:sdac-surrogate}]
