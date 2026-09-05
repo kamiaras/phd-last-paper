@@ -629,10 +629,7 @@ x_{t+1}(\mathbf{q})
 Here, $q_iw_s$ is the amount from arrival $w_s$ allocated $i$ periods later.
 The restriction $i\ge1$ gives a one-period delay because $w_s$ is observed only
 after $u_s$ is chosen. Policies of this form have been studied for Bernoulli
-recharges \cite{arafa2018online,zibaeenejad2019lookahead}. The weighted budget in
-\eqref{eq:def-allocation-sequences} accounts for leakage:
-reserving $q_i$ units for expenditure $i$ periods after an arrival requires
-$q_i/\alpha^i$ units at the arrival time. Let
+recharges \cite{arafa2018online,zibaeenejad2019lookahead}. Let
 \[
 \Pi_\alpha^{\mathrm{alloc}}
 \triangleq
@@ -641,35 +638,23 @@ $q_i/\alpha^i$ units at the arrival time. Let
 
 \begin{lemma}[Finite-memory approximation of decreasing-allocation policies]
 \label{lem:sdac-allocation-approx}
-Every policy in $\Pi_\alpha^{\mathrm{alloc}}$ is feasible. Fix
-$\mathbf{q}\in\mathcal{Q}_\alpha$ and $H\ge1$, and define
-\begin{equation}
-\label{eq:allocation-truncation}
+Every policy in $\Pi_\alpha^{\mathrm{alloc}}$ is feasible for every arrival
+sequence with entries in $[0,1]$. Fix
+$\mathbf{q}\in\mathcal{Q}_\alpha$ and an integer $H\ge1$, and define
+\[
 m_{H,i}(\mathbf{q})
 \triangleq
 \frac{q_i}{\alpha^i},
 \qquad i\in[H].
-\end{equation}
-Then $\mathbf{m}_H(\mathbf{q})\in\mathcal{M}_H$. With
+\]
+Then $\mathbf{m}_H(\mathbf{q})\in\mathcal{M}_H$. Let
 \[
 \operatorname{Tail}_H(\mathbf{q})
 \triangleq
 \sum_{i=H+1}^{\infty}q_i,
 \]
-the corresponding trajectories satisfy, for every arrival sequence in $[0,1]$,
-\begin{align}
-0
-&\le
-u_t(\mathbf{q})-u_t\bigl(\mathbf{m}_H(\mathbf{q})\bigr)
-\le \operatorname{Tail}_H(\mathbf{q}),
-\label{eq:allocation-action-gap}\\
-0
-&\le
-x_t\bigl(\mathbf{m}_H(\mathbf{q})\bigr)-x_t(\mathbf{q})
-\le \frac{\operatorname{Tail}_H(\mathbf{q})}{1-\alpha}.
-\label{eq:allocation-state-gap}
-\end{align}
-If each $c_t$ satisfies \eqref{eq:model-lipschitz}, then
+so $\operatorname{Tail}_H(\mathbf{q})\le\alpha^{H+1}$. If each $c_t$
+satisfies \eqref{eq:model-lipschitz}, then, for every such arrival sequence,
 \begin{equation}
 \label{eq:allocation-cost-gap}
 \begin{aligned}
@@ -692,33 +677,33 @@ c_t\bigl(x_t(\mathbf{m}_H(\mathbf{q})),u_t(\mathbf{m}_H(\mathbf{q}))\bigr)
 \begin{corollary}[Fixed-fraction policies as geometric allocations]
 \label{cor:fraction-as-allocation}
 Fix $k\in[0,\alpha]$, set $\lambda_k\triangleq\alpha-k$, and define
-\begin{equation}
-\label{eq:fraction-as-allocation}
+\[
 q_i(k)=k\lambda_k^{i-1},
 \qquad i\ge1,
-\end{equation}
+\]
 where $\lambda_k^0\triangleq1$. Then $\mathbf{q}(k)\in\mathcal{Q}_\alpha$
-and $\pi_{\mathbf{q}(k)}$ is exactly the feasible fixed-fraction policy
-$u_t(k)=k x_t(k)$. Its SDAC truncation is
+and, for every arrival sequence with entries in $[0,1]$,
+\[
+\bigl(x_t(\mathbf{q}(k)),u_t(\mathbf{q}(k))\bigr)
+=
+\bigl(x_t(k),u_t(k)\bigr),
+\qquad t\in[T].
+\]
+Thus, $\pi_{\mathbf{q}(k)}$ realizes the feasible fixed-fraction policy
+$u_t(k)=k x_t(k)$. For every integer $H\ge1$, define its SDAC truncation by
 \[
 \mathbf{m}_H^{\mathrm{frac}}(k)
 \triangleq
-\mathbf{m}_H\bigl(\mathbf{q}(k)\bigr),
+\mathbf{m}_H\bigl(\mathbf{q}(k)\bigr)
+\in\mathcal{M}_H,
 \]
-with coordinates
-\[
-m_{H,i}\bigl(\mathbf{q}(k)\bigr)
-=
-\frac{k\lambda_k^{i-1}}{\alpha^i},
-\qquad i\in[H],
-\]
-and its tail is
+whose omitted tail is
 \[
 \operatorname{Tail}_H\bigl(\mathbf{q}(k)\bigr)
 =
 \frac{k\lambda_k^H}{1-\lambda_k}.
 \]
-Therefore, \eqref{eq:allocation-cost-gap} specializes to
+If each $c_t$ satisfies \eqref{eq:model-lipschitz}, then
 \begin{equation}
 \label{eq:sdac-fraction-approx-cost}
 \begin{aligned}
@@ -739,12 +724,7 @@ u_t(\mathbf{m}_H^{\mathrm{frac}}(k))
 \end{equation}
 \end{corollary}
 
-Thus, $\Pi_\alpha^{\mathrm{alloc}}$ contains every feasible fixed-fraction
-policy. Together with
-Theorem~\ref{thm:regret-bound}, the tail bound in
-\eqref{eq:allocation-cost-gap} yields a no-regret guarantee against
-$\Pi_\alpha^{\mathrm{alloc}}$ and, consequently, against feasible fixed-fraction
-policies.
+
 
 
 
@@ -1390,162 +1370,139 @@ assumption and \eqref{eq:surr-coefficient-norms} give
 \end{proof}
 
 \begin{proof}[Proof of Lemma~\ref{lem:sdac-allocation-approx}]
-Fix $\mathbf{q}\in\mathcal{Q}_\alpha$ and set
+Since $\mathbf{q}\in\mathcal{Q}_\alpha$,
 \[
-a_i\triangleq\frac{q_i}{\alpha^i},
+m_{H,i}(\mathbf{q})=\frac{q_i}{\alpha^i}\ge0,
 \qquad
-b_j\triangleq1-\sum_{i=1}^{j-1}a_i,
-\qquad j\ge1.
+\|\mathbf{m}_H(\mathbf{q})\|_1
+=\sum_{i=1}^H\frac{q_i}{\alpha^i}\le1.
 \]
-The weighted-budget constraint gives $a_i\ge0$ and $b_j\ge0$. We first show that
-\begin{equation}
-\label{eq:allocation-state-decomposition}
-x_t(\mathbf{q})
-=
-\sum_{j=1}^{t-1}\alpha^{j-1}b_jw_{t-j}.
-\end{equation}
-The identity is immediate at $t=1$. If it holds at time $t$, then
-\begin{align*}
-x_{t+1}(\mathbf{q})
-&=
-w_t+
-\sum_{j=1}^{t-1}
-\bigl(\alpha^jb_j-q_j\bigr)w_{t-j}\\
-&=
-w_t+
-\sum_{j=1}^{t-1}\alpha^jb_{j+1}w_{t-j},
-\end{align*}
-because $q_j=\alpha^ja_j$ and $b_{j+1}=b_j-a_j$. Reindexing gives
-\eqref{eq:allocation-state-decomposition} at time $t+1$.
+Thus $\mathbf{m}_H(\mathbf{q})\in\mathcal{M}_H$.
 
-For each $j\ge1$,
+We next prove that $\pi_{\mathbf{q}}$ is feasible. For this purpose, take the
+truncation length to be $T$. Using
+$w_\tau=0$ for $\tau\le0$, for every $t\in[T]$,
 \[
-a_j
-\le
-1-\sum_{i=1}^{j-1}a_i
-=b_j.
+u_t\bigl(\mathbf{m}_T(\mathbf{q})\bigr)
+=\sum_{i=1}^T\frac{q_i}{\alpha^i}\alpha^i w_{t-i}
+=\sum_{i=1}^{t-1}q_iw_{t-i}=u_t(\mathbf{q}).
 \]
-Consequently,
-\begin{align*}
-0\le u_t(\mathbf{q})
-&=
-\sum_{j=1}^{t-1}\alpha^ja_jw_{t-j}\\
-&\le
-\sum_{j=1}^{t-1}\alpha^jb_jw_{t-j}
-=\alpha x_t(\mathbf{q}),
-\end{align*}
-which proves \eqref{eq:model-feasibility} for the decreasing-allocation policy.
-
-For the truncated vector in \eqref{eq:allocation-truncation},
+The two policies have the same initial state and state recursion, so their
+state trajectories coincide. Lemma~\ref{lem:sdac-feasibility} therefore gives
 \[
-m_{H,i}(\mathbf{q})=a_i\ge0,
+0\le u_t(\mathbf{q})\le\alpha x_t(\mathbf{q}),
+\qquad t\in[T].
+\]
+
+For the approximation error, define
+\[
+e_t^u\triangleq
+u_t(\mathbf{q})-u_t\bigl(\mathbf{m}_H(\mathbf{q})\bigr),
 \qquad
-\sum_{i=1}^H m_{H,i}(\mathbf{q})
-\le
-\sum_{i=1}^{\infty}a_i
-\le1.
+e_t^x\triangleq
+x_t\bigl(\mathbf{m}_H(\mathbf{q})\bigr)-x_t(\mathbf{q}).
 \]
-Thus, $\mathbf{m}_H(\mathbf{q})\in\mathcal{M}_H$. Its SDAC action is
+Again using $w_\tau=0$ for $\tau\le0$,
 \[
-u_t\bigl(\mathbf{m}_H(\mathbf{q})\bigr)
-=
-\sum_{i=1}^{\min\{H,t-1\}}q_iw_{t-i}.
-\]
-It follows that
-\[
-0\le
-u_t(\mathbf{q})-u_t\bigl(\mathbf{m}_H(\mathbf{q})\bigr)
-=
-\sum_{i=H+1}^{t-1}q_iw_{t-i}
-\le \operatorname{Tail}_H(\mathbf{q}),
-\]
-where the middle sum is empty when $t\le H+1$. This proves
-\eqref{eq:allocation-action-gap}.
-
-Define
-\[
-e_t^x
-\triangleq
-x_t\bigl(\mathbf{m}_H(\mathbf{q})\bigr)-x_t(\mathbf{q}),
-\qquad
 e_t^u
-\triangleq
-u_t(\mathbf{q})-u_t\bigl(\mathbf{m}_H(\mathbf{q})\bigr).
+=
+\sum_{i=H+1}^{\infty}q_iw_{t-i},
+\qquad
+0\le e_t^u\le\operatorname{Tail}_H(\mathbf{q}).
 \]
-The two state recursions give
+Subtracting the two state recursions gives
 \[
 e_{t+1}^x=\alpha e_t^x+e_t^u,
 \qquad e_1^x=0.
 \]
-Since $0\le e_t^u\le \operatorname{Tail}_H(\mathbf{q})$,
-\[
-0\le e_t^x
-=
-\sum_{\tau=1}^{t-1}\alpha^{t-1-\tau}e_\tau^u
-\le
-\frac{\operatorname{Tail}_H(\mathbf{q})}{1-\alpha},
-\]
-which proves \eqref{eq:allocation-state-gap}. The Lipschitz property now yields
+Hence, with the sum understood to be zero at $t=1$,
 \[
 \begin{aligned}
-&\bigl|
-c_t\bigl(x_t(\mathbf{m}_H(\mathbf{q})),u_t(\mathbf{m}_H(\mathbf{q}))\bigr)
-\\
-&\qquad
--c_t\bigl(x_t(\mathbf{q}),u_t(\mathbf{q})\bigr)
-\bigr| \\
-&\qquad\le
-\left(L_u+\frac{L_x}{1-\alpha}\right)\operatorname{Tail}_H(\mathbf{q}).
+0\le e_t^x
+&=\sum_{s=1}^{t-1}\alpha^{t-1-s}e_s^u
+\le\operatorname{Tail}_H(\mathbf{q})
+\sum_{s=1}^{t-1}\alpha^{t-1-s}\\
+&=\operatorname{Tail}_H(\mathbf{q})
+\frac{1-\alpha^{t-1}}{1-\alpha}
+\le\frac{\operatorname{Tail}_H(\mathbf{q})}{1-\alpha}.
 \end{aligned}
 \]
-Finally,
-\begin{align*}
+
+Both policies are feasible, so their state--action pairs belong to
+$\mathcal{D}_\alpha$. By \eqref{eq:model-lipschitz} and the triangle
+inequality,
+\[
+\begin{aligned}
+&\left|
+\sum_{t=1}^T
+\left[
+c_t\bigl(x_t(\mathbf{m}_H(\mathbf{q})),u_t(\mathbf{m}_H(\mathbf{q}))\bigr)
+-c_t\bigl(x_t(\mathbf{q}),u_t(\mathbf{q})\bigr)
+\right]
+\right|\\
+&\qquad\le
+\sum_{t=1}^T\left(L_xe_t^x+L_ue_t^u\right)
+\le
+\left(L_u+\frac{L_x}{1-\alpha}\right)
+\operatorname{Tail}_H(\mathbf{q})T.
+\end{aligned}
+\]
+Finally, since $\alpha\in(0,1)$,
+\[
+\begin{aligned}
 \operatorname{Tail}_H(\mathbf{q})
-&=
-\sum_{i=H+1}^{\infty}\alpha^ia_i\\
-&\le
-\alpha^{H+1}\sum_{i=H+1}^{\infty}a_i
-\le\alpha^{H+1}.
-\end{align*}
-Summing the per-period cost bound proves \eqref{eq:allocation-cost-gap}.
+&=\sum_{i=H+1}^{\infty}\alpha^i\frac{q_i}{\alpha^i}
+\le\alpha^{H+1}
+\sum_{i=H+1}^{\infty}\frac{q_i}{\alpha^i}\le\alpha^{H+1}.
+\end{aligned}
+\]
+This proves \eqref{eq:allocation-cost-gap}.
 \end{proof}
 
 \begin{proof}[Proof of Corollary~\ref{cor:fraction-as-allocation}]
-Fix $k\in[0,\alpha]$, let $\lambda_k=\alpha-k$, and let $\mathbf{q}(k)$ be defined by
-\eqref{eq:fraction-as-allocation}. The sequence is nonnegative and decreasing.
+Since $0\le\lambda_k\le\alpha<1$,
+\[
+q_i(k)\ge0,\qquad
+q_{i+1}(k)=\lambda_k q_i(k)\le q_i(k),\qquad i\ge1.
+\]
 If $k=0$, then $\mathbf{q}(k)=\mathbf{0}\in\mathcal{Q}_\alpha$. If $k>0$,
-then $\lambda_k/\alpha<1$ and
+then $0\le\lambda_k/\alpha<1$ and
 \[
+\begin{aligned}
 \sum_{i=1}^{\infty}\frac{q_i(k)}{\alpha^i}
-=
-\frac{k}{\alpha}
-\sum_{j=0}^{\infty}
+&=\frac{k}{\alpha}\sum_{j=0}^{\infty}
 \left(\frac{\lambda_k}{\alpha}\right)^j
-=
-\frac{k}{\alpha-\lambda_k}
-=1,
+=\frac{k}{\alpha}\frac{1}{1-\lambda_k/\alpha}\\
+&=\frac{k}{\alpha-\lambda_k}=1.
+\end{aligned}
 \]
-so again $\mathbf{q}(k)\in\mathcal{Q}_\alpha$. Substituting
-$u_t(k)=k x_t(k)$ into the dynamics and unrolling gives
+Thus, $\mathbf{q}(k)\in\mathcal{Q}_\alpha$.
+
+Under the fixed-fraction policy, \eqref{eq:model-dynamics} becomes
 \[
-u_t(k)
-=
-k\sum_{i=1}^{t-1}\lambda_k^{i-1}w_{t-i}
-=
-\sum_{i=1}^{t-1}q_i(k)w_{t-i}
+x_{t+1}(k)=\lambda_k x_t(k)+w_t.
+\]
+Iterating this recursion from $x_1(k)=0$ gives
+\[
+\begin{aligned}
+x_t(k)&=\sum_{i=1}^{t-1}\lambda_k^{i-1}w_{t-i},\\
+u_t(k)&=k x_t(k)=\sum_{i=1}^{t-1}q_i(k)w_{t-i}
 =u_t\bigl(\mathbf{q}(k)\bigr).
+\end{aligned}
 \]
-The two policies therefore have identical state and action trajectories. Their
-SDAC truncations also coincide coordinatewise, and the omitted geometric tail is
+The two policies have the same actions, initial state, and dynamics. Hence,
+their state trajectories coincide. Lemma~\ref{lem:sdac-allocation-approx}
+gives $\mathbf{m}_H^{\mathrm{frac}}(k)\in\mathcal{M}_H$. Moreover,
 \[
+\begin{aligned}
 \operatorname{Tail}_H\bigl(\mathbf{q}(k)\bigr)
-=
-k\sum_{i=H+1}^{\infty}\lambda_k^{i-1}
-=
-\frac{k\lambda_k^H}{1-\lambda_k}.
+&=k\sum_{i=H+1}^{\infty}\lambda_k^{i-1}
+=k\lambda_k^H\sum_{j=0}^{\infty}\lambda_k^j\\
+&=\frac{k\lambda_k^H}{1-\lambda_k}.
+\end{aligned}
 \]
-Substitution in \eqref{eq:allocation-cost-gap} proves
-\eqref{eq:sdac-fraction-approx-cost}.
+Substituting the trajectory and tail identities into
+\eqref{eq:allocation-cost-gap} proves \eqref{eq:sdac-fraction-approx-cost}.
 \end{proof}
 
 \section{Proofs for the Online SDAC Controller}
