@@ -13,7 +13,7 @@
 \newtheorem{remark}{Remark}
 
 \newcommand{\RegSDAC}[1]{\operatorname{Reg}_{#1}^{\mathrm{SDAC}}}
-\newcommand{\RegProp}[1]{\operatorname{Reg}_{#1}^{\mathrm{prop}}}
+\newcommand{\RegFrac}[1]{\operatorname{Reg}_{#1}^{\mathrm{frac}}}
 \newcommand{\RegAlloc}[1]{\operatorname{Reg}_{#1}^{\mathrm{alloc}}}
 
 \title{Online Constrained Control of Storage Systems via Simplex Disturbance-Action
@@ -136,8 +136,8 @@ Our contributions are as follows:
     class defined in
     Section~\ref{subsec:allocation-sequences}. This class allocates each arrival
     over future periods according to the same decreasing sequence. It contains
-    every feasible proportional state-feedback policy
-    $u_t=kx_t$, with $k\in[0,\alpha]$, and the approximation error decreases
+    every feasible fixed-fraction policy
+    $u_t=kx_t$ for some fixed $k\in[0,\alpha]$, and the approximation error decreases
     geometrically with the memory horizon $H$.
 
 \item \textbf{Online control and regret.}
@@ -150,7 +150,7 @@ Our contributions are as follows:
     regret against the best fixed SDAC policy.
     For $H=\Theta(\log T)$, the regret against the decreasing-allocation class is
     $O\!\left(\sqrt{T\log\log T}\right)$. The same bound
-    holds against the best proportional state-feedback policy.
+    holds against the best fixed-fraction policy.
 
 \item \textbf{Minimax lower bound.}
     We prove a lower bound of order $\sqrt{T}$ for the expected regret of every
@@ -400,8 +400,9 @@ Our objective is to satisfy \eqref{eq:model-feasibility} at every time and achie
 sublinear regret.
 
 For the other comparator classes considered below, $x_t(k)$ and $u_t(k)$ denote
-the state and action induced by a feasible proportional state-feedback policy with
-gain $k\in[0,\alpha]$, while $x_t(\mathbf{q})$ and $u_t(\mathbf{q})$ denote those
+the state and action induced by the feasible fixed-fraction policy
+$u_t(k)=kx_t(k)$ for $k\in[0,\alpha]$, while $x_t(\mathbf{q})$ and
+$u_t(\mathbf{q})$ denote those
 induced by a decreasing allocation sequence $\mathbf{q}$.
 
 
@@ -688,19 +689,19 @@ c_t\bigl(x_t(\mathbf{m}_H(\mathbf{q})),u_t(\mathbf{m}_H(\mathbf{q}))\bigr)
 \end{equation}
 \end{lemma}
 
-\begin{corollary}[Proportional state feedback as a geometric allocation]
-\label{cor:proportional-as-allocation}
+\begin{corollary}[Fixed-fraction policies as geometric allocations]
+\label{cor:fraction-as-allocation}
 Fix $k\in[0,\alpha]$, set $\lambda_k\triangleq\alpha-k$, and define
 \begin{equation}
-\label{eq:proportional-as-allocation}
+\label{eq:fraction-as-allocation}
 q_i(k)=k\lambda_k^{i-1},
 \qquad i\ge1,
 \end{equation}
 where $\lambda_k^0\triangleq1$. Then $\mathbf{q}(k)\in\mathcal{Q}_\alpha$
-and $\pi_{\mathbf{q}(k)}$ is exactly the feasible proportional state-feedback policy
+and $\pi_{\mathbf{q}(k)}$ is exactly the feasible fixed-fraction policy
 $u_t(k)=k x_t(k)$. Its SDAC truncation is
 \[
-\mathbf{m}_H^{\mathrm{prop}}(k)
+\mathbf{m}_H^{\mathrm{frac}}(k)
 \triangleq
 \mathbf{m}_H\bigl(\mathbf{q}(k)\bigr),
 \]
@@ -719,14 +720,14 @@ and its tail is
 \]
 Therefore, \eqref{eq:allocation-cost-gap} specializes to
 \begin{equation}
-\label{eq:sdac-lin-approx-cost}
+\label{eq:sdac-fraction-approx-cost}
 \begin{aligned}
 &\left|
 \sum_{t=1}^T
 \left[
 c_t\!\bigl(
-x_t(\mathbf{m}_H^{\mathrm{prop}}(k)),
-u_t(\mathbf{m}_H^{\mathrm{prop}}(k))
+x_t(\mathbf{m}_H^{\mathrm{frac}}(k)),
+u_t(\mathbf{m}_H^{\mathrm{frac}}(k))
 \bigr)
 -c_t\bigl(x_t(k),u_t(k)\bigr)
 \right]
@@ -738,12 +739,12 @@ u_t(\mathbf{m}_H^{\mathrm{prop}}(k))
 \end{equation}
 \end{corollary}
 
-Thus, $\Pi_\alpha^{\mathrm{alloc}}$ contains every feasible proportional
-state-feedback policy. Together with
+Thus, $\Pi_\alpha^{\mathrm{alloc}}$ contains every feasible fixed-fraction
+policy. Together with
 Theorem~\ref{thm:regret-bound}, the tail bound in
 \eqref{eq:allocation-cost-gap} yields a no-regret guarantee against
-$\Pi_\alpha^{\mathrm{alloc}}$ and, consequently, against feasible proportional
-state-feedback policies.
+$\Pi_\alpha^{\mathrm{alloc}}$ and, consequently, against feasible fixed-fraction
+policies.
 
 
 
@@ -1001,23 +1002,23 @@ O\!\left(\sqrt{T\log\log T}\right)
 \]
 \end{corollary}
 
-Because geometric allocation sequences induce proportional state feedback, the
-controller also satisfies a gain-dependent bound for that policy family.
+Because geometric allocation sequences induce fixed-fraction policies, the
+controller also satisfies a corresponding bound for that policy class.
 
-\begin{corollary}[No-regret against proportional state-feedback policies]
-\label{cor:regret-vs-linear}
+\begin{corollary}[No-regret against fixed-fraction policies]
+\label{cor:regret-vs-fraction}
 Run the online SDAC controller in Corollary~\ref{cor:regret-vs-allocation}. For
 $k\in[0,\alpha]$, let
 $J_T(k)\triangleq\sum_{t=1}^T c_t\bigl(x_t(k),u_t(k)\bigr)$, where
 $u_t(k)=k x_t(k)$, and define
 \[
-\RegProp{T}
+\RegFrac{T}
 \triangleq
 J_T^{\mathrm{on}}-\min_{k\in[0,\alpha]}J_T(k).
 \]
 For every $k\in[0,\alpha]$, with $\lambda_k=\alpha-k$,
 \begin{equation}
-\label{eq:linear-regret-decomposition}
+\label{eq:fraction-regret-decomposition}
 \begin{aligned}
 J_T^{\mathrm{on}}-J_T(k)
 &\le
@@ -1030,7 +1031,7 @@ J_T^{\mathrm{on}}-J_T(k)
 Moreover,
 \[
 \begin{aligned}
-\RegProp{T}
+\RegFrac{T}
 &\le
 2\sqrt{\Gamma_\alpha T\log(H_T+1)}
 \\
@@ -1509,9 +1510,9 @@ Finally,
 Summing the per-period cost bound proves \eqref{eq:allocation-cost-gap}.
 \end{proof}
 
-\begin{proof}[Proof of Corollary~\ref{cor:proportional-as-allocation}]
+\begin{proof}[Proof of Corollary~\ref{cor:fraction-as-allocation}]
 Fix $k\in[0,\alpha]$, let $\lambda_k=\alpha-k$, and let $\mathbf{q}(k)$ be defined by
-\eqref{eq:proportional-as-allocation}. The sequence is nonnegative and decreasing.
+\eqref{eq:fraction-as-allocation}. The sequence is nonnegative and decreasing.
 If $k=0$, then $\mathbf{q}(k)=\mathbf{0}\in\mathcal{Q}_\alpha$. If $k>0$,
 then $\lambda_k/\alpha<1$ and
 \[
@@ -1544,7 +1545,7 @@ k\sum_{i=H+1}^{\infty}\lambda_k^{i-1}
 \frac{k\lambda_k^H}{1-\lambda_k}.
 \]
 Substitution in \eqref{eq:allocation-cost-gap} proves
-\eqref{eq:sdac-lin-approx-cost}.
+\eqref{eq:sdac-fraction-approx-cost}.
 \end{proof}
 
 \section{Proofs for the Online SDAC Controller}
@@ -2376,12 +2377,12 @@ $H_T\ge\log T/\log(1/\alpha)$ implies $\alpha^{H_T}\le1/T$, while
 $H_T=\Theta(\log T)$ implies $\log(H_T+1)=O(\log\log T)$.
 \end{proof}
 
-\begin{proof}[Proof of Corollary~\ref{cor:regret-vs-linear}]
+\begin{proof}[Proof of Corollary~\ref{cor:regret-vs-fraction}]
 For fixed $k$, Theorem~\ref{thm:regret-bound} applied to
-$\mathbf{m}_{H_T}^{\mathrm{prop}}(k)$, followed by
-\eqref{eq:sdac-lin-approx-cost}, gives
-\eqref{eq:linear-regret-decomposition}.
-Corollary~\ref{cor:proportional-as-allocation} shows that the geometric allocation
+$\mathbf{m}_{H_T}^{\mathrm{frac}}(k)$, followed by
+\eqref{eq:sdac-fraction-approx-cost}, gives
+\eqref{eq:fraction-regret-decomposition}.
+Corollary~\ref{cor:fraction-as-allocation} shows that the geometric allocation
 sequence $\mathbf{q}(k)$ belongs to $\mathcal{Q}_\alpha$, so
 Lemma~\ref{lem:sdac-allocation-approx} gives
 $\operatorname{Tail}_{H_T}(\mathbf{q}(k))\le\alpha^{H_T+1}$. This makes the bound
