@@ -518,8 +518,8 @@ for every $t\in[T]$ and $i\in[H]$.
 \begin{lemma}[Feasibility of SDAC policies]
 \label{lem:sdac-feasibility}
 For every $\mathbf{m}\in\mathcal{M}_H$, the trajectory induced by
-$\pi_{\mathbf{m}}$ satisfies the action constraint
-\eqref{eq:model-feasibility}. Explicitly,
+$\pi_{\mathbf{m}}$ satisfies
+\eqref{eq:model-feasibility},
 \begin{equation}
 \label{eq:sdac-feasibility}
 0\le u_t(\mathbf{m})\le \alpha x_t(\mathbf{m})
@@ -1288,14 +1288,14 @@ For $t\in[T]$ and $i\in[H]$, the definitions give
 \begin{align*}
 r_{t+1}
 &=\sum_{j=1}^{t}\alpha^{j-1}w_{t+1-j} \\
-&=w_t+\sum_{j=1}^{t-1}\alpha^j w_{t-j} \\
-&=w_t+\alpha r_t, \\
+&=w_t+\sum_{j=1}^{t-1}\alpha^j w_{t-j} 
+=w_t+\alpha r_t, \\
 r_{t+1}(i)
 &=\sum_{j=1}^{i}\alpha^{j-1}w_{t+1-j} \\
-&=w_t+\sum_{j=1}^{i-1}\alpha^j w_{t-j} \\
-&=w_t+\alpha r_t(i)-\alpha^i w_{t-i}.
+&=w_t+\sum_{j=1}^{i-1}\alpha^j w_{t-j} 
+=w_t+\alpha r_t(i)-\alpha^i w_{t-i}.
 \end{align*}
-The sum from $j=1$ to $i-1$ is empty when $i=1$.
+The sum from $j=1$ to $s-1$ is empty when $s=1$.
 
 At $t=1$, \eqref{eq:model-init} gives $x_1(\mathbf{m})=0$, while
 $r_1(i)=r_1=0$ by the arrival and empty-sum conventions. Thus,
@@ -1321,23 +1321,9 @@ x_{t+1}(\mathbf{m})
 &=\sum_{i=1}^H m_i r_{t+1}(i)
 +\left(1-\sum_{i=1}^H m_i\right)r_{t+1}.
 \end{align*}
-The last equality uses
-\[
--\sum_{i=1}^H m_i
--\left(1-\sum_{i=1}^H m_i\right)+1=0,
-\]
-which is the coefficient of $w_t$.
 Thus, \eqref{eq:sdac-state-decomp} follows by induction.
 
-Rearranging \eqref{eq:sdac-state-decomp} gives
-\[
-\begin{aligned}
-x_t(\mathbf{m})
-&=r_t+\sum_{i=1}^H m_i\bigl(r_t(i)-r_t\bigr) \\
-&=r_t+\langle\boldsymbol{\phi}_t^x,\mathbf{m}\rangle,
-\end{aligned}
-\]
-which is affine in $\mathbf{m}$. Finally, since $w_\tau\in[0,1]$ and
+Finally, since $w_\tau\in[0,1]$ and
 $w_\tau=0$ for $\tau\le0$,
 \[
 \begin{aligned}
