@@ -469,10 +469,8 @@ The resulting SDAC policy class is
 We next establish two structural properties of this policy class. Every
 $\pi_{\mathbf{m}}$ satisfies the feasibility constraint
 \eqref{eq:model-feasibility}, and its induced cost is convex and Lipschitz in
-$\mathbf{m}$. Thus, regret minimization against the best fixed SDAC policy is an
-instance of online convex optimization over the simplex. Both properties follow
-from an explicit decomposition of the state trajectory that isolates its
-dependence on $\mathbf{m}$.
+$\mathbf{m}$. Proofs omitted from this section are collected in
+Appendix~\ref{sec:appendix-sdac-proofs}.
 
 \begin{lemma}[State decomposition under SDAC]
 \label{lem:sdac-state-decomp}
@@ -488,7 +486,7 @@ r_t
 \triangleq
 \sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j}.
 \]
-Then the state component of the fixed-policy trajectory satisfies, for every
+Then the state of a fixed-policy induced by $\pi_{\mathbf{m}}$ satisfies, for every
 $t\in[T]$,
 \begin{equation}
 \label{eq:sdac-state-decomp}
@@ -517,9 +515,6 @@ for every $t\in[T]$ and $i\in[H]$. Consequently,
 $\mathbf{m}\mapsto x_t(\mathbf{m})$ is affine for every $t\in[T]$.
 \end{lemma}
 
-The proof is given in Appendix~\ref{sec:appendix-sdac-proofs}.
-
-This decomposition implies feasibility.
 
 \begin{lemma}[Feasibility of SDAC policies]
 \label{lem:sdac-feasibility}
@@ -617,8 +612,7 @@ and use the explicit choice
 \]
 This choice belongs to $\partial\ell_t(\mathbf{m})$ and satisfies
 $\|\mathbf{g}_t\|_\infty\le G_\alpha$, as stated in
-Lemma~\ref{lem:sdac-surrogate}. The proof is given in
-Appendix~\ref{sec:appendix-sdac-proofs}.
+Lemma~\ref{lem:sdac-surrogate}.
 
 \subsection{Approximation of Decreasing-Allocation Policies}
 \label{subsec:allocation-sequences}
@@ -766,10 +760,6 @@ u_t(\mathbf{m}_H^{\mathrm{prop}}(k))
 \end{equation}
 \end{corollary}
 
-The proofs of Lemma~\ref{lem:sdac-allocation-approx} and
-Corollary~\ref{cor:proportional-as-allocation} are given in
-Appendix~\ref{sec:appendix-sdac-proofs}.
-
 Thus, $\Pi_\alpha^{\mathrm{alloc}}$ contains every feasible proportional
 state-feedback policy. Together with
 Theorem~\ref{thm:regret-bound}, the tail bound in
@@ -816,9 +806,8 @@ We initialize at
 \label{eq:alg-init}
 \mathbf{m}_1\triangleq\frac{1}{H+1}\mathbf{1}
 \end{equation}
-so that
-$\sup_{\mathbf{m}\in\mathcal{M}_H}D_\Psi(\mathbf{m}\|\mathbf{m}_1)\le\log(H+1)$
-(see the proof of Theorem~\ref{thm:regret-bound}).
+so that, by \eqref{eq:breg-init-bound},
+$\sup_{\mathbf{m}\in\mathcal{M}_H}D_\Psi(\mathbf{m}\|\mathbf{m}_1)\le\log(H+1)$.
 
 \paragraph{Control-action selection}
 At the start of round $t$, the controller has the current online parameter
@@ -883,20 +872,15 @@ Bregman projection onto $\mathcal{M}_H$:
 =
 \frac{\widetilde{\mathbf{m}}_{t+1}}{\max\{1,\|\widetilde{\mathbf{m}}_{t+1}\|_1\}},
 \end{equation}
-where the projection operator is defined and derived in
-Lemma~\ref{lem:bregman-projection} of
-Appendix~\ref{sec:appendix-algorithm-proofs}.
+where Lemma~\ref{lem:bregman-projection} derives the projection formula.
 
 
 \section{Regret Upper Bounds}
 \label{sec:regret-analysis}
 The following theorem states that the online SDAC controller achieves sublinear
 regret relative to every fixed SDAC policy
-$\pi_{\mathbf{m}}\in\Pi_H^{\mathrm{SDAC}}$.
-The proof combines a standard online convex optimization bound for the surrogate
-costs $\ell_t$ with the stability bound under online parameter updates stated
-below. The complete proofs are deferred to
-Appendix~\ref{sec:appendix-regret-proofs}.
+$\pi_{\mathbf{m}}\in\Pi_H^{\mathrm{SDAC}}$. Proofs omitted from this section are
+collected in Appendix~\ref{sec:appendix-regret-proofs}.
 
 \begin{theorem}[Regret against fixed SDAC policies]
 \label{thm:regret-bound}
@@ -976,10 +960,8 @@ holding $\mathbf{m}_t$ constant from time $1$ through time $t$. Consequently,
 \end{equation}
 \end{lemma}
 
-The proof of Lemma~\ref{lem:contractive-deviation} is given in
-Appendix~\ref{sec:appendix-regret-proofs}. The proof of
-Theorem~\ref{thm:regret-bound} then has three steps. First, the OMD bound for the
-surrogate costs gives
+The proof of Theorem~\ref{thm:regret-bound} has three steps. First, the OMD bound
+for the surrogate costs gives
 \[
 \sum_{t=1}^T\ell_t(\mathbf{m}_t)
 -\min_{\mathbf{m}\in\mathcal{M}_H}\sum_{t=1}^T\ell_t(\mathbf{m})
@@ -1084,16 +1066,13 @@ O\!\left(\sqrt{T\log\log T}\right)
 \]
 \end{corollary}
 
-The proofs of Corollaries~\ref{cor:regret-vs-allocation}
-and~\ref{cor:regret-vs-linear} are given in
-Appendix~\ref{sec:appendix-regret-proofs}.
-
 \section{Minimax Regret Lower Bound}
 \label{sec:minimax-lower-bound}
 
 The next result shows that the $\sqrt{T}$ dependence is unavoidable and quantifies
-the necessary dependence on $1-\alpha$ for any causal feasible controller. Its
-proof is deferred to Appendix~\ref{sec:appendix-minimax-proofs}.
+the necessary dependence on $1-\alpha$ for any causal feasible controller. Proofs
+omitted from this section are collected in
+Appendix~\ref{sec:appendix-minimax-proofs}.
 
 \begin{theorem}[Minimax SDAC regret lower bound]
 \label{thm:sdac-lower-bound}
