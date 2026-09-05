@@ -247,22 +247,15 @@ with general convex state--action costs.
 
 \paragraph{Inventory and reservoir management}
 Yang et al.\ \cite{yang2020online} study online procurement under inventory
-constraints. Their controller observes the current demand and price and then chooses
-how much supply to purchase. Performance is measured by a competitive ratio for the
-total procurement cost. Our online SDAC controller instead chooses how much stored
-resource to use before observing the current arrival and cost.
-
-Hihat and Fermanian \cite{hihat2024online} consider inventory systems with more
-general state-transition functions and study policies that replenish inventory up
-to a target level. Their model is broader in its transition dynamics, but it has a
-different decision order and a different policy class. Our scalar linear dynamics
-allow explicit feasibility, approximation, and regret guarantees.
-
-Classical reservoir models also use storage dynamics with random inflows and
-controlled releases \cite{moran1954dams,prabhu1998stochastic}. That literature
-mainly studies long-run performance under stochastic inflows. It provides another
-example of control under storage constraints, although physical reservoir models
-may also include capacity and overflow effects that are not part of our main model.
+constraints and obtain optimal competitive ratios relative to an offline optimum.
+They observe the current demand and price before acting, whereas our controller
+acts before the current arrival and cost are revealed. Hihat and Fermanian
+\cite{hihat2024online} learn a base-stock policy for more general inventory
+dynamics but do not prove a regret bound for their method. For our scalar linear
+model, we prove feasibility, approximation, and sublinear regret guarantees.
+Classical stochastic reservoir models study storage under random inflows and fixed
+release rules \cite{moran1954dams}, with an emphasis on steady-state behavior rather
+than finite-horizon online regret.
 
 \subsection{Paper Organization}
 
