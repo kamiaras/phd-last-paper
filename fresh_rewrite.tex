@@ -517,57 +517,38 @@ for every $t\in[T]$ and $i\in[H]$.
 
 \begin{lemma}[Feasibility of SDAC policies]
 \label{lem:sdac-feasibility}
-For every $\mathbf{m}\in\mathcal{M}_H$, the trajectory induced by
-$\pi_{\mathbf{m}}$ satisfies
-\eqref{eq:model-feasibility},
-\begin{equation}
-\label{eq:sdac-feasibility}
+For every $\mathbf{m}\in\mathcal{M}_H$, the fixed SDAC policy
+$\pi_{\mathbf{m}}$ is feasible:
+\[
 0\le u_t(\mathbf{m})\le \alpha x_t(\mathbf{m})
-\qquad
-\text{for all }t\in[T].
-\end{equation}
+\qquad \text{for every }t\in[T].
+\]
 \end{lemma}
 
 \begin{proof}
-Because $m_i$, $\alpha$, and $w_{t-i}$ are nonnegative,
+Fix $t\in[T]$. For every $i\in[H]$,
 \[
-u_t(\mathbf{m})
-=
-\sum_{i=1}^H m_i\alpha^i w_{t-i}
+\alpha r_t(i)-\alpha^i w_{t-i}
+=\sum_{j=1}^{i-1}\alpha^j w_{t-j}
 \ge0.
 \]
-For every $i\in\{1,\ldots,H\}$,
-\begin{equation}
-\label{eq:feas-r-term}
-\alpha r_t(i)
-=
-\sum_{j=1}^{i}\alpha^j w_{t-j}
-\ge
-\alpha^i w_{t-i}.
-\end{equation}
-Because $\mathbf{m}\in\mathcal{M}_H$ and $r_t\ge0$ by
-Lemma~\ref{lem:sdac-state-decomp},
-\begin{equation}
-\label{eq:feas-upper-direct}
+Since $\mathbf{m}\in\mathcal{M}_H$, we have $m_i\ge0$ for every $i\in[H]$ and
+$1-\sum_{i=1}^H m_i\ge0$. Also, $w_{t-i}\ge0$ for every $i\in[H]$ and
+$r_t\ge0$. Therefore,
+\[
 \begin{aligned}
-\alpha x_t(\mathbf{m})
-&=
-\sum_{i=1}^H m_i\alpha r_t(i)
-+\alpha\bigl(1-\sum_{i=1}^H m_i\bigr)r_t \\
-&\ge
-\sum_{i=1}^H m_i\alpha r_t(i) \\
-&\ge
-\sum_{i=1}^H m_i\alpha^i w_{t-i}
-=
-u_t(\mathbf{m}),
+0\le u_t(\mathbf{m})
+&=\sum_{i=1}^H m_i\alpha^i w_{t-i} \\
+&\le\sum_{i=1}^H m_i\alpha r_t(i) \\
+&\le\sum_{i=1}^H m_i\alpha r_t(i)
++\alpha\left(1-\sum_{i=1}^H m_i\right)r_t \\
+&=\alpha x_t(\mathbf{m}),
 \end{aligned}
-\end{equation}
-where the second inequality uses \eqref{eq:feas-r-term}.
+\]
+where the last equality follows from \eqref{eq:sdac-state-decomp}.
 \end{proof}
 
-For any realized arrival history, both components of the fixed-policy trajectory
-are affine in $\mathbf{m}$. The following lemma records the resulting convexity and
-the constants used by the online update.
+
 
 \begin{lemma}[Convexity and Lipschitz continuity of surrogate cost]
 \label{lem:sdac-surrogate}
