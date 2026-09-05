@@ -371,14 +371,14 @@ J_T^{\mathrm{on}}
 \sum_{t=1}^T c_t(x_t,u_t).
 \end{equation}
 
-Fix a positive integer $H$, and let $\mathbf{m}$ range over the SDAC parameter set
-$\mathcal{M}_H$, defined in Section~\ref{sec:sdac}. For each
-$\mathbf{m}\in\mathcal{M}_H$, let $\pi_{\mathbf{m}}$ denote the fixed SDAC policy.
+
+
+For a fixed positive integer \(H\), let \(\pi_{\mathbf{m}}\) denote the fixed SDAC
+policy indexed by \(\mathbf{m}\in\mathcal{M}_H\), where \(\mathcal{M}_H\) is defined in Section~\ref{sec:sdac}.
 The \emph{fixed-policy trajectory associated with $\mathbf{m}$} is the unique
 state--action sequence $\{(x_t(\mathbf{m}),u_t(\mathbf{m}))\}_{t=1}^T$ obtained by
 applying $\pi_{\mathbf{m}}$ with $\mathbf{m}$ held
-constant at every time; its recursion is given in
-\eqref{eq:def-fixed-policy-trajectory}.
+constant at every time.
 Define the cumulative cost of this fixed-policy trajectory by
 \[
 J_T(\mathbf{m})
@@ -386,14 +386,6 @@ J_T(\mathbf{m})
 \sum_{t=1}^T
 c_t\bigl(x_t(\mathbf{m}),u_t(\mathbf{m})\bigr).
 \]
-For the other comparator classes considered below, $x_t(k)$ and $u_t(k)$ denote
-the state and action induced by a feasible proportional state-feedback policy with
-gain $k\in[0,\alpha]$, while $x_t(\mathbf{q})$ and $u_t(\mathbf{q})$ denote those
-induced by a decreasing allocation sequence $\mathbf{q}$.
-
-Both the online trajectory and every fixed-policy trajectory used as a benchmark
-are required to satisfy
-\eqref{eq:model-feasibility} under \eqref{eq:model-dynamics}.
 The regret against the best fixed SDAC policy is defined by
 \begin{equation}
 \label{eq:def-regret}
@@ -405,6 +397,13 @@ J_T^{\mathrm{on}}
 \end{equation}
 Our objective is to satisfy \eqref{eq:model-feasibility} at every time and achieve
 sublinear regret.
+
+For the other comparator classes considered below, $x_t(k)$ and $u_t(k)$ denote
+the state and action induced by a feasible proportional state-feedback policy with
+gain $k\in[0,\alpha]$, while $x_t(\mathbf{q})$ and $u_t(\mathbf{q})$ denote those
+induced by a decreasing allocation sequence $\mathbf{q}$.
+
+
 
 \section{Simplex Disturbance-Action Control (SDAC)}
 \label{sec:sdac}
@@ -427,7 +426,7 @@ action can exceed $\alpha x_t$ or become negative.
 We therefore introduce \emph{Simplex Disturbance-Action Control} (SDAC), which uses a
 simplex-constrained filter tailored to the storage dynamics. This restriction ensures
 that every fixed SDAC policy is feasible while preserving the convexity of the surrogate costs and
-tractable online updates.
+enabling us to achieve a tractable online algorithm.
 
 
 \subsection{Policy Definition and Structural Properties}
@@ -459,8 +458,7 @@ where
 \bigl(\alpha w_{t-1},\alpha^2 w_{t-2},\ldots,\alpha^H w_{t-H}\bigr)^\top
 \in\mathbb{R}^H.
 \end{equation}
-The factor $\alpha^i$ accounts for retention over $i$ periods under
-\eqref{eq:model-dynamics}. The resulting SDAC policy class is
+The resulting SDAC policy class is
 \begin{equation}
 \label{eq:def-sdac-class}
 \Pi_H^{\mathrm{SDAC}}
@@ -468,21 +466,9 @@ The factor $\alpha^i$ accounts for retention over $i$ periods under
 \{\pi_{\mathbf{m}}:\mathbf{m}\in\mathcal{M}_H\}.
 \end{equation}
 
-Applying $\pi_{\mathbf{m}}$ with $\mathbf{m}$ held constant at every time gives the
-fixed-policy trajectory
-\begin{equation}
-\label{eq:def-fixed-policy-trajectory}
-\begin{aligned}
-x_1(\mathbf{m})&=0,\\
-u_t(\mathbf{m})&=\sum_{i=1}^H m_i\alpha^i w_{t-i},\\
-x_{t+1}(\mathbf{m})&=\alpha x_t(\mathbf{m})-u_t(\mathbf{m})+w_t,
-\qquad t\in[T].
-\end{aligned}
-\end{equation}
-
-We next establish two structural properties of fixed SDAC policies. The induced
-control action always satisfies the feasibility constraint
-\eqref{eq:model-feasibility}, and the induced cost is convex and Lipschitz in
+We next establish two structural properties of this policy class. Every
+$\pi_{\mathbf{m}}$ satisfies the feasibility constraint
+\eqref{eq:model-feasibility}, and its induced cost is convex and Lipschitz in
 $\mathbf{m}$. Thus, regret minimization against the best fixed SDAC policy is an
 instance of online convex optimization over the simplex. Both properties follow
 from an explicit decomposition of the state trajectory that isolates its
@@ -533,13 +519,13 @@ $\mathbf{m}\mapsto x_t(\mathbf{m})$ is affine for every $t\in[T]$.
 
 The proof is given in Appendix~\ref{sec:appendix-sdac-proofs}.
 
-The first consequence of this decomposition is that every fixed SDAC policy is feasible.
+This decomposition implies feasibility.
 
 \begin{lemma}[Feasibility of SDAC policies]
 \label{lem:sdac-feasibility}
-For every $\mathbf{m}\in\mathcal{M}_H$, the fixed-policy trajectory defined by
-\eqref{eq:def-fixed-policy-trajectory} satisfies the action
-constraint \eqref{eq:model-feasibility}. Explicitly,
+For every $\mathbf{m}\in\mathcal{M}_H$, the trajectory induced by
+$\pi_{\mathbf{m}}$ satisfies the action constraint
+\eqref{eq:model-feasibility}. Explicitly,
 \begin{equation}
 \label{eq:sdac-feasibility}
 0\le u_t(\mathbf{m})\le \alpha x_t(\mathbf{m})
@@ -1353,7 +1339,7 @@ x_1(\mathbf{m})
 &=0,
 \end{align*}
 so \eqref{eq:sdac-state-decomp} holds. Suppose it holds at time $t$. Using
-\eqref{eq:def-fixed-policy-trajectory},
+\eqref{eq:def-sdac-policy} and \eqref{eq:model-dynamics},
 \begin{equation}
 \label{eq:decomp-induction-1}
 \begin{aligned}
