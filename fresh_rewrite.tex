@@ -474,20 +474,20 @@ Appendix~\ref{sec:appendix-sdac-proofs}.
 
 \begin{lemma}[State decomposition under SDAC]
 \label{lem:sdac-state-decomp}
-Fix a positive integer $H$ and $\mathbf{m}\in\mathcal{M}_H$.
-For each $t\in[T]$, define
+Fix a positive integer $H$.
+For $t\in[T]$ and $i\in[H]$, define
 \[
 r_t(i)
 \triangleq
 \sum_{j=1}^{i}\alpha^{j-1}w_{t-j},
-\quad i\in[H],
 \qquad
 r_t
 \triangleq
 \sum_{j=1}^{t-1}\alpha^{j-1}w_{t-j},
 \]
-where $r_1 = 0$. Then the state of a fixed-policy induced by $\pi_{\mathbf{m}}$ satisfies, for every
-$t\in[T]$,
+where the empty sum defining $r_1$ is zero. Then, for every
+$\mathbf{m}\in\mathcal{M}_H$ and $t\in[T]$, the fixed-policy state associated
+with $\mathbf{m}$ satisfies
 \begin{equation}
 \label{eq:sdac-state-decomp}
 x_t(\mathbf{m})
@@ -495,24 +495,23 @@ x_t(\mathbf{m})
 \sum_{i=1}^H m_i r_t(i)
 +\bigl(1-\sum_{i=1}^H m_i\bigr)r_t.
 \end{equation}
-Equivalently, define
+Equivalently, with
 \[
 \boldsymbol{\phi}_t^x
 \triangleq
-\bigl(r_t(1)-r_t,\ldots,r_t(H)-r_t\bigr)^\top.
+\bigl(r_t(1)-r_t,\ldots,r_t(H)-r_t\bigr)^\top,
 \]
-Then
+we have
 \[
 x_t(\mathbf{m})
 =
 r_t+\langle\boldsymbol{\phi}_t^x,\mathbf{m}\rangle.
 \]
-Moreover,
+Thus, $\mathbf{m}\mapsto x_t(\mathbf{m})$ is affine. Moreover,
 \[
 0\le r_t(i)\le r_t\le\frac{1}{1-\alpha},
 \]
-for every $t\in[T]$ and $i\in[H]$. Consequently,
-$\mathbf{m}\mapsto x_t(\mathbf{m})$ is affine for every $t\in[T]$.
+for every $t\in[T]$ and $i\in[H]$.
 \end{lemma}
 
 
@@ -1285,82 +1284,70 @@ must be respected in real time.
 \label{sec:appendix-sdac-proofs}
 
 \begin{proof}[Proof of Lemma~\ref{lem:sdac-state-decomp}]
-The auxiliary quantities satisfy
-\begin{equation}
-\label{eq:r-recursion}
-r_{t+1}=\alpha r_t+w_t,
-\qquad
-r_1=0,
-\end{equation}
-and, for every $i\in\{1,\ldots,H\}$,
-\begin{equation}
-\label{eq:r-trunc-recursion}
-\begin{aligned}
-\alpha r_t(i)-\alpha^i w_{t-i}
-=\sum_{j=1}^{i-1}\alpha^j w_{t-j}
-=r_{t+1}(i)-w_t.
-\end{aligned}
-\end{equation}
-For $i=1$, the sum is empty.
-
-At $t=1$, since $w_{\tau}\equiv 0$ for $\tau\le 0$, we have
+For $t\in[T]$ and $i\in[H]$, the definitions give
 \begin{align*}
-r_1(i)
-&=
-\sum_{j=1}^{i}\alpha^{j-1}w_{1-j} = 0
+r_{t+1}
+&=\sum_{j=1}^{t}\alpha^{j-1}w_{t+1-j} \\
+&=w_t+\sum_{j=1}^{t-1}\alpha^j w_{t-j} \\
+&=w_t+\alpha r_t, \\
+r_{t+1}(i)
+&=\sum_{j=1}^{i}\alpha^{j-1}w_{t+1-j} \\
+&=w_t+\sum_{j=1}^{i-1}\alpha^j w_{t-j} \\
+&=w_t+\alpha r_t(i)-\alpha^i w_{t-i}.
 \end{align*}
-so \eqref{eq:sdac-state-decomp} holds for $t=1$. Suppose \eqref{eq:sdac-state-decomp}  holds at time $t$ and plug it
-and \eqref{eq:def-sdac-policy} into dynamic equation \eqref{eq:model-dynamics} at $t+1$, we get
-\begin{equation}
-\label{eq:decomp-induction-1}
-\begin{aligned}
+The sum from $j=1$ to $i-1$ is empty when $i=1$.
+
+At $t=1$, \eqref{eq:model-init} gives $x_1(\mathbf{m})=0$, while
+$r_1(i)=r_1=0$ by the arrival and empty-sum conventions. Thus,
+\eqref{eq:sdac-state-decomp} holds at $t=1$. Suppose it holds at some
+$t$ with $1\le t<T$. By \eqref{eq:model-dynamics} and
+\eqref{eq:def-sdac-policy},
+\begin{align*}
 x_{t+1}(\mathbf{m})
-&=
-    \alpha\left(
-    \sum_{i=1}^H m_i r_t(i)
-    +\bigl(1-\sum_{i=1}^H m_i\bigr)r_t
-\right) \\
+&=\alpha x_t(\mathbf{m})-u_t(\mathbf{m})+w_t \\
+&=\alpha\left[
+\sum_{i=1}^H m_i r_t(i)
++\left(1-\sum_{i=1}^H m_i\right)r_t
+\right] \\
 &\quad
--\sum_{i=1}^H m_i\alpha^i w_{t-i}
-+w_t \\
-&=
-\sum_{i=1}^H m_i
+-\sum_{i=1}^H m_i\alpha^i w_{t-i}+w_t \\
+&=\sum_{i=1}^H m_i
 \bigl(\alpha r_t(i)-\alpha^i w_{t-i}\bigr) \\
 &\quad
-+\alpha\bigl(1-\sum_{i=1}^H m_i\bigr)r_t+w_t.
-\end{aligned}
-\end{equation}
-Substituting \eqref{eq:r-recursion} and \eqref{eq:r-trunc-recursion} into
-\eqref{eq:decomp-induction-1},
-\begin{equation}
-\label{eq:decomp-induction-2}
-\begin{aligned}
-x_{t+1}(\mathbf{m})
-&=
-\sum_{i=1}^H m_i
-\bigl(r_{t+1}(i)-w_t\bigr) \\
++\left(1-\sum_{i=1}^H m_i\right)\alpha r_t+w_t \\
+&=\sum_{i=1}^H m_i\bigl(r_{t+1}(i)-w_t\bigr) \\
 &\quad
-+\bigl(1-\sum_{i=1}^H m_i\bigr)(r_{t+1}-w_t)+w_t \\
-&=
-\sum_{i=1}^H m_i r_{t+1}(i)
-+\bigl(1-\sum_{i=1}^H m_i\bigr)r_{t+1},
-\end{aligned}
-\end{equation}
-The total coefficient of $w_t$ in the first line is
++\left(1-\sum_{i=1}^H m_i\right)(r_{t+1}-w_t)+w_t \\
+&=\sum_{i=1}^H m_i r_{t+1}(i)
++\left(1-\sum_{i=1}^H m_i\right)r_{t+1}.
+\end{align*}
+The last equality uses
 \[
 -\sum_{i=1}^H m_i
--\left(1-\sum_{i=1}^H m_i\right)
-+1
-=0.
+-\left(1-\sum_{i=1}^H m_i\right)+1=0,
 \]
-Therefore, \eqref{eq:sdac-state-decomp} follows by induction.
+which is the coefficient of $w_t$.
+Thus, \eqref{eq:sdac-state-decomp} follows by induction.
 
-All summands defining $r_t(i)$ and $r_t$ are nonnegative. Since
-$w_\tau=0$ for $\tau\le0$, $r_t(i)$ is a truncation of $r_t$; hence
+Rearranging \eqref{eq:sdac-state-decomp} gives
 \[
-0\le r_t(i)\le r_t
-\le\sum_{j=1}^{\infty}\alpha^{j-1}
+\begin{aligned}
+x_t(\mathbf{m})
+&=r_t+\sum_{i=1}^H m_i\bigl(r_t(i)-r_t\bigr) \\
+&=r_t+\langle\boldsymbol{\phi}_t^x,\mathbf{m}\rangle,
+\end{aligned}
+\]
+which is affine in $\mathbf{m}$. Finally, since $w_\tau\in[0,1]$ and
+$w_\tau=0$ for $\tau\le0$,
+\[
+\begin{aligned}
+0\le r_t(i)
+&=\sum_{j=1}^{\min\{i,t-1\}}\alpha^{j-1}w_{t-j} \\
+&\le r_t
+\le\sum_{j=1}^{t-1}\alpha^{j-1} \\
+&\le\sum_{j=1}^{\infty}\alpha^{j-1}
 =\frac{1}{1-\alpha}.
+\end{aligned}
 \]
 \end{proof}
 
