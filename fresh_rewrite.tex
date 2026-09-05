@@ -292,10 +292,10 @@ Here, $1-\alpha$ is the fraction of the stored resource lost during one period.
 The constraint \eqref{eq:model-feasibility} ensures that the action does not exceed
 the amount remaining after this loss.
 
-Although $w_t$ is commonly called a disturbance in the online-control literature,
-we call it an \emph{arrival} because it is nonnegative. We retain the standard names
-Disturbance-Action Control and Simplex Disturbance-Action Control. The
-nonnegativity of $w_t$ is important both for the storage interpretation and for the
+In the online-control literature, $w_t$ is commonly called a disturbance. Here, we
+call it an \emph{arrival} because it is nonnegative, while retaining the standard
+names Disturbance-Action Control. The
+nonnegativity of $w_t$ is important for both the storage interpretation and the
 feasibility properties of SDAC.
 
 At time $t$, the controller chooses $u_t$ before observing $w_t$ or $c_t$. After the
