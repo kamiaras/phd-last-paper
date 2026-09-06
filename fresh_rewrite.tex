@@ -2,6 +2,7 @@
 \usepackage{amsmath,amssymb,amsthm,mathtools}
 \usepackage{cite}
 \usepackage{graphicx}
+
 \usepackage[hidelinks]{hyperref}
 
 \setlength{\emergencystretch}{2em}
@@ -540,8 +541,8 @@ Therefore,
 \[
 \begin{aligned}
 0\le u_t(\mathbf{m})
-&=\sum_{i=1}^H m_i\alpha^i w_{t-i} \\
-&\le\sum_{i=1}^H m_i\alpha r_t(i) \\
+&=\sum_{i=1}^H m_i\alpha^i w_{t-i}
+\le\sum_{i=1}^H m_i\alpha r_t(i) \\
 &\le\sum_{i=1}^H m_i\alpha r_t(i)
 +\alpha\left(1-\sum_{i=1}^H m_i\right)r_t \\
 &=\alpha x_t(\mathbf{m}),
@@ -920,8 +921,8 @@ For fixed $\alpha,L_x,L_u$, the right-hand side is
 $O\!\left(\sqrt{T\log\log T}\right)=o(T)$.
 \end{corollary}
 
-Because geometric allocation sequences induce fixed-fraction policies, the
-controller also satisfies a corresponding bound for that policy class.
+The controller also satisfies a regret bound against fixed-fraction policies
+because geometric allocation sequences induce these policies.
 
 \begin{corollary}[No-regret against fixed-fraction policies]
 \label{cor:regret-vs-fraction}
@@ -1016,9 +1017,8 @@ Corollary~\ref{cor:sdac-lower-mixing} yields
 =
 \Omega\!\left(\frac{\sqrt{T}}{1-\alpha}\right).
 \]
-The upper bound in
-Theorem~\ref{thm:regret-bound} is
-$O((1-\alpha)^{-3/2}\sqrt{T\log(H+1)})$. Its dependence on
+The upper bound is $O((1-\alpha)^{-3/2}\sqrt{T\log(H+1)})$
+by Theorem~\ref{thm:regret-bound}. Its dependence on
 $(1-\alpha)^{-1}$ is therefore larger by a factor of $(1-\alpha)^{-1/2}$.
 
 This scaling requires $T$ to grow with $t_{\mathrm{mix}}(\alpha)$. For fixed $T$,
@@ -1160,8 +1160,8 @@ must be respected in real time.
 For $t\in[T]$ and $i\in[H]$, the definitions give
 \begin{align*}
 r_{t+1}
-&=\sum_{j=1}^{t}\alpha^{j-1}w_{t+1-j} \\
-&=w_t+\sum_{j=1}^{t-1}\alpha^j w_{t-j} 
+&=\sum_{j=1}^{t}\alpha^{j-1}w_{t+1-j}
+=w_t+\sum_{j=1}^{t-1}\alpha^j w_{t-j}
 =w_t+\alpha r_t, \\
 r_{t+1}(i)
 &=\sum_{j=1}^{i}\alpha^{j-1}w_{t+1-j} \\
@@ -1256,8 +1256,8 @@ $\mathbf{g}_t$ be defined by \eqref{eq:surr-subgradient}. For every
 $\mathbf{m}'\in\mathcal{M}_H$, the subgradient inequality gives
 \begin{align*}
 \ell_t(\mathbf{m}')
-&=c_t\bigl(x_t(\mathbf{m}'),u_t(\mathbf{m}')\bigr) \\
-&\ge c_t\bigl(x_t(\mathbf{m}),u_t(\mathbf{m})\bigr) \\
+&=c_t\bigl(x_t(\mathbf{m}'),u_t(\mathbf{m}')\bigr)
+\ge c_t\bigl(x_t(\mathbf{m}),u_t(\mathbf{m})\bigr) \\
 &\quad
 +\zeta_t^x\bigl(x_t(\mathbf{m}')-x_t(\mathbf{m})\bigr)
 +\zeta_t^u\bigl(u_t(\mathbf{m}')-u_t(\mathbf{m})\bigr) \\
@@ -1274,8 +1274,8 @@ assumption and \eqref{eq:surr-coefficient-norms} give
 \|\mathbf{g}_t\|_\infty
 &\le
 |\zeta_t^x|\|\boldsymbol{\phi}_t^x\|_\infty
-+|\zeta_t^u|\|\boldsymbol{\phi}_t^u\|_\infty \\
-&\le
++|\zeta_t^u|\|\boldsymbol{\phi}_t^u\|_\infty
+\le
 \frac{\alpha L_x}{1-\alpha}+\alpha L_u \\
 &=G_\alpha.
 \end{aligned}
@@ -1516,7 +1516,7 @@ Such a $\delta$ exists because both differences are positive. Set
 By convexity, $\mathbf{m}_\delta\in\mathcal{M}_H$, and
 \[
 \begin{aligned}
-\langle\boldsymbol{\phi}_t^u,\mathbf{m}_\delta\rangle
+&\langle\boldsymbol{\phi}_t^u,\mathbf{m}_\delta\rangle \\
 &=
 \langle\boldsymbol{\phi}_t^u,\mathbf{m}_t^{\mathrm{exec}}\rangle
 +\delta\left(
@@ -1528,16 +1528,16 @@ By convexity, $\mathbf{m}_\delta\in\mathcal{M}_H$, and
 Thus $\mathbf{m}_\delta\in\mathcal{B}_t(x_t)$. Since
 $\mathbf{m}_t\notin\mathcal{B}_t(x_t)$,
 $\mathbf{m}_t^{\mathrm{exec}}\ne\mathbf{m}_t$, and hence
-$D_\Psi(\mathbf{m}_t^{\mathrm{exec}}\|\mathbf{m}_t)>0$. Strict convexity and
-$D_\Psi(\mathbf{m}_t\|\mathbf{m}_t)=0$ give
+$D_\Psi(\mathbf{m}_t^{\mathrm{exec}}\|\mathbf{m}_t)>0$. Using strict convexity
+and $D_\Psi(\mathbf{m}_t\|\mathbf{m}_t)=0$, we obtain
 \begin{align*}
 D_\Psi(\mathbf{m}_\delta\|\mathbf{m}_t)
 &<
 (1-\delta)D_\Psi(\mathbf{m}_t^{\mathrm{exec}}\|\mathbf{m}_t)
 +\delta D_\Psi(\mathbf{m}_t\|\mathbf{m}_t) \\
 &=
-(1-\delta)D_\Psi(\mathbf{m}_t^{\mathrm{exec}}\|\mathbf{m}_t) \\
-&<
+(1-\delta)D_\Psi(\mathbf{m}_t^{\mathrm{exec}}\|\mathbf{m}_t)
+<
 D_\Psi(\mathbf{m}_t^{\mathrm{exec}}\|\mathbf{m}_t),
 \end{align*}
 contradicting the definition of $\mathbf{m}_t^{\mathrm{exec}}$. Therefore, the
@@ -1681,8 +1681,8 @@ Cauchy--Schwarz gives
 \begin{aligned}
 \|\mathbf{d}\|_1^2
 &=\left(\sum_{i=1}^H
-\frac{|d_i|}{\sqrt{z_{s,i}}}\sqrt{z_{s,i}}\right)^2 \\
-&\le
+\frac{|d_i|}{\sqrt{z_{s,i}}}\sqrt{z_{s,i}}\right)^2
+\le
 \left(\sum_{i=1}^H\frac{d_i^2}{z_{s,i}}\right)
 \left(\sum_{i=1}^H z_{s,i}\right) \\
 &\le
@@ -1773,8 +1773,8 @@ Convexity of $\ell_t$ gives
 \begin{aligned}
 \ell_t(\mathbf{m}_t)-\ell_t(\mathbf{m})
 &\le
-\langle \mathbf{g}_t,\mathbf{m}_t-\mathbf{m}\rangle \\
-&=
+\langle \mathbf{g}_t,\mathbf{m}_t-\mathbf{m}\rangle
+=
 \langle \mathbf{g}_t,\mathbf{m}_t-\mathbf{m}_{t+1}\rangle \\
 &\quad+
 \langle \mathbf{g}_t,\mathbf{m}_{t+1}-\mathbf{m}\rangle.
@@ -1832,8 +1832,7 @@ gives
 \sum_{t=1}^T\ell_t(\mathbf{m}_t)
 -\sum_{t=1}^T\ell_t(\mathbf{m})
 &\le
-\frac{D_\Psi(\mathbf{m}\|\mathbf{m}_1)}{\eta} \\
-&\quad
+\frac{D_\Psi(\mathbf{m}\|\mathbf{m}_1)}{\eta}
 -\frac{D_\Psi(\mathbf{m}\|\mathbf{m}_{T+1})}{\eta} \\
 &\quad+
 \frac{\eta}{2}\sum_{t=1}^T\|\mathbf{g}_t\|_\infty^2.
@@ -1884,8 +1883,8 @@ x_{t+1}
 \right\}+w_t \\
 &=\left[
 \alpha x_t-\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle
-\right]_++w_t \\
-&=F_t(x_t;\mathbf{m}_t).
+\right]_++w_t
+=F_t(x_t;\mathbf{m}_t).
 \end{aligned}
 \]
 For a fixed $\mathbf{m}$, \eqref{eq:def-sdac-policy} and
@@ -1901,14 +1900,14 @@ x_{t+1}(\mathbf{m})
 &=\left[
 \alpha x_t(\mathbf{m})
 -\langle\boldsymbol{\phi}_t^u,\mathbf{m}\rangle
-\right]_++w_t \\
-&=F_t(x_t(\mathbf{m});\mathbf{m}).
+\right]_++w_t
+=F_t(x_t(\mathbf{m});\mathbf{m}).
 \end{aligned}
 \]
 Finally, since $|[z]_+-[z']_+|\le|z-z'|$,
 \[
 \begin{aligned}
-|F_t(x;\mathbf{m})-F_t(x';\mathbf{m}')|
+&|F_t(x;\mathbf{m})-F_t(x';\mathbf{m}')| \\
 &=\left|
 \left[\alpha x-\langle\boldsymbol{\phi}_t^u,\mathbf{m}\rangle\right]_+
 -\left[\alpha x'-\langle\boldsymbol{\phi}_t^u,\mathbf{m}'\rangle\right]_+
@@ -1952,8 +1951,8 @@ Thus, the triangle inequality yields
 \[
 \begin{aligned}
 d_{t+1}
-&\le|x_{t+1}-x_{t+1}(\mathbf{m}_t)| \\
-&\quad+|x_{t+1}(\mathbf{m}_t)-x_{t+1}(\mathbf{m}_{t+1})| \\
+&\le|x_{t+1}-x_{t+1}(\mathbf{m}_t)|
++|x_{t+1}(\mathbf{m}_t)-x_{t+1}(\mathbf{m}_{t+1})| \\
 &\le\alpha d_t+\frac{\alpha\eta G_\alpha}{1-\alpha}.
 \end{aligned}
 \]
@@ -1962,21 +1961,21 @@ Iterating from $d_1=0$ gives, for $t\ge2$,
 \begin{aligned}
 d_t
 &\le\frac{\alpha\eta G_\alpha}{1-\alpha}
-\sum_{j=0}^{t-2}\alpha^j \\
-&\le\frac{\alpha\eta G_\alpha}{1-\alpha}
+\sum_{j=0}^{t-2}\alpha^j
+\le\frac{\alpha\eta G_\alpha}{1-\alpha}
 \sum_{j=0}^{\infty}\alpha^j
 =\frac{\alpha\eta G_\alpha}{(1-\alpha)^2}.
 \end{aligned}
 \]
 This bound also holds at $t=1$.
 
-By the clipping rule \eqref{eq:alg-feasible-action} and fixed-policy feasibility
-(Lemma~\ref{lem:sdac-feasibility}),
+The clipping rule \eqref{eq:alg-feasible-action} and feasibility of each fixed
+policy (Lemma~\ref{lem:sdac-feasibility}) give
 \[
 \begin{aligned}
 0\le u_t(\mathbf{m}_t)-u_t
-&=[u_t(\mathbf{m}_t)-\alpha x_t]_+ \\
-&\le[\alpha x_t(\mathbf{m}_t)-\alpha x_t]_+ \\
+&=[u_t(\mathbf{m}_t)-\alpha x_t]_+
+\le[\alpha x_t(\mathbf{m}_t)-\alpha x_t]_+ \\
 &\le\alpha d_t.
 \end{aligned}
 \]
@@ -1987,8 +1986,8 @@ Both state--action pairs lie in $\mathcal{D}_\alpha$, so the Lipschitz bound
 \begin{aligned}
 c_t(x_t,u_t)-\ell_t(\mathbf{m}_t)
 &\le L_xd_t+L_u|u_t-u_t(\mathbf{m}_t)| \\
-&\le(L_x+\alpha L_u)d_t \\
-&\le\frac{\alpha\eta G_\alpha(L_x+\alpha L_u)}{(1-\alpha)^2}.
+&\le(L_x+\alpha L_u)d_t
+\le\frac{\alpha\eta G_\alpha(L_x+\alpha L_u)}{(1-\alpha)^2}.
 \end{aligned}
 \]
 Summing over $t=1,\ldots,T$ proves \eqref{eq:stability-sum-bound}.
@@ -2022,8 +2021,8 @@ $\|\mathbf{g}_t\|_\infty\le G_\alpha$ now give
 \begin{aligned}
 \sum_{t=1}^T
 \bigl(\ell_t(\mathbf{m}_t)-\ell_t(\mathbf{m})\bigr)
-&\le\frac{D_\Psi(\mathbf{m}\|\mathbf{m}_1)}{\eta} \\
-&\quad+\frac{\eta}{2}\sum_{t=1}^T\|\mathbf{g}_t\|_\infty^2 \\
+&\le\frac{D_\Psi(\mathbf{m}\|\mathbf{m}_1)}{\eta}
++\frac{\eta}{2}\sum_{t=1}^T\|\mathbf{g}_t\|_\infty^2 \\
 &\le\frac{\log(H+1)}{\eta}
 +\frac{\eta T G_\alpha^2}{2}.
 \end{aligned}
@@ -2078,8 +2077,8 @@ Lemma~\ref{lem:sdac-allocation-approx}. By the definition of $\RegSDAC{T}$,
 \[
 \begin{aligned}
 J_T^{\mathrm{on}}-J_T(\mathbf{q})
-&=J_T^{\mathrm{on}}-J_T(\mathbf{m}) \\
-&\quad+J_T(\mathbf{m})-J_T(\mathbf{q}) \\
+&=J_T^{\mathrm{on}}-J_T(\mathbf{m})
++J_T(\mathbf{m})-J_T(\mathbf{q}) \\
 &\le\RegSDAC{T}+J_T(\mathbf{m})-J_T(\mathbf{q}).
 \end{aligned}
 \]
@@ -2114,8 +2113,8 @@ Since $0<\alpha<1$, it follows that
 \[
 \begin{aligned}
 \alpha^{H_T+1}T
-&\le\alpha^{1+\log T/\log(1/\alpha)}T \\
-&=\alpha\exp\!\left(
+&\le\alpha^{1+\log T/\log(1/\alpha)}T
+=\alpha\exp\!\left(
 \frac{\log\alpha}{\log(1/\alpha)}\log T\right)T \\
 &=\alpha e^{-\log T}T=\alpha.
 \end{aligned}
@@ -2141,10 +2140,10 @@ Hence, by Corollary~\ref{cor:regret-vs-allocation},
 \[
 \begin{aligned}
 \RegFrac{T}
-&=J_T^{\mathrm{on}}-\min_{k\in[0,\alpha]}J_T(k) \\
-&=J_T^{\mathrm{on}}-\min_{k\in[0,\alpha]}J_T(\mathbf{q}(k)) \\
-&\le J_T^{\mathrm{on}}-\inf_{\mathbf{q}\in\mathcal{Q}_\alpha}J_T(\mathbf{q}) \\
-&=\RegAlloc{T} \\
+&=J_T^{\mathrm{on}}-\min_{k\in[0,\alpha]}J_T(k)
+=J_T^{\mathrm{on}}-\min_{k\in[0,\alpha]}J_T(\mathbf{q}(k)) \\
+&\le J_T^{\mathrm{on}}-\inf_{\mathbf{q}\in\mathcal{Q}_\alpha}J_T(\mathbf{q})
+=\RegAlloc{T} \\
 &\le2\sqrt{\Gamma_\alpha T\log(H_T+1)} \\
 &\quad+\left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H_T+1}T.
 \end{aligned}
@@ -2209,8 +2208,8 @@ whenever $x_t(\mathbf{m}^{(1)})=1$. Hence, for $t\ge2$,
 \[
 \begin{aligned}
 x_t(\mathbf{m}^{(0)})-x_t(\mathbf{m}^{(1)})
-&=\frac{1-\alpha^{t-1}}{1-\alpha}-1\\
-&=\frac{\alpha(1-\alpha^{t-2})}{1-\alpha}.
+&=\frac{1-\alpha^{t-1}}{1-\alpha}-1
+=\frac{\alpha(1-\alpha^{t-2})}{1-\alpha}.
 \end{aligned}
 \]
 Since both policies incur zero cost at $t=1$, their cumulative costs satisfy
@@ -2233,8 +2232,8 @@ randomization, so it is independent of $\xi_t$. Since $\mathbb{E}[\xi_t]=0$,
 \mathbb{E}_{\boldsymbol{\xi},\mathcal{A}}[J_T^{\mathrm{on}}]
 &=\sum_{t=1}^T
 \mathbb{E}[\xi_t]\,
-\mathbb{E}_{\boldsymbol{\xi},\mathcal{A}}[L_xx_t-L_uu_t]\\
-&=0.
+\mathbb{E}_{\boldsymbol{\xi},\mathcal{A}}[L_xx_t-L_uu_t]
+=0.
 \end{aligned}
 \]
 The two fixed-policy trajectories are deterministic. Thus, for $j\in\{0,1\}$,
@@ -2265,10 +2264,10 @@ Taking expectations and applying Khintchine's inequality in the last line gives
 \begin{aligned}
 \mathbb{E}_{\boldsymbol{\xi},\mathcal{A}}[\RegSDAC{T}]
 &\ge\frac12\mathbb{E}_{\boldsymbol{\xi}}
-\left|J_T(\mathbf{m}^{(0)})-J_T(\mathbf{m}^{(1)})\right|\\
+\left|J_T(\mathbf{m}^{(0)})-J_T(\mathbf{m}^{(1)})\right| \\
 &=\frac12\mathbb{E}_{\boldsymbol{\xi}}
-\left|\sum_{t=2}^T\xi_t\beta_t\right|\\
-&\ge\frac{1}{2\sqrt2}
+\left|\sum_{t=2}^T\xi_t\beta_t\right|
+\ge\frac{1}{2\sqrt2}
 \sqrt{\sum_{t=2}^T\beta_t^2}.
 \end{aligned}
 \]
@@ -2295,8 +2294,8 @@ Hence, by \eqref{eq:sdac-lower-beta},
 &\ge
 \alpha\left(
 L_u+\frac{L_x}{2(1-\alpha)}
-\right) \\
-&\ge
+\right)
+\ge
 \frac{\alpha}{2}
 \left(
 L_u+\frac{L_x}{1-\alpha}
@@ -2321,8 +2320,8 @@ $T\ge2t_{\mathrm{mix}}(\alpha)+2$. Theorem~\ref{thm:sdac-lower-bound} therefore 
 \frac{1}{2\sqrt{2}}
 \left[
 \frac{T}{2}\left(\frac{G_\alpha}{2}\right)^2
-\right]^{1/2} \\
-&=
+\right]^{1/2}
+=
 \frac{G_\alpha}{8}\sqrt{T}.
 \end{aligned}
 \]
