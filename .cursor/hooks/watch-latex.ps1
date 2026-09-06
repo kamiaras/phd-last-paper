@@ -1,34 +1,36 @@
+param([switch]$Background)
+
 $ErrorActionPreference = "Stop"
 $Root = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 Set-Location $Root
 
 $miktex = Join-Path $env:LOCALAPPDATA "Programs\MiKTeX\miktex\bin\x64"
-if (Test-Path $miktex) {
+if (Test-Path -LiteralPath $miktex) {
     $env:Path = "$miktex;$env:Path"
 }
+$env:MIKTEX_DISABLEWELCOME = "1"
 
-$pidFile = Join-Path $Root ".latexmk-watch.pid"
-if (Test-Path $pidFile) {
-    $old = 0
-    [void][int]::TryParse(((Get-Content $pidFile -Raw).Trim()), [ref]$old)
-    if ($old -gt 0) {
-        $alive = Get-Process -Id $old -ErrorAction SilentlyContinue
-        if ($alive) {
-            Write-Host "LaTeX watcher already running (pid $old)"
-            exit 0
-        }
-    }
+# The task and Cursor hooks may start together. A mutex prevents duplicate
+# compilers and is released by Windows even if a watcher is terminated.
+$hasher = [Security.Cryptography.SHA256]::Create()
+try {
+    $rootHash = [BitConverter]::ToString($hasher.ComputeHash(
+        [Text.Encoding]::UTF8.GetBytes($Root.ToUpperInvariant()))).Replace("-", "")
 }
-Set-Content -Path $pidFile -Value $PID -Encoding ascii
+finally { $hasher.Dispose() }
+$mutex = [Threading.Mutex]::new($false, "Local\LaTeXWatch-$rootHash")
+$ownsMutex = $false
+$transcribing = $false
+$pidFile = Join-Path $Root ".latexmk-watch.pid"
 
 function Clear-CorruptAux {
     foreach ($name in @("fresh_rewrite.aux", "fresh_rewrite.out")) {
         $path = Join-Path $Root $name
-        if (-not (Test-Path $path)) { continue }
+        if (-not (Test-Path -LiteralPath $path)) { continue }
         $bytes = [System.IO.File]::ReadAllBytes($path)
         if ($bytes -contains 0) {
             Write-Host "Removing corrupt $name"
-            Remove-Item $path -Force -ErrorAction SilentlyContinue
+            Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
         }
     }
 }
@@ -36,36 +38,72 @@ function Clear-CorruptAux {
 function Invoke-Latex {
     Clear-CorruptAux
     & latexmk -pdf -interaction=nonstopmode -synctex=1 -file-line-error fresh_rewrite.tex
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "LaTeX build failed (exit $LASTEXITCODE). Waiting for the next saved change."
+    }
+}
+
+function Get-InputState {
+    # Poll both inputs so atomic saves and changes during a build are not lost.
+    $states = foreach ($name in @("fresh_rewrite.tex", "ref.bib")) {
+        $item = Get-Item -LiteralPath (Join-Path $Root $name) -ErrorAction SilentlyContinue
+        if ($item) { "$name|$($item.LastWriteTimeUtc.Ticks)|$($item.Length)" }
+        else { "$name|missing" }
+    }
+    return ($states -join ";")
 }
 
 try {
+    try { $ownsMutex = $mutex.WaitOne(0) }
+    catch [Threading.AbandonedMutexException] { $ownsMutex = $true }
+    if (-not $ownsMutex) {
+        if ($Background) { Write-Output "{}" }
+        else { Write-Host "LaTeX watcher already running." }
+        exit 0
+    }
+
+    if ($Background) {
+        # The child acquires the mutex itself; it does not depend on the hook's
+        # lifetime or on which editor tab currently has focus.
+        $mutex.ReleaseMutex()
+        $ownsMutex = $false
+        $powershell = Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe"
+        Start-Process -FilePath $powershell -ArgumentList @(
+            "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ('"' + $PSCommandPath + '"')
+        ) -WorkingDirectory $Root -WindowStyle Hidden
+        Write-Output "{}"
+        exit 0
+    }
+
+    Set-Content -LiteralPath $pidFile -Value $PID -Encoding ascii
+    Start-Transcript -LiteralPath (Join-Path $Root ".latexmk-watch.log") -Append | Out-Null
+    $transcribing = $true
+    $state = Get-InputState
     Invoke-Latex
     Write-Host "=== Watching for updated files. Use Ctrl+C to stop ==="
 
-    $watcher = New-Object System.IO.FileSystemWatcher
-    $watcher.Path = $Root
-    $watcher.Filter = "*.*"
-    $watcher.IncludeSubdirectories = $false
-    $watcher.NotifyFilter = [IO.NotifyFilters]::LastWrite -bor [IO.NotifyFilters]::Size -bor [IO.NotifyFilters]::FileName
-    $watcher.EnableRaisingEvents = $true
-
-    $watched = @("fresh_rewrite.tex", "ref.bib")
     while ($true) {
-        $evt = $watcher.WaitForChanged([System.IO.WatcherChangeTypes]::Changed -bor [System.IO.WatcherChangeTypes]::Renamed, 2000)
-        if ($evt.TimedOut) { continue }
-        if ($watched -notcontains $evt.Name) { continue }
-        Start-Sleep -Milliseconds 2500
-        Write-Host "Latexmk: changed $($evt.Name) - rebuilding fresh_rewrite.pdf"
+        Start-Sleep -Milliseconds 1000
+        if ((Get-InputState) -eq $state) { continue }
         do {
-            $stamp = (Get-Item "fresh_rewrite.tex").LastWriteTimeUtc
-            Invoke-Latex
-        } while ((Get-Item "fresh_rewrite.tex").LastWriteTimeUtc -gt $stamp)
+            $current = Get-InputState
+            Start-Sleep -Milliseconds 2500
+            $settled = Get-InputState
+        } while ($current -ne $settled)
+        $state = $settled
+        Write-Host "Latexmk: input changed - rebuilding fresh_rewrite.pdf"
+        Invoke-Latex
         Write-Host "=== Watching for updated files. Use Ctrl+C to stop ==="
     }
 }
 finally {
-    $current = Get-Content $pidFile -ErrorAction SilentlyContinue
-    if ($current -eq [string]$PID) {
-        Remove-Item $pidFile -ErrorAction SilentlyContinue
+    if ($transcribing) { Stop-Transcript | Out-Null }
+    if ($ownsMutex) {
+        $currentPid = Get-Content -LiteralPath $pidFile -ErrorAction SilentlyContinue
+        if ($currentPid -eq [string]$PID) {
+            Remove-Item -LiteralPath $pidFile -ErrorAction SilentlyContinue
+        }
+        $mutex.ReleaseMutex()
     }
+    $mutex.Dispose()
 }

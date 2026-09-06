@@ -3,8 +3,8 @@
   "tasks": [
     {
       "label": "Watch LaTeX (fresh_rewrite)",
-      "type": "shell",
-      "command": "powershell",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": [
         "-NoProfile",
         "-ExecutionPolicy",
@@ -19,17 +19,7 @@
         }
       },
       "isBackground": true,
-      "problemMatcher": {
-        "owner": "latexmk",
-        "pattern": {
-          "regexp": "^$"
-        },
-        "background": {
-          "activeOnStart": true,
-          "beginsPattern": ".",
-          "endsPattern": "Watching for updated files|All targets are up-to-date"
-        }
-      },
+      "problemMatcher": [],
       "runOptions": {
         "runOn": "folderOpen"
       },

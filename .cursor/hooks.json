@@ -1,10 +1,16 @@
 {
   "version": 1,
   "hooks": {
+    "workspaceOpen": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/watch-latex.ps1 -Background",
+        "timeout": 15
+      }
+    ],
     "afterFileEdit": [
       {
-        "command": ".cursor/hooks/compile-latex.cmd",
-        "timeout": 120
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/watch-latex.ps1 -Background",
+        "timeout": 15
       }
     ]
   }
