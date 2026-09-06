@@ -1561,7 +1561,8 @@ Suppose, for contradiction, that the action constraint is slack at
 $\mathbf{m}_t^{\mathrm{exec}}$:
 \[
 \langle\boldsymbol{\phi}_t^u,\mathbf{m}_t^{\mathrm{exec}}\rangle
-<\alpha x_t.
+<\alpha x_t
+<\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle.
 \]
 We move a small distance from $\mathbf{m}_t^{\mathrm{exec}}$ toward
 $\mathbf{m}_t$. The step is chosen to remain in $\mathcal{B}_t(x_t)$; strict
@@ -1620,81 +1621,77 @@ Combining the two cases with \eqref{eq:alg-feasible-action} proves the result.
 
 \begin{lemma}[Bregman projection onto $\mathcal{M}_H$]
 \label{lem:bregman-projection}
-Let $D_\Psi$ be the Bregman divergence \eqref{eq:def-bregman} of the unnormalized
-negentropy \eqref{eq:def-negentropy}. Fix $\widetilde{\mathbf{m}}\in\mathbb{R}_{>0}^H$. Then the Bregman projection of
-$\widetilde{\mathbf{m}}$ onto $\mathcal{M}_H$,
+For the Bregman divergence $D_\Psi$ in \eqref{eq:def-bregman} and every
+$\widetilde{\mathbf{m}}\in\mathbb{R}_{>0}^H$,
 \[
 \operatorname{Proj}_{\mathcal{M}_H}^{\Psi}(\widetilde{\mathbf{m}})
 \triangleq
 \operatorname*{arg\,min}_{\mathbf{m}\in\mathcal{M}_H}
-D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}}),
-\]
-is given by
-\[
-\operatorname{Proj}_{\mathcal{M}_H}^{\Psi}(\widetilde{\mathbf{m}})
+D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}})
 =
 \frac{\widetilde{\mathbf{m}}}{\max\{1,\|\widetilde{\mathbf{m}}\|_1\}}.
 \]
 \end{lemma}
 
 \begin{proof}
-The projection objective
-$\mathbf{m}\mapsto D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}})$ is strictly
-convex, and, for $m_i>0$,
-\begin{equation}
-\label{eq:breg-grad}
-\frac{\partial}{\partial m_i}D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}})
-=
-\log\frac{m_i}{\widetilde{m}_i}.
-\end{equation}
-Its unconstrained minimizer is therefore $\mathbf{m}=\widetilde{\mathbf{m}}$.
+The function $r\mapsto r\log r-r+1$ is nonnegative for $r\ge0$ and vanishes
+only at $r=1$. Writing the $i$th summand in \eqref{eq:def-bregman} as
+$v_i(r\log r-r+1)$, where $r=m_i/v_i$, therefore gives
+\[
+D_\Psi(\mathbf{m}\|\mathbf{v})\ge0,
+\qquad
+D_\Psi(\mathbf{m}\|\mathbf{v})=0
+\quad\Longleftrightarrow\quad
+\mathbf{m}=\mathbf{v}.
+\]
+If $\|\widetilde{\mathbf{m}}\|_1\le1$, then
+$\widetilde{\mathbf{m}}\in\mathcal{M}_H$, so the equality condition shows that
+it is the unique minimizer.
 
-If $\|\widetilde{\mathbf{m}}\|_1\le1$, this minimizer belongs to $\mathcal{M}_H$, and hence
+Now suppose $\|\widetilde{\mathbf{m}}\|_1>1$ and set
 \[
-\operatorname{Proj}_{\mathcal{M}_H}^{\Psi}(\widetilde{\mathbf{m}})
-=\widetilde{\mathbf{m}}.
-\]
-Suppose $\|\widetilde{\mathbf{m}}\|_1>1$. The constraint
-$\|\mathbf{m}\|_1\le1$ is then active. Moreover, the minimizer has no zero
-coordinate: if $m_i=0$, transferring an arbitrarily small amount of mass
-from a positive coordinate to coordinate $i$ has directional derivative
-$-\infty$, because
-\[
-\lim_{z\downarrow0}\log\frac{z}{\widetilde{m}_i}=-\infty.
-\]
-Thus the nonnegativity constraints are inactive. With $\nu\ge0$ denoting
-the multiplier of $\|\mathbf{m}\|_1\le1$, stationarity and complementary
-slackness give
-\begin{equation}
-\label{eq:breg-kkt}
-\log\frac{m_i}{\widetilde{m}_i}+\nu=0,
-\qquad
-\|\mathbf{m}\|_1=1.
-\end{equation}
-The first relation in \eqref{eq:breg-kkt} implies
-\[
-m_i
-=
-\widetilde{m}_i \exp(-\nu).
-\]
-Summing over $i$ and using the second relation in \eqref{eq:breg-kkt},
-\[
-1
-=
-\|\widetilde{\mathbf{m}}\|_1 \exp(-\nu),
-\qquad
-\exp(-\nu)
-=
-\frac{1}{\|\widetilde{\mathbf{m}}\|_1}.
-\]
-Hence $\nu=\log\|\widetilde{\mathbf{m}}\|_1>0$ and
-\[
-\operatorname{Proj}_{\mathcal{M}_H}^{\Psi}(\widetilde{\mathbf{m}})
-=
+\mathbf{m}^\star
+\triangleq
 \frac{\widetilde{\mathbf{m}}}{\|\widetilde{\mathbf{m}}\|_1}.
 \]
-Combining the cases $\|\widetilde{\mathbf{m}}\|_1\le1$ and
-$\|\widetilde{\mathbf{m}}\|_1>1$ proves the stated formula.
+Then $\mathbf{m}^\star\in\mathcal{M}_H\cap\mathbb{R}_{>0}^H$ and
+\[
+\widetilde{\mathbf{m}}
+=\|\widetilde{\mathbf{m}}\|_1\mathbf{m}^\star,
+\qquad
+\|\mathbf{m}^\star\|_1=1.
+\]
+For every $\mathbf{m}\in\mathcal{M}_H$, substituting the first identity into
+\eqref{eq:def-bregman} gives
+\[
+\begin{aligned}
+D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}})
+&=
+D_\Psi(\mathbf{m}\|\mathbf{m}^\star)
+-\|\mathbf{m}\|_1\log\|\widetilde{\mathbf{m}}\|_1
++\|\widetilde{\mathbf{m}}\|_1-1, \\
+D_\Psi(\mathbf{m}^\star\|\widetilde{\mathbf{m}})
+&=
+-\log\|\widetilde{\mathbf{m}}\|_1
++\|\widetilde{\mathbf{m}}\|_1-1.
+\end{aligned}
+\]
+Subtracting the second equality from the first yields
+\[
+\begin{aligned}
+&D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}})
+-D_\Psi(\mathbf{m}^\star\|\widetilde{\mathbf{m}}) \\
+&\qquad=
+D_\Psi(\mathbf{m}\|\mathbf{m}^\star)
++\bigl(1-\|\mathbf{m}\|_1\bigr)
+\log\|\widetilde{\mathbf{m}}\|_1
+\ge0.
+\end{aligned}
+\]
+The last inequality uses $D_\Psi(\mathbf{m}\|\mathbf{m}^\star)\ge0$,
+$\|\mathbf{m}\|_1\le1$, and $\log\|\widetilde{\mathbf{m}}\|_1>0$.
+Equality requires $\mathbf{m}=\mathbf{m}^\star$. Thus,
+$\mathbf{m}^\star$ is the unique minimizer.
 \end{proof}
 
 \begin{lemma}[Closed-form solution of the OMD update]
