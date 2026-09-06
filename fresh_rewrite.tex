@@ -1661,28 +1661,29 @@ Then $\mathbf{m}^\star\in\mathcal{M}_H\cap\mathbb{R}_{>0}^H$ and
 \qquad
 \|\mathbf{m}^\star\|_1=1.
 \]
-For every $\mathbf{m}\in\mathcal{M}_H$, substituting the first identity into
-\eqref{eq:def-bregman} gives
+For every $i\in[H]$, the first identity gives
 \[
-\begin{aligned}
-D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}})
-&=
-D_\Psi(\mathbf{m}\|\mathbf{m}^\star)
--\|\mathbf{m}\|_1\log\|\widetilde{\mathbf{m}}\|_1
-+\|\widetilde{\mathbf{m}}\|_1-1, \\
-D_\Psi(\mathbf{m}^\star\|\widetilde{\mathbf{m}})
-&=
--\log\|\widetilde{\mathbf{m}}\|_1
-+\|\widetilde{\mathbf{m}}\|_1-1.
-\end{aligned}
+\begin{split}
+m_i\log\frac{m_i}{\widetilde{m}_i}
+&=m_i\log\frac{m_i}{m_i^\star}
+-m_i\log\|\widetilde{\mathbf{m}}\|_1, \\
+m_i^\star\log\frac{m_i^\star}{\widetilde{m}_i}
+&=-m_i^\star\log\|\widetilde{\mathbf{m}}\|_1.
+\end{split}
 \]
-Subtracting the second equality from the first yields
+Using these identities in \eqref{eq:def-bregman}, for every
+$\mathbf{m}\in\mathcal{M}_H$,
 \[
 \begin{aligned}
 &D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}})
 -D_\Psi(\mathbf{m}^\star\|\widetilde{\mathbf{m}}) \\
-&\qquad=
-D_\Psi(\mathbf{m}\|\mathbf{m}^\star)
+&=\sum_{i=1}^H
+\left(
+m_i\log\frac{m_i}{m_i^\star}-m_i+m_i^\star
+\right)
++\sum_{i=1}^H(m_i^\star-m_i)
+\log\|\widetilde{\mathbf{m}}\|_1 \\
+&=D_\Psi(\mathbf{m}\|\mathbf{m}^\star)
 +\bigl(1-\|\mathbf{m}\|_1\bigr)
 \log\|\widetilde{\mathbf{m}}\|_1
 \ge0.
@@ -1697,69 +1698,52 @@ $\mathbf{m}^\star$ is the unique minimizer.
 \begin{lemma}[Closed-form solution of the OMD update]
 \label{lem:omd-closed-form}
 Fix $\mathbf{m}_t\in\mathcal{M}_H\cap\mathbb{R}_{>0}^H$, $\eta>0$, and
-$\mathbf{g}_t\in\mathbb{R}^H$, and let
-$\widetilde{\mathbf{m}}_{t+1}$ be defined coordinatewise by \eqref{eq:alg-omd-mult},
-i.e.\ $\widetilde{m}_{t+1,i}=m_{t,i}\exp(-\eta g_{t,i})$. Then
+$\mathbf{g}_t\in\mathbb{R}^H$. Define
+$\widetilde{m}_{t+1,i}\triangleq m_{t,i}\exp\!\bigl(-\eta g_{t,i}\bigr)$ for
+$i\in[H]$. Then the
+OMD update \eqref{eq:alg-omd-argmin} has the unique solution
 \[
 \begin{aligned}
-&\operatorname*{arg\,min}_{\mathbf{m}\in\mathcal{M}_H}
-\left\{
-\eta\langle \mathbf{g}_t,\mathbf{m}\rangle
-+D_\Psi(\mathbf{m}\|\mathbf{m}_t)
-\right\} \\
-&\quad=
-\operatorname*{arg\,min}_{\mathbf{m}\in\mathcal{M}_H} D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}}_{t+1})
-=
-\operatorname{Proj}_{\mathcal{M}_H}^{\Psi}(\widetilde{\mathbf{m}}_{t+1}),
+\mathbf{m}_{t+1}
+&=\operatorname{Proj}_{\mathcal{M}_H}^{\Psi}(\widetilde{\mathbf{m}}_{t+1}) 
+=\frac{\widetilde{\mathbf{m}}_{t+1}}
+{\max\{1,\|\widetilde{\mathbf{m}}_{t+1}\|_1\}}.
 \end{aligned}
 \]
-where $\operatorname{Proj}_{\mathcal{M}_H}^{\Psi}$ is the Bregman projection in
-Lemma~\ref{lem:bregman-projection}.
-Consequently, the OMD update \eqref{eq:alg-omd-argmin} coincides exactly with
-the closed-form OMD update \eqref{eq:alg-omd-mult}--\eqref{eq:alg-omd-proj},
-and, in particular,
-$\mathbf{m}_{t+1}\in\mathcal{M}_H\cap\mathbb{R}_{>0}^H$. Thus, the positive
+Moreover, $\mathbf{m}_{t+1}\in\mathcal{M}_H\cap\mathbb{R}_{>0}^H$. Hence, the
 initialization \eqref{eq:alg-init} keeps every OMD iterate strictly positive.
 \end{lemma}
 
 \begin{proof}
-Fix $\mathbf{m}\in\mathbb{R}_{\ge0}^H$ and a coordinate $i$. Then
-\begin{equation}
-\label{eq:omd-cf-log}
-\begin{aligned}
-\eta g_{t,i}\,m_i
-+
-m_i\log\frac{m_i}{m_{t,i}}
-&=
-m_i
-\left(
-\eta g_{t,i}
-+
-\log\frac{m_i}{m_{t,i}}
-\right) \\
-&=
-m_i\log\frac{m_i}{\widetilde{m}_{t+1,i}}.
-\end{aligned}
-\end{equation}
-Substitution into the OMD objective gives
-\begin{equation}
-\label{eq:omd-cf-breg}
+Fix $\mathbf{m}\in\mathcal{M}_H$. For each $i$ such that $m_i>0$,
+\[
+\log\frac{m_i}{\widetilde{m}_{t+1,i}}
+=
+\log\frac{m_i}{m_{t,i}}+\eta g_{t,i}.
+\]
+After multiplication by $m_i$, this identity also holds when $m_i=0$ under
+the convention $0\log0=0$. Therefore, \eqref{eq:def-bregman} gives
+\[
 \begin{aligned}
 &\eta\langle \mathbf{g}_t,\mathbf{m}\rangle+D_\Psi(\mathbf{m}\|\mathbf{m}_t) \\
-&\qquad=
-D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}}_{t+1})
-+
-\sum_{i=1}^H
-\left(
-m_{t,i}-\widetilde{m}_{t+1,i}
-\right).
+&=\sum_{i=1}^H\left(
+\eta g_{t,i}m_i
++m_i\log\frac{m_i}{m_{t,i}}-m_i+m_{t,i}
+\right) \\
+&=\sum_{i=1}^H\left(
+m_i\log\frac{m_i}{\widetilde{m}_{t+1,i}}-m_i+m_{t,i}
+\right) \\
+&=D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}}_{t+1})
++\sum_{i=1}^H\left(m_{t,i}-\widetilde{m}_{t+1,i}\right).
 \end{aligned}
-\end{equation}
-The final sum is independent of $\mathbf{m}$. Hence, the two optimization problems
-have the same minimizer, and Lemma~\ref{lem:bregman-projection} gives
-\eqref{eq:alg-omd-proj}. Since $\mathbf{m}_t>0$ coordinatewise, both the
-multiplicative step and the subsequent positive rescaling preserve strict
-positivity.
+\]
+The final sum is independent of $\mathbf{m}$. Thus, minimizing the OMD objective
+is equivalent to minimizing
+$D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}}_{t+1})$ over $\mathcal{M}_H$.
+Since $\widetilde{\mathbf{m}}_{t+1}>0$ coordinatewise,
+Lemma~\ref{lem:bregman-projection} gives the stated unique minimizer and formula.
+The formula also shows that $\mathbf{m}_{t+1}>0$ coordinatewise. The last claim
+follows by induction from \eqref{eq:alg-init}.
 \end{proof}
 
 \section{Proofs for the Regret Upper Bounds}
