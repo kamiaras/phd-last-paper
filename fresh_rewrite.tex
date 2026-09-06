@@ -1749,12 +1749,6 @@ follows by induction from \eqref{eq:alg-init}.
 \section{Proofs for the Regret Upper Bounds}
 \label{sec:appendix-regret-proofs}
 
-The following lemmas establish the OMD and stability estimates used in the proof of
-Theorem~\ref{thm:regret-bound}. They rely on the state-decomposition, feasibility,
-and surrogate-cost lemmas established in Section~\ref{sec:sdac}
-(Lemmas~\ref{lem:sdac-state-decomp}, \ref{lem:sdac-feasibility}, and
-\ref{lem:sdac-surrogate}).
-
 \begin{lemma}[One-step OMD movement bound]
 \label{lem:omd-move}
 The OMD update \eqref{eq:alg-omd-argmin} with step size $\eta>0$ satisfies
@@ -1799,13 +1793,13 @@ Adding these bounds and using the symmetric Bregman identity,
 &\quad\le
 D_\Psi(\mathbf{m}_{t+1}\|\mathbf{m}_t)+D_\Psi(\mathbf{m}_t\|\mathbf{m}_{t+1}) \\
 &\quad=
-\end{aligned}
 \bigl\langle\nabla\Psi(\mathbf{m}_{t+1})-\nabla\Psi(\mathbf{m}_t),
 \mathbf{m}_{t+1}-\mathbf{m}_t\bigr\rangle \\
 &\quad\le
 \eta\langle\mathbf{g}_t,\mathbf{m}_t-\mathbf{m}_{t+1}\rangle \\
 &\quad\le
 \eta\|\mathbf{g}_t\|_\infty\|\mathbf{m}_{t+1}-\mathbf{m}_t\|_1.
+\end{aligned}
 \]
 The last two inequalities use first-order optimality of
 \eqref{eq:alg-omd-argmin} at the feasible point $\mathbf{m}_t$ and
