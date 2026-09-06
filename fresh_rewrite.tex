@@ -1394,6 +1394,61 @@ Substituting the trajectory and tail identities into
 \section{Proofs for the Online SDAC Controller}
 \label{sec:appendix-algorithm-proofs}
 
+The probability-simplex results for OMD with unnormalized negentropy and its
+Bregman divergence are standard \cite{hazan2016introduction}. We state and prove
+the corresponding forms used below because the online parameter set
+$\mathcal{M}_H$ is a subprobability simplex.
+
+\begin{lemma}[Strong convexity of negentropy on the subprobability simplex]
+\label{lem:subprob-negentropy-strong-convexity}
+For every $\mathbf{m}\in\mathcal{M}_H$ and
+$\mathbf{v}\in\mathcal{M}_H\cap\mathbb{R}_{>0}^H$,
+\begin{equation}
+\label{eq:subprob-negentropy-strong-convexity}
+D_\Psi(\mathbf{m}\|\mathbf{v})
+\ge
+\frac12\|\mathbf{m}-\mathbf{v}\|_1^2.
+\end{equation}
+Thus, $\Psi$ is $1$-strongly convex with respect to $\|\cdot\|_1$ on
+$\mathcal{M}_H$.
+\end{lemma}
+
+\begin{proof}
+First suppose $\mathbf{m}>0$ coordinatewise. Set
+$\mathbf{d}\triangleq\mathbf{m}-\mathbf{v}$ and
+$\mathbf{z}_s\triangleq\mathbf{v}+s\mathbf{d}$ for $s\in[0,1]$. Then
+$\mathbf{z}_s\in\mathcal{M}_H\cap\mathbb{R}_{>0}^H$, and weighted
+Cauchy--Schwarz gives
+\[
+\begin{aligned}
+\|\mathbf{d}\|_1^2
+&=\left(\sum_{i=1}^H
+\frac{|d_i|}{\sqrt{z_{s,i}}}\sqrt{z_{s,i}}\right)^2
+\le
+\left(\sum_{i=1}^H\frac{d_i^2}{z_{s,i}}\right)
+\left(\sum_{i=1}^H z_{s,i}\right) \\
+&\le
+\mathbf{d}^\top\nabla^2\Psi(\mathbf{z}_s)\mathbf{d}.
+\end{aligned}
+\]
+The integral remainder in Taylor's formula therefore yields
+\[
+\begin{aligned}
+D_\Psi(\mathbf{m}\|\mathbf{v})
+&=\int_0^1(1-s)
+\mathbf{d}^\top\nabla^2\Psi(\mathbf{z}_s)\mathbf{d}\,ds \\
+&\ge
+\|\mathbf{d}\|_1^2\int_0^1(1-s)\,ds
+=\frac12\|\mathbf{d}\|_1^2.
+\end{aligned}
+\]
+For a general $\mathbf{m}\in\mathcal{M}_H$ and $0<\varepsilon<1$, apply the bound to
+$\mathbf{m}^{\varepsilon}\triangleq(1-\varepsilon)\mathbf{m}
++\varepsilon\mathbf{v}$ and let $\varepsilon\downarrow0$. The result follows
+from the convention $0\log0=0$ and continuity in the first argument of
+$D_\Psi$.
+\end{proof}
+
 
 \begin{lemma}[Action clipping as a Bregman projection]
 \label{lem:availability-projection}
@@ -1626,60 +1681,6 @@ Induction from \eqref{eq:alg-init} proves positivity of every iterate.
 
 \section{Proofs for the Regret Upper Bounds}
 \label{sec:appendix-regret-proofs}
-
-The result for the probability simplex is standard
-\cite{hazan2016introduction}; we include the less commonly stated subprobability
-form.
-
-\begin{lemma}[Strong convexity of negentropy on the subprobability simplex]
-\label{lem:subprob-negentropy-strong-convexity}
-For every $\mathbf{m}\in\mathcal{M}_H$ and
-$\mathbf{v}\in\mathcal{M}_H\cap\mathbb{R}_{>0}^H$,
-\begin{equation}
-\label{eq:subprob-negentropy-strong-convexity}
-D_\Psi(\mathbf{m}\|\mathbf{v})
-\ge
-\frac12\|\mathbf{m}-\mathbf{v}\|_1^2.
-\end{equation}
-Thus, $\Psi$ is $1$-strongly convex with respect to $\|\cdot\|_1$ on
-$\mathcal{M}_H$.
-\end{lemma}
-
-\begin{proof}
-First suppose $\mathbf{m}>0$ coordinatewise. Set
-$\mathbf{d}\triangleq\mathbf{m}-\mathbf{v}$ and
-$\mathbf{z}_s\triangleq\mathbf{v}+s\mathbf{d}$ for $s\in[0,1]$. Then
-$\mathbf{z}_s\in\mathcal{M}_H\cap\mathbb{R}_{>0}^H$, and weighted
-Cauchy--Schwarz gives
-\[
-\begin{aligned}
-\|\mathbf{d}\|_1^2
-&=\left(\sum_{i=1}^H
-\frac{|d_i|}{\sqrt{z_{s,i}}}\sqrt{z_{s,i}}\right)^2
-\le
-\left(\sum_{i=1}^H\frac{d_i^2}{z_{s,i}}\right)
-\left(\sum_{i=1}^H z_{s,i}\right) \\
-&\le
-\mathbf{d}^\top\nabla^2\Psi(\mathbf{z}_s)\mathbf{d}.
-\end{aligned}
-\]
-The integral remainder in Taylor's formula therefore yields
-\[
-\begin{aligned}
-D_\Psi(\mathbf{m}\|\mathbf{v})
-&=\int_0^1(1-s)
-\mathbf{d}^\top\nabla^2\Psi(\mathbf{z}_s)\mathbf{d}\,ds \\
-&\ge
-\|\mathbf{d}\|_1^2\int_0^1(1-s)\,ds
-=\frac12\|\mathbf{d}\|_1^2.
-\end{aligned}
-\]
-For a general $\mathbf{m}\in\mathcal{M}_H$ and $0<\varepsilon<1$, apply the bound to
-$\mathbf{m}^{\varepsilon}\triangleq(1-\varepsilon)\mathbf{m}
-+\varepsilon\mathbf{v}$ and let $\varepsilon\downarrow0$. The result follows
-from the convention $0\log0=0$ and continuity in the first argument of
-$D_\Psi$.
-\end{proof}
 
 \begin{lemma}[One-step OMD movement bound]
 \label{lem:omd-move}
