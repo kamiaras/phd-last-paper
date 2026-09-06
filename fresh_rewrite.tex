@@ -1417,7 +1417,7 @@ Substituting the trajectory and tail identities into
 \label{lem:availability-projection}
 For $t\in[T]$, define the set of parameters compatible with the current state by
 \[
-\mathcal{B}_t(x_t)
+\mathcal{B}_t
 \triangleq
 \left\{
 \mathbf{m}\in\mathcal{M}_H:
@@ -1426,11 +1426,11 @@ For $t\in[T]$, define the set of parameters compatible with the current state by
 \right\}.
 \]
 Let $\mathbf{m}_t^{\mathrm{exec}}$ be the Bregman projection of
-$\mathbf{m}_t$ onto $\mathcal{B}_t(x_t)$:
+$\mathbf{m}_t$ onto $\mathcal{B}_t$:
 \[
 \mathbf{m}_t^{\mathrm{exec}}
 \in
-\operatorname*{arg\,min}_{\mathbf{m}\in\mathcal{B}_t(x_t)}
+\operatorname*{arg\,min}_{\mathbf{m}\in\mathcal{B}_t}
 D_\Psi(\mathbf{m}\|\mathbf{m}_t).
 \]
 Then
@@ -1449,14 +1449,20 @@ Then
 
 \begin{proof}
 The online state satisfies $x_t\ge0$, so
-$\mathbf{0}\in\mathcal{B}_t(x_t)$. This set is compact and convex because it is
+$\mathbf{0}\in\mathcal{B}_t$. This set is compact and convex because it is
 the intersection of $\mathcal{M}_H$ and a closed halfspace. By
 \eqref{eq:alg-init} and the update
 \eqref{eq:alg-omd-mult}--\eqref{eq:alg-omd-proj}, every coordinate of
-$\mathbf{m}_t$ is positive. Thus,
-$D_\Psi(\cdot\|\mathbf{m}_t)$ is continuous and strictly convex on
-$\mathcal{M}_H$, so the projection exists and is unique. Moreover,
-$D_\Psi(\mathbf{m}\|\mathbf{m}_t)\ge0$, with equality only at
+$\mathbf{m}_t$ is positive. By \eqref{eq:def-bregman},
+$D_\Psi(\cdot\|\mathbf{m}_t)$ is continuous on $\mathcal{M}_H$. By
+Lemma~\ref{lem:subprob-negentropy-strong-convexity}, it is strictly convex and,
+for every $\mathbf{m}\in\mathcal{M}_H$,
+\[
+D_\Psi(\mathbf{m}\|\mathbf{m}_t)
+\ge \frac12\|\mathbf{m}-\mathbf{m}_t\|_1^2
+\ge0.
+\]
+Thus, the projection exists and is unique, and equality holds only at
 $\mathbf{m}=\mathbf{m}_t$.
 
 If
@@ -1464,7 +1470,7 @@ If
 \langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle
 \le \alpha x_t,
 \]
-then $\mathbf{m}_t\in\mathcal{B}_t(x_t)$ and
+then $\mathbf{m}_t\in\mathcal{B}_t$ and
 $\mathbf{m}_t^{\mathrm{exec}}=\mathbf{m}_t$.
 
 Now suppose
@@ -1472,7 +1478,7 @@ Now suppose
 \langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle
 >\alpha x_t.
 \]
-Since $\mathbf{m}_t^{\mathrm{exec}}\in\mathcal{B}_t(x_t)$,
+Since $\mathbf{m}_t^{\mathrm{exec}}\in\mathcal{B}_t$,
 \[
 \langle\boldsymbol{\phi}_t^u,\mathbf{m}_t^{\mathrm{exec}}\rangle
 \le\alpha x_t
@@ -1486,7 +1492,7 @@ $\mathbf{m}_t^{\mathrm{exec}}$:
 <\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle.
 \]
 We move a small distance from $\mathbf{m}_t^{\mathrm{exec}}$ toward
-$\mathbf{m}_t$. The step is chosen to remain in $\mathcal{B}_t(x_t)$; strict
+$\mathbf{m}_t$. The step is chosen to remain in $\mathcal{B}_t$; strict
 convexity will then give a smaller Bregman divergence, contradicting the
 optimality of $\mathbf{m}_t^{\mathrm{exec}}$. Choose $0<\delta<1$ such that
 \[
@@ -1516,8 +1522,8 @@ By convexity, $\mathbf{m}_\delta\in\mathcal{M}_H$, and
 \right) <\alpha x_t.
 \end{aligned}
 \]
-Thus $\mathbf{m}_\delta\in\mathcal{B}_t(x_t)$. Since
-$\mathbf{m}_t\notin\mathcal{B}_t(x_t)$,
+Thus $\mathbf{m}_\delta\in\mathcal{B}_t$. Since
+$\mathbf{m}_t\notin\mathcal{B}_t$,
 $\mathbf{m}_t^{\mathrm{exec}}\ne\mathbf{m}_t$, and hence
 $D_\Psi(\mathbf{m}_t^{\mathrm{exec}}\|\mathbf{m}_t)>0$. Using strict convexity
 and $D_\Psi(\mathbf{m}_t\|\mathbf{m}_t)=0$, we obtain
