@@ -808,13 +808,14 @@ i\in[H].
 Next, project onto $\mathcal{M}_H$, which here amounts to rescaling if needed:
 \begin{equation}
 \label{eq:alg-omd-proj}
+\begin{aligned}
 \mathbf{m}_{t+1}
-\triangleq
-\operatorname{Proj}_{\mathcal{M}_H}^{\Psi}(\widetilde{\mathbf{m}}_{t+1})
-=
-\frac{\widetilde{\mathbf{m}}_{t+1}}{\max\{1,\|\widetilde{\mathbf{m}}_{t+1}\|_1\}},
+&=\operatorname*{arg\,min}_{\mathbf{m}\in\mathcal{M}_H}
+D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}}_{t+1}) \\
+&=\frac{\widetilde{\mathbf{m}}_{t+1}}
+{\max\{1,\|\widetilde{\mathbf{m}}_{t+1}\|_1\}}.
+\end{aligned}
 \end{equation}
-where the equality follows from Lemma~\ref{lem:bregman-projection}.
 
 
 \section{Regret Upper Bounds}
@@ -1619,131 +1620,104 @@ constraint is active:
 Combining the two cases with \eqref{eq:alg-feasible-action} proves the result.
 \end{proof}
 
-\begin{lemma}[Bregman projection onto $\mathcal{M}_H$]
-\label{lem:bregman-projection}
-For the Bregman divergence $D_\Psi$ in \eqref{eq:def-bregman} and every
-$\widetilde{\mathbf{m}}\in\mathbb{R}_{>0}^H$,
-\[
-\operatorname{Proj}_{\mathcal{M}_H}^{\Psi}(\widetilde{\mathbf{m}})
-\triangleq
-\operatorname*{arg\,min}_{\mathbf{m}\in\mathcal{M}_H}
-D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}})
-=
-\frac{\widetilde{\mathbf{m}}}{\max\{1,\|\widetilde{\mathbf{m}}\|_1\}}.
-\]
-\end{lemma}
-
-\begin{proof}
-The function $r\mapsto r\log r-r+1$ is nonnegative for $r\ge0$ and vanishes
-only at $r=1$. Writing the $i$th summand in \eqref{eq:def-bregman} as
-$v_i(r\log r-r+1)$, where $r=m_i/v_i$, therefore gives
-\[
-D_\Psi(\mathbf{m}\|\mathbf{v})\ge0,
-\qquad
-D_\Psi(\mathbf{m}\|\mathbf{v})=0
-\quad\Longleftrightarrow\quad
-\mathbf{m}=\mathbf{v}.
-\]
-If $\|\widetilde{\mathbf{m}}\|_1\le1$, then
-$\widetilde{\mathbf{m}}\in\mathcal{M}_H$, so the equality condition shows that
-it is the unique minimizer.
-
-Now suppose $\|\widetilde{\mathbf{m}}\|_1>1$ and set
-\[
-\mathbf{m}^\star
-\triangleq
-\frac{\widetilde{\mathbf{m}}}{\|\widetilde{\mathbf{m}}\|_1}.
-\]
-Then $\mathbf{m}^\star\in\mathcal{M}_H\cap\mathbb{R}_{>0}^H$ and
-\[
-\widetilde{\mathbf{m}}
-=\|\widetilde{\mathbf{m}}\|_1\mathbf{m}^\star,
-\qquad
-\|\mathbf{m}^\star\|_1=1.
-\]
-For every $i\in[H]$, the first identity gives
-\[
-\begin{split}
-m_i\log\frac{m_i}{\widetilde{m}_i}
-&=m_i\log\frac{m_i}{m_i^\star}
--m_i\log\|\widetilde{\mathbf{m}}\|_1, \\
-m_i^\star\log\frac{m_i^\star}{\widetilde{m}_i}
-&=-m_i^\star\log\|\widetilde{\mathbf{m}}\|_1.
-\end{split}
-\]
-Using these identities in \eqref{eq:def-bregman}, for every
-$\mathbf{m}\in\mathcal{M}_H$,
-\[
-\begin{aligned}
-&D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}})
--D_\Psi(\mathbf{m}^\star\|\widetilde{\mathbf{m}}) \\
-&=\sum_{i=1}^H
-\left(
-m_i\log\frac{m_i}{m_i^\star}-m_i+m_i^\star
-\right)
-+\sum_{i=1}^H(m_i^\star-m_i)
-\log\|\widetilde{\mathbf{m}}\|_1 \\
-&=D_\Psi(\mathbf{m}\|\mathbf{m}^\star)
-+\bigl(1-\|\mathbf{m}\|_1\bigr)
-\log\|\widetilde{\mathbf{m}}\|_1
-\ge0.
-\end{aligned}
-\]
-The last inequality uses $D_\Psi(\mathbf{m}\|\mathbf{m}^\star)\ge0$,
-$\|\mathbf{m}\|_1\le1$, and $\log\|\widetilde{\mathbf{m}}\|_1>0$.
-Equality requires $\mathbf{m}=\mathbf{m}^\star$. Thus,
-$\mathbf{m}^\star$ is the unique minimizer.
-\end{proof}
-
 \begin{lemma}[Closed-form solution of the OMD update]
 \label{lem:omd-closed-form}
 Fix $\mathbf{m}_t\in\mathcal{M}_H\cap\mathbb{R}_{>0}^H$, $\eta>0$, and
 $\mathbf{g}_t\in\mathbb{R}^H$. Define
-$\widetilde{m}_{t+1,i}\triangleq m_{t,i}\exp\!\bigl(-\eta g_{t,i}\bigr)$ for
-$i\in[H]$. Then the
-OMD update \eqref{eq:alg-omd-argmin} has the unique solution
+$\widetilde{m}_{t+1,i}\triangleq m_{t,i}\exp(-\eta g_{t,i})$ for $i\in[H]$.
+Then the OMD update \eqref{eq:alg-omd-argmin} has the unique solution
 \[
-\begin{aligned}
 \mathbf{m}_{t+1}
-&=\operatorname{Proj}_{\mathcal{M}_H}^{\Psi}(\widetilde{\mathbf{m}}_{t+1}) 
 =\frac{\widetilde{\mathbf{m}}_{t+1}}
 {\max\{1,\|\widetilde{\mathbf{m}}_{t+1}\|_1\}}.
-\end{aligned}
 \]
-Moreover, $\mathbf{m}_{t+1}\in\mathcal{M}_H\cap\mathbb{R}_{>0}^H$. Hence, the
-initialization \eqref{eq:alg-init} keeps every OMD iterate strictly positive.
+Moreover, $\mathbf{m}_{t+1}\in\mathcal{M}_H\cap\mathbb{R}_{>0}^H$. Hence,
+the initialization \eqref{eq:alg-init} keeps every OMD iterate strictly positive.
 \end{lemma}
 
 \begin{proof}
-Fix $\mathbf{m}\in\mathcal{M}_H$. For each $i$ such that $m_i>0$,
+Since $m_{t,i}>0$, we have $\widetilde{m}_{t+1,i}>0$ for every $i\in[H]$.
+For any $\mathbf{m}\in\mathcal{M}_H$,
 \[
-\log\frac{m_i}{\widetilde{m}_{t+1,i}}
-=
-\log\frac{m_i}{m_{t,i}}+\eta g_{t,i}.
+m_i\log\frac{m_i}{\widetilde{m}_{t+1,i}}
+=m_i\log\frac{m_i}{m_{t,i}}+\eta g_{t,i}m_i,
 \]
-After multiplication by $m_i$, this identity also holds when $m_i=0$ under
-the convention $0\log0=0$. Therefore, \eqref{eq:def-bregman} gives
+where the identity at $m_i=0$ uses $0\log0=0$. Substituting into
+\eqref{eq:def-bregman} gives
 \[
 \begin{aligned}
-&\eta\langle \mathbf{g}_t,\mathbf{m}\rangle+D_\Psi(\mathbf{m}\|\mathbf{m}_t) \\
+&\eta\langle\mathbf{g}_t,\mathbf{m}\rangle+D_\Psi(\mathbf{m}\|\mathbf{m}_t) \\
 &=\sum_{i=1}^H\left(
-\eta g_{t,i}m_i
-+m_i\log\frac{m_i}{m_{t,i}}-m_i+m_{t,i}
+\eta g_{t,i}m_i+m_i\log\frac{m_i}{m_{t,i}}-m_i+m_{t,i}
 \right) \\
 &=\sum_{i=1}^H\left(
 m_i\log\frac{m_i}{\widetilde{m}_{t+1,i}}-m_i+m_{t,i}
 \right) \\
 &=D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}}_{t+1})
-+\sum_{i=1}^H\left(m_{t,i}-\widetilde{m}_{t+1,i}\right).
++\sum_{i=1}^H(m_{t,i}-\widetilde{m}_{t+1,i}).
 \end{aligned}
 \]
-The final sum is independent of $\mathbf{m}$. Thus, minimizing the OMD objective
-is equivalent to minimizing
+The final sum is independent of $\mathbf{m}$, so it remains to minimize
 $D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}}_{t+1})$ over $\mathcal{M}_H$.
-Since $\widetilde{\mathbf{m}}_{t+1}>0$ coordinatewise,
-Lemma~\ref{lem:bregman-projection} gives the stated unique minimizer and formula.
-The formula also shows that $\mathbf{m}_{t+1}>0$ coordinatewise. The last claim
-follows by induction from \eqref{eq:alg-init}.
+
+If $\|\widetilde{\mathbf{m}}_{t+1}\|_1\le1$, then
+$\widetilde{\mathbf{m}}_{t+1}\in\mathcal{M}_H$.
+Lemma~\ref{lem:subprob-negentropy-strong-convexity} gives
+\[
+D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}}_{t+1})
+\ge\frac12\|\mathbf{m}-\widetilde{\mathbf{m}}_{t+1}\|_1^2\ge0.
+\]
+Since $D_\Psi(\widetilde{\mathbf{m}}_{t+1}\|\widetilde{\mathbf{m}}_{t+1})=0$,
+$\widetilde{\mathbf{m}}_{t+1}$ is the unique minimizer.
+
+If $\|\widetilde{\mathbf{m}}_{t+1}\|_1>1$, set
+\[
+\mathbf{m}^\star
+\triangleq
+\frac{\widetilde{\mathbf{m}}_{t+1}}
+{\|\widetilde{\mathbf{m}}_{t+1}\|_1}.
+\]
+Then $\mathbf{m}^\star>0$ coordinatewise, $\|\mathbf{m}^\star\|_1=1$, and
+\[
+\widetilde{m}_{t+1,i}
+=\|\widetilde{\mathbf{m}}_{t+1}\|_1m_i^\star.
+\]
+Thus, for every $i\in[H]$,
+\[
+\begin{aligned}
+m_i\log\frac{m_i}{\widetilde{m}_{t+1,i}}
+&=m_i\log\frac{m_i}{m_i^\star}
+-m_i\log\|\widetilde{\mathbf{m}}_{t+1}\|_1, \\
+m_i^\star\log\frac{m_i^\star}{\widetilde{m}_{t+1,i}}
+&=-m_i^\star\log\|\widetilde{\mathbf{m}}_{t+1}\|_1.
+\end{aligned}
+\]
+Using these identities in \eqref{eq:def-bregman}, for every
+$\mathbf{m}\in\mathcal{M}_H$,
+\[
+\begin{aligned}
+&D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}}_{t+1})
+-D_\Psi(\mathbf{m}^\star\|\widetilde{\mathbf{m}}_{t+1}) \\
+&=\sum_{i=1}^H
+\left(
+m_i\log\frac{m_i}{m_i^\star}-m_i+m_i^\star
+\right)
+\\
+&\quad+\sum_{i=1}^H(m_i^\star-m_i)
+\log\|\widetilde{\mathbf{m}}_{t+1}\|_1 \\
+&=D_\Psi(\mathbf{m}\|\mathbf{m}^\star)
++\bigl(1-\|\mathbf{m}\|_1\bigr)
+\log\|\widetilde{\mathbf{m}}_{t+1}\|_1
+\ge0.
+\end{aligned}
+\]
+Since $\|\mathbf{m}\|_1\le1$ and $\log\|\widetilde{\mathbf{m}}_{t+1}\|_1>0$,
+Lemma~\ref{lem:subprob-negentropy-strong-convexity} gives the last inequality,
+with equality only at $\mathbf{m}=\mathbf{m}^\star$. Thus,
+$\mathbf{m}^\star$ is the unique minimizer.
+
+In both cases, the minimizer has the stated formula and is strictly positive.
+Induction from \eqref{eq:alg-init} proves positivity of every iterate.
 \end{proof}
 
 \section{Proofs for the Regret Upper Bounds}
