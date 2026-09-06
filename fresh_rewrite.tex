@@ -2151,18 +2151,25 @@ Thus, for fixed $\alpha,L_x,L_u$, the right-hand side of
 \end{proof}
 
 \begin{proof}[Proof of Corollary~\ref{cor:regret-vs-fraction}]
-By Corollary~\ref{cor:fraction-as-allocation}, every $k\in[0,\alpha]$
-has $\mathbf{q}(k)\in\mathcal{Q}_\alpha$ with
-$J_T(\mathbf{q}(k))=J_T(k)$. Hence
+By Corollary~\ref{cor:fraction-as-allocation}, for every $k\in[0,\alpha]$,
+\[
+\mathbf{q}(k)\in\mathcal{Q}_\alpha,
+\qquad
+J_T(\mathbf{q}(k))=J_T(k).
+\]
+Hence, by Corollary~\ref{cor:regret-vs-allocation},
 \[
 \begin{aligned}
 \RegFrac{T}
+&=J_T^{\mathrm{on}}-\min_{k\in[0,\alpha]}J_T(k) \\
 &=J_T^{\mathrm{on}}-\min_{k\in[0,\alpha]}J_T(\mathbf{q}(k)) \\
-&\le J_T^{\mathrm{on}}-\inf_{\mathbf{q}\in\mathcal{Q}_\alpha}J_T(\mathbf{q})
-=\RegAlloc{T}.
+&\le J_T^{\mathrm{on}}-\inf_{\mathbf{q}\in\mathcal{Q}_\alpha}J_T(\mathbf{q}) \\
+&=\RegAlloc{T} \\
+&\le2\sqrt{\Gamma_\alpha T\log(H_T+1)} \\
+&\quad+\left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H_T+1}T.
 \end{aligned}
 \]
-Corollary~\ref{cor:regret-vs-allocation} gives the stated bound and rate.
+The rate follows from the same corollary.
 \end{proof}
 
 
