@@ -960,7 +960,7 @@ Appendix~\ref{sec:appendix-minimax-proofs}.
 \begin{theorem}[Minimax SDAC regret lower bound]
 \label{thm:sdac-lower-bound}
 Fix $H\ge1$ and $T\ge2$. For every causal feasible online controller
-$\mathcal{A}$, possibly randomized, there exists a deterministic oblivious sequence
+$\mathcal{A}$, possibly randomized, there is a deterministic oblivious sequence
 of arrivals and costs satisfying the assumptions of
 Section~\ref{sec:model-setup} such that
 \begin{equation}
@@ -976,13 +976,11 @@ where
 \beta_t
 \triangleq
 \alpha\left(
-L_u
-+
-\frac{L_x(1-\alpha^{t-2})}{1-\alpha}
-\right).
+L_u+\frac{L_x(1-\alpha^{t-2})}{1-\alpha}
+\right),
+\qquad t=2,\ldots,T.
 \end{equation}
-The expectation is only over the internal randomization of $\mathcal{A}$; the
-adversarial sequence is deterministic and fixed before the interaction.
+The expectation is over the internal randomization of $\mathcal{A}$.
 \end{theorem}
 
 \begin{corollary}[Lower bound beyond the mixing time]
@@ -2171,239 +2169,123 @@ The rate follows from the same corollary.
 
 \begin{proof}[Proof of Theorem~\ref{thm:sdac-lower-bound}]
 Fix a causal feasible controller $\mathcal{A}$. Let
-$\xi_1,\ldots,\xi_T$ be independent Rademacher random variables, also independent
-of the internal randomization of $\mathcal{A}$, with
+$\xi_1,\ldots,\xi_T$ be independent Rademacher random variables, independent
+of the controller's randomization. Set
 \[
-\mathbb{P}(\xi_t=1)
-=
-\mathbb{P}(\xi_t=-1)
-=\frac12.
+w_t=1,
+\qquad
+c_t(x,u)=\xi_t(L_xx-L_uu),
+\qquad t\in[T].
 \]
-Set
-\begin{equation}
-\label{eq:lower-hard-arrival}
-w_t=1
-\qquad
-\text{for all }t\in[T],
-\end{equation}
-and define the costs by
-\begin{equation}
-\label{eq:lower-hard-cost}
-c_t(x,u)
-=
-\xi_t\bigl(L_x x-L_u u\bigr)
-\qquad
-\text{for all }t\in[T].
-\end{equation}
-Each $c_t$ is affine and hence convex. For any two points in
-$\mathcal{D}_\alpha$,
-\begin{equation}
-\label{eq:lower-lipschitz-check}
+Each cost is affine with gradient $\xi_t(L_x,-L_u)$, so it is convex and
+satisfies the required subgradient bounds. Also,
+\[
 \begin{aligned}
 |c_t(x,u)-c_t(x',u')|
-&=
-|L_x(x-x')-L_u(u-u')| \\
-&\le
-L_x|x-x'|+L_u|u-u'|.
+&=|L_x(x-x')-L_u(u-u')|\\
+&\le L_x|x-x'|+L_u|u-u'|.
 \end{aligned}
-\end{equation}
-Moreover,
-\[
-\nabla c_t=\xi_t(L_x,-L_u),
-\qquad
-|\partial_x c_t|=L_x,
-\qquad
-|\partial_u c_t|=L_u,
 \]
-so the required subgradient bounds hold.
+Thus every realization gives an admissible sequence.
 
-
-We now select two fixed SDAC policies for the benchmark. The parameter
-$\mathbf{m}^{(0)}$ leaves all mass in the subprobability simplex unused, so its
-SDAC action is always zero. The parameter $\mathbf{m}^{(1)}$ places all mass on the
-first lag, so its action is $\alpha w_{t-1}$. Let
-\begin{equation}
-\label{eq:lower-two-policy-parameters}
-\mathbf{m}^{(0)}\triangleq\mathbf{0},
-\qquad
-\mathbf{m}^{(1)}\triangleq\mathbf{e}_1
-\end{equation}
-belong to $\mathcal{M}_H$, where
-$\mathbf{e}_1=(1,0,\ldots,0)\in\mathbb{R}^H$. Thus, under
-\eqref{eq:lower-hard-arrival}, $\mathbf{m}^{(0)}$ is the no-release policy, whereas
-$\mathbf{m}^{(1)}$ releases the retained portion of the preceding arrival. For the
-no-release policy,
-\begin{equation}
-\label{eq:lower-policy-zero-trajectory}
-u_t(\mathbf{m}^{(0)})=0,
-\qquad
-x_t(\mathbf{m}^{(0)})
-=
-\rho_t
-\triangleq
-\frac{1-\alpha^{t-1}}{1-\alpha}.
-\end{equation}
-This follows by unrolling $x_{t+1}=\alpha x_t+1$:
+Consider the two fixed SDAC parameters
 \[
-x_t(\mathbf{m}^{(0)})
-=\sum_{s=0}^{t-2}\alpha^s
-=\frac{1-\alpha^{t-1}}{1-\alpha},
-\qquad t\ge2,
-\]
-and the closed form also gives $x_1(\mathbf{m}^{(0)})=0$. For the one-lag policy,
-\eqref{eq:def-sdac-policy} gives
-\begin{equation}
-\label{eq:lower-policy-one-action}
-u_1(\mathbf{m}^{(1)})=0,
+\mathbf{m}^{(0)}=\mathbf{0},
 \qquad
-u_t(\mathbf{m}^{(1)})=\alpha,
-\quad t\ge2.
-\end{equation}
-Its state at $t=2$ is
-\[
-x_2(\mathbf{m}^{(1)})
-=\alpha x_1(\mathbf{m}^{(1)})-u_1(\mathbf{m}^{(1)})+w_1
-=1.
+\mathbf{m}^{(1)}=\mathbf{e}_1=(1,0,\ldots,0)\in\mathcal{M}_H.
 \]
-If $x_t(\mathbf{m}^{(1)})=1$ for some $t\ge2$, then
+Both trajectories start at $(x_1,u_1)=(0,0)$. For $t\ge2$, the SDAC
+action formula and the dynamics give
 \[
 \begin{aligned}
+u_t(\mathbf{m}^{(0)})&=0,
+&
+x_t(\mathbf{m}^{(0)})
+&=\sum_{s=0}^{t-2}\alpha^s
+=\frac{1-\alpha^{t-1}}{1-\alpha},\\
+u_t(\mathbf{m}^{(1)})&=\alpha,
+&
+x_t(\mathbf{m}^{(1)})&=1.
+\end{aligned}
+\]
+The last identity follows from $x_2(\mathbf{m}^{(1)})=1$ and
+\[
 x_{t+1}(\mathbf{m}^{(1)})
-&=\alpha x_t(\mathbf{m}^{(1)})-u_t(\mathbf{m}^{(1)})+w_t \\
-&=\alpha-\alpha+1
-=1.
-\end{aligned}
+=\alpha x_t(\mathbf{m}^{(1)})-\alpha+1
+=\alpha-\alpha+1=1
 \]
-Induction therefore gives
-\begin{equation}
-\label{eq:lower-policy-one-trajectory}
-x_t(\mathbf{m}^{(1)})=1,
-\qquad
-t\ge2.
-\end{equation}
-For $t\ge2$, the difference between the two states is
-\begin{equation}
-\label{eq:lower-two-policy-state-difference}
+whenever $x_t(\mathbf{m}^{(1)})=1$. Hence, for $t\ge2$,
+\[
 \begin{aligned}
-\Delta_t
-&\triangleq
-x_t(\mathbf{m}^{(0)})-x_t(\mathbf{m}^{(1)}) \\
-&=\rho_t-1 \\
+x_t(\mathbf{m}^{(0)})-x_t(\mathbf{m}^{(1)})
+&=\frac{1-\alpha^{t-1}}{1-\alpha}-1\\
 &=\frac{\alpha(1-\alpha^{t-2})}{1-\alpha}.
 \end{aligned}
-\end{equation}
-
-
-
-The two policies have the same state and action at $t=1$. For $t\ge2$,
-\eqref{eq:lower-policy-one-action} and
-\eqref{eq:lower-two-policy-state-difference} give
-\begin{equation}
-\label{eq:lower-two-policy-cost-difference}
+\]
+Since both policies incur zero cost at $t=1$, their cumulative costs satisfy
+\[
 \begin{aligned}
 J_T(\mathbf{m}^{(0)})-J_T(\mathbf{m}^{(1)})
-&=
-\sum_{t=2}^T\xi_t(L_x\Delta_t+\alpha L_u) \\
-&=
-\sum_{t=2}^T\xi_t \beta_t,
+&=\sum_{t=2}^T\xi_t
+\left(
+\frac{\alpha L_x(1-\alpha^{t-2})}{1-\alpha}
++\alpha L_u
+\right)\\
+&=\sum_{t=2}^T\xi_t\beta_t.
 \end{aligned}
-\end{equation}
-with $\beta_t$ as in \eqref{eq:sdac-lower-beta}.
+\]
 
-
-
-Let $\mathcal{F}_t^-$ be the information available immediately before $c_t$ is
-revealed, including the randomization used to select $u_t$. By causality,
-$(x_t,u_t)$ is $\mathcal{F}_t^-$-measurable, whereas $\xi_t$ is independent of
-$\mathcal{F}_t^-$ and has mean zero. Hence, by the tower property,
-\begin{equation}
-\label{eq:lower-online-mean-zero}
+By causality, $(x_t,u_t)$ depends only on past signs and the controller's
+randomization, so it is independent of $\xi_t$. Since $\mathbb{E}[\xi_t]=0$,
+\[
 \begin{aligned}
-\mathbb{E}_{\boldsymbol{\xi},\mathcal{A}}\!\left[
-J_T^{\mathrm{on}}
-\right]
+\mathbb{E}_{\boldsymbol{\xi},\mathcal{A}}[J_T^{\mathrm{on}}]
 &=\sum_{t=1}^T
-\mathbb{E}_{\boldsymbol{\xi},\mathcal{A}}\!\left[
-\bigl(L_x x_t-L_u u_t\bigr)
-\mathbb{E}[\xi_t\mid\mathcal{F}_t^-]
-\right]
-\\
+\mathbb{E}[\xi_t]\,
+\mathbb{E}_{\boldsymbol{\xi},\mathcal{A}}[L_xx_t-L_uu_t]\\
 &=0.
 \end{aligned}
-\end{equation}
-The fixed-policy trajectories depend only on the arrival sequence and are
-therefore independent of the Rademacher variables. Thus, for $j\in\{0,1\}$,
-\begin{equation}
-\label{eq:lower-two-policy-means-zero}
+\]
+The two fixed-policy trajectories are deterministic. Thus, for $j\in\{0,1\}$,
+\[
 \begin{aligned}
-\mathbb{E}_{\boldsymbol{\xi}}\!\left[
-J_T(\mathbf{m}^{(j)})
-\right]
+\mathbb{E}_{\boldsymbol{\xi}}[J_T(\mathbf{m}^{(j)})]
 &=\sum_{t=1}^T\mathbb{E}[\xi_t]
-\bigl(
-L_x x_t(\mathbf{m}^{(j)})-L_u u_t(\mathbf{m}^{(j)})
-\bigr)
-\\
+\bigl(L_xx_t(\mathbf{m}^{(j)})-L_uu_t(\mathbf{m}^{(j)})\bigr)\\
 &=0.
 \end{aligned}
-\end{equation}
-
-
-Because $\mathbf{m}^{(0)},\mathbf{m}^{(1)}\in\mathcal{M}_H$, for every realization of
-the Rademacher variables and every choice made by the controller,
-\begin{equation}
-\label{eq:lower-two-policy-regret}
+\]
+Both parameters belong to $\mathcal{M}_H$. Using
+$\min\{a,b\}=(a+b-|a-b|)/2$, we obtain
+\[
 \begin{aligned}
 \RegSDAC{T}
-&=
-J_T^{\mathrm{on}}
--\min_{\mathbf{m}\in\mathcal{M}_H}J_T(\mathbf{m}) \\
-&\ge
-J_T^{\mathrm{on}}
--\min\!\left\{
-J_T(\mathbf{m}^{(0)}),
-J_T(\mathbf{m}^{(1)})
-\right\}.
+&=J_T^{\mathrm{on}}-\min_{\mathbf{m}\in\mathcal{M}_H}J_T(\mathbf{m})\\
+&\ge J_T^{\mathrm{on}}
+-\min\{J_T(\mathbf{m}^{(0)}),J_T(\mathbf{m}^{(1)})\}\\
+&=J_T^{\mathrm{on}}
+-\frac{J_T(\mathbf{m}^{(0)})+J_T(\mathbf{m}^{(1)})}{2}\\
+&\quad+\frac12
+\left|J_T(\mathbf{m}^{(0)})-J_T(\mathbf{m}^{(1)})\right|.
 \end{aligned}
-\end{equation}
-Taking expectations in \eqref{eq:lower-two-policy-regret} and using
-$\min\{a,b\}=(a+b-|a-b|)/2$ together with
-\eqref{eq:lower-online-mean-zero} and
-\eqref{eq:lower-two-policy-means-zero} gives
-\begin{equation}
-\label{eq:lower-randomized-sequence-bound}
-\begin{aligned}
-\mathbb{E}_{\boldsymbol{\xi},\mathcal{A}}\!\left[\RegSDAC{T}\right]
-&\ge \frac12\mathbb{E}_{\boldsymbol{\xi}}\!\left[
-\left|J_T(\mathbf{m}^{(0)})-J_T(\mathbf{m}^{(1)})\right|
-\right] \\
-&= \frac12\mathbb{E}_{\boldsymbol{\xi}}\!\left[
-\left|\sum_{t=2}^T\xi_t\beta_t\right|
-\right] \\
-&\ge \frac{1}{2\sqrt2}
-\left(\sum_{t=2}^T\beta_t^2\right)^{1/2}.
-\end{aligned}
-\end{equation}
-Khintchine's inequality for Rademacher sums gives the final inequality in
-\eqref{eq:lower-randomized-sequence-bound}. It remains to remove the randomization
-from the adversarial construction. The
-left-hand side of \eqref{eq:lower-randomized-sequence-bound} is the average over
-all $2^T$ realizations of the Rademacher vector $\boldsymbol{\xi}$:
-\[
-\mathbb{E}_{\boldsymbol{\xi},\mathcal{A}}\!\left[\RegSDAC{T}\right]
-=
-\frac{1}{2^T}
-\sum_{\boldsymbol{\xi}\in\{-1,1\}^T}
-\mathbb{E}_{\mathcal{A}}\!\left[
-\RegSDAC{T}\,\middle|\,\boldsymbol{\xi}
-\right].
 \]
-Hence, at least one vector $\boldsymbol{\xi}^\star$ makes the conditional expectation
-at least the right-hand side of \eqref{eq:lower-randomized-sequence-bound}. Fixing
-$\boldsymbol{\xi}^\star$ in \eqref{eq:lower-hard-cost}, together with the arrivals
-in \eqref{eq:lower-hard-arrival}, produces a deterministic admissible sequence
-fixed before the interaction. The remaining expectation is only over the internal
-randomization of $\mathcal{A}$, and \eqref{eq:sdac-lower-exact} follows.
+Taking expectations and applying Khintchine's inequality in the last line gives
+\[
+\begin{aligned}
+\mathbb{E}_{\boldsymbol{\xi},\mathcal{A}}[\RegSDAC{T}]
+&\ge\frac12\mathbb{E}_{\boldsymbol{\xi}}
+\left|J_T(\mathbf{m}^{(0)})-J_T(\mathbf{m}^{(1)})\right|\\
+&=\frac12\mathbb{E}_{\boldsymbol{\xi}}
+\left|\sum_{t=2}^T\xi_t\beta_t\right|\\
+&\ge\frac{1}{2\sqrt2}
+\sqrt{\sum_{t=2}^T\beta_t^2}.
+\end{aligned}
+\]
+This expectation averages over the finitely many sign vectors
+$\boldsymbol{\xi}\in\{-1,1\}^T$. At least one vector
+$\boldsymbol{\xi}^\star$ therefore gives expected regret, over the controller's
+randomization alone, at least as large as this bound. Fixing that vector before
+the interaction gives the required deterministic oblivious sequence.
 \end{proof}
 
 \begin{proof}[Proof of Corollary~\ref{cor:sdac-lower-mixing}]
