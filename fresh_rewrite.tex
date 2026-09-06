@@ -1749,6 +1749,61 @@ follows by induction from \eqref{eq:alg-init}.
 \section{Proofs for the Regret Upper Bounds}
 \label{sec:appendix-regret-proofs}
 
+The analogous strong-convexity result for the probability simplex is standard;
+see, e.g., \cite{hazan2016introduction}. Although the proof below is not new,
+the subprobability form is less commonly stated, so we include it for
+completeness.
+
+\begin{lemma}[Strong convexity of negentropy on the subprobability simplex]
+\label{lem:subprob-negentropy-strong-convexity}
+For every $\mathbf{m}\in\mathcal{M}_H$ and
+$\mathbf{v}\in\mathcal{M}_H\cap\mathbb{R}_{>0}^H$,
+\begin{equation}
+\label{eq:subprob-negentropy-strong-convexity}
+D_\Psi(\mathbf{m}\|\mathbf{v})
+\ge
+\frac12\|\mathbf{m}-\mathbf{v}\|_1^2.
+\end{equation}
+Thus, $\Psi$ is $1$-strongly convex with respect to $\|\cdot\|_1$ on
+$\mathcal{M}_H$.
+\end{lemma}
+
+\begin{proof}
+First suppose $\mathbf{m}>0$ coordinatewise. Set
+$\mathbf{d}\triangleq\mathbf{m}-\mathbf{v}$ and
+$\mathbf{z}_s\triangleq\mathbf{v}+s\mathbf{d}$ for $s\in[0,1]$. Then
+$\mathbf{z}_s\in\mathcal{M}_H\cap\mathbb{R}_{>0}^H$, and weighted
+Cauchy--Schwarz gives
+\[
+\begin{aligned}
+\|\mathbf{d}\|_1^2
+&=\left(\sum_{i=1}^H
+\frac{|d_i|}{\sqrt{z_{s,i}}}\sqrt{z_{s,i}}\right)^2 \\
+&\le
+\left(\sum_{i=1}^H\frac{d_i^2}{z_{s,i}}\right)
+\left(\sum_{i=1}^H z_{s,i}\right) \\
+&\le
+\mathbf{d}^\top\nabla^2\Psi(\mathbf{z}_s)\mathbf{d}.
+\end{aligned}
+\]
+The integral remainder in Taylor's formula therefore yields
+\[
+\begin{aligned}
+D_\Psi(\mathbf{m}\|\mathbf{v})
+&=\int_0^1(1-s)
+\mathbf{d}^\top\nabla^2\Psi(\mathbf{z}_s)\mathbf{d}\,ds \\
+&\ge
+\|\mathbf{d}\|_1^2\int_0^1(1-s)\,ds
+=\frac12\|\mathbf{d}\|_1^2.
+\end{aligned}
+\]
+For a general $\mathbf{m}\in\mathcal{M}_H$, apply the preceding bound to
+$\mathbf{m}^{\varepsilon}\triangleq(1-\varepsilon)\mathbf{m}
++\varepsilon\mathbf{v}$ and let $\varepsilon\downarrow0$. The result follows
+from the convention $0\log0=0$ and continuity in the first argument of
+$D_\Psi$.
+\end{proof}
+
 \begin{lemma}[One-step OMD movement bound]
 \label{lem:omd-move}
 The OMD update \eqref{eq:alg-omd-argmin} with step size $\eta>0$ satisfies
@@ -1760,22 +1815,8 @@ The OMD update \eqref{eq:alg-omd-argmin} with step size $\eta>0$ satisfies
 \end{lemma}
 
 \begin{proof}
-For every $\mathbf{z}\in\mathcal{M}_H\cap\mathbb{R}_{>0}^H$ and
-$\mathbf{v}\in\mathbb{R}^H$, Cauchy--Schwarz and $\sum_i z_i\le1$ give
-\begin{equation}
-\label{eq:omd-strong-convexity}
-\begin{aligned}
-\mathbf{v}^\top\nabla^2\Psi(\mathbf{z})\mathbf{v}
-&=
-\sum_{i=1}^H\frac{v_i^2}{z_i} \\
-&\ge
-\frac{\|\mathbf{v}\|_1^2}{\sum_{i=1}^H z_i} \\
-&\ge
-\|\mathbf{v}\|_1^2.
-\end{aligned}
-\end{equation}
-By Lemma~\ref{lem:omd-closed-form}, both iterates are positive. Integrating
-\eqref{eq:omd-strong-convexity} along the segment joining them gives
+By Lemma~\ref{lem:omd-closed-form}, both iterates are positive. Applying
+Lemma~\ref{lem:subprob-negentropy-strong-convexity} in both directions gives
 \[
 \begin{aligned}
 D_\Psi(\mathbf{m}_{t+1}\|\mathbf{m}_t)
@@ -1867,8 +1908,7 @@ The equality follows from the three-point Bregman identity. Substituting
 -\frac{D_\Psi(\mathbf{m}_{t+1}\|\mathbf{m}_t)}{\eta}.
 \end{aligned}
 \end{equation}
-The strong-convexity calculation
-\eqref{eq:omd-strong-convexity} and H\"older's inequality give
+Lemma~\ref{lem:subprob-negentropy-strong-convexity} and H\"older's inequality give
 \begin{equation}
 \label{eq:omd-young-step}
 \begin{aligned}
