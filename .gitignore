@@ -19,6 +19,8 @@
 *.dvi
 *.ps
 .latexmk-watch.pid
+.latexmk-build/
+.latexmk-publish-*.tmp
 # Local archive / recycle bin (not part of active repo)
 archive/
 
