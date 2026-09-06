@@ -2092,30 +2092,62 @@ Thus $\sqrt{\Gamma_\alpha}=\Theta((1-\alpha)^{-3/2})$.
 \end{proof}
 
 \begin{proof}[Proof of Corollary~\ref{cor:regret-vs-allocation}]
-Fix $\mathbf{q}\in\mathcal{Q}_\alpha$ and use the SDAC comparator
-$\mathbf{m}_{H_T}(\mathbf{q})$ from
-Lemma~\ref{lem:sdac-allocation-approx}. Theorem~\ref{thm:regret-bound} and
-\eqref{eq:allocation-cost-gap} give
+Fix $\mathbf{q}\in\mathcal{Q}_\alpha$ and set
+$\mathbf{m}=\mathbf{m}_{H_T}(\mathbf{q})\in\mathcal{M}_{H_T}$ as in
+Lemma~\ref{lem:sdac-allocation-approx}. By the definition of $\RegSDAC{T}$,
 \[
 \begin{aligned}
 J_T^{\mathrm{on}}-J_T(\mathbf{q})
-&\le
-2\sqrt{\Gamma_\alpha T\log(H_T+1)}\\
-&\quad+
-\left(L_u+\frac{L_x}{1-\alpha}\right)
-\operatorname{Tail}_{H_T}(\mathbf{q})T\\
-&\le
-2\sqrt{\Gamma_\alpha T\log(H_T+1)}\\
-&\quad+
-\left(L_u+\frac{L_x}{1-\alpha}\right)
-\alpha^{H_T+1}T.
+&=J_T^{\mathrm{on}}-J_T(\mathbf{m}) \\
+&\quad+J_T(\mathbf{m})-J_T(\mathbf{q}) \\
+&\le\RegSDAC{T}+J_T(\mathbf{m})-J_T(\mathbf{q}).
 \end{aligned}
 \]
-The bound is uniform in $\mathbf{q}$, so taking the infimum over
-$\mathbf{q}\in\mathcal{Q}_\alpha$ proves \eqref{eq:allocation-regret-bound}.
-Finally,
-$H_T\ge\log T/\log(1/\alpha)$ implies $\alpha^{H_T}\le1/T$, while
-$H_T=\Theta(\log T)$ implies $\log(H_T+1)=O(\log\log T)$.
+The approximation bound \eqref{eq:allocation-cost-gap} gives
+\[
+J_T(\mathbf{m})-J_T(\mathbf{q})
+\le
+\left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H_T+1}T.
+\]
+This bound is independent of $\mathbf{q}$. Taking the supremum and applying
+Theorem~\ref{thm:regret-bound} with step size $\eta^*$ therefore yields
+\[
+\begin{aligned}
+\RegAlloc{T}
+&=\sup_{\mathbf{q}\in\mathcal{Q}_\alpha}
+\bigl(J_T^{\mathrm{on}}-J_T(\mathbf{q})\bigr) \\
+&\le\RegSDAC{T}
++\left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H_T+1}T \\
+&\le2\sqrt{\Gamma_\alpha T\log(H_T+1)} \\
+&\quad+\left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H_T+1}T,
+\end{aligned}
+\]
+which proves \eqref{eq:allocation-regret-bound}.
+
+For the rate, the definition of $H_T$ gives
+\[
+\frac{\log T}{\log(1/\alpha)}
+\le H_T
+\le 1+\frac{\log T}{\log(1/\alpha)}.
+\]
+Since $0<\alpha<1$, it follows that
+\[
+\begin{aligned}
+\alpha^{H_T+1}T
+&\le\alpha^{1+\log T/\log(1/\alpha)}T \\
+&=\alpha\exp\!\left(
+\frac{\log\alpha}{\log(1/\alpha)}\log T\right)T \\
+&=\alpha e^{-\log T}T=\alpha.
+\end{aligned}
+\]
+Also, for fixed $\alpha$,
+\[
+\log(H_T+1)
+\le\log\!\left(2+\frac{\log T}{\log(1/\alpha)}\right)
+=O(\log\log T).
+\]
+Thus, for fixed $\alpha,L_x,L_u$, the right-hand side of
+\eqref{eq:allocation-regret-bound} is $O(\sqrt{T\log\log T})=o(T)$.
 \end{proof}
 
 \begin{proof}[Proof of Corollary~\ref{cor:regret-vs-fraction}]
