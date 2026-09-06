@@ -1916,7 +1916,7 @@ Since $D_\Psi(\mathbf{m}\|\mathbf{m}_{T+1})\ge0$, this proves
 
 \begin{lemma}[Positive-part representation of the dynamics]
 \label{lem:positive-part-dynamics}
-For $\mathbf{m}\in\mathcal{M}_H$, define
+For $t\in[T]$, $x\ge0$, and $\mathbf{m}\in\mathcal{M}_H$, define
 \begin{equation}
 \label{eq:def-contractive-transition}
 F_t(x;\mathbf{m})
@@ -1924,8 +1924,7 @@ F_t(x;\mathbf{m})
 \left[\alpha x-\langle\boldsymbol{\phi}_t^u,\mathbf{m}\rangle\right]_+
 +w_t.
 \end{equation}
-Then the online state and the state component of every fixed-policy trajectory
-satisfy
+Then, for every $t\in[T]$ and $\mathbf{m}\in\mathcal{M}_H$,
 \begin{equation}
 \label{eq:positive-part-transitions}
 x_{t+1}=F_t(x_t;\mathbf{m}_t),
@@ -1936,54 +1935,65 @@ Moreover, for all $x,x'\ge0$ and
 $\mathbf{m},\mathbf{m}'\in\mathcal{M}_H$,
 \begin{equation}
 \label{eq:transition-contraction}
-\begin{aligned}
-&|F_t(x;\mathbf{m})-F_t(x';\mathbf{m}')| \\
-&\quad\le
-\left|
-\alpha(x-x')
--\langle\boldsymbol{\phi}_t^u,\mathbf{m}-\mathbf{m}'\rangle
-\right| \\
-&\quad\le
+|F_t(x;\mathbf{m})-F_t(x';\mathbf{m}')|
+\le
 \alpha|x-x'|
 +\|\boldsymbol{\phi}_t^u\|_\infty
 \|\mathbf{m}-\mathbf{m}'\|_1.
-\end{aligned}
 \end{equation}
 \end{lemma}
 
 \begin{proof}
-For the online trajectory, \eqref{eq:alg-feasible-action} implies
-\begin{equation}
+By \eqref{eq:model-dynamics} and \eqref{eq:alg-feasible-action},
+\[
 \begin{aligned}
-\alpha x_t-u_t
-&=
-\alpha x_t-
+x_{t+1}
+&=\alpha x_t-
 \min\!\left\{
 \langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle,
 \alpha x_t
-\right\} \\
-&=
-\left[
-\alpha x_t-
-\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle
-\right]_+.
+\right\}+w_t \\
+&=\left[
+\alpha x_t-\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle
+\right]_++w_t \\
+&=F_t(x_t;\mathbf{m}_t).
 \end{aligned}
-\end{equation}
-For a fixed $\mathbf{m}$, Lemma~\ref{lem:sdac-feasibility} gives
+\]
+For a fixed $\mathbf{m}$, \eqref{eq:def-sdac-policy} and
+Lemma~\ref{lem:sdac-feasibility} give
+$\langle\boldsymbol{\phi}_t^u,\mathbf{m}\rangle
+=u_t(\mathbf{m})\le\alpha x_t(\mathbf{m})$. Hence, by
+\eqref{eq:model-dynamics},
 \[
+\begin{aligned}
+x_{t+1}(\mathbf{m})
+&=\alpha x_t(\mathbf{m})
+-\langle\boldsymbol{\phi}_t^u,\mathbf{m}\rangle+w_t \\
+&=\left[
 \alpha x_t(\mathbf{m})
 -\langle\boldsymbol{\phi}_t^u,\mathbf{m}\rangle
-\ge0,
+\right]_++w_t \\
+&=F_t(x_t(\mathbf{m});\mathbf{m}).
+\end{aligned}
 \]
-so inserting a positive part does not change its state update. This proves
-\eqref{eq:positive-part-transitions}. Finally, the map $z\mapsto[z]_+$ is
-nonexpansive:
+Finally, since $|[z]_+-[z']_+|\le|z-z'|$,
 \[
-|[z]_+-[z']_+|\le|z-z'|.
+\begin{aligned}
+|F_t(x;\mathbf{m})-F_t(x';\mathbf{m}')|
+&=\left|
+\left[\alpha x-\langle\boldsymbol{\phi}_t^u,\mathbf{m}\rangle\right]_+
+-\left[\alpha x'-\langle\boldsymbol{\phi}_t^u,\mathbf{m}'\rangle\right]_+
+\right| \\
+&\le\left|
+\alpha(x-x')
+-\langle\boldsymbol{\phi}_t^u,\mathbf{m}-\mathbf{m}'\rangle
+\right| \\
+&\le\alpha|x-x'|
++\|\boldsymbol{\phi}_t^u\|_\infty
+\|\mathbf{m}-\mathbf{m}'\|_1,
+\end{aligned}
 \]
-Applying this inequality to the two arguments in
-\eqref{eq:def-contractive-transition}, followed by H\"older's inequality, gives
-\eqref{eq:transition-contraction}.
+where the last inequality follows from the triangle and H\"older inequalities.
 \end{proof}
 
 \begin{proof}[Proof of Lemma~\ref{lem:contractive-deviation}]
