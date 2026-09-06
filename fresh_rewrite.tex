@@ -1757,37 +1757,17 @@ and surrogate-cost lemmas established in Section~\ref{sec:sdac}
 
 \begin{lemma}[One-step OMD movement bound]
 \label{lem:omd-move}
-For the OMD update with step size $\eta>0$ and subgradient
-$\mathbf{g}_t\in\partial \ell_t(\mathbf{m}_t)$,
+The OMD update \eqref{eq:alg-omd-argmin} with step size $\eta>0$ satisfies
 \[
-\|\mathbf{m}_{t+1}-\mathbf{m}_t\|_1 \le \eta\,\|\mathbf{g}_t\|_\infty.
+\|\mathbf{m}_{t+1}-\mathbf{m}_t\|_1
+\le \eta\|\mathbf{g}_t\|_\infty
+\le \eta G_\alpha.
 \]
-In particular, since $\|\mathbf{g}_t\|_\infty\le G_\alpha$,
-$\|\mathbf{m}_{t+1}-\mathbf{m}_t\|_1\le \eta G_\alpha$.
 \end{lemma}
 
 \begin{proof}
-First-order optimality of
-\eqref{eq:alg-omd-argmin}, evaluated at the feasible point $\mathbf{m}_t$, gives
-\begin{equation}
-\label{eq:omd-movement-optimality}
-\begin{aligned}
-&\left\langle
-\eta \mathbf{g}_t+\nabla\Psi(\mathbf{m}_{t+1})-\nabla\Psi(\mathbf{m}_t),
-\mathbf{m}_t-\mathbf{m}_{t+1}
-\right\rangle
-\ge0, \\
-&D_\Psi(\mathbf{m}_{t+1}\|\mathbf{m}_t)+D_\Psi(\mathbf{m}_t\|\mathbf{m}_{t+1}) \\
-&\qquad\le
-\eta\langle \mathbf{g}_t,\mathbf{m}_t-\mathbf{m}_{t+1}\rangle \\
-&\qquad\le
-\eta\|\mathbf{g}_t\|_\infty\|\mathbf{m}_{t+1}-\mathbf{m}_t\|_1.
-\end{aligned}
-\end{equation}
-The second line uses the symmetric Bregman identity.
-
 For every $\mathbf{z}\in\mathcal{M}_H\cap\mathbb{R}_{>0}^H$ and
-$\mathbf{v}\in\mathbb{R}^H$,
+$\mathbf{v}\in\mathbb{R}^H$, Cauchy--Schwarz and $\sum_i z_i\le1$ give
 \begin{equation}
 \label{eq:omd-strong-convexity}
 \begin{aligned}
@@ -1800,11 +1780,8 @@ $\mathbf{v}\in\mathbb{R}^H$,
 \|\mathbf{v}\|_1^2.
 \end{aligned}
 \end{equation}
-The first inequality follows from Cauchy--Schwarz. The segment joining
-$\mathbf{m}_t$ and
-$\mathbf{m}_{t+1}$ lies in $\mathcal{M}_H\cap\mathbb{R}_{>0}^H$ by
-Lemma~\ref{lem:omd-closed-form}; integrating
-\eqref{eq:omd-strong-convexity} along this segment yields
+By Lemma~\ref{lem:omd-closed-form}, both iterates are positive. Integrating
+\eqref{eq:omd-strong-convexity} along the segment joining them gives
 \[
 \begin{aligned}
 D_\Psi(\mathbf{m}_{t+1}\|\mathbf{m}_t)
@@ -1815,14 +1792,26 @@ D_\Psi(\mathbf{m}_t\|\mathbf{m}_{t+1})
 \frac12\|\mathbf{m}_{t+1}-\mathbf{m}_t\|_1^2.
 \end{aligned}
 \]
-Combining these inequalities with \eqref{eq:omd-movement-optimality},
+Adding these bounds and using the symmetric Bregman identity,
 \[
-\|\mathbf{m}_{t+1}-\mathbf{m}_t\|_1^2
-\le
+\begin{aligned}
+&\|\mathbf{m}_{t+1}-\mathbf{m}_t\|_1^2 \\
+&\quad\le
+D_\Psi(\mathbf{m}_{t+1}\|\mathbf{m}_t)+D_\Psi(\mathbf{m}_t\|\mathbf{m}_{t+1}) \\
+&\quad=
+\end{aligned}
+\bigl\langle\nabla\Psi(\mathbf{m}_{t+1})-\nabla\Psi(\mathbf{m}_t),
+\mathbf{m}_{t+1}-\mathbf{m}_t\bigr\rangle \\
+&\quad\le
+\eta\langle\mathbf{g}_t,\mathbf{m}_t-\mathbf{m}_{t+1}\rangle \\
+&\quad\le
 \eta\|\mathbf{g}_t\|_\infty\|\mathbf{m}_{t+1}-\mathbf{m}_t\|_1.
 \]
-The claim is immediate if $\mathbf{m}_{t+1}=\mathbf{m}_t$; otherwise divide by
-$\|\mathbf{m}_{t+1}-\mathbf{m}_t\|_1$.
+The last two inequalities use first-order optimality of
+\eqref{eq:alg-omd-argmin} at the feasible point $\mathbf{m}_t$ and
+H\"older's inequality, respectively. If the iterates differ, divide by
+$\|\mathbf{m}_{t+1}-\mathbf{m}_t\|_1$; otherwise the bound is trivial.
+Finally, $\|\mathbf{g}_t\|_\infty\le G_\alpha$ gives the stated uniform bound.
 \end{proof}
 
 \begin{lemma}[OMD regret for the surrogate costs]
