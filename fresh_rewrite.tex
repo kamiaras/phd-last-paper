@@ -45,9 +45,8 @@ whose sum is at most one. The key feature of SDAC is that every fixed policy in 
 class is feasible by construction. Our online SDAC controller updates these
 parameters using entropic online mirror descent while preserving feasibility along
 the time-varying trajectory. We prove a regret bound of
-$O\!\left(\sqrt{T\log(H+1)}\right)$ relative to the best fixed SDAC policy. We
-also derive a minimax lower bound showing that the dependence on $T$ is tight. We
-then show that SDAC
+$O\!\left(\sqrt{T\log(H+1)}\right)$ relative to the best fixed SDAC policy and a
+minimax lower bound showing that the dependence on $T$ is tight. Moreover, SDAC
 geometrically approximates a decreasing-allocation policy class that spreads each
 arrival over time according to a common decreasing allocation sequence, a structure
 that arises in stochastic energy-harvesting control. With a suitable choice
@@ -115,8 +114,8 @@ trajectory used as a benchmark must satisfy the same dynamics and action
 constraint. The formal model and assumptions are given in
 Section~\ref{sec:model-setup}.
 
-Energy-harvesting battery management is our main application. In this case, $x_t$
-is the battery state of charge, $w_t$ is the harvested energy, $u_t$ is the energy
+Our main application is energy-harvesting battery management, where $x_t$ is the
+battery state of charge, $w_t$ is the harvested energy, $u_t$ is the energy
 used, and $1-\alpha$ is the fraction of stored energy lost during one period.
 Similar dynamics arise in perishable inventory systems, water reservoirs with
 storage loss, and queues with abandonment. In many standard queueing models,
@@ -331,8 +330,8 @@ A storage capacity of $1/(1-\alpha)$ suffices to avoid overflow.
 \end{remark}
 
 Each revealed cost function $c_t:\mathbb{R}_{\ge0}^2\to\mathbb{R}$ is convex in
-$(x,u)$. We also assume that each $c_t$ satisfies the following Lipschitz condition
-on $\mathcal{D}_\alpha$: there are constants $L_x,L_u>0$ such that
+$(x,u)$ and satisfies the following Lipschitz condition on $\mathcal{D}_\alpha$:
+there are constants $L_x,L_u>0$ such that
 \begin{equation}
 \label{eq:model-lipschitz}
 |c_t(x,u)-c_t(x',u')|
@@ -372,11 +371,9 @@ J_T^{\mathrm{on}}
 
 For a fixed positive integer \(H\), let \(\pi_{\mathbf{m}}\) denote the fixed SDAC
 policy indexed by \(\mathbf{m}\in\mathcal{M}_H\), where \(\mathcal{M}_H\) is defined in Section~\ref{sec:sdac}.
-The \emph{fixed-policy trajectory associated with $\mathbf{m}$} is the unique
+The corresponding \emph{fixed-policy trajectory} is the unique
 state--action sequence $\{(x_t(\mathbf{m}),u_t(\mathbf{m}))\}_{t=1}^T$ obtained by
-applying $\pi_{\mathbf{m}}$ with $\mathbf{m}$ held
-constant at every time.
-Define the cumulative cost of this fixed-policy trajectory by
+applying $\pi_{\mathbf{m}}$ at every time. Its cumulative cost is
 \[
 J_T(\mathbf{m})
 \triangleq
@@ -422,9 +419,9 @@ filter.
 For our constrained model, an unrestricted filter does not ensure feasibility: its
 action can exceed $\alpha x_t$ or become negative.
 We therefore introduce \emph{Simplex Disturbance-Action Control} (SDAC), which uses a
-simplex-constrained filter tailored to the storage dynamics. This restriction ensures
-that every fixed SDAC policy is feasible, preserves the convexity of the surrogate
-costs, and allows efficient online updates.
+simplex-constrained filter tailored to the storage dynamics. This restriction makes
+every fixed SDAC policy feasible while keeping surrogate costs convex and online
+updates efficient.
 
 
 \subsection{Policy Definition and Structural Properties}
@@ -464,10 +461,10 @@ The resulting SDAC policy class is
 \{\pi_{\mathbf{m}}:\mathbf{m}\in\mathcal{M}_H\}.
 \end{equation}
 
-We next establish two structural properties of this policy class. Every
+The following state decomposition underlies both structural properties: every
 $\pi_{\mathbf{m}}$ satisfies the feasibility constraint
 \eqref{eq:model-feasibility}, and its induced cost is convex and Lipschitz in
-$\mathbf{m}$. Proofs omitted from this section are collected in
+$\mathbf{m}$. Omitted proofs appear in
 Appendix~\ref{sec:appendix-sdac-proofs}.
 
 \begin{lemma}[State decomposition under SDAC]
@@ -572,8 +569,7 @@ $\mathbf{m},\mathbf{m}'\in\mathcal{M}_H$,
 \le
 G_\alpha\|\mathbf{m}-\mathbf{m}'\|_1.
 \]
-For each $\mathbf{m}\in\mathcal{M}_H$, use the cost subgradient from
-\eqref{eq:model-cost-subgradient} to write
+For $\mathbf{m}\in\mathcal{M}_H$, use \eqref{eq:model-cost-subgradient} to define
 \begin{equation}
 \label{eq:surr-subgradient}
 \begin{aligned}
@@ -586,7 +582,7 @@ For each $\mathbf{m}\in\mathcal{M}_H$, use the cost subgradient from
 +\zeta_t^u\boldsymbol{\phi}_t^u.
 \end{aligned}
 \end{equation}
-The resulting vector satisfies
+Then
 \[
 \mathbf{g}_t\in\partial\ell_t(\mathbf{m}),
 \qquad
@@ -752,13 +748,11 @@ Initialize the online parameter as
 \end{equation}
 
 \paragraph{Action selection}
-At the start of round $t$, the controller has the online parameter
-$\mathbf{m}_t$. For $t=1$, this parameter is initialized according to
-\eqref{eq:alg-init}; for $t\ge2$, it is the output of the OMD update from round
-$t-1$.
-Because $\mathbf{m}_t$ varies with $t$, the nominal action
-$\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle$ may exceed the current upper
-bound $\alpha x_t$. The controller therefore selects
+At round $t$, the controller uses the online parameter $\mathbf{m}_t$, initialized
+by \eqref{eq:alg-init} for $t=1$ and produced by the OMD update from round $t-1$
+for $t\ge2$. Fixed-policy feasibility need not hold when $\mathbf{m}_t$ varies: the
+nominal action $\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle$ can exceed
+$\alpha x_t$. The controller therefore selects
 \begin{equation}
 \label{eq:alg-feasible-action}
 u_t
@@ -816,10 +810,10 @@ D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}}_{t+1}) \\
 
 \section{Regret Upper Bounds}
 \label{sec:regret-analysis}
-The following theorem states that the online SDAC controller achieves sublinear
+The resulting online SDAC controller achieves sublinear
 regret relative to every fixed SDAC policy
-$\pi_{\mathbf{m}}\in\Pi_H^{\mathrm{SDAC}}$. Proofs omitted from this section are
-collected in Appendix~\ref{sec:appendix-regret-proofs}.
+$\pi_{\mathbf{m}}\in\Pi_H^{\mathrm{SDAC}}$. Omitted proofs appear in
+Appendix~\ref{sec:appendix-regret-proofs}.
 
 \begin{theorem}[Regret against fixed SDAC policies]
 \label{thm:regret-bound}
@@ -930,27 +924,16 @@ $u_t(k)=kx_t(k)$, and define
 \triangleq
 J_T^{\mathrm{on}}-\min_{k\in[0,\alpha]}J_T(k).
 \]
-Then
-\[
-\begin{aligned}
-\RegFrac{T}
-&\le
-2\sqrt{\Gamma_\alpha T\log(H_T+1)}
-\\
-&\quad+
-\left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H_T+1}T.
-\end{aligned}
-\]
-For fixed $\alpha,L_x,L_u$, the right-hand side is
-$O\!\left(\sqrt{T\log\log T}\right)=o(T)$.
+Then \eqref{eq:allocation-regret-bound} also holds with $\RegAlloc{T}$ replaced by
+$\RegFrac{T}$.
 \end{corollary}
 
 \section{Minimax Regret Lower Bound}
 \label{sec:minimax-lower-bound}
 
-The next result shows that the $\sqrt{T}$ dependence is unavoidable and quantifies
-the necessary dependence on $1-\alpha$ for any causal feasible controller. Proofs
-omitted from this section are collected in
+Complementing the upper bound, the next result shows that the $\sqrt{T}$ dependence
+is unavoidable and quantifies the necessary dependence on $1-\alpha$ for any
+causal feasible controller. Omitted proofs appear in
 Appendix~\ref{sec:appendix-minimax-proofs}.
 
 \begin{theorem}[Minimax SDAC regret lower bound]
@@ -1283,9 +1266,8 @@ m_{H,i}(\mathbf{q})=\frac{q_i}{\alpha^i}\ge0,
 \]
 Thus $\mathbf{m}_H(\mathbf{q})\in\mathcal{M}_H$.
 
-We next prove that $\pi_{\mathbf{q}}$ is feasible. For this purpose, take the
-truncation length to be $T$. Using
-$w_\tau=0$ for $\tau\le0$, for every $t\in[T]$,
+For feasibility, use truncation length $T$. Since $w_\tau=0$ for $\tau\le0$, for
+every $t\in[T]$,
 \[
 u_t\bigl(\mathbf{m}_T(\mathbf{q})\bigr)
 =\sum_{i=1}^T\frac{q_i}{\alpha^i}\alpha^i w_{t-i}
@@ -1484,17 +1466,13 @@ Since $\mathbf{m}_t^{\mathrm{exec}}\in\mathcal{B}_t$,
 \le\alpha x_t
 <\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle.
 \]
-Suppose, for contradiction, that the action constraint is slack at
-$\mathbf{m}_t^{\mathrm{exec}}$:
+Assume, for contradiction, that the action constraint is slack:
 \[
 \langle\boldsymbol{\phi}_t^u,\mathbf{m}_t^{\mathrm{exec}}\rangle
 <\alpha x_t
 <\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle.
 \]
-We move a small distance from $\mathbf{m}_t^{\mathrm{exec}}$ toward
-$\mathbf{m}_t$. The step is chosen to remain in $\mathcal{B}_t$; strict
-convexity will then give a smaller Bregman divergence, contradicting the
-optimality of $\mathbf{m}_t^{\mathrm{exec}}$. Choose $0<\delta<1$ such that
+Choose $0<\delta<1$ such that
 \[
 \delta\left(
 \langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle-
@@ -1583,7 +1561,7 @@ m_i\log\frac{m_i}{\widetilde{m}_{t+1,i}}-m_i+m_{t,i}
 +\sum_{i=1}^H(m_{t,i}-\widetilde{m}_{t+1,i}).
 \end{aligned}
 \]
-The final sum is independent of $\mathbf{m}$, so it remains to minimize
+Thus, it suffices to minimize
 $D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}}_{t+1})$ over $\mathcal{M}_H$.
 
 If $\|\widetilde{\mathbf{m}}_{t+1}\|_1\le1$, then
@@ -1649,10 +1627,9 @@ Induction from \eqref{eq:alg-init} proves positivity of every iterate.
 \section{Proofs for the Regret Upper Bounds}
 \label{sec:appendix-regret-proofs}
 
-The analogous strong-convexity result for the probability simplex is standard;
-see, e.g., \cite{hazan2016introduction}. Although the proof below is not new,
-the subprobability form is less commonly stated, so we include it for
-completeness.
+The result for the probability simplex is standard
+\cite{hazan2016introduction}; we include the less commonly stated subprobability
+form.
 
 \begin{lemma}[Strong convexity of negentropy on the subprobability simplex]
 \label{lem:subprob-negentropy-strong-convexity}
@@ -1792,8 +1769,8 @@ D_\Psi(\mathbf{m}\|\mathbf{m}_t)
 -D_\Psi(\mathbf{m}_{t+1}\|\mathbf{m}_t).
 \end{aligned}
 \end{equation}
-The equality follows from the three-point Bregman identity. Substituting
-\eqref{eq:omd-three-point-step} into \eqref{eq:omd-convexity-step},
+By the three-point Bregman identity, substituting
+\eqref{eq:omd-three-point-step} into \eqref{eq:omd-convexity-step} gives
 \begin{equation}
 \label{eq:omd-one-step-regret}
 \begin{aligned}
@@ -1821,9 +1798,8 @@ Lemma~\ref{lem:subprob-negentropy-strong-convexity} and H\"older's inequality gi
 \frac{\eta}{2}\|\mathbf{g}_t\|_\infty^2.
 \end{aligned}
 \end{equation}
-The last inequality follows from Young's inequality. Combining
-\eqref{eq:omd-one-step-regret} and \eqref{eq:omd-young-step} and summing over $t$
-gives
+The last step is Young's inequality. Substituting \eqref{eq:omd-young-step} into
+\eqref{eq:omd-one-step-regret} and summing over $t$ gives
 \[
 \begin{aligned}
 \sum_{t=1}^T\ell_t(\mathbf{m}_t)
@@ -2268,11 +2244,10 @@ Taking expectations and applying Khintchine's inequality in the last line gives
 \sqrt{\sum_{t=2}^T\beta_t^2}.
 \end{aligned}
 \]
-This expectation averages over the finitely many sign vectors
-$\boldsymbol{\xi}\in\{-1,1\}^T$. At least one vector
-$\boldsymbol{\xi}^\star$ therefore gives expected regret, over the controller's
-randomization alone, at least as large as this bound. Fixing that vector before
-the interaction gives the required deterministic oblivious sequence.
+Averaging over $\boldsymbol{\xi}\in\{-1,1\}^T$, some $\boldsymbol{\xi}^\star$
+gives expected regret at least this bound over the controller's randomization.
+Fixing $\boldsymbol{\xi}^\star$ before the interaction gives the required
+deterministic oblivious sequence.
 \end{proof}
 
 \begin{proof}[Proof of Corollary~\ref{cor:sdac-lower-mixing}]
