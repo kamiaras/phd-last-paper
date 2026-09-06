@@ -779,12 +779,9 @@ $\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle\ge0$. If $x_t\ge0$, then
 \eqref{eq:model-dynamics} gives $x_{t+1}\ge w_t\ge0$. Since $x_1=0$, induction
 shows that the online trajectory is feasible.
 
-The clipping step also has a Bregman interpretation. We use
-$\mathbf{m}_t^{\mathrm{exec}}$ to denote the execution vector obtained by
-projecting $\mathbf{m}_t$ onto the set of parameters compatible with the current
-state $x_t$, using the negentropy Bregman divergence.
-Lemma~\ref{lem:availability-projection} formalizes this projection and shows
-that $\mathbf{m}_t^{\mathrm{exec}}$ induces exactly the clipped action $u_t$.
+The clipping step also has an interesting interpretation. Lemma~\ref{lem:availability-projection} shows that the $D_\Psi$-projection of
+$\mathbf{m}_t$ onto the parameters compatible with $x_t$ induces exactly the
+clipped action $u_t$.
 \paragraph{Surrogate cost and OMD update}
 After $w_t$ and $c_t$ are revealed, the controller evaluates the subgradient
 $\mathbf{g}_t$ in \eqref{eq:surr-subgradient} at $\mathbf{m}_t$ and sets
@@ -1497,9 +1494,8 @@ Substituting the trajectory and tail identities into
 
 \begin{lemma}[Action clipping as a Bregman projection]
 \label{lem:availability-projection}
-At time $t$, define the parameter set compatible with the available state by
-\begin{equation}
-\label{eq:def-availability-set}
+For $t\in[T]$, define the set of parameters compatible with the current state by
+\[
 \mathcal{B}_t(x_t)
 \triangleq
 \left\{
@@ -1507,18 +1503,17 @@ At time $t$, define the parameter set compatible with the available state by
 \langle\boldsymbol{\phi}_t^u,\mathbf{m}\rangle
 \le \alpha x_t
 \right\}.
-\end{equation}
-For the negentropy $\Psi$ in \eqref{eq:def-negentropy}, let
-\begin{equation}
-\label{eq:def-exec-projection}
+\]
+Let $\mathbf{m}_t^{\mathrm{exec}}$ be the Bregman projection of
+$\mathbf{m}_t$ onto $\mathcal{B}_t(x_t)$:
+\[
 \mathbf{m}_t^{\mathrm{exec}}
 \in
 \operatorname*{arg\,min}_{\mathbf{m}\in\mathcal{B}_t(x_t)}
 D_\Psi(\mathbf{m}\|\mathbf{m}_t).
-\end{equation}
+\]
 Then
-\begin{equation}
-\label{eq:availability-projection-action}
+\[
 \left\langle
 \boldsymbol{\phi}_t^u,\mathbf{m}_t^{\mathrm{exec}}
 \right\rangle
@@ -1528,55 +1523,99 @@ Then
 \alpha x_t
 \right\}
 =u_t.
-\end{equation}
-Thus the projection formulation and the scalar clipping rule induce exactly the
-same executed action.
+\]
 \end{lemma}
 
 \begin{proof}
-The set $\mathcal{B}_t(x_t)$ is nonempty because it contains $\mathbf{0}$, and it
-is compact and convex. By Lemma~\ref{lem:omd-closed-form}, every coordinate of
-$\mathbf{m}_t$ is strictly positive. Hence
-$D_\Psi(\cdot\|\mathbf{m}_t)$ is strictly convex on $\mathcal{M}_H$ and is
-minimized uniquely at $\mathbf{m}_t$ over any feasible set containing
-$\mathbf{m}_t$.
-Consequently, if
+The online state satisfies $x_t\ge0$, so
+$\mathbf{0}\in\mathcal{B}_t(x_t)$. This set is compact and convex because it is
+the intersection of $\mathcal{M}_H$ and a closed halfspace. By
+\eqref{eq:alg-init} and the update
+\eqref{eq:alg-omd-mult}--\eqref{eq:alg-omd-proj}, every coordinate of
+$\mathbf{m}_t$ is positive. Thus,
+$D_\Psi(\cdot\|\mathbf{m}_t)$ is continuous and strictly convex on
+$\mathcal{M}_H$, so the projection exists and is unique. Moreover,
+$D_\Psi(\mathbf{m}\|\mathbf{m}_t)\ge0$, with equality only at
+$\mathbf{m}=\mathbf{m}_t$.
+
+If
 \[
 \langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle
 \le \alpha x_t,
 \]
-then $\mathbf{m}_t^{\mathrm{exec}}=\mathbf{m}_t$, which proves
-\eqref{eq:availability-projection-action} in the feasible case.
+then $\mathbf{m}_t\in\mathcal{B}_t(x_t)$ and
+$\mathbf{m}_t^{\mathrm{exec}}=\mathbf{m}_t$.
 
-Suppose instead that $\mathbf{m}_t$ is infeasible. We claim that the action
-constraint is active at $\mathbf{m}_t^{\mathrm{exec}}$. If it were slack, then
-\begin{equation}
-\label{eq:availability-projection-slack}
-\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t^{\mathrm{exec}}\rangle
-<\alpha x_t
-<\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle.
-\end{equation}
-For sufficiently small $\lambda\in(0,1)$, the point
+Now suppose
 \[
-\mathbf{m}_\lambda
-\triangleq
-(1-\lambda)\mathbf{m}_t^{\mathrm{exec}}+\lambda\mathbf{m}_t
+\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle
+>\alpha x_t.
 \]
-would still belong to $\mathcal{B}_t(x_t)$. Because
-$D_\Psi(\mathbf{m}_t\|\mathbf{m}_t)=0$, strict convexity would then give
+Since $\mathbf{m}_t^{\mathrm{exec}}\in\mathcal{B}_t(x_t)$,
+\[
+\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t^{\mathrm{exec}}\rangle
+\le\alpha x_t
+<\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle.
+\]
+Suppose, for contradiction, that the action constraint is slack at
+$\mathbf{m}_t^{\mathrm{exec}}$:
+\[
+\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t^{\mathrm{exec}}\rangle
+<\alpha x_t.
+\]
+We move a small distance from $\mathbf{m}_t^{\mathrm{exec}}$ toward
+$\mathbf{m}_t$. The step is chosen to remain in $\mathcal{B}_t(x_t)$; strict
+convexity will then give a smaller Bregman divergence, contradicting the
+optimality of $\mathbf{m}_t^{\mathrm{exec}}$. Choose $0<\delta<1$ such that
+\[
+\delta\left(
+\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle-
+\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t^{\mathrm{exec}}\rangle
+\right)
+<
+\alpha x_t-
+\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t^{\mathrm{exec}}\rangle.
+\]
+Such a $\delta$ exists because both differences are positive. Set
+\[
+\mathbf{m}_\delta
+\triangleq
+(1-\delta)\mathbf{m}_t^{\mathrm{exec}}+\delta\mathbf{m}_t.
+\]
+By convexity, $\mathbf{m}_\delta\in\mathcal{M}_H$, and
+\[
+\begin{aligned}
+\langle\boldsymbol{\phi}_t^u,\mathbf{m}_\delta\rangle
+&=
+\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t^{\mathrm{exec}}\rangle
++\delta\left(
+\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t\rangle-
+\langle\boldsymbol{\phi}_t^u,\mathbf{m}_t^{\mathrm{exec}}\rangle
+\right) <\alpha x_t.
+\end{aligned}
+\]
+Thus $\mathbf{m}_\delta\in\mathcal{B}_t(x_t)$. Since
+$\mathbf{m}_t\notin\mathcal{B}_t(x_t)$,
+$\mathbf{m}_t^{\mathrm{exec}}\ne\mathbf{m}_t$, and hence
+$D_\Psi(\mathbf{m}_t^{\mathrm{exec}}\|\mathbf{m}_t)>0$. Strict convexity and
+$D_\Psi(\mathbf{m}_t\|\mathbf{m}_t)=0$ give
 \begin{align*}
-D_\Psi(\mathbf{m}_\lambda\|\mathbf{m}_t)
+D_\Psi(\mathbf{m}_\delta\|\mathbf{m}_t)
 &<
-(1-\lambda)D_\Psi(\mathbf{m}_t^{\mathrm{exec}}\|\mathbf{m}_t) \\
+(1-\delta)D_\Psi(\mathbf{m}_t^{\mathrm{exec}}\|\mathbf{m}_t)
++\delta D_\Psi(\mathbf{m}_t\|\mathbf{m}_t) \\
+&=
+(1-\delta)D_\Psi(\mathbf{m}_t^{\mathrm{exec}}\|\mathbf{m}_t) \\
 &<
 D_\Psi(\mathbf{m}_t^{\mathrm{exec}}\|\mathbf{m}_t),
 \end{align*}
-contradicting \eqref{eq:def-exec-projection}. Hence
+contradicting the definition of $\mathbf{m}_t^{\mathrm{exec}}$. Therefore, the
+constraint is active:
 \[
 \langle\boldsymbol{\phi}_t^u,\mathbf{m}_t^{\mathrm{exec}}\rangle
-=\alpha x_t
+=\alpha x_t.
 \]
-in the infeasible case, which completes the proof.
+Combining the two cases with \eqref{eq:alg-feasible-action} proves the result.
 \end{proof}
 
 \begin{lemma}[Bregman projection onto $\mathcal{M}_H$]
