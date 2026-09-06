@@ -884,27 +884,26 @@ controller satisfies
 
 \begin{corollary}[No-regret against decreasing-allocation policies]
 \label{cor:regret-vs-allocation}
-Set
+Under the assumptions of Theorem~\ref{thm:regret-bound}, run the online SDAC
+controller with step size $\eta^*$ and memory horizon
 \[
-H_T
+H=H_T
 \triangleq
 \max\!\left\{1,\left\lceil\frac{\log T}{\log(1/\alpha)}\right\rceil\right\},
 \]
-and run the online SDAC controller with memory horizon $H=H_T$,
-and the step size $\eta^*$ of Theorem~\ref{thm:regret-bound}. For
-$\mathbf{q}\in\mathcal{Q}_\alpha$, let
+where $\eta^*$ is given in that theorem. Define
 \[
+\begin{aligned}
 J_T(\mathbf{q})
-\triangleq
-\sum_{t=1}^T c_t\bigl(x_t(\mathbf{q}),u_t(\mathbf{q})\bigr)
-\]
-and
-\[
+&\triangleq
+\sum_{t=1}^T c_t\bigl(x_t(\mathbf{q}),u_t(\mathbf{q})\bigr),
+\qquad \mathbf{q}\in\mathcal{Q}_\alpha, \\
 \RegAlloc{T}
-\triangleq
+&\triangleq
 J_T^{\mathrm{on}}
 -
 \inf_{\mathbf{q}\in\mathcal{Q}_\alpha}J_T(\mathbf{q}).
+\end{aligned}
 \]
 Then
 \begin{equation}
@@ -917,16 +916,8 @@ Then
 \left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H_T+1}T.
 \end{aligned}
 \end{equation}
-Here $\Gamma_\alpha$ is defined in \eqref{eq:def-Gamma-alpha}. Since
-$\alpha^{H_T}\le1/T$ and
-$\log(H_T+1)=O(\log\log T)$ as $T\to\infty$,
-the approximation term is $O(1)$. Consequently,
-\[
-\RegAlloc{T}
-=
-O\!\left(\sqrt{T\log\log T}\right)
-=o(T).
-\]
+For fixed $\alpha,L_x,L_u$, the right-hand side is
+$O\!\left(\sqrt{T\log\log T}\right)=o(T)$.
 \end{corollary}
 
 Because geometric allocation sequences induce fixed-fraction policies, the
