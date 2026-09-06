@@ -827,17 +827,14 @@ collected in Appendix~\ref{sec:appendix-regret-proofs}.
 
 \begin{theorem}[Regret against fixed SDAC policies]
 \label{thm:regret-bound}
-Suppose the cost functions satisfy the regularity and bounded-subgradient
-assumptions of Section~\ref{sec:model-setup}. Then the controller from
-Section~\ref{sec:online-algorithm}, initialized as in \eqref{eq:alg-init} and using
-step size $\eta>0$, satisfies, for the regret defined in \eqref{eq:def-regret},
+Suppose the costs satisfy the assumptions of Section~\ref{sec:model-setup}.
+For any step size $\eta>0$, the controller in
+Section~\ref{sec:online-algorithm}, initialized by \eqref{eq:alg-init}, satisfies
 \begin{equation}
 \label{eq:regret-theorem-bound}
 \RegSDAC{T}
 \le
-\frac{\log(H+1)}{\eta}
-+
-\eta T\Gamma_\alpha,
+\frac{\log(H+1)}{\eta}+\eta T\Gamma_\alpha,
 \end{equation}
 where
 \begin{equation}
@@ -850,24 +847,15 @@ where
 \end{equation}
 and $G_\alpha=\alpha\bigl(\frac{L_x}{1-\alpha}+L_u\bigr)$ as in
 \eqref{eq:def-surrogate-G}.
-In particular, the choice
+Choosing
 \[
-\eta^*
-=
-\sqrt{\frac{\log(H+1)}{T\Gamma_\alpha}}
+\eta^*=\sqrt{\frac{\log(H+1)}{T\Gamma_\alpha}}
 \]
 gives
 \[
-\RegSDAC{T}
-\le
-2\sqrt{\Gamma_\alpha T\log(H+1)}.
+\RegSDAC{T}\le 2\sqrt{\Gamma_\alpha T\log(H+1)}.
 \]
-For fixed $L_x,L_u>0$, the leading factor obeys
-\[
-\sqrt{\Gamma_\alpha}=\Theta(\alpha)
-\quad\text{as }\alpha\downarrow0,
-\]
-and
+For fixed $L_x,L_u>0$,
 \[
 \sqrt{\Gamma_\alpha}
 =\Theta\!\left((1-\alpha)^{-3/2}\right)
@@ -875,20 +863,9 @@ and
 \]
 \end{theorem}
 
-The proof of Theorem~\ref{thm:regret-bound} has three steps. First, the OMD bound
-for the surrogate costs gives
-\[
-\sum_{t=1}^T\ell_t(\mathbf{m}_t)
--\min_{\mathbf{m}\in\mathcal{M}_H}\sum_{t=1}^T\ell_t(\mathbf{m})
-\le
-\frac{\log(H+1)}{\eta}+\frac{\eta G_\alpha^2T}{2}.
-\]
-Second, \eqref{eq:stability-sum-bound} controls the difference between the
-realized and surrogate costs. Third, adding the two bounds and using
-\eqref{eq:def-Gamma-alpha} gives \eqref{eq:regret-theorem-bound}; optimizing over
-$\eta$ gives the stated choice $\eta^*$.
-
-
+The proof combines the OMD bound for the surrogate costs
+(Lemma~\ref{lem:omd-surrogate-regret}) with the following bound on the
+difference between realized and surrogate costs.
 \begin{lemma}[Stability under online parameter updates]
 \label{lem:contractive-deviation}
 Under the assumptions of Theorem~\ref{thm:regret-bound}, the online SDAC
@@ -2054,188 +2031,78 @@ Summing over $t=1,\ldots,T$ proves \eqref{eq:stability-sum-bound}.
 
 
 \begin{proof}[Proof of Theorem~\ref{thm:regret-bound}]
-Define the stability term
+Fix $\mathbf{m}\in\mathcal{M}_H$. We first bound the initial Bregman
+divergence. Since $\mathbf{m}_1=\frac{1}{H+1}\mathbf{1}$ and
+$m_i\log m_i\le0$ for $m_i\in[0,1]$,
 \[
-\operatorname{Stab}_T
-\triangleq
+\begin{aligned}
+D_\Psi(\mathbf{m}\|\mathbf{m}_1)
+&=\sum_{i=1}^H m_i\log m_i \\
+&\quad+\|\mathbf{m}\|_1\bigl(\log(H+1)-1\bigr)
++\frac{H}{H+1} \\
+&\le (1-\|\mathbf{m}\|_1)\frac{H}{H+1} \\
+&\quad+\|\mathbf{m}\|_1
+\left(\log(H+1)-\frac{1}{H+1}\right) \\
+&\le\log(H+1).
+\end{aligned}
+\]
+The last line uses $\|\mathbf{m}\|_1\in[0,1]$ and
+$\frac{H}{H+1}\le\log(H+1)$, which follows from
+$\log z\ge1-z^{-1}$ for $z\ge1$.
+
+Lemma~\ref{lem:omd-surrogate-regret} and
+$\|\mathbf{g}_t\|_\infty\le G_\alpha$ now give
+\[
+\begin{aligned}
 \sum_{t=1}^T
-\left(
-c_t(x_t,u_t)
--\ell_t(\mathbf{m}_t)
-\right).
+\bigl(\ell_t(\mathbf{m}_t)-\ell_t(\mathbf{m})\bigr)
+&\le\frac{D_\Psi(\mathbf{m}\|\mathbf{m}_1)}{\eta} \\
+&\quad+\frac{\eta}{2}\sum_{t=1}^T\|\mathbf{g}_t\|_\infty^2 \\
+&\le\frac{\log(H+1)}{\eta}
++\frac{\eta T G_\alpha^2}{2}.
+\end{aligned}
 \]
-Using
-$\ell_t(\mathbf{m})=c_t(x_t(\mathbf{m}),u_t(\mathbf{m}))$, the regret decomposes as
-\begin{equation}
-\label{eq:regret-decomp}
-\begin{aligned}
-\RegSDAC{T}
-&=
-\operatorname{Stab}_T
-+
-\sum_{t=1}^T\ell_t(\mathbf{m}_t)
--
-\min_{\mathbf{m}\in\mathcal{M}_H}\sum_{t=1}^T\ell_t(\mathbf{m}).
-\end{aligned}
-\end{equation}
-
-We first bound the initial Bregman divergence. Fix $\mathbf{m}\in\mathcal{M}_H$. Since
-$\mathbf{m}_1=\frac{1}{H+1}\mathbf{1}$,
-\begin{equation}
-\label{eq:breg-init-expand}
-\begin{aligned}
-D_\Psi(\mathbf{m}\|\mathbf{m}_1)
-&=
-\sum_{i=1}^H
-m_i\log\bigl((H+1)m_i\bigr) \\
-&\quad
--\|\mathbf{m}\|_1+\frac{H}{H+1} \\
-&=
-\sum_{i=1}^H m_i\log m_i
-+\|\mathbf{m}\|_1\log(H+1) \\
-&\quad
--\|\mathbf{m}\|_1+\frac{H}{H+1}.
-\end{aligned}
-\end{equation}
-Because $z\log z\le0$ for $z\in[0,1]$,
-\begin{equation}
-\label{eq:breg-init-affine}
-D_\Psi(\mathbf{m}\|\mathbf{m}_1)
-\le
-\|\mathbf{m}\|_1\log(H+1)-\|\mathbf{m}\|_1+\frac{H}{H+1}.
-\end{equation}
-The right-hand side is affine in $\|\mathbf{m}\|_1\in[0,1]$, and its values at the
-endpoints are
+Since $\ell_t(\mathbf{m})=c_t(x_t(\mathbf{m}),u_t(\mathbf{m}))$,
+adding the stability bound \eqref{eq:stability-sum-bound} yields
 \[
 \begin{aligned}
-\frac{H}{H+1}
-&\le
-\log(H+1), \\
-\log(H+1)-\frac{1}{H+1}
-&\le
-\log(H+1).
-\end{aligned}
-\]
-Here the first inequality follows from
-$\log z\ge1-z^{-1}$ for $z\ge1$. Therefore,
-\begin{equation}
-\label{eq:breg-init-bound}
-D_\Psi(\mathbf{m}\|\mathbf{m}_1)
-\le
-\log(H+1)
-\qquad
-\text{for every }\mathbf{m}\in\mathcal{M}_H.
-\end{equation}
-
-Lemma~\ref{lem:omd-surrogate-regret},
-$\|\mathbf{g}_t\|_\infty\le G_\alpha$, and \eqref{eq:breg-init-bound} imply, for every
-$\mathbf{m}\in\mathcal{M}_H$,
-\begin{equation}
-\label{eq:omd-ell-raw}
-\begin{aligned}
-\sum_{t=1}^T\bigl(\ell_t(\mathbf{m}_t)-\ell_t(\mathbf{m})\bigr)
-&\le
-\frac{D_\Psi(\mathbf{m}\|\mathbf{m}_1)}{\eta}
-+
-\frac{\eta}{2}\sum_{t=1}^T\|\mathbf{g}_t\|_\infty^2 \\
-&\le
-\frac{\log(H+1)}{\eta}
-+
-\frac{\eta G_\alpha^2T}{2}.
-\end{aligned}
-\end{equation}
-Since \eqref{eq:omd-ell-raw} holds uniformly over $\mathbf{m}$,
-\begin{equation}
-\label{eq:omd-term}
-\sum_{t=1}^T\ell_t(\mathbf{m}_t)
--
-\min_{\mathbf{m}\in\mathcal{M}_H}\sum_{t=1}^T\ell_t(\mathbf{m})
-\le
-\frac{\log(H+1)}{\eta}
-+
-\frac{\eta G_\alpha^2T}{2}.
-\end{equation}
-The stability bound \eqref{eq:stability-sum-bound} gives
-\begin{equation}
-\label{eq:stab-term}
-\operatorname{Stab}_T
-\le
-\frac{\alpha\eta T G_\alpha(L_x+\alpha L_u)}{(1-\alpha)^2}.
-\end{equation}
-Substituting \eqref{eq:omd-term} and \eqref{eq:stab-term} into
-\eqref{eq:regret-decomp},
-\begin{equation}
-\label{eq:regret-eta}
-\begin{aligned}
-\RegSDAC{T}
-&\le
-\frac{\log(H+1)}{\eta}
+J_T^{\mathrm{on}}-J_T(\mathbf{m})
+&=\sum_{t=1}^T\bigl(c_t(x_t,u_t)-\ell_t(\mathbf{m}_t)\bigr) \\
+&\quad+\sum_{t=1}^T
+\bigl(\ell_t(\mathbf{m}_t)-\ell_t(\mathbf{m})\bigr) \\
+&\le\frac{\log(H+1)}{\eta}
 +\frac{\eta T G_\alpha^2}{2} \\
-&\quad
-+\frac{\alpha\eta T G_\alpha(L_x+\alpha L_u)}{(1-\alpha)^2} \\
-&=
-\frac{\log(H+1)}{\eta}
-+\eta T\Gamma_\alpha.
+&\quad+\frac{\alpha\eta T G_\alpha(L_x+\alpha L_u)}
+{(1-\alpha)^2} \\
+&=\frac{\log(H+1)}{\eta}+\eta T\Gamma_\alpha.
 \end{aligned}
-\end{equation}
-
-Differentiating with respect to $\eta$ yields
-\[
--\frac{\log(H+1)}{\eta^2}
-+
-T\Gamma_\alpha.
 \]
-The unique minimizer is therefore
-\begin{equation}
-\label{eq:eta-star}
-\eta^*
-=
-\sqrt{
-\frac{\log(H+1)}
-{T\Gamma_\alpha}
-}.
-\end{equation}
-At this value, the two summands in \eqref{eq:regret-eta} are equal, so
-\begin{equation}
-\label{eq:regret-opt}
-\RegSDAC{T}
-\le
-2\sqrt{\Gamma_\alpha T\log(H+1)}.
-\end{equation}
+Taking the maximum over $\mathbf{m}\in\mathcal{M}_H$ proves
+\eqref{eq:regret-theorem-bound}. At the stated step size,
+\[
+\frac{\log(H+1)}{\eta^*}
+=\eta^*T\Gamma_\alpha
+=\sqrt{\Gamma_\alpha T\log(H+1)},
+\]
+so the two terms sum to the claimed regret bound.
 
-It remains to verify the dependence on $\alpha$. As $\alpha\downarrow0$,
-\begin{align*}
-\frac{G_\alpha}{\alpha}
-&=
-\frac{L_x}{1-\alpha}+L_u
-\longrightarrow L_x+L_u, \\
-\frac{\Gamma_\alpha}{\alpha^2}
-&=
-\frac12\left(\frac{G_\alpha}{\alpha}\right)^2
-+
-\frac{G_\alpha}{\alpha}
-\frac{L_x+\alpha L_u}{(1-\alpha)^2} \\
-&\longrightarrow
-\frac{(L_x+L_u)^2}{2}+L_x(L_x+L_u)>0.
-\end{align*}
-Therefore $\sqrt{\Gamma_\alpha}=\Theta(\alpha)$ as
-$\alpha\downarrow0$. As $\alpha\uparrow1$, write
-$\varepsilon=1-\alpha$. Then
-\begin{align*}
-\varepsilon G_\alpha
-&=
-\alpha(L_x+\varepsilon L_u)
-\longrightarrow L_x, \\
-\varepsilon^3\Gamma_\alpha
-&=
-\frac{\varepsilon^3G_\alpha^2}{2}
-+\alpha(\varepsilon G_\alpha)(L_x+\alpha L_u) \\
-&\longrightarrow
-L_x(L_x+L_u)>0.
-\end{align*}
-Thus
-$\sqrt{\Gamma_\alpha}=\Theta((1-\alpha)^{-3/2})$ as
-$\alpha\uparrow1$.
+Finally, for fixed $L_x,L_u>0$, as $\alpha\uparrow1$,
+\[
+(1-\alpha)G_\alpha
+=\alpha\bigl(L_x+(1-\alpha)L_u\bigr)
+\longrightarrow L_x,
+\]
+and hence
+\[
+\begin{aligned}
+(1-\alpha)^3\Gamma_\alpha
+&=\frac{1-\alpha}{2}\bigl((1-\alpha)G_\alpha\bigr)^2 \\
+&\quad+\alpha\bigl((1-\alpha)G_\alpha\bigr)
+(L_x+\alpha L_u) \\
+&\longrightarrow L_x(L_x+L_u)>0.
+\end{aligned}
+\]
+Thus $\sqrt{\Gamma_\alpha}=\Theta((1-\alpha)^{-3/2})$.
 \end{proof}
 
 \begin{proof}[Proof of Corollary~\ref{cor:regret-vs-allocation}]
