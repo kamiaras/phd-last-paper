@@ -985,57 +985,48 @@ The expectation is over the internal randomization of $\mathcal{A}$.
 
 \begin{corollary}[Lower bound beyond the mixing time]
 \label{cor:sdac-lower-mixing}
-Define
-\begin{equation}
-\label{eq:def-mixing-time}
+Fix $H\ge1$ and define
+\[
 t_{\mathrm{mix}}(\alpha)
 \triangleq
 \left\lceil
 \frac{\log 2}{\log(1/\alpha)}
 \right\rceil.
-\end{equation}
-If $T\ge2t_{\mathrm{mix}}(\alpha)+2$, then every causal feasible controller $\mathcal{A}$
-admits a deterministic oblivious sequence for which
-\begin{equation}
-\label{eq:sdac-lower-mixing}
+\]
+If $T\ge2t_{\mathrm{mix}}(\alpha)+2$, then for every causal feasible controller
+$\mathcal{A}$, possibly randomized, there is a deterministic oblivious sequence
+satisfying the model assumptions such that
+\[
 \mathbb{E}_{\mathcal{A}}\!\left[\RegSDAC{T}\right]
 \ge
 \frac{G_\alpha}{8}\sqrt{T},
-\end{equation}
+\]
 where $G_\alpha=\alpha(L_x/(1-\alpha)+L_u)$ as in
 \eqref{eq:def-surrogate-G}.
 \end{corollary}
 
 \begin{remark}[Large-$\alpha$ regime]
 \label{rem:large-alpha-regime}
-As $\alpha\uparrow1$, stored arrivals persist longer and
-$t_{\mathrm{mix}}(\alpha)=\Theta((1-\alpha)^{-1})$. Hence,
+For fixed $L_x,L_u>0$, both $t_{\mathrm{mix}}(\alpha)$ and $G_\alpha$ are of
+order $(1-\alpha)^{-1}$ as $\alpha\uparrow1$. If
+$T\ge2t_{\mathrm{mix}}(\alpha)+2$, then
 Corollary~\ref{cor:sdac-lower-mixing} yields
-\begin{equation}
-\label{eq:sdac-lower-large-alpha}
+\[
 \mathbb{E}_{\mathcal{A}}\!\left[\RegSDAC{T}\right]
 =
-\Omega\!\left(\frac{\sqrt{T}}{1-\alpha}\right)
-\end{equation}
-whenever $T\ge2t_{\mathrm{mix}}(\alpha)+2$. The upper bound in
+\Omega\!\left(\frac{\sqrt{T}}{1-\alpha}\right).
+\]
+The upper bound in
 Theorem~\ref{thm:regret-bound} is
-$O((1-\alpha)^{-3/2}\sqrt{T\log(H+1)})$, leaving a factor of
-$(1-\alpha)^{-1/2}$ between the two bounds.
+$O((1-\alpha)^{-3/2}\sqrt{T\log(H+1)})$. Its dependence on
+$(1-\alpha)^{-1}$ is therefore larger by a factor of $(1-\alpha)^{-1/2}$.
 
-The condition $T\ge2t_{\mathrm{mix}}(\alpha)+2$ is essential for interpreting the
-large-$\alpha$ asymptotic. If $T$ is fixed while $\alpha\uparrow1$, then
+This scaling requires $T$ to grow with $t_{\mathrm{mix}}(\alpha)$. For fixed $T$,
 \[
-\frac{1-\alpha^{t-2}}{1-\alpha}\longrightarrow t-2,
+\frac{1-\alpha^{t-2}}{1-\alpha}\longrightarrow t-2
+\qquad\text{as }\alpha\uparrow1,
 \]
-and the right-hand side of \eqref{eq:sdac-lower-exact} converges to the finite
-quantity
-\[
-\frac{1}{2\sqrt{2}}
-\sqrt{\sum_{t=2}^T\bigl(L_u+L_x(t-2)\bigr)^2}.
-\]
-Thus, for fixed $T$, the exact finite-horizon bound in
-\eqref{eq:sdac-lower-exact} applies instead of the long-horizon scaling in
-\eqref{eq:sdac-lower-large-alpha}.
+so the lower bound in \eqref{eq:sdac-lower-exact} remains finite.
 \end{remark}
 
 \section{Discussion and Extensions}
@@ -2289,17 +2280,16 @@ the interaction gives the required deterministic oblivious sequence.
 \end{proof}
 
 \begin{proof}[Proof of Corollary~\ref{cor:sdac-lower-mixing}]
-The definition of $t_{\mathrm{mix}}(\alpha)$ gives
-\begin{equation}
-\label{eq:lower-mixing-geometric}
-\alpha^{t_{\mathrm{mix}}(\alpha)}
+For $t=t_{\mathrm{mix}}(\alpha)+2,\ldots,T$,
+\[
+\alpha^{t-2}
+\le\alpha^{t_{\mathrm{mix}}(\alpha)}
 \le
 \alpha^{\log 2/\log(1/\alpha)}
 =\frac12.
-\end{equation}
-Therefore, for every $t\ge t_{\mathrm{mix}}(\alpha)+2$,
-\begin{equation}
-\label{eq:lower-beta-post-mixing}
+\]
+Hence, by \eqref{eq:sdac-lower-beta},
+\[
 \begin{aligned}
 \beta_t
 &\ge
@@ -2313,21 +2303,20 @@ L_u+\frac{L_x}{1-\alpha}
 \right)
 =\frac{G_\alpha}{2}.
 \end{aligned}
-\end{equation}
-There are $T-t_{\mathrm{mix}}(\alpha)-1$ indices in
-$\{t_{\mathrm{mix}}(\alpha)+2,\ldots,T\}$. If
-$T\ge2t_{\mathrm{mix}}(\alpha)+2$, then
-\begin{equation}
-\label{eq:lower-post-mixing-count}
-T-t_{\mathrm{mix}}(\alpha)-1
-\ge
-\frac{T}{2}.
-\end{equation}
-Applying Theorem~\ref{thm:sdac-lower-bound} and retaining only these indices,
-\begin{equation}
-\label{eq:lower-mixing-final}
+\]
+There are $T-t_{\mathrm{mix}}(\alpha)-1\ge T/2$ such indices, since
+$T\ge2t_{\mathrm{mix}}(\alpha)+2$. Theorem~\ref{thm:sdac-lower-bound} therefore gives
+\[
 \begin{aligned}
 \mathbb{E}_{\mathcal{A}}\!\left[\RegSDAC{T}\right]
+&\ge
+\frac{1}{2\sqrt{2}}\sqrt{\sum_{t=2}^T\beta_t^2} \\
+&\ge
+\frac{1}{2\sqrt{2}}
+\left[
+\bigl(T-t_{\mathrm{mix}}(\alpha)-1\bigr)
+\left(\frac{G_\alpha}{2}\right)^2
+\right]^{1/2} \\
 &\ge
 \frac{1}{2\sqrt{2}}
 \left[
@@ -2336,8 +2325,7 @@ Applying Theorem~\ref{thm:sdac-lower-bound} and retaining only these indices,
 &=
 \frac{G_\alpha}{8}\sqrt{T}.
 \end{aligned}
-\end{equation}
-This is \eqref{eq:sdac-lower-mixing}.
+\]
 \end{proof}
 
 \bibliographystyle{IEEEtran}
