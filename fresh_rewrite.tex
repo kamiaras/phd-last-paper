@@ -934,28 +934,16 @@ controller also satisfies a corresponding bound for that policy class.
 
 \begin{corollary}[No-regret against fixed-fraction policies]
 \label{cor:regret-vs-fraction}
-Run the online SDAC controller in Corollary~\ref{cor:regret-vs-allocation}. For
-$k\in[0,\alpha]$, let
+Run the online SDAC controller as in Corollary~\ref{cor:regret-vs-allocation}.
+For $k\in[0,\alpha]$, let
 $J_T(k)\triangleq\sum_{t=1}^T c_t\bigl(x_t(k),u_t(k)\bigr)$, where
-$u_t(k)=k x_t(k)$, and define
+$u_t(k)=kx_t(k)$, and define
 \[
 \RegFrac{T}
 \triangleq
 J_T^{\mathrm{on}}-\min_{k\in[0,\alpha]}J_T(k).
 \]
-For every $k\in[0,\alpha]$, with $\lambda_k=\alpha-k$,
-\begin{equation}
-\label{eq:fraction-regret-decomposition}
-\begin{aligned}
-J_T^{\mathrm{on}}-J_T(k)
-&\le
-2\sqrt{\Gamma_\alpha T\log(H_T+1)} \\
-&\quad+
-\left(L_u+\frac{L_x}{1-\alpha}\right)
-\frac{k\lambda_k^{H_T}}{1-\lambda_k}\,T.
-\end{aligned}
-\end{equation}
-Moreover,
+Then
 \[
 \begin{aligned}
 \RegFrac{T}
@@ -963,13 +951,11 @@ Moreover,
 2\sqrt{\Gamma_\alpha T\log(H_T+1)}
 \\
 &\quad+
-\left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H_T+1}T
-\\
-&=
-O\!\left(\sqrt{T\log\log T}\right)
-=o(T).
+\left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H_T+1}T.
 \end{aligned}
 \]
+For fixed $\alpha,L_x,L_u$, the right-hand side is
+$O\!\left(\sqrt{T\log\log T}\right)=o(T)$.
 \end{corollary}
 
 \section{Minimax Regret Lower Bound}
@@ -2133,16 +2119,18 @@ $H_T=\Theta(\log T)$ implies $\log(H_T+1)=O(\log\log T)$.
 \end{proof}
 
 \begin{proof}[Proof of Corollary~\ref{cor:regret-vs-fraction}]
-For fixed $k$, Theorem~\ref{thm:regret-bound} applied to
-$\mathbf{m}_{H_T}^{\mathrm{frac}}(k)$, followed by
-\eqref{eq:sdac-fraction-approx-cost}, gives
-\eqref{eq:fraction-regret-decomposition}.
-Corollary~\ref{cor:fraction-as-allocation} shows that the geometric allocation
-sequence $\mathbf{q}(k)$ belongs to $\mathcal{Q}_\alpha$, so
-Lemma~\ref{lem:sdac-allocation-approx} gives
-$\operatorname{Tail}_{H_T}(\mathbf{q}(k))\le\alpha^{H_T+1}$. This makes the bound
-uniform in $k$; minimizing over $k$ proves the stated finite-time and asymptotic
-guarantees.
+By Corollary~\ref{cor:fraction-as-allocation}, every $k\in[0,\alpha]$
+has $\mathbf{q}(k)\in\mathcal{Q}_\alpha$ with
+$J_T(\mathbf{q}(k))=J_T(k)$. Hence
+\[
+\begin{aligned}
+\RegFrac{T}
+&=J_T^{\mathrm{on}}-\min_{k\in[0,\alpha]}J_T(\mathbf{q}(k)) \\
+&\le J_T^{\mathrm{on}}-\inf_{\mathbf{q}\in\mathcal{Q}_\alpha}J_T(\mathbf{q})
+=\RegAlloc{T}.
+\end{aligned}
+\]
+Corollary~\ref{cor:regret-vs-allocation} gives the stated bound and rate.
 \end{proof}
 
 
