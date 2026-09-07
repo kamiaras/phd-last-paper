@@ -674,46 +674,15 @@ q_i(k)=k\lambda_k^{i-1},
 \qquad i\ge1,
 \]
 where $\lambda_k^0\triangleq1$. Then $\mathbf{q}(k)\in\mathcal{Q}_\alpha$
-and, for every arrival sequence with entries in $[0,1]$,
+and, for every arrival sequence with entries in $[0,1]$, the allocation policy
+$\pi_{\mathbf{q}(k)}$ coincides with the feasible fixed-fraction policy
+$u_t(k)=k x_t(k)$:
 \[
 \bigl(x_t(\mathbf{q}(k)),u_t(\mathbf{q}(k))\bigr)
 =
 \bigl(x_t(k),u_t(k)\bigr),
 \qquad t\in[T].
 \]
-Thus, $\pi_{\mathbf{q}(k)}$ realizes the feasible fixed-fraction policy
-$u_t(k)=k x_t(k)$. For every integer $H\ge1$, define its SDAC truncation by
-\[
-\mathbf{m}_H^{\mathrm{frac}}(k)
-\triangleq
-\mathbf{m}_H\bigl(\mathbf{q}(k)\bigr)
-\in\mathcal{M}_H,
-\]
-whose omitted tail is
-\[
-\operatorname{Tail}_H\bigl(\mathbf{q}(k)\bigr)
-=
-\frac{k\lambda_k^H}{1-\lambda_k}.
-\]
-If each $c_t$ satisfies \eqref{eq:model-lipschitz}, then
-\begin{equation}
-\label{eq:sdac-fraction-approx-cost}
-\begin{aligned}
-&\left|
-\sum_{t=1}^T
-\left[
-c_t\!\bigl(
-x_t(\mathbf{m}_H^{\mathrm{frac}}(k)),
-u_t(\mathbf{m}_H^{\mathrm{frac}}(k))
-\bigr)
--c_t\bigl(x_t(k),u_t(k)\bigr)
-\right]
-\right| \\
-&\qquad\le
-\left(L_u+\frac{L_x}{1-\alpha}\right)
-\frac{k\lambda_k^H}{1-\lambda_k}\,T.
-\end{aligned}
-\end{equation}
 \end{corollary}
 
 
@@ -1376,19 +1345,9 @@ u_t(k)&=k x_t(k)=\sum_{i=1}^{t-1}q_i(k)w_{t-i}
 =u_t\bigl(\mathbf{q}(k)\bigr).
 \end{aligned}
 \]
-The two policies have the same actions, initial state, and dynamics. Hence,
-their state trajectories coincide. Lemma~\ref{lem:sdac-allocation-approx}
-gives $\mathbf{m}_H^{\mathrm{frac}}(k)\in\mathcal{M}_H$. Moreover,
-\[
-\begin{aligned}
-\operatorname{Tail}_H\bigl(\mathbf{q}(k)\bigr)
-&=k\sum_{i=H+1}^{\infty}\lambda_k^{i-1}
-=k\lambda_k^H\sum_{j=0}^{\infty}\lambda_k^j\\
-&=\frac{k\lambda_k^H}{1-\lambda_k}.
-\end{aligned}
-\]
-Substituting the trajectory and tail identities into
-\eqref{eq:allocation-cost-gap} proves \eqref{eq:sdac-fraction-approx-cost}.
+Both state trajectories start at zero and follow \eqref{eq:model-dynamics} with
+the same actions. Hence, $x_t\bigl(\mathbf{q}(k)\bigr)=x_t(k)$ for every
+$t\in[T]$.
 \end{proof}
 
 \section{Proofs for the Online SDAC Controller}
