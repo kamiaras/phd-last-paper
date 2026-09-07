@@ -14,8 +14,6 @@
 \newtheorem{remark}{Remark}
 
 \newcommand{\RegSDAC}[1]{\operatorname{Reg}_{#1}^{\mathrm{SDAC}}}
-\newcommand{\RegFrac}[1]{\operatorname{Reg}_{#1}^{\mathrm{frac}}}
-\newcommand{\RegAlloc}[1]{\operatorname{Reg}_{#1}^{\mathrm{alloc}}}
 
 \title{Online Constrained Control of Storage Systems via Simplex Disturbance-Action
 Policies}
@@ -40,17 +38,17 @@ time-varying cost depends on both the state and the action. At each time, the
 controller selects a feasible action before the current resource arrival and cost
 are revealed. To handle the resulting coupling
 between feasibility and online learning, we introduce \emph{Simplex Disturbance-Action
-Control} (SDAC), a policy class specified by $H$ nonnegative parameters
+Control} (SDAC), whose policies are specified by $H$ nonnegative parameters
 whose sum is at most one. The key feature of SDAC is that every fixed policy in the
 class is feasible by construction. Our online SDAC controller updates these
 parameters using entropic online mirror descent while preserving feasibility along
 the time-varying trajectory. We prove a regret bound of
 $O\!\left(\sqrt{T\log(H+1)}\right)$ relative to the best fixed SDAC policy and a
-minimax lower bound showing that the dependence on $T$ is tight. Moreover, SDAC
-geometrically approximates a decreasing-allocation policy class that spreads each
-arrival over time according to a common decreasing allocation sequence, a structure
-that arises in stochastic energy-harvesting control. With a suitable choice
-$H=\Theta(\log T)$, the resulting regret against the decreasing-allocation class is
+minimax lower bound showing that the dependence on $T$ is tight. We also introduce
+infinite-memory SDAC policies. This class contains every feasible fixed-fraction policy.
+SDAC policies approximate infinite-memory SDAC policies with an error
+that decreases geometrically with $H$. With a suitable choice $H=\Theta(\log T)$,
+the resulting regret against infinite-memory SDAC policies is
 $O\!\left(\sqrt{T\log\log T}\right)$. The framework applies to energy-harvesting
 batteries and other storage-constrained resource systems.
 \end{abstract}
@@ -128,17 +126,17 @@ Section~\ref{sec:extensions}.
 Our contributions are:
 \begin{itemize}
 \item \textbf{Policy class.}
-    We introduce SDAC, a finite-memory policy class parameterized by a
-    subprobability simplex. We prove that every fixed SDAC policy is feasible
+    We introduce SDAC policies parameterized by a
+    subprobability simplex. We prove that every such fixed policy is feasible
     for every arrival sequence with entries in $[0,1]$.
 
-    We further show that SDAC approximates the decreasing-allocation policy
-    class defined in
-    Section~\ref{subsec:allocation-sequences}. This class allocates each arrival
-    over future periods according to the same decreasing sequence. It contains
-    every feasible fixed-fraction policy
-    $u_t=kx_t$ for some fixed $k\in[0,\alpha]$, and the approximation error decreases
-    geometrically with the memory horizon $H$.
+    We further introduce infinite-memory SDAC policies in
+    Section~\ref{subsec:infinite-memory-sdac}. Their parameter domain extends the
+    subprobability simplex to nonnegative sequences whose sum is at most one.
+    This class contains every SDAC policy and every feasible
+    fixed-fraction policy $u_t=kx_t$ for some fixed $k\in[0,\alpha]$.
+    Truncating the parameter sequence gives an SDAC policy whose
+    approximation error decreases geometrically with the memory horizon $H$.
 
 \item \textbf{Online control and regret.}
     We develop an online SDAC controller that updates its parameter using
@@ -146,7 +144,8 @@ Our contributions are:
     We prove that the controller remains feasible and achieves
     $O\!\left(\sqrt{T\log(H+1)}\right)$
     regret against the best fixed SDAC policy.
-    For a suitable choice $H=\Theta(\log T)$, the regret against the decreasing-allocation class is
+    For a suitable choice $H=\Theta(\log T)$, the regret against
+    infinite-memory SDAC policies is
     $O\!\left(\sqrt{T\log\log T}\right)$. The same bound
     holds against the best fixed-fraction policy.
 
@@ -196,20 +195,19 @@ time, although ours applies directly to causal feasible
 controllers under the state-dependent action constraint.
 
 
-
 \paragraph{Energy harvesting}
 Fixed-fraction and related allocation policies for stochastic energy arrivals
-motivate our \emph{decreasing-allocation policy class}. Shaviv and \"Ozg\"ur
+motivate our infinite-memory SDAC policies. Shaviv and \"Ozg\"ur
 \cite{shaviv2016universally} allocate a fixed fraction of the available energy
 under i.i.d.\ arrivals. Arafa et al.\ \cite{arafa2018online} extend fixed-fraction
 policies to general concave utilities under i.i.d.\ arrivals and, for Bernoulli
 arrivals, characterize a non-increasing allocation sequence following a full
 recharge. Zibaeenejad and Chen \cite{zibaeenejad2019lookahead} derive an optimal
 decreasing allocation sequence under Bernoulli arrivals when the controller
-observes a fixed look-ahead window. Together, these works motivate allocating each
-arrival over future periods according to a decreasing sequence. Our allocation
-begins one period after the arrival because the controller acts before observing
-the current arrival.
+observes a fixed look-ahead window. Our infinite-memory SDAC policies generalize
+this allocation structure. The class allows both decreasing and non-increasing
+as special case; see Section~\ref{subsec:infinite-memory-sdac} and
+Corollary~\ref{cor:fraction-as-sdac}.
 
 Yu and Neely \cite{Yu2019} study expected utility maximization under i.i.d.\ system
 states, while Asgari and Neely \cite{10.1145/3428337} obtain an
@@ -368,37 +366,35 @@ J_T^{\mathrm{on}}
 \end{equation}
 
 
-
-For a fixed positive integer \(H\), let \(\pi_{\mathbf{m}}\) denote the fixed SDAC
-policy indexed by \(\mathbf{m}\in\mathcal{M}_H\), where \(\mathcal{M}_H\) is defined in Section~\ref{sec:sdac}.
-The corresponding \emph{fixed-policy trajectory} is the unique
-state--action sequence $\{(x_t(\mathbf{m}),u_t(\mathbf{m}))\}_{t=1}^T$ obtained by
-applying $\pi_{\mathbf{m}}$ at every time. Its cumulative cost is
+Throughout, SDAC policies have finite memory unless explicitly called
+infinite-memory SDAC policies.
+The parameter domain $\mathcal{M}_H$ and the infinite-memory
+parameter domain $\mathcal{M}_\infty$ are defined in Section~\ref{sec:sdac}.
+For a fixed parameter $\mathbf{m}$, the corresponding \emph{fixed-policy
+trajectory} is the unique state--action
+sequence $\{(x_t(\mathbf{m}),u_t(\mathbf{m}))\}_{t=1}^T$ obtained by applying
+the SDAC policy with the same parameter $\mathbf{m}$ at every time.
+Its cumulative cost is
 \[
 J_T(\mathbf{m})
 \triangleq
-\sum_{t=1}^T
-c_t\bigl(x_t(\mathbf{m}),u_t(\mathbf{m})\bigr).
+\sum_{t=1}^T c_t\bigl(x_t(\mathbf{m}),u_t(\mathbf{m})\bigr).
 \]
-The regret against the best fixed SDAC policy is defined by
+For a fixed positive integer $H$, the regret against the best fixed
+SDAC policy is
 \begin{equation}
 \label{eq:def-regret}
-\RegSDAC{T}
+\RegSDAC{T}(H)
 \triangleq
 J_T^{\mathrm{on}}
--
-\min_{\mathbf{m}\in\mathcal{M}_H}J_T(\mathbf{m}).
+-\min_{\mathbf{m}\in\mathcal{M}_H}J_T(\mathbf{m}).
 \end{equation}
 Our objective is to satisfy \eqref{eq:model-feasibility} at every time and achieve
-sublinear regret.
+sublinear regret. The same trajectory and cost notation will be used for
+infinite-memory SDAC policies indexed by $\mathbf{m}\in\mathcal{M}_\infty$.
 
-For the other comparator classes considered below, $x_t(k)$ and $u_t(k)$ denote
-the state and action induced by the feasible fixed-fraction policy
-$u_t(k)=kx_t(k)$ for $k\in[0,\alpha]$, while $x_t(\mathbf{q})$ and
-$u_t(\mathbf{q})$ denote those
-induced by a decreasing allocation sequence $\mathbf{q}$.
-
-
+For fixed-fraction policies, $x_t(k)$ and $u_t(k)$ denote the state and action
+induced by $u_t(k)=kx_t(k)$ for $k\in[0,\alpha]$.
 
 \section{Simplex Disturbance-Action Control (SDAC)}
 \label{sec:sdac}
@@ -424,7 +420,7 @@ every fixed SDAC policy feasible while keeping surrogate costs convex and online
 updates efficient.
 
 
-\subsection{Policy Definition and Structural Properties}
+\subsection{Policies and Structural Properties}
 Fix a memory horizon $H\in\mathbb{N}_{>0}$ and define the subprobability simplex
 \begin{equation}
 \label{eq:def-simplex}
@@ -436,7 +432,7 @@ Fix a memory horizon $H\in\mathbb{N}_{>0}$ and define the subprobability simplex
 \right\}.
 \end{equation}
 With the convention $w_\tau\equiv0$ for $\tau\le0$, each
-$\mathbf{m}\in\mathcal{M}_H$ defines an SDAC policy $\pi_{\mathbf{m}}$ through
+$\mathbf{m}\in\mathcal{M}_H$ defines an SDAC policy through
 \begin{equation}
 \label{eq:def-sdac-policy}
 u_t(\mathbf{m})
@@ -453,16 +449,10 @@ where
 \bigl(\alpha w_{t-1},\alpha^2 w_{t-2},\ldots,\alpha^H w_{t-H}\bigr)^\top
 \in\mathbb{R}^H.
 \end{equation}
-The resulting SDAC policy class is
-\begin{equation}
-\label{eq:def-sdac-class}
-\Pi_H^{\mathrm{SDAC}}
-\triangleq
-\{\pi_{\mathbf{m}}:\mathbf{m}\in\mathcal{M}_H\}.
-\end{equation}
+Here, $m_i\alpha^i w_s$ is the amount from arrival $w_s$ used $i$ periods later.
 
 The following state decomposition underlies both structural properties: every
-$\pi_{\mathbf{m}}$ satisfies the feasibility constraint
+fixed SDAC policy satisfies the feasibility constraint
 \eqref{eq:model-feasibility}, and its induced cost is convex and Lipschitz in
 $\mathbf{m}$. Omitted proofs appear in
 Appendix~\ref{sec:appendix-sdac-proofs}.
@@ -509,7 +499,7 @@ Thus, $\mathbf{m}\mapsto x_t(\mathbf{m})$ is affine.
 \begin{lemma}[Feasibility of SDAC policies]
 \label{lem:sdac-feasibility}
 For every $\mathbf{m}\in\mathcal{M}_H$, the fixed SDAC policy
-$\pi_{\mathbf{m}}$ is feasible:
+indexed by $\mathbf{m}$ is feasible:
 \[
 0\le u_t(\mathbf{m})\le \alpha x_t(\mathbf{m})
 \qquad \text{for every }t\in[T].
@@ -542,7 +532,6 @@ Therefore,
 \]
 where the last equality follows from \eqref{eq:sdac-state-decomp}.
 \end{proof}
-
 
 
 \begin{lemma}[Convexity and Lipschitz continuity of surrogate cost]
@@ -590,106 +579,68 @@ Then
 \]
 \end{lemma}
 
-\subsection{Approximation of Decreasing-Allocation Policies}
-\label{subsec:allocation-sequences}
+\subsection{Approximation of Infinite-Memory SDAC Policies}
+\label{subsec:infinite-memory-sdac}
 
-Define the set of feasible decreasing allocation sequences
+Define the infinite-memory parameter domain
 \begin{equation}
-\label{eq:def-allocation-sequences}
-\mathcal{Q}_\alpha
+\label{eq:def-infinite-simplex}
+\mathcal{M}_\infty
 \triangleq
 \left\{
-\mathbf{q}=(q_i)_{i\ge1}:
-q_1\ge q_2\ge\cdots\ge0,
-\quad
-\sum_{i=1}^{\infty}\frac{q_i}{\alpha^i}\le1
+\mathbf{m}=(m_i)_{i\ge1}:m_i\ge0,\quad
+\sum_{i=1}^{\infty}m_i\le1
 \right\}.
 \end{equation}
-For $\mathbf{q}\in\mathcal{Q}_\alpha$, define
+Each $\mathbf{m}\in\mathcal{M}_\infty$ defines an infinite-memory SDAC policy
+through
 \begin{equation}
-\label{eq:def-allocation-policy}
-\begin{aligned}
-u_t(\mathbf{q})
-&\triangleq
-\sum_{i=1}^{t-1}q_iw_{t-i}, \\
-x_{t+1}(\mathbf{q})
-&=
-\alpha x_t(\mathbf{q})-u_t(\mathbf{q})+w_t,
-\qquad x_1(\mathbf{q})=0.
-\end{aligned}
+\label{eq:def-infinite-sdac-policy}
+u_t(\mathbf{m})
+\triangleq
+\sum_{i=1}^{t-1}m_i\alpha^i w_{t-i}.
 \end{equation}
-Here, $q_iw_s$ is the amount from arrival $w_s$ allocated $i$ periods later.
-The restriction $i\ge1$ gives a one-period delay because $w_s$ is observed only
-after $u_s$ is chosen. Policies of this form have been studied for Bernoulli
-recharges \cite{arafa2018online,zibaeenejad2019lookahead}. Let
-\[
-\Pi_\alpha^{\mathrm{alloc}}
-\triangleq
-\{\pi_{\mathbf{q}}:\mathbf{q}\in\mathcal{Q}_\alpha\}.
-\]
+The state $x_t(\mathbf{m})$ follows \eqref{eq:model-dynamics} with initial
+condition \eqref{eq:model-init}.
+After extending vectors in $\mathcal{M}_H$ by zeros, SDAC policies with horizon $H$
+are exactly the infinite-memory SDAC policies with $m_i=0$ for every $i>H$.
 
-\begin{lemma}[Finite-memory approximation of decreasing-allocation policies]
-\label{lem:sdac-allocation-approx}
-Every policy in $\Pi_\alpha^{\mathrm{alloc}}$ is feasible for every arrival
-sequence with entries in $[0,1]$. Fix
-$\mathbf{q}\in\mathcal{Q}_\alpha$ and an integer $H\ge1$, and define
+\begin{lemma}[Approximation of infinite-memory SDAC policies]
+\label{lem:sdac-truncation-approx}
+Every infinite-memory SDAC policy is feasible for every arrival sequence with
+entries in $[0,1]$. Fix $\mathbf{m}\in\mathcal{M}_\infty$ and an integer $H\ge1$,
+and define its truncation by
 \[
-m_{H,i}(\mathbf{q})
-\triangleq
-\frac{q_i}{\alpha^i},
-\qquad i\in[H].
+\mathbf{m}_H(\mathbf{m})\triangleq(m_1,\ldots,m_H)^\top.
 \]
-Then $\mathbf{m}_H(\mathbf{q})\in\mathcal{M}_H$. Let
-\[
-\operatorname{Tail}_H(\mathbf{q})
-\triangleq
-\sum_{i=H+1}^{\infty}q_i,
-\]
-so $\operatorname{Tail}_H(\mathbf{q})\le\alpha^{H+1}$. If each $c_t$
-satisfies \eqref{eq:model-lipschitz}, then, for every such arrival sequence,
+Then $\mathbf{m}_H(\mathbf{m})\in\mathcal{M}_H$. If each $c_t$ satisfies
+\eqref{eq:model-lipschitz}, then, for every such arrival sequence,
 \begin{equation}
-\label{eq:allocation-cost-gap}
+\label{eq:sdac-truncation-cost-gap}
 \begin{aligned}
-&\left|
-\sum_{t=1}^T
-\left[
-c_t\bigl(x_t(\mathbf{m}_H(\mathbf{q})),u_t(\mathbf{m}_H(\mathbf{q}))\bigr)
--c_t\bigl(x_t(\mathbf{q}),u_t(\mathbf{q})\bigr)
-\right]
-\right|\\
-&\qquad\le
-\left(L_u+\frac{L_x}{1-\alpha}\right)
-\operatorname{Tail}_H(\mathbf{q})T \\
-&\qquad\le
+&\left|J_T\bigl(\mathbf{m}_H(\mathbf{m})\bigr)-J_T(\mathbf{m})\right|\le
 \left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H+1}T.
 \end{aligned}
 \end{equation}
 \end{lemma}
 
-\begin{corollary}[Fixed-fraction policies as geometric allocations]
-\label{cor:fraction-as-allocation}
-Fix $k\in[0,\alpha]$, set $\lambda_k\triangleq\alpha-k$, and define
+\begin{corollary}[Fixed-fraction policies as infinite-memory SDAC policies]
+\label{cor:fraction-as-sdac}
+For $k\in[0,\alpha]$, define
 \[
-q_i(k)=k\lambda_k^{i-1},
+m_i(k)=\frac{k}{\alpha}\left(1-\frac{k}{\alpha}\right)^{i-1},
 \qquad i\ge1,
 \]
-where $\lambda_k^0\triangleq1$. Then $\mathbf{q}(k)\in\mathcal{Q}_\alpha$
-and, for every arrival sequence with entries in $[0,1]$, the allocation policy
-$\pi_{\mathbf{q}(k)}$ coincides with the feasible fixed-fraction policy
-$u_t(k)=k x_t(k)$:
+where $0^0=1$.
+Then $\mathbf{m}(k)\in\mathcal{M}_\infty$ and, for every arrival sequence with
+entries in $[0,1]$, the infinite-memory SDAC policy indexed by $\mathbf{m}(k)$
+coincides with the feasible fixed-fraction policy $u_t(k)=kx_t(k)$:
 \[
-\bigl(x_t(\mathbf{q}(k)),u_t(\mathbf{q}(k))\bigr)
-=
-\bigl(x_t(k),u_t(k)\bigr),
+\bigl(x_t(\mathbf{m}(k)),u_t(\mathbf{m}(k))\bigr)
+=\bigl(x_t(k),u_t(k)\bigr),
 \qquad t\in[T].
 \]
 \end{corollary}
-
-
-
-
-
-
 
 \section{Online SDAC Controller}
 \label{sec:online-algorithm}
@@ -781,7 +732,7 @@ D_\Psi(\mathbf{m}\|\widetilde{\mathbf{m}}_{t+1}) \\
 \label{sec:regret-analysis}
 The resulting online SDAC controller achieves sublinear
 regret relative to every fixed SDAC policy
-$\pi_{\mathbf{m}}\in\Pi_H^{\mathrm{SDAC}}$. Omitted proofs appear in
+indexed by $\mathbf{m}\in\mathcal{M}_H$. Omitted proofs appear in
 Appendix~\ref{sec:appendix-regret-proofs}.
 
 \begin{theorem}[Regret against fixed SDAC policies]
@@ -791,7 +742,7 @@ For any step size $\eta>0$, the controller in
 Section~\ref{sec:online-algorithm}, initialized by \eqref{eq:alg-init}, satisfies
 \begin{equation}
 \label{eq:regret-theorem-bound}
-\RegSDAC{T}
+\RegSDAC{T}(H)
 \le
 \frac{\log(H+1)}{\eta}+\eta T\Gamma_\alpha,
 \end{equation}
@@ -812,7 +763,7 @@ Choosing
 \]
 gives
 \[
-\RegSDAC{T}\le 2\sqrt{\Gamma_\alpha T\log(H+1)}.
+\RegSDAC{T}(H)\le 2\sqrt{\Gamma_\alpha T\log(H+1)}.
 \]
 \end{theorem}
 
@@ -832,11 +783,8 @@ controller satisfies
 \end{lemma}
 
 
-
-
-
-\begin{corollary}[No-regret against decreasing-allocation policies]
-\label{cor:regret-vs-allocation}
+\begin{corollary}[No-regret against infinite-memory SDAC policies]
+\label{cor:regret-vs-infinite-sdac}
 Under the assumptions of Theorem~\ref{thm:regret-bound}, run the online SDAC
 controller with step size $\eta^*$ and memory horizon
 \[
@@ -844,25 +792,18 @@ H=H_T
 \triangleq
 \max\!\left\{1,\left\lceil\frac{\log T}{\log(1/\alpha)}\right\rceil\right\},
 \]
-where $\eta^*$ is given in that theorem. Define
+where $\eta^*$ is given in that theorem. Define the regret against the best fixed
+infinite-memory SDAC policy by
 \[
-\begin{aligned}
-J_T(\mathbf{q})
-&\triangleq
-\sum_{t=1}^T c_t\bigl(x_t(\mathbf{q}),u_t(\mathbf{q})\bigr),
-\qquad \mathbf{q}\in\mathcal{Q}_\alpha, \\
-\RegAlloc{T}
-&\triangleq
-J_T^{\mathrm{on}}
--
-\inf_{\mathbf{q}\in\mathcal{Q}_\alpha}J_T(\mathbf{q}).
-\end{aligned}
+\RegSDAC{T}(\infty)
+\triangleq
+J_T^{\mathrm{on}}-\inf_{\mathbf{m}\in\mathcal{M}_\infty}J_T(\mathbf{m}).
 \]
 Then
 \begin{equation}
-\label{eq:allocation-regret-bound}
+\label{eq:infinite-sdac-regret-bound}
 \begin{aligned}
-\RegAlloc{T}
+\RegSDAC{T}(\infty)
 &\le
 2\sqrt{\Gamma_\alpha T\log(H_T+1)}\\
 &\quad+
@@ -871,24 +812,13 @@ Then
 \end{equation}
 For fixed $\alpha,L_x,L_u$, the right-hand side is
 $O\!\left(\sqrt{T\log\log T}\right)=o(T)$.
-\end{corollary}
-
-The controller also satisfies a regret bound against fixed-fraction policies
-because geometric allocation sequences induce these policies.
-
-\begin{corollary}[No-regret against fixed-fraction policies]
-\label{cor:regret-vs-fraction}
-Run the online SDAC controller as in Corollary~\ref{cor:regret-vs-allocation}.
-For $k\in[0,\alpha]$, let
-$J_T(k)\triangleq\sum_{t=1}^T c_t\bigl(x_t(k),u_t(k)\bigr)$, where
-$u_t(k)=kx_t(k)$, and define
+The same bound holds against the best fixed-fraction policy, since
+Corollary~\ref{cor:fraction-as-sdac} gives
 \[
-\RegFrac{T}
-\triangleq
-J_T^{\mathrm{on}}-\min_{k\in[0,\alpha]}J_T(k).
+J_T^{\mathrm{on}}
+-\min_{k\in[0,\alpha]}\sum_{t=1}^T c_t\bigl(x_t(k),u_t(k)\bigr)
+\le\RegSDAC{T}(\infty).
 \]
-Then \eqref{eq:allocation-regret-bound} also holds with $\RegAlloc{T}$ replaced by
-$\RegFrac{T}$.
 \end{corollary}
 
 \section{Minimax Regret Lower Bound}
@@ -907,7 +837,7 @@ of arrivals and costs satisfying the assumptions of
 Section~\ref{sec:model-setup} such that
 \begin{equation}
 \label{eq:sdac-lower-exact}
-\mathbb{E}_{\mathcal{A}}\!\left[\RegSDAC{T}\right]
+\mathbb{E}_{\mathcal{A}}\!\left[\RegSDAC{T}(H)\right]
 \ge
 \frac{1}{2\sqrt{2}}
 \sqrt{\sum_{t=2}^T \beta_t^2},
@@ -939,7 +869,7 @@ If $T\ge2t_{\mathrm{mix}}(\alpha)+2$, then for every causal feasible controller
 $\mathcal{A}$, possibly randomized, there is a deterministic oblivious sequence
 satisfying the model assumptions such that
 \[
-\mathbb{E}_{\mathcal{A}}\!\left[\RegSDAC{T}\right]
+\mathbb{E}_{\mathcal{A}}\!\left[\RegSDAC{T}(H)\right]
 \ge
 \frac{G_\alpha}{8}\sqrt{T},
 \]
@@ -954,7 +884,7 @@ order $(1-\alpha)^{-1}$ as $\alpha\uparrow1$. If
 $T\ge2t_{\mathrm{mix}}(\alpha)+2$, then
 Corollary~\ref{cor:sdac-lower-mixing} yields
 \[
-\mathbb{E}_{\mathcal{A}}\!\left[\RegSDAC{T}\right]
+\mathbb{E}_{\mathcal{A}}\!\left[\RegSDAC{T}(H)\right]
 =
 \Omega\!\left(\frac{\sqrt{T}}{1-\alpha}\right).
 \]
@@ -1093,7 +1023,6 @@ and actions. Cross-coupled storage systems (nondiagonal $\mathbf{A}$) require
 further analysis.
 
 
-
 \section{Conclusion}
 \label{sec:conclusion}
 
@@ -1106,11 +1035,10 @@ minimax lower bound gives
 $\Omega((1-\alpha)^{-1}\sqrt{T})$ regret as $\alpha\uparrow1$; hence, a factor of
 $(1-\alpha)^{-1/2}$ between the upper and lower bounds remains open. The
 SDAC approximation results further give
-$O\!\left(\sqrt{T\log\log T}\right)$ regret against the best decreasing-allocation
-policy for a suitable choice $H=\Theta(\log T)$. The model applies directly to
+$O\!\left(\sqrt{T\log\log T}\right)$ regret against the best fixed
+infinite-memory SDAC policy for a suitable choice $H=\Theta(\log T)$. The model applies directly to
 energy-harvesting battery management and related settings in which storage limits
 must be respected in real time.
-
 
 
 \appendices
@@ -1242,45 +1170,45 @@ assumption and \eqref{eq:surr-coefficient-norms} give
 \end{align*}
 \end{proof}
 
-\begin{proof}[Proof of Lemma~\ref{lem:sdac-allocation-approx}]
-Since $\mathbf{q}\in\mathcal{Q}_\alpha$,
+\begin{proof}[Proof of Lemma~\ref{lem:sdac-truncation-approx}]
+Since $\mathbf{m}\in\mathcal{M}_\infty$, we have $m_i\ge0$ for every $i\in[H]$ and
 \[
-m_{H,i}(\mathbf{q})=\frac{q_i}{\alpha^i}\ge0,
-\qquad
-\|\mathbf{m}_H(\mathbf{q})\|_1
-=\sum_{i=1}^H\frac{q_i}{\alpha^i}\le1.
+\|\mathbf{m}_H(\mathbf{m})\|_1
+=\sum_{i=1}^H m_i\le\sum_{i=1}^{\infty}m_i\le1.
 \]
-Thus $\mathbf{m}_H(\mathbf{q})\in\mathcal{M}_H$.
+Thus $\mathbf{m}_H(\mathbf{m})\in\mathcal{M}_H$.
 
-For feasibility, use truncation length $T$. Since $w_\tau=0$ for $\tau\le0$, for
-every $t\in[T]$,
+For feasibility of the infinite-memory SDAC policy, use truncation length $T$.
+Since $w_\tau=0$ for $\tau\le0$, for every $t\in[T]$,
 \[
-u_t\bigl(\mathbf{m}_T(\mathbf{q})\bigr)
-=\sum_{i=1}^T\frac{q_i}{\alpha^i}\alpha^i w_{t-i}
-=\sum_{i=1}^{t-1}q_iw_{t-i}=u_t(\mathbf{q}).
+\begin{aligned}
+u_t\bigl(\mathbf{m}_T(\mathbf{m})\bigr)
+&=\sum_{i=1}^T m_i\alpha^i w_{t-i}\\
+&=\sum_{i=1}^{t-1}m_i\alpha^i w_{t-i}=u_t(\mathbf{m}).
+\end{aligned}
 \]
-The two policies have the same initial state and state recursion, so their
-state trajectories coincide. Lemma~\ref{lem:sdac-feasibility} therefore gives
+The infinite-memory SDAC policy and its truncation have the same initial state
+and state recursion, so their state trajectories coincide.
+Lemma~\ref{lem:sdac-feasibility} therefore gives
 \[
-0\le u_t(\mathbf{q})\le\alpha x_t(\mathbf{q}),
+0\le u_t(\mathbf{m})\le\alpha x_t(\mathbf{m}),
 \qquad t\in[T].
 \]
 
 For the approximation error, define
 \[
-e_t^u\triangleq
-u_t(\mathbf{q})-u_t\bigl(\mathbf{m}_H(\mathbf{q})\bigr),
-\qquad
-e_t^x\triangleq
-x_t\bigl(\mathbf{m}_H(\mathbf{q})\bigr)-x_t(\mathbf{q}).
+\begin{aligned}
+e_t^u&\triangleq
+u_t(\mathbf{m})-u_t\bigl(\mathbf{m}_H(\mathbf{m})\bigr),\\
+e_t^x&\triangleq
+x_t\bigl(\mathbf{m}_H(\mathbf{m})\bigr)-x_t(\mathbf{m}).
+\end{aligned}
 \]
 Again using $w_\tau=0$ for $\tau\le0$,
 \[
-e_t^u
-=
-\sum_{i=H+1}^{\infty}q_iw_{t-i},
+e_t^u=\sum_{i=H+1}^{\infty}\alpha^i m_i w_{t-i},
 \qquad
-0\le e_t^u\le\operatorname{Tail}_H(\mathbf{q}).
+0\le e_t^u\le\sum_{i=H+1}^{\infty}\alpha^i m_i.
 \]
 Subtracting the two state recursions gives
 \[
@@ -1291,80 +1219,90 @@ Hence, with the sum understood to be zero at $t=1$,
 \[
 \begin{aligned}
 0\le e_t^x
-&=\sum_{s=1}^{t-1}\alpha^{t-1-s}e_s^u
-\le\operatorname{Tail}_H(\mathbf{q})
+&=\sum_{s=1}^{t-1}\alpha^{t-1-s}e_s^u\\
+&\le\left(\sum_{i=H+1}^{\infty}\alpha^i m_i\right)
 \sum_{s=1}^{t-1}\alpha^{t-1-s}\\
-&=\operatorname{Tail}_H(\mathbf{q})
-\frac{1-\alpha^{t-1}}{1-\alpha}
-\le\frac{\operatorname{Tail}_H(\mathbf{q})}{1-\alpha}.
+&=\left(\sum_{i=H+1}^{\infty}\alpha^i m_i\right)
+\frac{1-\alpha^{t-1}}{1-\alpha}\\
+&\le\frac{1}{1-\alpha}\sum_{i=H+1}^{\infty}\alpha^i m_i.
 \end{aligned}
 \]
 
 Both policies are feasible, so their state--action pairs belong to
-$\mathcal{D}_\alpha$. By \eqref{eq:model-lipschitz} and the triangle
-inequality,
+$\mathcal{D}_\alpha$. By \eqref{eq:model-lipschitz} and the triangle inequality,
 \[
 \begin{aligned}
-&\left|
-\sum_{t=1}^T
-\left[
-c_t\bigl(x_t(\mathbf{m}_H(\mathbf{q})),u_t(\mathbf{m}_H(\mathbf{q}))\bigr)
--c_t\bigl(x_t(\mathbf{q}),u_t(\mathbf{q})\bigr)
-\right]
-\right|\\
-&\qquad\le
-\sum_{t=1}^T\left(L_xe_t^x+L_ue_t^u\right)
-\le
-\left(L_u+\frac{L_x}{1-\alpha}\right)
-\operatorname{Tail}_H(\mathbf{q})T.
+&\left|J_T\bigl(\mathbf{m}_H(\mathbf{m})\bigr)-J_T(\mathbf{m})\right|\\
+&\quad=\left|\sum_{t=1}^T\left[
+c_t\bigl(x_t(\mathbf{m}_H(\mathbf{m})),u_t(\mathbf{m}_H(\mathbf{m}))\bigr)
+\right.\right.\\
+&\hspace{7em}\left.\left.
+-c_t\bigl(x_t(\mathbf{m}),u_t(\mathbf{m})\bigr)\right]\right|\\
+&\quad\le\sum_{t=1}^T\left(L_xe_t^x+L_ue_t^u\right)\\
+&\quad\le\left(L_u+\frac{L_x}{1-\alpha}\right)T
+\sum_{i=H+1}^{\infty}\alpha^i m_i.
 \end{aligned}
 \]
 Finally, since $\alpha\in(0,1)$,
 \[
 \begin{aligned}
-\operatorname{Tail}_H(\mathbf{q})
-&=\sum_{i=H+1}^{\infty}\alpha^i\frac{q_i}{\alpha^i}
-\le\alpha^{H+1}
-\sum_{i=H+1}^{\infty}\frac{q_i}{\alpha^i}\le\alpha^{H+1}.
+\sum_{i=H+1}^{\infty}\alpha^i m_i
+&\le\alpha^{H+1}\sum_{i=H+1}^{\infty}m_i\\
+&\le\alpha^{H+1}\sum_{i=1}^{\infty}m_i
+\le\alpha^{H+1}.
 \end{aligned}
 \]
-This proves \eqref{eq:allocation-cost-gap}.
+This proves \eqref{eq:sdac-truncation-cost-gap}.
 \end{proof}
 
-\begin{proof}[Proof of Corollary~\ref{cor:fraction-as-allocation}]
-Since $0\le\lambda_k\le\alpha<1$,
+\begin{proof}[Proof of Corollary~\ref{cor:fraction-as-sdac}]
+Since $0\le k/\alpha\le1$,
 \[
-q_i(k)\ge0,\qquad
-q_{i+1}(k)=\lambda_k q_i(k)\le q_i(k),\qquad i\ge1.
+m_i(k)=\frac{k}{\alpha}\left(1-\frac{k}{\alpha}\right)^{i-1}\ge0,
+\qquad i\ge1.
 \]
-If $k=0$, then $\mathbf{q}(k)=\mathbf{0}\in\mathcal{Q}_\alpha$. If $k>0$,
-then $0\le\lambda_k/\alpha<1$ and
+If $k=0$, then $\mathbf{m}(k)=\mathbf{0}\in\mathcal{M}_\infty$.
+If $k>0$, then $0\le1-k/\alpha<1$ and
 \[
 \begin{aligned}
-\sum_{i=1}^{\infty}\frac{q_i(k)}{\alpha^i}
+\sum_{i=1}^{\infty}m_i(k)
 &=\frac{k}{\alpha}\sum_{j=0}^{\infty}
-\left(\frac{\lambda_k}{\alpha}\right)^j
-=\frac{k}{\alpha}\frac{1}{1-\lambda_k/\alpha}\\
-&=\frac{k}{\alpha-\lambda_k}=1.
+\left(1-\frac{k}{\alpha}\right)^j\\
+&=\frac{k}{\alpha}\frac{1}{1-(1-k/\alpha)}
+=\frac{k}{\alpha}\frac{\alpha}{k}=1.
 \end{aligned}
 \]
-Thus, $\mathbf{q}(k)\in\mathcal{Q}_\alpha$.
+Thus, $\mathbf{m}(k)\in\mathcal{M}_\infty$ for every $k\in[0,\alpha]$.
 
 Under the fixed-fraction policy, \eqref{eq:model-dynamics} becomes
 \[
-x_{t+1}(k)=\lambda_k x_t(k)+w_t.
+x_{t+1}(k)=(\alpha-k)x_t(k)+w_t.
 \]
 Iterating this recursion from $x_1(k)=0$ gives
 \[
+x_t(k)=\sum_{i=1}^{t-1}(\alpha-k)^{i-1}w_{t-i}.
+\]
+For every $i\ge1$,
+\[
 \begin{aligned}
-x_t(k)&=\sum_{i=1}^{t-1}\lambda_k^{i-1}w_{t-i},\\
-u_t(k)&=k x_t(k)=\sum_{i=1}^{t-1}q_i(k)w_{t-i}
-=u_t\bigl(\mathbf{q}(k)\bigr).
+\alpha^i m_i(k)
+&=\alpha^i\frac{k}{\alpha}
+\left(\frac{\alpha-k}{\alpha}\right)^{i-1}\\
+&=k\alpha^{i-1}\frac{(\alpha-k)^{i-1}}{\alpha^{i-1}}
+=k(\alpha-k)^{i-1}.
+\end{aligned}
+\]
+Therefore,
+\[
+\begin{aligned}
+u_t(k)&=kx_t(k)
+=\sum_{i=1}^{t-1}k(\alpha-k)^{i-1}w_{t-i}\\
+&=\sum_{i=1}^{t-1}\alpha^i m_i(k)w_{t-i}
+=u_t\bigl(\mathbf{m}(k)\bigr).
 \end{aligned}
 \]
 Both state trajectories start at zero and follow \eqref{eq:model-dynamics} with
-the same actions. Hence, $x_t\bigl(\mathbf{q}(k)\bigr)=x_t(k)$ for every
-$t\in[T]$.
+the same actions. Hence, $x_t\bigl(\mathbf{m}(k)\bigr)=x_t(k)$ for every $t\in[T]$.
 \end{proof}
 
 \section{Proofs for the Online SDAC Controller}
@@ -1944,7 +1882,6 @@ Summing over $t=1,\ldots,T$ proves \eqref{eq:stability-sum-bound}.
 \end{proof}
 
 
-
 \begin{proof}[Proof of Theorem~\ref{thm:regret-bound}]
 Fix $\mathbf{m}\in\mathcal{M}_H$. We first bound the initial Bregman
 divergence. Since $\mathbf{m}_1=\frac{1}{H+1}\mathbf{1}$ and
@@ -2002,38 +1939,39 @@ Taking the maximum over $\mathbf{m}\in\mathcal{M}_H$ proves
 so the two terms sum to the claimed regret bound.
 \end{proof}
 
-\begin{proof}[Proof of Corollary~\ref{cor:regret-vs-allocation}]
-Fix $\mathbf{q}\in\mathcal{Q}_\alpha$ and set
-$\mathbf{m}=\mathbf{m}_{H_T}(\mathbf{q})\in\mathcal{M}_{H_T}$ as in
-Lemma~\ref{lem:sdac-allocation-approx}. By the definition of $\RegSDAC{T}$,
+\begin{proof}[Proof of Corollary~\ref{cor:regret-vs-infinite-sdac}]
+Fix an infinite-memory SDAC policy indexed by $\mathbf{m}\in\mathcal{M}_\infty$ and apply
+Lemma~\ref{lem:sdac-truncation-approx} to obtain
+$\mathbf{m}_{H_T}(\mathbf{m})\in\mathcal{M}_{H_T}$.
+The definition of $\RegSDAC{T}(H_T)$ gives
 \[
 \begin{aligned}
-J_T^{\mathrm{on}}-J_T(\mathbf{q})
-&=J_T^{\mathrm{on}}-J_T(\mathbf{m})
-+J_T(\mathbf{m})-J_T(\mathbf{q}) \\
-&\le\RegSDAC{T}+J_T(\mathbf{m})-J_T(\mathbf{q}).
+J_T^{\mathrm{on}}-J_T(\mathbf{m})
+&=J_T^{\mathrm{on}}-J_T\bigl(\mathbf{m}_{H_T}(\mathbf{m})\bigr)\\
+&\quad+J_T\bigl(\mathbf{m}_{H_T}(\mathbf{m})\bigr)-J_T(\mathbf{m})\\
+&\le\RegSDAC{T}(H_T)\\
+&\quad+J_T\bigl(\mathbf{m}_{H_T}(\mathbf{m})\bigr)-J_T(\mathbf{m}).
 \end{aligned}
 \]
-The approximation bound \eqref{eq:allocation-cost-gap} gives
+The approximation bound \eqref{eq:sdac-truncation-cost-gap} gives
 \[
-J_T(\mathbf{m})-J_T(\mathbf{q})
-\le
-\left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H_T+1}T.
+J_T\bigl(\mathbf{m}_{H_T}(\mathbf{m})\bigr)-J_T(\mathbf{m})
+\le\left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H_T+1}T.
 \]
-This bound is independent of $\mathbf{q}$. Taking the supremum and applying
-Theorem~\ref{thm:regret-bound} with step size $\eta^*$ therefore yields
+This bound is independent of $\mathbf{m}$. Taking the supremum and applying
+Theorem~\ref{thm:regret-bound} with memory $H_T$ and step size $\eta^*$ gives
 \[
 \begin{aligned}
-\RegAlloc{T}
-&=\sup_{\mathbf{q}\in\mathcal{Q}_\alpha}
-\bigl(J_T^{\mathrm{on}}-J_T(\mathbf{q})\bigr) \\
-&\le\RegSDAC{T}
-+\left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H_T+1}T \\
-&\le2\sqrt{\Gamma_\alpha T\log(H_T+1)} \\
+\RegSDAC{T}(\infty)
+&=\sup_{\mathbf{m}\in\mathcal{M}_\infty}
+\bigl(J_T^{\mathrm{on}}-J_T(\mathbf{m})\bigr)\\
+&\le\RegSDAC{T}(H_T)
++\left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H_T+1}T\\
+&\le2\sqrt{\Gamma_\alpha T\log(H_T+1)}\\
 &\quad+\left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H_T+1}T,
 \end{aligned}
 \]
-which proves \eqref{eq:allocation-regret-bound}.
+which proves \eqref{eq:infinite-sdac-regret-bound}.
 
 For the rate, the definition of $H_T$ gives
 \[
@@ -2058,32 +1996,18 @@ Also, for fixed $\alpha$,
 =O(\log\log T).
 \]
 Thus, for fixed $\alpha,L_x,L_u$, the right-hand side of
-\eqref{eq:allocation-regret-bound} is $O(\sqrt{T\log\log T})=o(T)$.
-\end{proof}
-
-\begin{proof}[Proof of Corollary~\ref{cor:regret-vs-fraction}]
-By Corollary~\ref{cor:fraction-as-allocation}, for every $k\in[0,\alpha]$,
-\[
-\mathbf{q}(k)\in\mathcal{Q}_\alpha,
-\qquad
-J_T(\mathbf{q}(k))=J_T(k).
-\]
-Hence, by Corollary~\ref{cor:regret-vs-allocation},
+\eqref{eq:infinite-sdac-regret-bound} is $O(\sqrt{T\log\log T})=o(T)$.
+For fixed-fraction policies, Corollary~\ref{cor:fraction-as-sdac} gives
+$\mathbf{m}(k)\in\mathcal{M}_\infty$ for every $k\in[0,\alpha]$. Consequently,
 \[
 \begin{aligned}
-\RegFrac{T}
-&=J_T^{\mathrm{on}}-\min_{k\in[0,\alpha]}J_T(k)
-=J_T^{\mathrm{on}}-\min_{k\in[0,\alpha]}J_T(\mathbf{q}(k)) \\
-&\le J_T^{\mathrm{on}}-\inf_{\mathbf{q}\in\mathcal{Q}_\alpha}J_T(\mathbf{q})
-=\RegAlloc{T} \\
-&\le2\sqrt{\Gamma_\alpha T\log(H_T+1)} \\
-&\quad+\left(L_u+\frac{L_x}{1-\alpha}\right)\alpha^{H_T+1}T.
+\inf_{\mathbf{m}\in\mathcal{M}_\infty}J_T(\mathbf{m})
+&\le\min_{k\in[0,\alpha]}J_T(\mathbf{m}(k))\\
+&=\min_{k\in[0,\alpha]}\sum_{t=1}^T c_t\bigl(x_t(k),u_t(k)\bigr).
 \end{aligned}
 \]
-The rate follows from the same corollary.
+Subtracting from $J_T^{\mathrm{on}}$ yields the stated fixed-fraction regret bound.
 \end{proof}
-
-
 
 \section{Proofs for the Minimax Regret Lower Bound}
 \label{sec:appendix-minimax-proofs}
@@ -2181,7 +2105,7 @@ Both parameters belong to $\mathcal{M}_H$. Using
 $\min\{a,b\}=(a+b-|a-b|)/2$, we obtain
 \[
 \begin{aligned}
-\RegSDAC{T}
+\RegSDAC{T}(H)
 &=J_T^{\mathrm{on}}-\min_{\mathbf{m}\in\mathcal{M}_H}J_T(\mathbf{m})\\
 &\ge J_T^{\mathrm{on}}
 -\min\{J_T(\mathbf{m}^{(0)}),J_T(\mathbf{m}^{(1)})\}\\
@@ -2194,7 +2118,7 @@ $\min\{a,b\}=(a+b-|a-b|)/2$, we obtain
 Taking expectations and applying Khintchine's inequality in the last line gives
 \[
 \begin{aligned}
-\mathbb{E}_{\boldsymbol{\xi},\mathcal{A}}[\RegSDAC{T}]
+\mathbb{E}_{\boldsymbol{\xi},\mathcal{A}}[\RegSDAC{T}(H)]
 &\ge\frac12\mathbb{E}_{\boldsymbol{\xi}}
 \left|J_T(\mathbf{m}^{(0)})-J_T(\mathbf{m}^{(1)})\right| \\
 &=\frac12\mathbb{E}_{\boldsymbol{\xi}}
@@ -2237,7 +2161,7 @@ L_u+\frac{L_x}{1-\alpha}
 There are $T-t_{\mathrm{mix}}(\alpha)-1\ge T/2$ such indices, since
 $T\ge2t_{\mathrm{mix}}(\alpha)+2$. Theorem~\ref{thm:sdac-lower-bound} therefore gives
 \begin{align*}
-\mathbb{E}_{\mathcal{A}}\!\left[\RegSDAC{T}\right]
+\mathbb{E}_{\mathcal{A}}\!\left[\RegSDAC{T}(H)\right]
 &\ge
 \frac{1}{2\sqrt{2}}\sqrt{\sum_{t=2}^T\beta_t^2} \\
 &\ge
