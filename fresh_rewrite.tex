@@ -814,12 +814,6 @@ gives
 \[
 \RegSDAC{T}\le 2\sqrt{\Gamma_\alpha T\log(H+1)}.
 \]
-For fixed $L_x,L_u>0$,
-\[
-\sqrt{\Gamma_\alpha}
-=\Theta\!\left((1-\alpha)^{-3/2}\right)
-\quad\text{as }\alpha\uparrow1.
-\]
 \end{theorem}
 
 The proof combines the OMD bound for the surrogate costs
@@ -964,11 +958,34 @@ Corollary~\ref{cor:sdac-lower-mixing} yields
 =
 \Omega\!\left(\frac{\sqrt{T}}{1-\alpha}\right).
 \]
+For the upper bound, as $\alpha\uparrow1$,
+\[
+(1-\alpha)G_\alpha
+=\alpha\bigl(L_x+(1-\alpha)L_u\bigr)
+\longrightarrow L_x,
+\]
+and \eqref{eq:def-Gamma-alpha} gives
+\[
+\begin{aligned}
+(1-\alpha)^3\Gamma_\alpha
+&=\frac{1-\alpha}{2}\bigl((1-\alpha)G_\alpha\bigr)^2 \\
+&\quad+\alpha\bigl((1-\alpha)G_\alpha\bigr)
+(L_x+\alpha L_u) \\
+&\longrightarrow L_x(L_x+L_u)>0.
+\end{aligned}
+\]
+Thus
+\[
+\sqrt{\Gamma_\alpha}
+=\Theta\!\left((1-\alpha)^{-3/2}\right)
+\quad\text{as }\alpha\uparrow1.
+\]
 The upper bound is $O((1-\alpha)^{-3/2}\sqrt{T\log(H+1)})$
 by Theorem~\ref{thm:regret-bound}. Its dependence on
 $(1-\alpha)^{-1}$ is therefore larger by a factor of $(1-\alpha)^{-1/2}$.
 
-This scaling requires $T$ to grow with $t_{\mathrm{mix}}(\alpha)$. For fixed $T$,
+The lower-bound scaling requires $T$ to grow with $t_{\mathrm{mix}}(\alpha)$.
+For fixed $T$,
 \[
 \frac{1-\alpha^{t-2}}{1-\alpha}\longrightarrow t-2
 \qquad\text{as }\alpha\uparrow1,
@@ -1983,24 +2000,6 @@ Taking the maximum over $\mathbf{m}\in\mathcal{M}_H$ proves
 =\sqrt{\Gamma_\alpha T\log(H+1)},
 \]
 so the two terms sum to the claimed regret bound.
-
-Finally, for fixed $L_x,L_u>0$, as $\alpha\uparrow1$,
-\[
-(1-\alpha)G_\alpha
-=\alpha\bigl(L_x+(1-\alpha)L_u\bigr)
-\longrightarrow L_x,
-\]
-and hence
-\[
-\begin{aligned}
-(1-\alpha)^3\Gamma_\alpha
-&=\frac{1-\alpha}{2}\bigl((1-\alpha)G_\alpha\bigr)^2 \\
-&\quad+\alpha\bigl((1-\alpha)G_\alpha\bigr)
-(L_x+\alpha L_u) \\
-&\longrightarrow L_x(L_x+L_u)>0.
-\end{aligned}
-\]
-Thus $\sqrt{\Gamma_\alpha}=\Theta((1-\alpha)^{-3/2})$.
 \end{proof}
 
 \begin{proof}[Proof of Corollary~\ref{cor:regret-vs-allocation}]
