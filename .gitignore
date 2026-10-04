@@ -21,6 +21,7 @@
 .latexmk-watch.pid
 .latexmk-build/
 .latexmk-publish-*.tmp
+tmp/
 # Local archive / recycle bin (not part of active repo)
 archive/
 

@@ -1,0 +1,6 @@
+# Keep manuscript sources consistent across Windows and other platforms.
+*.tex text eol=lf
+*.bib text eol=lf
+.gitattributes text eol=lf
+.gitignore text eol=lf
+build.ps1 text eol=lf
