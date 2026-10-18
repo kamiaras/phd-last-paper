@@ -161,110 +161,150 @@ Our contributions are:
     The upper bound contains a factor of $\sqrt{\log(H+1)}$ that does not
     appear in the lower bound. The bounds also differ by a factor of
     $(1-\alpha)^{-1/2}$ in their dependence on $1-\alpha$.
-    Closing these gaps is left for future work.
+    Subsequent work closes these gaps for the same policy class
+    \cite{asgari2026cumulative}.
 \end{itemize}
 
 
 \subsection{Related Work}
 
 \paragraph{Online control}
-Agarwal et al.\ use
-DAC policies to obtain $\widetilde O(\sqrt{T})$ regret against strongly
-stable linear controllers \cite{agarwal2019online}. More closely related to
-our simplex parameterization, Golowich et al.\ adapt DAC to population
-dynamics and search over simplex-structured DAC policy parameters
-\cite{golowich2024population}. Their state lies in a probability simplex,
-and their feasible action set is independent of the current state. This differs
-from the current paper where our constraint $0\le u_t\le\alpha x_t$ couples each action to the available
-resource.
+Goulart et al.\ use a parameterization similar to DAC for a related constrained
+control problem under bounded disturbances \cite{goulart2006optimization}.
+Agarwal et al.\ use DAC policies to obtain $\widetilde O(\sqrt{T})$ regret
+against strongly stable linear controllers \cite{agarwal2019online}.
+Golowich et al.\ use nonnegative, normalized DAC parameters to control
+population dynamics \cite{golowich2024population}. They use entropic mirror
+descent and bound the additional cost caused by changing the parameters
+over time. Their state lies in a probability simplex, and their feasible
+action set does not depend on the current state. In SDAC, the parameters
+distribute arrivals across future allocations, with powers of the retention
+coefficient accounting for storage loss. This construction ensures that each
+fixed policy satisfies $0\le u_t\le\alpha x_t$.
 
-Li et al.\ impose separate fixed affine constraints on states and actions
-\cite{li2021onlineConstrained}. Assuming a strictly safe linear controller,
-they enforce feasibility by projecting DAC updates onto a tightened parameter
-set. Liu et al.\ consider adversarial and static convex constraints on the
-state--action pair \cite{liu2023constrainedControl}. Their main algorithms
-bound cumulative adversarial violation and per-time static violation; they
-also describe a projection variant with zero violation for static affine
-constraints. Our constraint $0\le u_t\le\alpha x_t$ is itself static and
-affine. We exploit the storage dynamics to make every fixed SDAC policy
-feasible on a subprobability-simplex parameter domain, and use the clipping
-rule \eqref{eq:alg-feasible-action} to preserve feasibility during online
-updates.
+Li et al.\ study separate fixed affine constraints on states and actions
+\cite{li2021onlineConstrained}. They assume that a linear controller satisfies
+the constraints with a positive margin, and project DAC updates onto a
+restricted parameter set to preserve feasibility. Such a margin need not
+exist here: when $x_t=0$, feasibility requires $u_t=0$.
+Liu et al.\ study fixed
+and adversarial time-varying convex constraints on the state and action
+\cite{liu2023constrainedControl}. They bound constraint violations and also
+give a projection method that satisfies fixed affine constraints at every
+time. Our constraint $0\le u_t\le\alpha x_t$ is also fixed and affine.
+The clipping rule \eqref{eq:alg-feasible-action} preserves feasibility when
+the SDAC parameters change online.
 
-Kumar et al.\ introduce online convex optimization with unbounded memory
-\cite{kumar2023unbounded}. For their discounted infinite-memory model with
-a Euclidean history norm, the lower bound scales as $\sqrt{T}$ divided by
-one minus the discount factor, for horizons beyond the effective memory
-scale. This
-parallels our $\Omega((1-\alpha)^{-1}\sqrt{T})$ lower bound for sufficiently large horizons, although ours applies directly to causal feasible
-controllers under the state-dependent action constraint.
+Online convex optimization with memory studies costs that depend on past
+decisions \cite{anava2015memory,kumar2023unbounded}. A standard approach
+first analyzes the cost of repeatedly using the current decision, then
+bounds the additional cost caused by changing decisions over time.
+Our surrogate costs use the state and action obtained by keeping the current
+SDAC parameter fixed from the start. Lemma~\ref{lem:contractive-deviation}
+bounds their difference from the actual costs using storage decay and
+accounting for action clipping. Kumar et al.\ also derive lower bounds when
+the influence of past decisions decreases geometrically
+\cite{kumar2023unbounded}. Section~\ref{sec:regret-lower-bound} gives a related
+lower bound for causal feasible controllers, with fixed SDAC policies
+evaluated on their own trajectories.
 
 
 \paragraph{Energy harvesting}
-Fixed-fraction and related allocation policies for stochastic energy arrivals
-motivate our infinite-memory SDAC policies. Shaviv and \"Ozg\"ur
+Our infinite-memory SDAC policies are motivated by fixed-fraction policies
+for stochastic energy arrivals. Shaviv and \"Ozg\"ur
 \cite{shaviv2016universally} prove constant-gap throughput guarantees for
-fixed-fraction power allocation under i.i.d.\ arrivals. Arafa et al.\
-\cite{arafa2018online} extend the analysis to increasing concave utilities and
-characterize optimal allocations between full recharges under Bernoulli
-arrivals. With Bernoulli arrivals and a fixed look-ahead window, Zibaeenejad
-and Chen \cite{zibaeenejad2019lookahead} characterize an optimal policy that
-uses a decreasing allocation sequence while no recharge is visible and
-uniform allocation until the next recharge once it enters the window.
+fixed-fraction policies under i.i.d.\ arrivals. Arafa et al.\
+\cite{arafa2018online} extend the analysis to increasing concave rewards and
+characterize optimal allocations under Bernoulli arrivals, where each
+nonzero arrival fully recharges the battery. For the same arrival model,
+Zibaeenejad and Chen \cite{zibaeenejad2019lookahead} study optimal allocations
+when arrivals within a fixed future window are known.
 For the storage dynamics studied here, Corollary~\ref{cor:fraction-as-sdac}
 proves that infinite-memory SDAC contains every feasible fixed-fraction
 policy.
 
-Yu and Neely \cite{Yu2019} study expected utility maximization with delayed
-state information. Their results also cover non-i.i.d.\ wireless states and
-independent energy arrivals of constant mean, with performance compared to
-fixed actions satisfying a mean-energy constraint. Asgari and Neely
+Yu and Neely \cite{Yu2019} study online energy allocation with delayed
+information about the wireless state. Their results allow wireless states
+that need not be i.i.d.\ and independent energy arrivals with a constant
+mean. Asgari and Neely
 \cite{10.1145/3428337} obtain $O(\sqrt{T})$ expected regret for fixed action
-dimension using $O(\sqrt{T})$ battery capacity, under i.i.d.\ energy arrivals
-and arbitrary convex loss sequences. Their benchmark is the best fixed action
-satisfying the mean-energy constraint. Neither objective depends directly on
-the battery state. Lin et al.\ \cite{lin2025optimal} study online energy
-allocation with arbitrary arrivals and time-varying functions of age of
-information. They observe the current arrival and value function before
-allocation. For increasing concave value functions whose derivatives lie
-between positive bounds with a known ratio, they establish an optimal
-competitive ratio against an
-offline optimum with the same battery-capacity and allocation-rate
-constraints. Our setting combines adversarial arrivals and costs,
+dimension using $O(\sqrt{T})$ battery capacity, with i.i.d.\ energy arrivals
+and time-varying convex costs satisfying their independence assumptions. In that
+work, the current arrival is known before allocation and the cost is revealed
+afterward. Both works compare expected performance to fixed actions whose
+energy use does not exceed the mean energy arrival. These fixed actions need
+not satisfy the battery constraint on every realized arrival sequence.
+Their objectives do not depend directly on the battery state. Our fixed
+SDAC policies satisfy the action constraint on their own trajectories,
+and their actions vary with the arrival history.
+
+Lin et al.\ \cite{lin2025optimal} study online energy allocation with
+arbitrary arrivals and a class of time-varying increasing concave rewards. They give
+competitive-ratio guarantees against an offline optimum with the same
+battery-capacity and allocation-rate constraints. The current arrival and
+reward function are known before allocation.
+Our setting combines adversarial arrivals and costs,
 decisions before the current arrival and cost are revealed, and convex costs
 depending on both storage state and action. The benchmark is a fixed SDAC
 policy evaluated on its own induced trajectory.
 
+\paragraph{Storage management}
+Qin et al.\ study storage control with energy loss, capacity constraints,
+and limits on charging and discharging \cite{qin2016online}. They observe
+the current price and net demand before acting and bound the difference
+between their long-run expected average cost and the optimal value under
+stochastic assumptions. Kim et al.\ study energy allocation with storage
+loss and capacity constraints \cite{kim2016storage}. They give competitive
+guarantees for the value of meeting demand. Their result that includes
+production costs assumes shared storage and demands known in advance.
+Both works account for a prescribed storage capacity. Our analysis assumes
+sufficient capacity to avoid overflow and studies finite-horizon regret
+under adversarial arrivals and costs revealed after the action.
+
 \paragraph{Queueing and network optimization}
-Classical queueing control studies throughput and queue stability through dynamic
-service and scheduling decisions
+Classical queueing control studies throughput and queue stability
 \cite{tassiulas1992stability,tassiulas1993dynamic,mckeown1999achieving}, while
 stochastic network optimization studies tradeoffs between time-average performance
-and average queue backlog \cite{neely2010stochastic}. Our performance criterion is
-finite-horizon regret against the best fixed SDAC policy in hindsight.
+and average queue backlog \cite{neely2010stochastic}.
 
-Khojastepour and Sabharwal \cite{khojastepour2004delay} connect maximum-delay
-scheduling to finite-memory filters of current and past arrivals. Their
-time-invariant filters have nonnegative coefficients summing to one. Under
-i.i.d.\ arrivals, the uniform moving average minimizes long-run average
-transmit power over a Gaussian channel within that class. They also develop
-a time-varying robust scheduler that does not require source statistics.
-SDAC uses subprobability parameters together with retention factors and acts
-before the current arrival is observed. We study regret against a fixed SDAC
-policy under adversarial convex state--action costs.
+Khojastepour and Sabharwal \cite{khojastepour2004delay} study scheduling
+with a delay constraint using finite-memory filters of current and past
+arrivals. Their fixed filters have nonnegative coefficients summing to one.
+Under i.i.d.\ arrivals, equal coefficients minimize long-run average
+transmit power over a Gaussian channel within this class. They also develop
+a time-varying policy that does not require the arrival distribution.
+SDAC uses nonnegative parameters summing to at most one, together with
+powers of the retention coefficient, and acts before the current arrival
+is observed. We study regret against a fixed SDAC policy under adversarial
+convex costs depending on both state and action.
 
 \paragraph{Inventory and reservoir management}
-Yang et al.\ \cite{yang2020online} study online procurement with linear costs
-and inventory capacity and rate constraints. They obtain optimal competitive
-ratios relative to an offline optimum.
+Yang et al.\ \cite{yang2020online} study online inventory control with
+linear costs and capacity and rate constraints. They obtain optimal
+competitive ratios relative to an offline optimum.
 They observe the current demand and price before acting, whereas our controller
-acts before the current arrival and cost are revealed. Hihat and Fermanian
-\cite{hihat2024online} learn a feature-enhanced base-stock policy for inventory
-systems with multiple products, lost sales, perishability, capacity constraints,
-and lead times. They evaluate the method empirically and leave regret guarantees
-open. For our scalar linear model, we prove feasibility, approximation, and
-sublinear regret guarantees. Classical reservoir theory studies storage under
-random inflows and prescribed release rules \cite{moran1954dams}.
+acts before the current arrival and cost are revealed.
+Hihat et al.\ study inventory control with demands that need not be i.i.d.\
+\cite{hihat2023inventory}. They prove feasibility and $O(\sqrt{T})$ expected
+regret against the best fixed target for the inventory level after ordering.
+Their guarantee requires a uniformly positive conditional probability,
+given the past, that all product demands are at least a fixed positive amount.
+Our arrival sequences have no such probability assumption, and our benchmark
+is a fixed SDAC policy. Hihat and Fermanian
+\cite{hihat2024online} learn policies for inventory systems with multiple
+products, capacity constraints, and delays between ordering and delivery.
+They evaluate this more general method empirically and leave its regret
+guarantees open. Classical reservoir theory studies storage
+under random arrivals and specified rules for resource use \cite{moran1954dams}.
+
+\paragraph{Subsequent work}
+Asgari and Neely \cite{asgari2026cumulative} use a different parameterization
+and update rule for the same SDAC policy class. They remove the dependence
+on $H$ from the regret bound and obtain $O(\sqrt{T})$ regret against
+infinite-memory SDAC policies for fixed retention and cost constants.
+They also give upper and lower bounds with matching dependence on the
+horizon and retention coefficient for $\alpha\in[1/2,1)$ and $T\ge4$,
+with fixed positive cost constants.
 
 \section{Model and Regret Benchmark}
 \label{sec:model-setup}
@@ -1161,15 +1201,17 @@ We studied adversarial online control of a storage system under a state-dependen
 action constraint. We introduced SDAC policies, which are feasible by
 construction, and developed an online SDAC controller with
 $O\!\left(\sqrt{T\log(H+1)}\right)$ regret against the best fixed SDAC policy.
+The SDAC approximation results further give
+$O\!\left(\sqrt{T\log\log T}\right)$ regret against the best fixed
+infinite-memory SDAC policy for a suitable choice $H=\Theta(\log T)$.
 Under the horizon condition \eqref{eq:sdac-lower-horizon}, the
 lower bound gives
 $\Omega((1-\alpha)^{-1}\sqrt{T})$ regret as $\alpha\uparrow1$.
-A factor of $\sqrt{\log(H+1)}$ remains between the upper and lower bounds
+For the bounds proved here, a factor of $\sqrt{\log(H+1)}$ remains between
+the upper and lower bounds
 in their dependence on $H$, together with a factor of $(1-\alpha)^{-1/2}$
-in their dependence on $1-\alpha$. The
-SDAC approximation results further give
-$O\!\left(\sqrt{T\log\log T}\right)$ regret against the best fixed
-infinite-memory SDAC policy for a suitable choice $H=\Theta(\log T)$. The model applies directly to
+in their dependence on $1-\alpha$. Subsequent work closes these gaps for
+the same policy class \cite{asgari2026cumulative}. The model applies directly to
 energy-harvesting battery management and related settings in which storage limits
 must be respected in real time.
 
